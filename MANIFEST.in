@@ -1,0 +1,5 @@
+include LICENCE.TXT
+include test/*.py
+include test/format.tests
+recursive-include doc/html *.*
+prune doc/html/.*
