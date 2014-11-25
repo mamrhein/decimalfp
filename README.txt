@@ -24,7 +24,22 @@ If a string is given as value, it must be a string in one of two formats:
 The value is always adjusted to the given precision or the precision is
 calculated from the given value, if no precision is given.
 
-`Decimal` instances are immutable.
+When the given `precision` is lower than the precision of the given `value`,
+the result is rounded, according to the rounding mode of the current context
+held by the standard module `decimal` (which defaults to ROUND_HALF_EVEN, in
+contrast to the `round` function in Python 2.x !!!).
+
+When no `precision` is given and the given `value` is a `float` or a
+`numbers.Rational` (but no `Decimal`), the `Decimal` constructor tries to
+convert `value` exactly. But, for performance reasons, this is done only up a
+fixed limit of fractional digits. This limit defaults to 32 and is accessible
+as `decimalfp.LIMIT_PREC`. If `value` can not be represented as a `Decimal`
+within this limit, an exception is raised.
+
+`Decimal` does not deal with infinity, division by 0 always raises a
+`ZeroDivisionError`. Likewise, infinite instances of type `float` or
+`decimal.Decimal` can not be converted to `Decimal` instances. The same is
+true for the 'not a number' instances of these types.
 
 Computations
 ------------
@@ -37,19 +52,15 @@ of all numeric types mentioned above.
 All numerical operations give an exact result, i.e. they are not automatically
 constraint to the precision of the operands or to a number of significant
 digits (like the floating-point `Decimal` type from the standard module
-`decimal`). Adding and subtracting give a result with a precision equal to the
-maximum of the precisions of the operands. Multiplying results have a
-precision equal to the sum of the precisions of the operands. For performance
-reasons, division tries to give an exact result as Decimal only up to a fixed
-limit of fractional digits. This limit defaults to 32 and is accessible as
-`decimalfp.LIMIT_PREC`. If the result can not be represented as a Decimal
-within this limit, a `fractions.Fraction` is returned.
+`decimal`). When the result can not exactly be represented by a `Decimal`
+instance within the limit given by `decimalfp.LIMIT_PREC`, an instance of
+`fractions.Fraction` is returned.
 
 `Decimal` supports rounding via the built-in function `round` using the same
 rounding mode as the `float` type by default (i.e. ROUND_HALF_UP in Pyhton 2.x
 and ROUND_HALF_EVEN in Python 3.x). In addition, via the method `adjusted` a
 `Decimal` with a different precision can be derived, supporting all rounding
-modes defined by the standard module `decimal`.
+modes defined by the standard library module `decimal`.
 
 For more details see the documentation provided with the source distribution
 or `here <http://pythonhosted.org/decimalfp>`_.
