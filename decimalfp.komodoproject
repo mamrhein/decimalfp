@@ -1,8 +1,55 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Komodo Project File - DO NOT EDIT -->
 <project id="85c3a190-08a8-425c-a767-6c5cedb71278" kpf_version="5" name="decimalfp.komodoproject">
-<livefolder id="26de1e93-5c3d-400e-9d18-de54ba0d15a7" idref="85c3a190-08a8-425c-a767-6c5cedb71278" name="decimalfp.work" url="">
-</livefolder>
-<file id="577855eb-be17-458d-80e6-f1583e8e80e8" idref="85c3a190-08a8-425c-a767-6c5cedb71278" name="decimalfp.rst" url="doc/decimalfp.rst">
-</file>
+<preference-set idref="85c3a190-08a8-425c-a767-6c5cedb71278" id="project" preftype="project">
+  <string relative="path" id="import_dirname"></string>
+<preference-set id="languages">
+<preference-set id="languages/CoffeeScript">
+  <boolean id="primary">0</boolean>
+</preference-set>
+<preference-set id="languages/MXML">
+  <boolean id="primary">0</boolean>
+</preference-set>
+<preference-set id="languages/Node.js">
+  <boolean id="primary">0</boolean>
+</preference-set>
+<preference-set id="languages/Perl">
+  <boolean id="primary">0</boolean>
+</preference-set>
+<preference-set id="languages/RHTML">
+  <boolean id="primary">0</boolean>
+</preference-set>
+<preference-set id="languages/Regex">
+  <boolean id="primary">1</boolean>
+</preference-set>
+<preference-set id="languages/Ruby">
+  <boolean id="primary">0</boolean>
+</preference-set>
+<preference-set id="languages/SCSS">
+  <boolean id="primary">0</boolean>
+</preference-set>
+<preference-set id="languages/Sass">
+  <boolean id="primary">0</boolean>
+</preference-set>
+<preference-set id="languages/Tcl">
+  <boolean id="primary">0</boolean>
+</preference-set>
+<preference-set id="languages/TemplateToolkit">
+  <boolean id="primary">0</boolean>
+</preference-set>
+<preference-set id="languages/YAML">
+  <boolean id="primary">1</boolean>
+</preference-set>
+<preference-set id="languages/reStructuredText">
+  <boolean id="primary">1</boolean>
+</preference-set>
+</preference-set>
+<preference-set id="testPlans">
+<preference-set id="New test plan #1">
+  <string id="command_line"></string>
+  <string relative="url" id="directory"></string>
+  <string id="language">Perl - TAP (*.t)</string>
+</preference-set>
+</preference-set>
+</preference-set>
 </project>
