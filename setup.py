@@ -6,7 +6,7 @@ with open('README.txt') as file:
 
 setup(
     name="decimalfp",
-    version="0.9.5",
+    version="0.9.6",
     author="Michael Amrhein",
     author_email="michael@adrhinum.de",
     url="https://pypi.python.org/pypi/decimalfp",

@@ -145,10 +145,15 @@ class DecimalTest:
 
     def testCoercions(self):
         f = Decimal('23.456')
+        g = Decimal('57.99999999999999999999999999999999999')
         self.assertEqual(int(f), 23)
         self.assertEqual(int(-f), -23)
+        self.assertEqual(int(g), 57)
+        self.assertEqual(int(-g), -57)
         self.assertEqual(float(f), 23.456)
+        self.assertEqual(float(g), 58.0)
         self.assertEqual(str(f), '23.456')
+        self.assertEqual(str(g), '57.99999999999999999999999999999999999')
         self.assertTrue(float(Decimal(sys.float_info.max)))
         self.assertEqual(str(Decimal(-20.7e-3, 5)), '-0.02070')
         self.assertEqual(str(Decimal(-20.7e-12, 13)), '-0.0000000000207')

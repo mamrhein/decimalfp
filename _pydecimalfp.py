@@ -32,7 +32,7 @@ from decimal import ROUND_DOWN, ROUND_UP, ROUND_HALF_DOWN, ROUND_HALF_UP,\
     ROUND_HALF_EVEN, ROUND_CEILING, ROUND_FLOOR, ROUND_05UP
 
 
-__version__ = 0, 9, 5
+__version__ = 0, 9, 6
 
 
 # Python 2 / Python 3
@@ -402,8 +402,9 @@ class Decimal(numbers.Rational):
         if sp == 0:
             return "%i" % self._value
         else:
-            i = _int(self._value, self._precision)
-            f = _frac(self._value, self._precision)
+            sv = self._value
+            i = _int(sv, sp)
+            f = sv - i * 10 ** sp
             s = (i == 0 and f < 0)*'-'  # -1 < self < 0 => i = 0 and f < 0 !!!
             return '%s%i.%0*i' % (s, i, sp, abs(f))
 
@@ -1104,18 +1105,18 @@ def _approx_rational(num, den, minPrec=0, maxPrec=None):
 
 
 def _int(v, p):
-    """Return integral part of decimal: int(v * 10 ** -p)"""
+    """Return integral part of shifted decimal"""
     if p == 0:
         return v
-    return int(v * 10 ** -p)
-
-
-def _frac(v, p):
-    """Return fractional part of decimal as integer:
-    v - int(v * 10 ** -p) * 10 ** p"""
-    if p == 0:
-        return 0
-    return v - _int(v, p) * 10 ** p
+    if v == 0:
+        return v
+    if p > 0:
+        if v > 0:
+            return v // 10 ** p
+        else:
+            return -(-v // 10 ** p)
+    else:
+        return v * 10 ** -p
 
 
 def _div(num, den, minPrec):
