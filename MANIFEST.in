@@ -1,4 +1,5 @@
 include LICENCE.TXT
+include CHANGES.txt
 include test/*.py
 include test/format.tests
 recursive-include doc/html *.*

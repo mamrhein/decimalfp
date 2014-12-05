@@ -1,0 +1,5 @@
+Version     Changes
+------------------------------------------------------------------------------
+0.9.5       First public release
+
+0.9.6       Fixed bug in __trunc__ and __str__
