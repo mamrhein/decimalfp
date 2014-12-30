@@ -358,6 +358,8 @@ cdef class Decimal:
             result._value = v
             result._precision = p
         else:
+            if not isinstance(precision, int):
+                raise TypeError("Precision must be of <type 'int'>.")
             result = Decimal(self)
             _adjust(result, precision, rounding)
         return result

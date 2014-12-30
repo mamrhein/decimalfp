@@ -5,7 +5,7 @@
 ##
 ## Author:      Michael Amrhein (mamrhein@users.sourceforge.net)
 ##
-## Copyright:   (c) 2001-2014 Michael Amrhein
+## Copyright:   (c) 2001 ff. Michael Amrhein
 ##              Portions adopted from FixedPoint.py written by Tim Peters
 ## License:     This program is free software. You can redistribute it, use it
 ##              and/or modify it under the terms of the 2-clause BSD license.
@@ -15,10 +15,13 @@
 ## $Source$
 ## $Revision$
 
+
 """Decimal fixed-point arithmetic."""
+
 
 from __future__ import absolute_import, division
 import sys
+import locale
 import math
 import numbers
 import operator
@@ -26,7 +29,6 @@ from decimalfp import _get_limit_prec, get_rounding
 from decimal import Decimal as _StdLibDecimal
 from fractions import gcd, Fraction
 from functools import reduce
-import locale
 # rounding modes
 from decimal import ROUND_DOWN, ROUND_UP, ROUND_HALF_DOWN, ROUND_HALF_UP,\
     ROUND_HALF_EVEN, ROUND_CEILING, ROUND_FLOOR, ROUND_05UP
@@ -39,13 +41,13 @@ __version__ = 0, 9, 6
 if sys.version_info[0] < 3:
     # rounding mode of builtin round function
     DFLT_ROUNDING = ROUND_HALF_UP
-    # Compatible testing for strings
-    str = type(u'')
-    bytes = type(b'')
 else:
     # In 3.0 round changed from half-up to half-even !
     DFLT_ROUNDING = ROUND_HALF_EVEN
+
 # Compatible testing for strings
+str = type(u'')
+bytes = type(b'')
 str_types = (bytes, str)
 
 
@@ -93,89 +95,93 @@ class Decimal(numbers.Rational):
 
     __slots__ = ('_value', '_precision',
                  # used for caching values only:
-                 '_hash', '_numerator', '_denominator')
+                 '_hash', '_numerator', '_denominator'
+                 )
 
-    def __new__(cls, value=0, precision=None):
-        if precision is not None:
+    def __init__(self, value=None, precision=None):
+
+        if precision is None:
+            if value is None:
+                self._value = 0
+                self._precision = 0
+                return
+        else:
             if not isinstance(precision, int):
                 raise TypeError("Precision must be of <type 'int'>.")
             if precision < 0:
                 raise ValueError("Precision must be >= 0.")
-        self = super(Decimal, cls).__new__(cls)
-        # only used as cache:
-        self._hash = self._numerator = self._denominator = None
+            if value is None:
+                self._value = 0
+                self._precision = precision
+                return
 
         # Decimal
         if isinstance(value, Decimal):
-            vp = value._precision
-            if precision is None or precision == vp:
-                self._precision = vp
-                self._value = value._value
-            else:
-                self._precision = precision
-                self._value = _adjust(value._value, vp, precision)
-            return self
+            self._precision = prec = value._precision
+            self._value = value._value
+            if precision is not None and precision != prec:
+                _adjust(self, precision)
+            return
 
         # String
         if isinstance(value, str_types):
+            prec = -1 if precision is None else precision
             try:
-                s = value.decode()
+                s = value.encode()
             except AttributeError:
                 s = value
-            i, e = _string2exact(s)
-            if i is None:
+            try:
+                _dec_from_str(self, s, prec)
+            except ValueError:
                 raise ValueError("Can't convert %s to Decimal." % repr(value))
-            self._value, self._precision = _convert_exp(i, e, precision)
-            return self
+            return
 
         # Integral
         if isinstance(value, numbers.Integral):
+            lValue = int(value)
             if precision is None:
                 self._precision = 0
-                self._value = int(value)
+                self._value = lValue
             else:
                 self._precision = precision
-                self._value = int(value * 10 ** precision)
-            return self
+                self._value = lValue * 10 ** precision
+            return
 
         # Decimal (from standard library)
         if isinstance(value, _StdLibDecimal):
             if value.is_finite():
                 sign, digits, exp = value.as_tuple()
-                i = (-1) ** sign * reduce(lambda x, y: x * 10 + y, digits)
-                self._value, self._precision = _convert_exp(i, exp, precision)
-                return self
+                coeff = (-1) ** sign * reduce(lambda x, y: x * 10 + y, digits)
+                prec = -1 if precision is None else precision
+                _dec_from_coeff_exp(self, coeff, exp, prec)
+                return
             else:
                 raise ValueError("Can't convert %s to Decimal." % repr(value))
 
         # Rational
         if isinstance(value, numbers.Rational):
-            n, d = value.numerator, value.denominator
-            if precision is None:
-                self._value, self._precision, r = _approx_rational(n, d)
-                if r != 0:
+            prec = -1 if precision is None else precision
+            num, den = value.numerator, value.denominator
+            try:
+                _dec_from_rational(self, num, den, prec)
+            except ValueError:
                     raise ValueError("Can't convert %s exactly to Decimal."
                                      % repr(value))
-            else:
-                self._value = _convert_rational(n, d, precision)
-                self._precision = precision
-            return self
+            return
 
         # Float
         if isinstance(value, float):
             try:
-                n, d = value.as_integer_ratio()
+                num, den = value.as_integer_ratio()
             except (ValueError, OverflowError):
                 raise ValueError("Can't convert %s to Decimal." % repr(value))
-            if precision is None:
-                self._value, self._precision, r = _approx_rational(n, d)
-                if r != 0:
+            prec = -1 if precision is None else precision
+            try:
+                _dec_from_rational(self, num, den, prec)
+            except ValueError:
                     raise ValueError("Can't convert %s exactly to Decimal."
                                      % repr(value))
-            else:
-                self._value = _convert_rational(n, d, precision)
-                self._precision = precision
-            return self
+            return
 
         # Others
         # If there's a float or int equivalent to value, use it
@@ -188,7 +194,10 @@ class Decimal(numbers.Rational):
             except:
                 pass
         if ev == value:     # do we really have the same value?
-            return cls(ev, precision)
+            dec = Decimal(ev, precision)
+            self._value = dec._value
+            self._precision = dec._precision
+            return
 
         # unable to create Decimal
         raise TypeError("Can't convert %s to Decimal." % repr(value))
@@ -284,19 +293,23 @@ class Decimal(numbers.Rational):
     def numerator(self):
         """Return the numerator from the pair of integers with the smallest
         positive denominator, whose ratio is equal to `self`."""
-        if self._numerator is not None:
+        try:
             return self._numerator
-        n, d = self.as_integer_ratio()
-        return n
+        except AttributeError:
+            n, d = self.as_integer_ratio()
+            self._numerator = n
+            return n
 
     @property
     def denominator(self):
         """Return the smallest positive denominator from the pairs of
         integers, whose ratio is equal to `self`."""
-        if self._denominator is not None:
+        try:
             return self._denominator
-        n, d = self.as_integer_ratio()
-        return d
+        except AttributeError:
+            n, d = self.as_integer_ratio()
+            self._denominator = d
+            return d
 
     @property
     def real(self):
@@ -334,18 +347,15 @@ class Decimal(numbers.Rational):
         result is rounded and thus information may be lost.
         """
         if precision is None:
-            result = Decimal(self)
-            result._value, result._precision = _reduce(self._value,
-                                                       self._precision)
+            v, p = _reduce(self)
+            result = Decimal()
+            result._value = v
+            result._precision = p
         else:
             if not isinstance(precision, int):
                 raise TypeError("Precision must be of <type 'int'>.")
-            #if precision < 0:
-            #    raise ValueError("Precision must be >= 0.")
             result = Decimal(self)
-            result._value = _adjust(self._value, self._precision, precision,
-                                    rounding)
-            result._precision = max(precision, 0)
+            _adjust(result, precision, rounding)
         return result
 
     def as_tuple(self):
@@ -354,17 +364,16 @@ class Decimal(numbers.Rational):
         v = self._value
         sign = int(v < 0)
         coeff = abs(v)
-        exp = - self.precision
+        exp = -self._precision
         return sign, coeff, exp
 
     # return lowest fraction equal to self
     def as_integer_ratio(self):
         """Return the pair of numerator and denominator with the smallest
-        positive denominator, whose ratio is equal to `self`."""
+        positive denominator, whose ratio is equal to self."""
         n, d = self._value, 10 ** self._precision
         g = gcd(n, d)
-        n, d = self._numerator, self._denominator = n // g, d // g
-        return n, d
+        return n // g, d // g
 
     def __copy__(self):
         """Return self (Decimal instances are immutable)."""
@@ -374,14 +383,16 @@ class Decimal(numbers.Rational):
         return self.__copy__()
 
     def __reduce__(self):
-        """Helper for pickle"""
-        return (_r, (self._value, self._precision))
+        return (Decimal, (None, None), (self._value, self._precision))
+
+    def __setstate__(self, state):
+        self._value, self._precision = state
 
     # string representation
     def __repr__(self):
         """repr(self)"""
         sp = self._precision
-        rv, rp = _reduce(self._value, sp)
+        rv, rp = _reduce(self)
         if rp == 0:
             s = str(rv)
         else:
@@ -436,7 +447,7 @@ class Decimal(numbers.Rational):
         else:
             percentSign = ''
             xtraShift = 0
-        val = _adjust(self._value, self._precision, fmtPrecision + xtraShift)
+        val = _get_adjusted_value(self, fmtPrecision + xtraShift)
         if val < 0:
             sign = '-'
             nToFill -= 1
@@ -472,21 +483,21 @@ class Decimal(numbers.Rational):
     # compare to Decimal or any type that can be converted to a Decimal
     def _make_comparable(self, other):
         if isinstance(other, Decimal):
-            sp, op = self._precision, other._precision
-            if sp == op:
+            selfPrec, otherPrec = self._precision, other._precision
+            if selfPrec == otherPrec:
                 return self._value, other._value
-            elif sp < op:
-                return _adjust(self._value, sp, op), other._value
+            elif selfPrec < otherPrec:
+                return (_get_adjusted_value(self, otherPrec), other._value)
             else:
-                return self._value, _adjust(other._value, op, sp)
+                return (self._value, _get_adjusted_value(other, selfPrec))
         if isinstance(other, numbers.Integral):
             return self._value, other * 10 ** self._precision
         if isinstance(other, numbers.Rational):
             return (self.numerator * other.denominator,
                     other.numerator * self.denominator)
         if isinstance(other, float):
-            n, d = other.as_integer_ratio()
-            return (self.numerator * d, n * self.denominator)
+            num, den = other.as_integer_ratio()
+            return (self.numerator * den, num * self.denominator)
         if isinstance(other, _StdLibDecimal):
             return (self, Decimal(other))
         if isinstance(other, numbers.Complex) and other.imag == 0:
@@ -497,10 +508,10 @@ class Decimal(numbers.Rational):
     def _compare(self, other, op):
         """Compare self and other using operator op."""
         try:
-            sv, ov = self._make_comparable(other)
+            selfVal, otherVal = self._make_comparable(other)
         except TypeError:
             return NotImplemented
-        return op(sv, ov)
+        return op(selfVal, otherVal)
 
     def __eq__(self, other):
         """self == other"""
@@ -522,30 +533,28 @@ class Decimal(numbers.Rational):
         """self >= other"""
         return self._compare(other, operator.ge)
 
-    # compute hash index
     def __hash__(self):
         """hash(self)"""
-        if self._hash is not None:
+        try:
             return self._hash
-        sv, sp = self._value, self._precision
-        if sp == 0:                         # if self == int(self),
-            h = self._hash = hash(sv)       # same hash as int
-        else:                               # otherwise same hash as
-                                            # equivalent fraction
-            h = self._hash = hash(Fraction(sv, 10 ** sp))
-        return h
+        except AttributeError:
+            selfVal, selfPrec = self._value, self._precision
+            if selfPrec == 0:           # if self == int(self),
+                return hash(selfVal)    # same hash as int
+            else:               # otherwise same hash as equivalent fraction
+                return hash(Fraction(selfVal, 10 ** selfPrec))
 
     # return 0 or 1 for truth-value testing
-    def __bool__(self):
+    def __nonzero__(self):
         """bool(self)"""
         return self._value != 0
-    __nonzero__ = __bool__
+    __bool__ = __nonzero__
 
     # return integer portion as int
-    def __trunc__(self):
+    def __int__(self):
         """math.trunc(self)"""
         return _int(self._value, self._precision)
-    __int__ = __trunc__
+    __trunc__ = __int__
 
     # convert to float (may loose precision!)
     def __float__(self):
@@ -568,237 +577,68 @@ class Decimal(numbers.Rational):
         result._value = abs(result._value)
         return result
 
-    def __add__(self, other):
-        """self + other"""
-        if isinstance(other, Decimal):
-            p = self._precision - other._precision
-            if p == 0:
-                result = Decimal(self)
-                result._value += other._value
-            elif p > 0:
-                result = Decimal(self)
-                result._value += other._value * 10 ** p
-            else:
-                result = Decimal(other)
-                result._value += self._value * 10 ** -p
-            return result
-        elif isinstance(other, numbers.Integral):
-            result = Decimal(self)
-            result._value += other * 10 ** self._precision
-            return result
-        elif isinstance(other, numbers.Rational):
-            other_numerator, other_denominator = (other.numerator,
-                                                  other.denominator)
-        elif isinstance(other, float):
-            other_numerator, other_denominator = other.as_integer_ratio()
-        elif isinstance(other, _StdLibDecimal):
-            return self.__add__(Decimal(other))
-        else:
-            return NotImplemented
-        # handle Rational and float
-        self_denominator = 10 ** self._precision
-        num = self._value * other_denominator + (self_denominator *
-                                                 other_numerator)
-        den = other_denominator * self_denominator
-        minPrec = self._precision
-        # return num / den as Decimal or as Fraction
-        return _div(num, den, minPrec)
+    def __add__(x, y):
+        """x + y"""
+        return add(x, y)
 
     # other + self
     __radd__ = __add__
 
-    def __sub__(self, other):
-        """self - other"""
-        if isinstance(other, Decimal):
-            p = self._precision - other._precision
-            if p == 0:
-                result = Decimal(self)
-                result._value -= other._value
-            elif p > 0:
-                result = Decimal(self)
-                result._value -= other._value * 10 ** p
-            else:
-                result = Decimal(other)
-                result._value = self._value * 10 ** -p - other._value
-            return result
-        elif isinstance(other, numbers.Integral):
-            result = Decimal(self)
-            result._value -= other * 10 ** self._precision
-            return result
-        elif isinstance(other, numbers.Rational):
-            other_numerator, other_denominator = (other.numerator,
-                                                  other.denominator)
-        elif isinstance(other, float):
-            other_numerator, other_denominator = other.as_integer_ratio()
-        elif isinstance(other, _StdLibDecimal):
-            return self.__sub__(Decimal(other))
-        else:
-            return NotImplemented
-        # handle Rational and float
-        self_denominator = 10 ** self._precision
-        num = self._value * other_denominator - (self_denominator *
-                                                 other_numerator)
-        den = other_denominator * self_denominator
-        minPrec = self._precision
-        # return num / den as Decimal or as Fraction
-        return _div(num, den, minPrec)
+    def __sub__(x, y):
+        """x - y"""
+        return sub(x, y)
 
-    def __rsub__(self, other):
-        """other - self"""
-        return self.__neg__().__add__(other)
+    def __rsub__(x, y):
+        """y - x"""
+        return add(-x, y)
 
-    def __mul__(self, other):
-        """self * other"""
-        if isinstance(other, Decimal):
-            result = Decimal(self)
-            result._value *= other._value
-            result._precision += other._precision
-            return result
-        elif isinstance(other, numbers.Integral):
-            result = Decimal(self)
-            result._value *= other
-            return result
-        elif isinstance(other, numbers.Rational):
-            other_numerator, other_denominator = (other.numerator,
-                                                  other.denominator)
-        elif isinstance(other, float):
-            other_numerator, other_denominator = other.as_integer_ratio()
-        elif isinstance(other, _StdLibDecimal):
-            return self.__mul__(Decimal(other))
-        else:
-            return NotImplemented
-        # handle Rational and float
-        num = self._value * other_numerator
-        den = other_denominator * 10 ** self._precision
-        minPrec = self._precision
-        # return num / den as Decimal or as Fraction
-        return _div(num, den, minPrec)
+    def __mul__(x, y):
+        """x * y"""
+        return mul(x, y)
 
     # other * self
     __rmul__ = __mul__
 
-    def __div__(self, other):
-        """self / other"""
-        if isinstance(other, Decimal):
-            sp, op = self._precision, other._precision
-            num = self._value * 10 ** op
-            den = other._value * 10 ** sp
-            minPrec = max(sp, op)
-            # return num / den as Decimal or as Fraction
-            return _div(num, den, minPrec)
-        elif isinstance(other, numbers.Rational):       # includes Integral
-            other_numerator, other_denominator = (other.numerator,
-                                                  other.denominator)
-        elif isinstance(other, float):
-            other_numerator, other_denominator = other.as_integer_ratio()
-        elif isinstance(other, _StdLibDecimal):
-            return self.__div__(Decimal(other))
-        else:
-            return NotImplemented
-        # handle Rational and float
-        num = self._value * other_denominator
-        den = other_numerator * 10 ** self._precision
-        minPrec = self._precision
-        # return num / den as Decimal or as Fraction
-        return _div(num, den, minPrec)
+    def __div__(x, y):
+        """x / y"""
+        return div1(x, y)
 
-    def __rdiv__(self, other):
-        """other / self"""
-        if isinstance(other, numbers.Rational):
-            other_numerator, other_denominator = (other.numerator,
-                                                  other.denominator)
-        elif isinstance(other, float):
-            other_numerator, other_denominator = other.as_integer_ratio()
-        elif isinstance(other, _StdLibDecimal):
-            return Decimal(other).__div__(self)
-        else:
-            return NotImplemented
-        # handle Rational and float
-        num = other_numerator * 10 ** self._precision
-        den = self._value * other_denominator
-        minPrec = self._precision
-        # return num / den as Decimal or as Fraction
-        return _div(num, den, minPrec)
+    def __rdiv__(x, y):
+        """y / x"""
+        return div2(y, x)
 
     # Decimal division is true division
     __truediv__ = __div__
     __rtruediv__ = __rdiv__
 
-    def __divmod__(self, other):
-        """self // other, self % other"""
-        if isinstance(other, Decimal):
-            sp, op = self._precision, other._precision
-            if sp >= op:
-                r = Decimal(self)
-                sv = self._value
-                ov = _adjust(other._value, op, sp)
-            else:
-                r = Decimal(other)
-                sv = _adjust(self._value, sp, op)
-                ov = other._value
-            q = sv // ov
-            r._value = sv - q * ov
-            return Decimal(q, r._precision), r
-        elif isinstance(other, numbers.Integral):
-            r = Decimal(self)
-            sv = self._value
-            sp = self._precision
-            ov = other * 10 ** sp
-            q = sv // ov
-            r._value = sv - q * ov
-            return Decimal(q, sp), r
-        elif isinstance(other, _StdLibDecimal):
-            return self.__divmod__(Decimal(other))
-        else:
-            return self // other, self % other
+    def __divmod__(x, y):
+        """x // y, x % y"""
+        return divmod1(x, y)
 
-    def __rdivmod__(self, other):
-        """other // self, other % self"""
-        if isinstance(other, numbers.Integral):
-            sp = self._precision
-            r = Decimal(other, sp)
-            sv = self._value
-            ov = other * 10 ** sp
-            q = ov // sv
-            r._value = ov - q * sv
-            return Decimal(q, sp), r
-        elif isinstance(other, _StdLibDecimal):
-            return Decimal(other).__divmod__(self)
-        else:
-            return other // self, other % self
+    def __rdivmod__(x, y):
+        """y // x, y % x"""
+        return divmod2(y, x)
 
-    def __floordiv__(self, other):
-        """self // other"""
-        if isinstance(other, (Decimal, numbers.Integral, _StdLibDecimal)):
-            return self.__divmod__(other)[0]
-        else:
-            return Decimal(math.floor(self / other), self._precision)
+    def __floordiv__(x, y):
+        """x // y"""
+        return floordiv1(x, y)
 
-    def __rfloordiv__(self, other):
-        """other // self"""
-        if isinstance(other, (Decimal, numbers.Integral, _StdLibDecimal)):
-            return self.__rdivmod__(other)[0]
-        else:
-            return Decimal(math.floor(other / self), self._precision)
+    def __rfloordiv__(x, y):
+        """y // x"""
+        return floordiv2(y, x)
 
-    def __mod__(self, other):
-        """self % other"""
-        if isinstance(other, (Decimal, numbers.Integral, _StdLibDecimal)):
-            return self.__divmod__(other)[1]
-        else:
-            return self - other * (self // other)
+    def __mod__(x, y):
+        """x % y"""
+        return mod1(x, y)
 
-    def __rmod__(self, other):
-        """other % self"""
-        if isinstance(other, (Decimal, numbers.Integral, _StdLibDecimal)):
-            return self.__rdivmod__(other)[1]
-        else:
-            return other - self * (other // self)
+    def __rmod__(x, y):
+        """y % x"""
+        return mod2(y, x)
 
-    def __pow__(self, other, mod=None):
-        """self ** other
+    def __pow__(x, y, mod=None):
+        """x ** y
 
-        If other is an integer (or a Rational with denominator = 1), the
+        If y is an integer (or a Rational with denominator = 1), the
         result will be a Decimal. Otherwise, the result will be a float or
         complex since roots are generally irrational.
 
@@ -807,28 +647,17 @@ class Decimal(numbers.Rational):
         if mod is not None:
             raise TypeError("3rd argument not allowed unless all arguments "
                             "are integers")
-        if isinstance(other, numbers.Integral):
-            other = int(other)
-            if other >= 0:
-                result = Decimal()
-                result._value = self._value ** other
-                result._precision = self._precision * other
-                return result
-            else:
-                return 1 / self.__pow__(-other, None)
-        elif isinstance(other, numbers.Rational):
-            if other.denominator == 1:
-                return self ** other.numerator
-            else:
-                return float(self) ** float(other)
-        else:
-            return float(self) ** other
+        return pow1(x, y)
 
-    def __rpow__(self, other):
-        """other ** self"""
-        if self.denominator == 1:
-            return other ** self.numerator
-        return other ** float(self)
+    def __rpow__(x, y, mod=None):
+        """y ** x
+
+        `mod` must always be None (otherwise a `TypeError` is raised).
+        """
+        if mod is not None:
+            raise TypeError("3rd argument not allowed unless all arguments "
+                            "are integers")
+        return pow2(y, x)
 
     def __floor__(self):
         """math.floor(self)"""
@@ -840,7 +669,7 @@ class Decimal(numbers.Rational):
         n, d = self._value, 10 ** self._precision
         return -(-n // d)
 
-    def __round__(self, ndigits=None):
+    def __round__(self, precision=None):
         """round(self [, ndigits])
 
         Round `self` to a given precision in decimal digits (default 0).
@@ -850,22 +679,15 @@ class Decimal(numbers.Rational):
         Python 3.x! It returns an `int` when called with one argument,
         otherwise a :class:`Decimal`.
         """
-        if ndigits is None:
+        if precision is None:
             # return integer
             return int(self.adjusted(0, DFLT_ROUNDING))
         # otherwise return Decimal
-        return self.adjusted(ndigits, DFLT_ROUNDING)
+        return self.adjusted(precision, DFLT_ROUNDING)
 
 
 # helper functions:
 
-
-# reconstruct Decimal from pickle
-def _r(v, p):
-    d = Decimal()
-    d._value = v
-    d._precision = p
-    return d
 
 # parse string
 import re
@@ -879,37 +701,94 @@ _pattern = r"""
             )
             ([eE](?P<exp>[+|-]?\d+))?
             \s*$
-            """
+            """.encode()
 _parseString = re.compile(_pattern, re.VERBOSE).match
 
 
-def _string2exact(s):
-    m = _parseString(s)
-    if m is None:
-        return None, None
-    ep = m.group('exp')
-    if ep:
-        e = int(ep)
+def _dec_from_str(dec, s, prec):
+    parsed = _parseString(s)
+    if parsed is None:
+        raise ValueError
+    sExp = parsed.group('exp')
+    if sExp:
+        exp = int(sExp)
     else:
-        e = 0
-    ip = m.group('int')
-    if ip:
-        fp = m.group('frac')
-        i = int(ip)
+        exp = 0
+    sInt = parsed.group('int')
+    if sInt:
+        nInt = int(sInt)
+        sFrac = parsed.group('frac')
     else:
-        fp = m.group('onlyfrac')
-        i = 0
-    if fp:
-        f = int(fp)
-        n = len(fp)
+        nInt = 0
+        sFrac = parsed.group('onlyfrac')
+    if sFrac:
+        nFrac = int(sFrac)
+        shift10 = len(sFrac)
     else:
-        f = 0
-        n = 0
-    i = i * 10 ** n + f
-    e -= n
-    if m.group('sign') == '-':
-        i = -i
-    return i, e
+        nFrac = 0
+        shift10 = 0
+    coeff = nInt * 10 ** shift10 + nFrac
+    exp -= shift10
+    if parsed.group('sign') == b'-':
+        coeff = -coeff
+    _dec_from_coeff_exp(dec, coeff, exp, prec)
+
+
+def _dec_from_coeff_exp(dec, coeff, exp, prec):
+    """Set `dec` so that it equals coeff * 10 ** exp, rounded to precision
+    `prec`."""
+    if prec == -1:
+        if exp > 0:
+            dec._precision = 0
+            dec._value = coeff * 10 ** exp
+        else:
+            dec._precision = abs(exp)
+            dec._value = coeff
+    else:
+        dec._precision = prec
+        shift10 = exp + prec
+        if shift10 == 0:
+            dec._value = coeff
+        if shift10 > 0:
+            dec._value = coeff * 10 ** shift10
+        else:
+            dec._value = _div_rounded(coeff, 10 ** -shift10)
+
+
+def _dec_from_rational(dec, num, den, prec):
+    if prec >= 0:
+        dec._value = _div_rounded(num * 10 ** prec, den)
+        dec._precision = prec
+    else:
+        rem = _approx_rational(dec, num, den)
+        if rem:
+            raise ValueError
+
+
+def _approx_rational(dec, num, den, minPrec=0):
+    """Approximate num / den as Decimal.
+
+    Computes q, p, r, so that
+        q * 10 ** -p + r = num / den
+    and p <= max(minPrec, LIMIT_PREC) and r -> 0.
+    Sets `dec` to q * 10 ** -p. Returns True if r != 0, False otherwise.
+    """
+    maxPrec = max(minPrec, _get_limit_prec())
+    while True:
+        prec = (minPrec + maxPrec) // 2
+        quot, rem = divmod(num * 10 ** prec, den)
+        if prec == maxPrec:
+            break
+        if rem == 0:
+            maxPrec = prec
+        elif minPrec >= maxPrec - 2:
+            minPrec = maxPrec
+        else:
+            minPrec = prec
+    dec._value = quot
+    dec._precision = prec
+    return (rem != 0)
+
 
 # parse a format specifier
 # [[fill]align][sign][0][minimumwidth][,][.precision][type]
@@ -992,7 +871,6 @@ def _padDigits(digits, minWidth, fill, sep=None, grouping=None):
         limit = max(minWidth, nDigits) if fill == '0' else nDigits
         for l in _iterGrouping(grouping):
             j = min(i + l, limit)
-            #print(i,j,limit)
             slices.append((i, j))
             if j >= limit:
                 break
@@ -1000,7 +878,6 @@ def _padDigits(digits, minWidth, fill, sep=None, grouping=None):
             limit = max(limit - 1, nDigits, i + 1)
         if j < limit:
             slices.append((j, limit))
-        #print(limit,slices)
         digits = (limit - nDigits) * fill + digits
         raw = sep.join([digits[limit - j: limit - i]
                        for i, j in reversed(slices)])
@@ -1022,28 +899,45 @@ def _iterGrouping(grouping):
         yield i
 
 
-# Helper functions for decimal arithmetic
+# helper functions for decimal arithmetic
 
 
-def _convert_exp(i, e, p):
-    """Return v, p so that v / 10 ** p = i * 10 ** e, rounded to precision p
-    """
-    if p is None:
-        if e > 0:
-            return i * 10 ** e, 0
-        else:
-            return i, abs(e)
+def _adjust(dec, prec, rounding=None):
+    """Adjust Decimal `dec` to precision `prec` using given rounding mode
+    (or default mode if none is given)."""
+    dp = prec - dec._precision
+    if dp == 0:
+        return
+    elif dp > 0:
+        dec._value *= 10 ** dp
+    elif prec >= 0:
+        dec._value = _div_rounded(dec._value, 10 ** -dp, rounding)
     else:
-        n = e + p
-        if n >= 0:
-            return i * 10 ** n, p
-        else:
-            return _div_rounded(i, 10 ** -n), p
+        dec._value = (_div_rounded(dec._value, 10 ** -dp, rounding)
+                      * 10 ** -prec)
+    dec._precision = max(prec, 0)
 
 
-def _reduce(v, p):
-    """Return rv, rp so that rv // 10 ** rp = v // 10 ** p and rv % 10 != 0
+def _get_adjusted_value(dec, prec, rounding=None):
+    """Return rv so that rv // 10 ** rp = v // 10 ** p,
+    rounded to precision rp using given rounding mode (or default mode if none
+    is given)."""
+    dp = prec - dec._precision
+    if dp == 0:
+        return dec._value
+    elif dp > 0:
+        return dec._value * 10 ** dp
+    elif prec >= 0:
+        return _div_rounded(dec._value, 10 ** -dp, rounding)
+    else:
+        return (_div_rounded(dec._value, 10 ** -dp, rounding)
+                * 10 ** -prec)
+
+
+def _reduce(dec):
+    """Return rv, rp so that rv // 10 ** rp = dec and rv % 10 != 0
     """
+    v, p = dec._value, dec._precision
     if v == 0:
         return 0, 0
     while p > 0 and v % 10 == 0:
@@ -1052,56 +946,14 @@ def _reduce(v, p):
     return v, p
 
 
-def _adjust(v, p, rp, rounding=None):
-    """Return rv so that rv // 10 ** max(rp, 0) = v // 10 ** p,
-    rounded to precision rp using given rounding mode (or default mode if none
-    is given)."""
-    dp = rp - p
-    if dp == 0:
-        return v
-    elif dp > 0:
-        return v * 10 ** dp
-    elif rp >= 0:
-        return _div_rounded(v, 10 ** -dp, rounding)
-    else:
-        return _div_rounded(v, 10 ** -dp, rounding) * 10 ** -rp
-
-
 # divide x by y, return rounded result
 def _div_rounded(x, y, rounding=None):
     """Return x // y, rounded using given rounding mode (or default mode
     if none is given)."""
-    q, r = divmod(x, y)
-    if r == 0:              # no need for rounding
-        return q
-    return q + _round(q, r, y, rounding)
-
-
-def _convert_rational(num, den, p):
-    return _div_rounded(num * 10 ** p, den)
-
-
-def _approx_rational(num, den, minPrec=0, maxPrec=None):
-    """Approximate x = num / den as Decimal.
-
-    Return q, p, r, so that
-        q * 10 ** -p + r = x
-    and p <= max(minPrec, LIMIT_PREC) and r -> 0.
-    """
-    if maxPrec is None:
-        maxPrec = max(minPrec, _get_limit_prec())
-    while True:
-        p = (minPrec + maxPrec) // 2
-        q, r = divmod(num * 10 ** p, den)
-        if p == maxPrec:
-            break
-        if r == 0:
-            maxPrec = p
-        elif minPrec >= maxPrec - 2:
-            minPrec = maxPrec
-        else:
-            minPrec = p
-    return q, p, r
+    quot, rem = divmod(x, y)
+    if rem == 0:              # no need for rounding
+        return quot
+    return quot + _round(quot, rem, y, rounding)
 
 
 def _int(v, p):
@@ -1122,109 +974,343 @@ def _int(v, p):
 def _div(num, den, minPrec):
     """Return num / den as Decimal, if possible with precision <=
     max(minPrec, LIMIT_PREC), otherwise as Fraction"""
-    q, p, r = _approx_rational(num, den, minPrec)
-    if r == 0:
-        result = Decimal()
-        result._value = q
-        result._precision = p
-        return result
+    dec = Decimal()
+    rem = _approx_rational(dec, num, den, minPrec)
+    if rem == 0:
+        return dec
     else:
         return Fraction(num, den)
 
 
+def add(x, y):
+    """x + y"""
+    if isinstance(y, Decimal):
+        p = x._precision - y._precision
+        if p == 0:
+            result = Decimal(x)
+            result._value += y._value
+        elif p > 0:
+            result = Decimal(x)
+            result._value += y._value * 10 ** p
+        else:
+            result = Decimal(y)
+            result._value += x._value * 10 ** -p
+        return result
+    elif isinstance(y, numbers.Integral):
+        p = x._precision
+        result = Decimal(x)
+        result._value += y * 10 ** p
+        return result
+    elif isinstance(y, numbers.Rational):
+        y_numerator, y_denominator = (y.numerator, y.denominator)
+    elif isinstance(y, float):
+        y_numerator, y_denominator = y.as_integer_ratio()
+    elif isinstance(y, _StdLibDecimal):
+        return add(x, Decimal(y))
+    else:
+        return NotImplemented
+    # handle Rational and float
+    x_denominator = 10 ** x._precision
+    num = x._value * y_denominator + x_denominator * y_numerator
+    den = y_denominator * x_denominator
+    minPrec = x._precision
+    # return num / den as Decimal or as Fraction
+    return _div(num, den, minPrec)
+
+
+def sub(x, y):
+    """x - y"""
+    if isinstance(y, Decimal):
+        p = x._precision - y._precision
+        if p == 0:
+            result = Decimal(x)
+            result._value -= y._value
+        elif p > 0:
+            result = Decimal(x)
+            result._value -= y._value * 10 ** p
+        else:
+            result = Decimal(y)
+            result._value = x._value * 10 ** -p - y._value
+        return result
+    elif isinstance(y, numbers.Integral):
+        p = x._precision
+        result = Decimal(x)
+        result._value -= y * 10 ** p
+        return result
+    elif isinstance(y, numbers.Rational):
+        y_numerator, y_denominator = (y.numerator, y.denominator)
+    elif isinstance(y, float):
+        y_numerator, y_denominator = y.as_integer_ratio()
+    elif isinstance(y, _StdLibDecimal):
+        return sub(x, Decimal(y))
+    else:
+        return NotImplemented
+    # handle Rational and float
+    x_denominator = 10 ** x._precision
+    num = x._value * y_denominator - x_denominator * y_numerator
+    den = y_denominator * x_denominator
+    minPrec = x._precision
+    # return num / den as Decimal or as Fraction
+    return _div(num, den, minPrec)
+
+
+def mul(x, y):
+    """x * y"""
+    if isinstance(y, Decimal):
+        result = Decimal(x)
+        result._value *= y._value
+        result._precision += y._precision
+        return result
+    elif isinstance(y, numbers.Integral):
+        result = Decimal(x)
+        result._value *= y
+        return result
+    elif isinstance(y, numbers.Rational):
+        y_numerator, y_denominator = (y.numerator, y.denominator)
+    elif isinstance(y, float):
+        y_numerator, y_denominator = y.as_integer_ratio()
+    elif isinstance(y, _StdLibDecimal):
+        return x.__mul__(Decimal(y))
+    else:
+        return NotImplemented
+    # handle Rational and float
+    num = x._value * y_numerator
+    den = y_denominator * 10 ** x._precision
+    minPrec = x._precision
+    # return num / den as Decimal or as Fraction
+    return _div(num, den, minPrec)
+
+
+def div1(x, y):
+    """x / y"""
+    if isinstance(y, Decimal):
+        xp, yp = x._precision, y._precision
+        num = x._value * 10 ** yp
+        den = y._value * 10 ** xp
+        minPrec = max(xp, yp)
+        # return num / den as Decimal or as Fraction
+        return _div(num, den, minPrec)
+    elif isinstance(y, numbers.Rational):       # includes Integral
+        y_numerator, y_denominator = (y.numerator, y.denominator)
+    elif isinstance(y, float):
+        y_numerator, y_denominator = y.as_integer_ratio()
+    elif isinstance(y, _StdLibDecimal):
+        return div1(x, Decimal(y))
+    else:
+        return NotImplemented
+    # handle Rational and float
+    num = x._value * y_denominator
+    den = y_numerator * 10 ** x._precision
+    minPrec = x._precision
+    # return num / den as Decimal or as Fraction
+    return _div(num, den, minPrec)
+
+
+def div2(x, y):
+    """x / y"""
+    if isinstance(x, Decimal):
+        xp, yp = x._precision, y._precision
+        num = x._value * 10 ** yp
+        den = y._value * 10 ** xp
+        minPrec = max(xp, yp)
+        # return num / den as Decimal or as Fraction
+        return _div(num, den, minPrec)
+    if isinstance(x, numbers.Rational):
+        x_numerator, x_denominator = (x.numerator, x.denominator)
+    elif isinstance(x, float):
+        x_numerator, x_denominator = x.as_integer_ratio()
+    elif isinstance(x, _StdLibDecimal):
+        return div1(Decimal(x), y)
+    else:
+        return NotImplemented
+    # handle Rational and float
+    num = x_numerator * 10 ** y._precision
+    den = y._value * x_denominator
+    minPrec = y._precision
+    # return num / den as Decimal or as Fraction
+    return _div(num, den, minPrec)
+
+
+def divmod1(x, y):
+    """x // y, x % y"""
+    if isinstance(y, Decimal):
+        xp, yp = x._precision, y._precision
+        if xp >= yp:
+            r = Decimal(x)
+            xv = x._value
+            yv = y._value * 10 ** (xp - yp)
+        else:
+            r = Decimal(y)
+            xv = x._value * 10 ** (yp - xp)
+            yv = y._value
+        q = xv // yv
+        r._value = xv - q * yv
+        return Decimal(q, r._precision), r
+    elif isinstance(y, numbers.Integral):
+        r = Decimal(x)
+        xv = x._value
+        xp = x._precision
+        yv = y * 10 ** xp
+        q = xv // yv
+        r._value = xv - q * yv
+        return Decimal(q, xp), r
+    elif isinstance(y, _StdLibDecimal):
+        return x.__divmod__(Decimal(y))
+    else:
+        return x // y, x % y
+
+
+def divmod2(x, y):
+    """x // y, x % y"""
+    if isinstance(x, Decimal):
+        xp, yp = x._precision, y._precision
+        if xp >= yp:
+            r = Decimal(x)
+            xv = x._value
+            yv = y._value * 10 ** (xp - yp)
+        else:
+            r = Decimal(y)
+            xv = x._value * 10 ** (yp - xp)
+            yv = y._value
+        q = xv // yv
+        r._value = xv - q * yv
+        return Decimal(q, r._precision), r
+    elif isinstance(x, numbers.Integral):
+        r = Decimal(y)
+        yv = y._value
+        yp = y._precision
+        xv = x * 10 ** yp
+        q = xv // yv
+        r._value = xv - q * yv
+        return Decimal(q, yp), r
+    elif isinstance(x, _StdLibDecimal):
+        return Decimal(x).__divmod__(y)
+    else:
+        return x // y, x % y
+
+
+def floordiv1(x, y):
+    """x // y"""
+    if isinstance(y, (Decimal, numbers.Integral, _StdLibDecimal)):
+        return divmod1(x, y)[0]
+    else:
+        return Decimal(math.floor(x / y), x._precision)
+
+
+def floordiv2(x, y):
+    """x // y"""
+    if isinstance(x, (Decimal, numbers.Integral, _StdLibDecimal)):
+        return divmod2(x, y)[0]
+    else:
+        return Decimal(math.floor(x / y), y._precision)
+
+
+def mod1(x, y):
+    """x % y"""
+    if isinstance(y, (Decimal, numbers.Integral, _StdLibDecimal)):
+        return divmod1(x, y)[1]
+    else:
+        return x - y * (x // y)
+
+
+def mod2(x, y):
+    """x % y"""
+    if isinstance(x, (Decimal, numbers.Integral, _StdLibDecimal)):
+        return divmod2(x, y)[1]
+    else:
+        return x - y * (x // y)
+
+
+def pow1(x, y):
+    """x ** y"""
+    if isinstance(y, numbers.Integral):
+        exp = int(y)
+        if exp >= 0:
+            result = Decimal()
+            result._value = x._value ** exp
+            result._precision = x._precision * exp
+            return result
+        else:
+            return 1 / pow1(x, -y)
+    elif isinstance(y, numbers.Rational):
+        if y.denominator == 1:
+            return x ** y.numerator
+        else:
+            return float(x) ** float(y)
+    else:
+        return float(x) ** y
+
+
+def pow2(x, y):
+    """x ** y"""
+    if y.denominator == 1:
+        return x ** y.numerator
+    return x ** float(y)
+
+
 # helper for different rounding modes
-
-
-# Round towards 0 (aka truncate)
-# quotient negativ => add 1
-def _round_down(q, r, y):
-    if q < 0:
-        return 1
-    else:
-        return 0
-
-
-# Round away from 0
-# quotient not negativ => add 1
-def _round_up(q, r, y):
-    if q >= 0:
-        return 1
-    else:
-        return 0
-
-
-# Round 5 down
-# |remainder| > |divisor|/2 or
-# |remainder| = |divisor|/2 and quotient < 0
-# => add 1
-def _round_half_down(q, r, y):
-    ar, ay = abs(2*r), abs(y)
-    if ar > ay or (ar == ay and q < 0):
-        return 1
-    else:
-        return 0
-
-
-# Round 5 up (away from 0)
-# |remainder| > |divisor|/2 or
-# |remainder| = |divisor|/2 and quotient >= 0
-# => add 1
-def _round_half_up(q, r, y):
-    ar, ay = abs(2*r), abs(y)
-    if ar > ay or (ar == ay and q >= 0):
-        return 1
-    else:
-        return 0
-
-
-# Round 5 to even, rest to nearest
-# |remainder| > |divisor|/2 or
-# |remainder| = |divisor|/2 and quotient not even
-# => add 1
-def _round_half_even(q, r, y):
-    ar, ay = abs(2*r), abs(y)
-    if ar > ay or (ar == ay and q % 2 != 0):
-        return 1
-    else:
-        return 0
-
-
-# Round up (not away from 0 if negative)
-# => always add 1
-def _round_ceiling(q, r, y):
-    return 1
-
-
-# Round down (not towards 0 if negative)
-# => never add 1
-def _round_floor(q, r, y):
-    return 0
-
-
-# Round down unless last digit is 0 or 5
-# quotient not negativ and quotient divisible by 5 without remainder or
-# quotient negativ and (quotient + 1) not divisible by 5 without remainder
-# => add 1
-def _round_05up(q, r, y):
-    if q >= 0 and q % 5 == 0 or q < 0 and (q + 1) % 5 != 0:
-        return 1
-    else:
-        return 0
-
-
-_rounding_map = {
-    ROUND_DOWN: _round_down,
-    ROUND_UP: _round_up,
-    ROUND_HALF_DOWN: _round_half_down,
-    ROUND_HALF_UP: _round_half_up,
-    ROUND_HALF_EVEN: _round_half_even,
-    ROUND_CEILING: _round_ceiling,
-    ROUND_FLOOR: _round_floor,
-    ROUND_05UP: _round_05up}
-
 
 def _round(q, r, y, rounding=None):
     if rounding is None:
         rounding = get_rounding()
-    f = _rounding_map[rounding]
-    return f(q, r, y)
+    if rounding == ROUND_HALF_UP:
+        # Round 5 up (away from 0)
+        # |remainder| > |divisor|/2 or
+        # |remainder| = |divisor|/2 and quotient >= 0
+        # => add 1
+        ar, ay = abs(2*r), abs(y)
+        if ar > ay or (ar == ay and q >= 0):
+            return 1
+        else:
+            return 0
+    if rounding == ROUND_HALF_EVEN:
+        # Round 5 to even, rest to nearest
+        # |remainder| > |divisor|/2 or
+        # |remainder| = |divisor|/2 and quotient not even
+        # => add 1
+        ar, ay = abs(2*r), abs(y)
+        if ar > ay or (ar == ay and q % 2 != 0):
+            return 1
+        else:
+            return 0
+    if rounding == ROUND_HALF_DOWN:
+        # Round 5 down
+        # |remainder| > |divisor|/2 or
+        # |remainder| = |divisor|/2 and quotient < 0
+        # => add 1
+        ar, ay = abs(2*r), abs(y)
+        if ar > ay or (ar == ay and q < 0):
+            return 1
+        else:
+            return 0
+    if rounding == ROUND_DOWN:
+        # Round towards 0 (aka truncate)
+        # quotient negativ => add 1
+        if q < 0:
+            return 1
+        else:
+            return 0
+    if rounding == ROUND_UP:
+        # Round away from 0
+        # quotient not negativ => add 1
+        if q >= 0:
+            return 1
+        else:
+            return 0
+    if rounding == ROUND_CEILING:
+        # Round up (not away from 0 if negative)
+        # => always add 1
+        return 1
+    if rounding == ROUND_FLOOR:
+        # Round down (not towards 0 if negative)
+        # => never add 1
+        return 0
+    if rounding == ROUND_05UP:
+        # Round down unless last digit is 0 or 5
+        # quotient not negativ and quotient divisible by 5 without remainder
+        # or quotient negativ and (quotient + 1) not divisible by 5 without
+        # remainder => add 1
+        if q >= 0 and q % 5 == 0 or q < 0 and (q + 1) % 5 != 0:
+            return 1
+        else:
+            return 0
