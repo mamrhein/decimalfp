@@ -218,6 +218,10 @@ class DecimalTest:
         self.assertEqual(f.precision, g.precision)
         self.assertEqual(f, g)
         self.assertNotEqual(f, h)
+        self.assertEqual(f.adjusted(0), 23)
+        self.assertEqual(f.adjusted(-1), 20)
+        self.assertEqual(f.adjusted(-5), 0)
+        self.assertRaises(TypeError, f.adjusted, 3.7)
 
     def testRounding(self):
         self.assertEqual(round(Decimal('23.456')), 23)
