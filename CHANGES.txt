@@ -1,5 +1,10 @@
 Version     Changes
 ------------------------------------------------------------------------------
-0.9.5       First public release
+0.9.7       Restructured Python code, so that it follows the structure of the
+            Cython code. Results in a small performance gain.
+            Minimum precision of the quotient of two Decimals is now set to
+            max(0, numerator.precision - denominator.precision).
 
 0.9.6       Fixed bug in __trunc__ and __str__
+
+0.9.5       First public release

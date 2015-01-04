@@ -34,7 +34,7 @@ from decimal import ROUND_DOWN, ROUND_UP, ROUND_HALF_DOWN, ROUND_HALF_UP,\
     ROUND_HALF_EVEN, ROUND_CEILING, ROUND_FLOOR, ROUND_05UP
 
 
-__version__ = 0, 9, 6
+__version__ = 0, 9, 7
 
 
 # Python 2 / Python 3
@@ -418,10 +418,6 @@ class Decimal(numbers.Rational):
             f = sv - i * 10 ** sp
             s = (i == 0 and f < 0)*'-'  # -1 < self < 0 => i = 0 and f < 0 !!!
             return '%s%i.%0*i' % (s, i, sp, abs(f))
-
-    def __lstr__(self):
-        """locale.str(self)"""
-        return self.__format__('n')
 
     def __format__(self, fmtSpec):
         """Return `self` converted to a string according to given format
@@ -983,7 +979,9 @@ def _div(num, den, minPrec):
 
 
 def add(x, y):
-    """x + y"""
+    """x + y
+
+    x must be a Decimal"""
     if isinstance(y, Decimal):
         p = x._precision - y._precision
         if p == 0:
@@ -1019,7 +1017,9 @@ def add(x, y):
 
 
 def sub(x, y):
-    """x - y"""
+    """x - y
+
+    x must be a Decimal"""
     if isinstance(y, Decimal):
         p = x._precision - y._precision
         if p == 0:
@@ -1055,7 +1055,9 @@ def sub(x, y):
 
 
 def mul(x, y):
-    """x * y"""
+    """x * y
+
+    x must be a Decimal"""
     if isinstance(y, Decimal):
         result = Decimal(x)
         result._value *= y._value
@@ -1082,12 +1084,14 @@ def mul(x, y):
 
 
 def div1(x, y):
-    """x / y"""
+    """x / y
+
+    x must be a Decimal"""
     if isinstance(y, Decimal):
         xp, yp = x._precision, y._precision
         num = x._value * 10 ** yp
         den = y._value * 10 ** xp
-        minPrec = max(xp, yp)
+        minPrec = max(0, xp - yp)
         # return num / den as Decimal or as Fraction
         return _div(num, den, minPrec)
     elif isinstance(y, numbers.Rational):       # includes Integral
@@ -1107,12 +1111,14 @@ def div1(x, y):
 
 
 def div2(x, y):
-    """x / y"""
+    """x / y
+
+    y must be a Decimal"""
     if isinstance(x, Decimal):
         xp, yp = x._precision, y._precision
         num = x._value * 10 ** yp
         den = y._value * 10 ** xp
-        minPrec = max(xp, yp)
+        minPrec = max(0, xp - yp)
         # return num / den as Decimal or as Fraction
         return _div(num, den, minPrec)
     if isinstance(x, numbers.Rational):
@@ -1132,7 +1138,9 @@ def div2(x, y):
 
 
 def divmod1(x, y):
-    """x // y, x % y"""
+    """x // y, x % y
+
+    x must be a Decimal"""
     if isinstance(y, Decimal):
         xp, yp = x._precision, y._precision
         if xp >= yp:
@@ -1161,7 +1169,9 @@ def divmod1(x, y):
 
 
 def divmod2(x, y):
-    """x // y, x % y"""
+    """x // y, x % y
+
+    y must be a Decimal"""
     if isinstance(x, Decimal):
         xp, yp = x._precision, y._precision
         if xp >= yp:
@@ -1190,7 +1200,9 @@ def divmod2(x, y):
 
 
 def floordiv1(x, y):
-    """x // y"""
+    """x // y
+
+    x must be a Decimal"""
     if isinstance(y, (Decimal, numbers.Integral, _StdLibDecimal)):
         return divmod1(x, y)[0]
     else:
@@ -1198,7 +1210,9 @@ def floordiv1(x, y):
 
 
 def floordiv2(x, y):
-    """x // y"""
+    """x // y
+
+    y must be a Decimal"""
     if isinstance(x, (Decimal, numbers.Integral, _StdLibDecimal)):
         return divmod2(x, y)[0]
     else:
@@ -1206,7 +1220,9 @@ def floordiv2(x, y):
 
 
 def mod1(x, y):
-    """x % y"""
+    """x % y
+
+    x must be a Decimal"""
     if isinstance(y, (Decimal, numbers.Integral, _StdLibDecimal)):
         return divmod1(x, y)[1]
     else:
@@ -1214,7 +1230,9 @@ def mod1(x, y):
 
 
 def mod2(x, y):
-    """x % y"""
+    """x % y
+
+    y must be a Decimal"""
     if isinstance(x, (Decimal, numbers.Integral, _StdLibDecimal)):
         return divmod2(x, y)[1]
     else:
@@ -1222,7 +1240,9 @@ def mod2(x, y):
 
 
 def pow1(x, y):
-    """x ** y"""
+    """x ** y
+
+    x must be a Decimal"""
     if isinstance(y, numbers.Integral):
         exp = int(y)
         if exp >= 0:
@@ -1242,7 +1262,9 @@ def pow1(x, y):
 
 
 def pow2(x, y):
-    """x ** y"""
+    """x ** y
+
+    y must be a Decimal"""
     if y.denominator == 1:
         return x ** y.numerator
     return x ** float(y)

@@ -38,7 +38,7 @@ from decimal import ROUND_DOWN, ROUND_UP, ROUND_HALF_DOWN, ROUND_HALF_UP,\
     ROUND_HALF_EVEN, ROUND_CEILING, ROUND_FLOOR, ROUND_05UP
 
 
-__version__ = 0, 9, 6
+__version__ = 0, 9, 7
 
 
 # Python 2 / Python 3
@@ -425,10 +425,6 @@ cdef class Decimal:
             f = sv - i * 10 ** sp
             s = (i == 0 and f < 0)*'-'  # -1 < self < 0 => i = 0 and f < 0 !!!
             return '%s%i.%0*i' % (s, i, sp, abs(f))
-
-    def __lstr__(self):
-        """locale.str(self)"""
-        return self.__format__('n')
 
     def __format__(self, fmtSpec):
         """Return `self` converted to a string according to given format
@@ -1105,7 +1101,7 @@ cdef object div1(Decimal x, object y):
         xp, yp = x._precision, (<Decimal>y)._precision
         num = x._value * base10pow(yp)
         den = (<Decimal>y)._value * base10pow(xp)
-        minPrec = max(xp, yp)
+        minPrec = max(0, xp - yp)
         # return num / den as Decimal or as Fraction
         return _div(num, den, minPrec)
     elif isinstance(y, numbers.Rational):       # includes Integral
@@ -1131,7 +1127,7 @@ cdef object div2(object x, Decimal y):
         xp, yp = (<Decimal>x)._precision, y._precision
         num = (<Decimal>x)._value * base10pow(yp)
         den = y._value * base10pow(xp)
-        minPrec = max(xp, yp)
+        minPrec = max(0, xp - yp)
         # return num / den as Decimal or as Fraction
         return _div(num, den, minPrec)
     if isinstance(x, numbers.Rational):
@@ -1275,99 +1271,67 @@ cdef object pow2(object x, Decimal y):
 
 # helper for different rounding modes
 
-# Round towards 0 (aka truncate)
-# quotient negativ => add 1
-cdef int _round_down(q, r, y):
-    if q < 0:
-        return 1
-    else:
-        return 0
-
-
-# Round away from 0
-# quotient not negativ => add 1
-cdef int _round_up(q, r, y):
-    if q >= 0:
-        return 1
-    else:
-        return 0
-
-
-# Round 5 down
-# |remainder| > |divisor|/2 or
-# |remainder| = |divisor|/2 and quotient < 0
-# => add 1
-cdef int _round_half_down(q, r, y):
-    ar, ay = abs(2*r), abs(y)
-    if ar > ay or (ar == ay and q < 0):
-        return 1
-    else:
-        return 0
-
-
-# Round 5 up (away from 0)
-# |remainder| > |divisor|/2 or
-# |remainder| = |divisor|/2 and quotient >= 0
-# => add 1
-cdef int _round_half_up(q, r, y):
-    ar, ay = abs(2*r), abs(y)
-    if ar > ay or (ar == ay and q >= 0):
-        return 1
-    else:
-        return 0
-
-
-# Round 5 to even, rest to nearest
-# |remainder| > |divisor|/2 or
-# |remainder| = |divisor|/2 and quotient not even
-# => add 1
-cdef int _round_half_even(q, r, y):
-    ar, ay = abs(2*r), abs(y)
-    if ar > ay or (ar == ay and q % 2 != 0):
-        return 1
-    else:
-        return 0
-
-
-# Round up (not away from 0 if negative)
-# => always add 1
-cdef inline int _round_ceiling(q, r, y):
-    return 1
-
-
-# Round down (not towards 0 if negative)
-# => never add 1
-cdef inline int _round_floor(q, r, y):
-    return 0
-
-
-# Round down unless last digit is 0 or 5
-# quotient not negativ and quotient divisible by 5 without remainder or
-# quotient negativ and (quotient + 1) not divisible by 5 without remainder
-# => add 1
-cdef int _round_05up(q, r, y):
-    if q >= 0 and q % 5 == 0 or q < 0 and (q + 1) % 5 != 0:
-        return 1
-    else:
-        return 0
-
-
 cdef int _round(q, r, y, rounding=None):
     if rounding is None:
         rounding = get_rounding()
     if rounding == ROUND_HALF_UP:
-        return _round_half_up(q, r, y)
+        # Round 5 up (away from 0)
+        # |remainder| > |divisor|/2 or
+        # |remainder| = |divisor|/2 and quotient >= 0
+        # => add 1
+        ar, ay = abs(2*r), abs(y)
+        if ar > ay or (ar == ay and q >= 0):
+            return 1
+        else:
+            return 0
     if rounding == ROUND_HALF_EVEN:
-        return _round_half_even(q, r, y)
+        # Round 5 to even, rest to nearest
+        # |remainder| > |divisor|/2 or
+        # |remainder| = |divisor|/2 and quotient not even
+        # => add 1
+        ar, ay = abs(2*r), abs(y)
+        if ar > ay or (ar == ay and q % 2 != 0):
+            return 1
+        else:
+            return 0
     if rounding == ROUND_HALF_DOWN:
-        return _round_half_down(q, r, y)
+        # Round 5 down
+        # |remainder| > |divisor|/2 or
+        # |remainder| = |divisor|/2 and quotient < 0
+        # => add 1
+        ar, ay = abs(2*r), abs(y)
+        if ar > ay or (ar == ay and q < 0):
+            return 1
+        else:
+            return 0
     if rounding == ROUND_DOWN:
-        return _round_down(q, r, y)
+        # Round towards 0 (aka truncate)
+        # quotient negativ => add 1
+        if q < 0:
+            return 1
+        else:
+            return 0
     if rounding == ROUND_UP:
-        return _round_up(q, r, y)
+        # Round away from 0
+        # quotient not negativ => add 1
+        if q >= 0:
+            return 1
+        else:
+            return 0
     if rounding == ROUND_CEILING:
-        return _round_ceiling(q, r, y)
+        # Round up (not away from 0 if negative)
+        # => always add 1
+        return 1
     if rounding == ROUND_FLOOR:
-        return _round_floor(q, r, y)
+        # Round down (not towards 0 if negative)
+        # => never add 1
+        return 0
     if rounding == ROUND_05UP:
-        return _round_05up(q, r, y)
+        # Round down unless last digit is 0 or 5
+        # quotient not negativ and quotient divisible by 5 without remainder
+        # or quotient negativ and (quotient + 1) not divisible by 5 without
+        # remainder => add 1
+        if q >= 0 and q % 5 == 0 or q < 0 and (q + 1) % 5 != 0:
+            return 1
+        else:
+            return 0

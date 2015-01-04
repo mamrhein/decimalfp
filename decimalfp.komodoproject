@@ -3,47 +3,20 @@
 <project id="85c3a190-08a8-425c-a767-6c5cedb71278" kpf_version="5" name="decimalfp.komodoproject">
 <preference-set idref="85c3a190-08a8-425c-a767-6c5cedb71278" id="project" preftype="project">
   <string relative="path" id="import_dirname"></string>
-<preference-set id="languages">
-<preference-set id="languages/CoffeeScript">
-  <boolean id="primary">0</boolean>
-</preference-set>
-<preference-set id="languages/MXML">
-  <boolean id="primary">0</boolean>
-</preference-set>
-<preference-set id="languages/Node.js">
-  <boolean id="primary">0</boolean>
-</preference-set>
-<preference-set id="languages/Perl">
-  <boolean id="primary">0</boolean>
-</preference-set>
-<preference-set id="languages/RHTML">
-  <boolean id="primary">0</boolean>
-</preference-set>
-<preference-set id="languages/Regex">
-  <boolean id="primary">1</boolean>
-</preference-set>
-<preference-set id="languages/Ruby">
-  <boolean id="primary">0</boolean>
-</preference-set>
-<preference-set id="languages/SCSS">
-  <boolean id="primary">0</boolean>
-</preference-set>
-<preference-set id="languages/Sass">
-  <boolean id="primary">0</boolean>
-</preference-set>
-<preference-set id="languages/Tcl">
-  <boolean id="primary">0</boolean>
-</preference-set>
-<preference-set id="languages/TemplateToolkit">
-  <boolean id="primary">0</boolean>
-</preference-set>
-<preference-set id="languages/YAML">
-  <boolean id="primary">1</boolean>
-</preference-set>
-<preference-set id="languages/reStructuredText">
-  <boolean id="primary">1</boolean>
-</preference-set>
-</preference-set>
+  <boolean id="languages/CoffeeScript/primary">0</boolean>
+  <boolean id="languages/MXML/primary">0</boolean>
+  <boolean id="languages/Node.js/primary">0</boolean>
+  <boolean id="languages/Perl/primary">0</boolean>
+  <boolean id="languages/RHTML/primary">0</boolean>
+  <boolean id="languages/Regex/primary">1</boolean>
+  <boolean id="languages/Ruby/primary">0</boolean>
+  <boolean id="languages/SCSS/primary">0</boolean>
+  <boolean id="languages/Sass/primary">0</boolean>
+  <boolean id="languages/Tcl/primary">0</boolean>
+  <boolean id="languages/TemplateToolkit/primary">0</boolean>
+  <boolean id="languages/YAML/primary">1</boolean>
+  <boolean id="languages/reStructuredText/primary">1</boolean>
+  <long id="prefs_version">1</long>
 <preference-set id="testPlans">
 <preference-set id="New test plan #1">
   <string id="command_line"></string>

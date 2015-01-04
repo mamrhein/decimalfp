@@ -153,11 +153,13 @@ with precision equal to the sum of the precisions of the operands.
     Decimal('12.5', 4)
 
 Dividing :class:`Decimal` instances results in a :class:`Decimal` instance
-with precision at least equal to the maximum of the precisions of the operands,
-but may be greater, if needed.
+with precision at least equal to max(0, numerator.precision -
+denominator.precision), but may be greater, if needed.
 
->>> Decimal('5.000') / Decimal('2.5')
-Decimal(2, 3)
+    >>> Decimal('5.2000') / Decimal('2.5')
+    Decimal('2.08', 3)
+    >>> Decimal('5.2003') / Decimal('2.5')
+    Decimal('2.08012')
 
 In operations with other numerical types the precision of the result is at
 least equal to the precision of the involved :class:`Decimal` instance, but
