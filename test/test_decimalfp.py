@@ -32,7 +32,7 @@ from _cdecimalfp import Decimal as _CDecimal
 
 Decimal = None
 
-__version__ = 0, 9, 5
+__version__ = 0, 9, 8
 
 __metaclass__ = type
 
@@ -387,6 +387,10 @@ class DecimalTest:
                     self.assertEqual(format(d, formatSpec), result)
                 else:
                     self.assertEqual(format(d), result)
+        d = Decimal('0.0038')
+        self.assertEqual(format(d), str(d))
+        self.assertEqual(format(d, '<.3'), str(d.adjusted(3)))
+        self.assertEqual(format(d, '<.7'), str(d.adjusted(7)))
         locale.setlocale(locale.LC_ALL, loc)
         self.assertRaises(ValueError, format, d, ' +012.5F')
         self.assertRaises(ValueError, format, d, '_+012.5F')

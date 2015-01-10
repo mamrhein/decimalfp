@@ -38,7 +38,7 @@ from decimal import ROUND_DOWN, ROUND_UP, ROUND_HALF_DOWN, ROUND_HALF_UP,\
     ROUND_HALF_EVEN, ROUND_CEILING, ROUND_FLOOR, ROUND_05UP
 
 
-__version__ = 0, 9, 7
+__version__ = 0, 9, 8
 
 
 # Python 2 / Python 3
@@ -406,9 +406,9 @@ cdef class Decimal:
             s = str(abs(rv))
             n = len(s)
             if n > rp:
-                s = "'%s%s.%s'" % ((rv < 0)*'-', s[0:-rp], s[-rp:])
+                s = "'%s%s.%s'" % ((rv < 0) * '-', s[0:-rp], s[-rp:])
             else:
-                s = "'%s0.%s%s'" % ((rv < 0)*'-', (rp-n)*'0', s)
+                s = "'%s0.%s%s'" % ((rv < 0) * '-', (rp-n) * '0', s)
         if sp == rp:
             return "Decimal(%s)" % (s)
         else:
@@ -423,7 +423,7 @@ cdef class Decimal:
             sv = self._value
             i = _int(sv, sp)
             f = sv - i * 10 ** sp
-            s = (i == 0 and f < 0)*'-'  # -1 < self < 0 => i = 0 and f < 0 !!!
+            s = (i == 0 and f < 0) * '-'  # -1 < self < 0 => i = 0 and f < 0 !
             return '%s%i.%0*i' % (s, i, sp, abs(f))
 
     def __format__(self, fmtSpec):
@@ -436,6 +436,7 @@ cdef class Decimal:
         Returns:
             str: `self` converted to a string according to `fmtSpec`
         """
+        cdef int nToFill, prec, xtraShift
         (fmtFill, fmtAlign, fmtSign, fmtMinWidth, fmtThousandsSep,
             fmtGrouping, fmtDecimalPoint, fmtPrecision,
             fmtType) = _getFormatParams(fmtSpec)
@@ -460,7 +461,7 @@ cdef class Decimal:
         else:
             sign = fmtSign
             nToFill -= 1
-        rawDigits = "%i" % val
+        rawDigits = format(val, '>0%i' % (fmtPrecision + 1))
         if fmtPrecision:
             decimalPoint = fmtDecimalPoint
             rawDigits, fracPart = (rawDigits[:-fmtPrecision],
@@ -1279,7 +1280,7 @@ cdef int _round(q, r, y, rounding=None):
         # |remainder| > |divisor|/2 or
         # |remainder| = |divisor|/2 and quotient >= 0
         # => add 1
-        ar, ay = abs(2*r), abs(y)
+        ar, ay = abs(2 * r), abs(y)
         if ar > ay or (ar == ay and q >= 0):
             return 1
         else:
@@ -1289,7 +1290,7 @@ cdef int _round(q, r, y, rounding=None):
         # |remainder| > |divisor|/2 or
         # |remainder| = |divisor|/2 and quotient not even
         # => add 1
-        ar, ay = abs(2*r), abs(y)
+        ar, ay = abs(2 * r), abs(y)
         if ar > ay or (ar == ay and q % 2 != 0):
             return 1
         else:
@@ -1299,7 +1300,7 @@ cdef int _round(q, r, y, rounding=None):
         # |remainder| > |divisor|/2 or
         # |remainder| = |divisor|/2 and quotient < 0
         # => add 1
-        ar, ay = abs(2*r), abs(y)
+        ar, ay = abs(2 * r), abs(y)
         if ar > ay or (ar == ay and q < 0):
             return 1
         else:

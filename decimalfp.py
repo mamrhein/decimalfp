@@ -227,7 +227,7 @@ from decimal import ROUND_DOWN, ROUND_UP, ROUND_HALF_DOWN, ROUND_HALF_UP,\
 from decimal import getcontext as _getcontext
 
 
-__version__ = 0, 9, 5
+__version__ = 0, 9, 8
 
 __metaclass__ = type
 

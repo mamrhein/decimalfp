@@ -1,5 +1,7 @@
 Version     Changes
 ------------------------------------------------------------------------------
+0.9.8       Fixed bug in __format__
+
 0.9.7       Restructured Python code, so that it follows the structure of the
             Cython code. Results in a small performance gain.
             Minimum precision of the quotient of two Decimals is now set to
