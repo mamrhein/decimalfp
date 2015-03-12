@@ -32,7 +32,7 @@ from _cdecimalfp import Decimal as _CDecimal
 
 Decimal = None
 
-__version__ = 0, 9, 8
+__version__ = 0, 9, 9
 
 __metaclass__ = type
 
@@ -137,11 +137,13 @@ class DecimalTest:
         self.assertEqual(hash(Decimal('0.33')), hash(Fraction('0.33')))
 
     def testMagnitude(self):
-        self.assertEqual(Decimal('12.345').magnitude, 2)
-        self.assertEqual(Decimal('286718.338524635465625').magnitude, 6)
-        self.assertEqual(Decimal('28671833852463546562.500').magnitude, 20)
-        self.assertEqual(Decimal('0.12345').magnitude, 0)
-        self.assertEqual(Decimal('0.0012345').magnitude, -2)
+        self.assertEqual(Decimal('12.345').magnitude, 1)
+        self.assertEqual(Decimal('10').magnitude, 1)
+        self.assertEqual(Decimal('-286718.338524635465625').magnitude, 5)
+        self.assertEqual(Decimal('286718338524635465627.500').magnitude, 20)
+        self.assertEqual(Decimal('0.12345').magnitude, -1)
+        self.assertEqual(Decimal('-0.0012345').magnitude, -3)
+        self.assertEqual(Decimal('-0.01').magnitude, -2)
 
     def testCoercions(self):
         f = Decimal('23.456')

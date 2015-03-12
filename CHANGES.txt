@@ -1,5 +1,8 @@
 Version     Changes
 ------------------------------------------------------------------------------
+0.9.9       Changed `magnitude`: return largest integer exp so that
+            10 ** exp <= self
+
 0.9.8       Fixed bug in __format__
 
 0.9.7       Restructured Python code, so that it follows the structure of the

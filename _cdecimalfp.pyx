@@ -38,7 +38,7 @@ from decimal import ROUND_DOWN, ROUND_UP, ROUND_HALF_DOWN, ROUND_HALF_UP,\
     ROUND_HALF_EVEN, ROUND_CEILING, ROUND_FLOOR, ROUND_05UP
 
 
-__version__ = 0, 9, 8
+__version__ = 0, 9, 9
 
 
 # Python 2 / Python 3
@@ -299,8 +299,8 @@ cdef class Decimal:
     @property
     def magnitude(self):
         """Return magnitude of `self` in terms of power to 10, i.e. the
-        smallest integer exp so that 10 ** exp >= self."""
-        return len(str(self._value)) - self._precision
+        largest integer exp so that 10 ** exp <= self."""
+        return int(math.floor(math.log10(abs(self._value)))) - self._precision
 
     @property
     def numerator(self):
@@ -389,7 +389,7 @@ cdef class Decimal:
         return self.__copy__()
 
     def __reduce__(self):
-        return (Decimal, (None, None), (self._value, self._precision))
+        return (Decimal, (), (self._value, self._precision))
 
     def __setstate__(self, state):
         self._value, self._precision = state
