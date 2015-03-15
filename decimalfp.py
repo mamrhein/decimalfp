@@ -216,6 +216,22 @@ the standard library module `decimal`.
 
 For the details of the different rounding modes see the documentation of the
 standard library module `decimal`.
+
+`round` and `adjusted` only allow to round to a quantum that's a power to 10.
+The method :meth:`quantize` can be used to round to any quantum and it does
+also support all rounding modes mentioned above.
+
+    >>> d = Decimal('12.345')
+    >>># equivalent to round(d, 2) or d.adjusted(2)
+    >>># (default rounding mode ROUND_HALF_EVEN):
+    >>> d.quantize(Decimal('0.01'))
+    Decimal('12.34')
+    >>> d.quantize(Decimal('0.05'))
+    Decimal('12.35')
+    >>> d.quantize('0.6')
+    Decimal('12.6')
+    >>> d.quantize(4)
+    Decimal('12')
 """
 
 
@@ -227,7 +243,7 @@ from decimal import ROUND_DOWN, ROUND_UP, ROUND_HALF_DOWN, ROUND_HALF_UP,\
 from decimal import getcontext as _getcontext
 
 
-__version__ = 0, 9, 9
+__version__ = 0, 9, 10
 
 __metaclass__ = type
 

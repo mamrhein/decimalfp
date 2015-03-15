@@ -1,5 +1,7 @@
 Version     Changes
 ------------------------------------------------------------------------------
+0.9.10      Added method `quantize`.
+
 0.9.9       Changed `magnitude`: return largest integer exp so that
             10 ** exp <= self
 

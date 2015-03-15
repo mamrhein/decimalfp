@@ -34,7 +34,7 @@ from decimal import ROUND_DOWN, ROUND_UP, ROUND_HALF_DOWN, ROUND_HALF_UP,\
     ROUND_HALF_EVEN, ROUND_CEILING, ROUND_FLOOR, ROUND_05UP
 
 
-__version__ = 0, 9, 9
+__version__ = 0, 9, 10
 
 
 # Python 2 / Python 3
@@ -296,9 +296,8 @@ class Decimal(numbers.Rational):
         try:
             return self._numerator
         except AttributeError:
-            n, d = self.as_integer_ratio()
-            self._numerator = n
-            return n
+            self._numerator, self._denominator = self.as_integer_ratio()
+            return self._numerator
 
     @property
     def denominator(self):
@@ -307,9 +306,8 @@ class Decimal(numbers.Rational):
         try:
             return self._denominator
         except AttributeError:
-            n, d = self.as_integer_ratio()
-            self._denominator = d
-            return d
+            self._numerator, self._denominator = self.as_integer_ratio()
+            return self._denominator
 
     @property
     def real(self):
@@ -331,7 +329,7 @@ class Decimal(numbers.Rational):
 
         Args:
             precision (int): number of fractional digits (default: None)
-            rounding(str): rounding mode (default: None)
+            rounding (str): rounding mode (default: None)
 
         Returns:
             :class:`Decimal` instance derived from `self`, adjusted
@@ -357,6 +355,45 @@ class Decimal(numbers.Rational):
             result = Decimal(self)
             _adjust(result, precision, rounding)
         return result
+
+    def quantize(self, quant, rounding=None):
+        """Return integer multiple of `quant` closest to `self`.
+
+        Args:
+            quant (Rational): quantum to get a multiple from
+            rounding (str): rounding mode (default: None)
+
+        A string can be given for `quant` as long as it is convertable to a
+        :class:`Decimal`.
+
+        If no `rounding` mode is given, the default mode from the current
+        context (from module `decimal`) is used.
+
+        Returns:
+            :class:`Decimal` instance that is the integer multiple of `quant`
+                closest to `self` (according to `rounding` mode); if result
+                can not be represented as :class:`Decimal`, an instance of
+                `Fraction` is returned
+
+        Raises:
+            TypeError: `quant` is not a Rational number or can not be
+                converted to a :class:`Decimal`
+        """
+        try:
+            num, den = quant.numerator, quant.denominator
+        except AttributeError:
+            try:
+                num, den = quant.as_integer_ratio()
+            except AttributeError:
+                try:
+                    quant = Decimal(quant)
+                except (TypeError, ValueError):
+                    raise TypeError("Can't quantize to a '%s': %s."
+                                    % (quant.__class__.__name__, quant))
+                num, den = quant.as_integer_ratio()
+        mult = _div_rounded(self._value * den, 10 ** self._precision * num,
+                            rounding)
+        return Decimal(mult) * quant
 
     def as_tuple(self):
         """Return a tuple (sign, coeff, exp) so that

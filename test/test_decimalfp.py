@@ -32,7 +32,7 @@ from _cdecimalfp import Decimal as _CDecimal
 
 Decimal = None
 
-__version__ = 0, 9, 9
+__version__ = 0, 9, 10
 
 __metaclass__ = type
 
@@ -224,6 +224,22 @@ class DecimalTest:
         self.assertEqual(f.adjusted(-1), 20)
         self.assertEqual(f.adjusted(-5), 0)
         self.assertRaises(TypeError, f.adjusted, 3.7)
+
+    def testQuantization(self):
+        f = Decimal('23.456')
+        g = Decimal('23.4562398').quantize(Decimal('0.001'))
+        h = Decimal('23.4565').quantize(Decimal('0.001'))
+        self.assertEqual(f.precision, g.precision)
+        self.assertEqual(f, g)
+        self.assertNotEqual(f, h)
+        self.assertEqual(f.quantize(1), 23)
+        self.assertEqual(f.quantize('10'), 20)
+        self.assertEqual(f.quantize(_StdLibDecimal(100)), 0)
+        for quant in [Decimal('0.02'), Decimal(3), Fraction(1, 3)]:
+            r = f.quantize(quant) / quant
+            self.assertEqual(r.denominator, 1)
+        self.assertRaises(TypeError, f.quantize, complex(5))
+        self.assertRaises(TypeError, f.quantize, 'a')
 
     def testRounding(self):
         self.assertEqual(round(Decimal('23.456')), 23)

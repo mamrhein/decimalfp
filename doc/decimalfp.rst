@@ -9,7 +9,7 @@ Class `Decimal`
 .. autoclass:: Decimal
     :members: from_float, from_decimal, from_real,
         precision, magnitude, numerator, denominator, real, imag,
-        adjusted, as_tuple, as_integer_ratio, __hash__,
+        adjusted, quantize, as_tuple, as_integer_ratio, __hash__,
         __eq__, __lt__, __le__, __gt__, __ge__,
         __abs__, __neg__, __pos__,
         __add__, __radd__, __sub__, __rsub__,
