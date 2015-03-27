@@ -32,7 +32,7 @@ from _cdecimalfp import Decimal as _CDecimal
 
 Decimal = None
 
-__version__ = 0, 9, 10
+__version__ = 0, 9, 11
 
 __metaclass__ = type
 
@@ -235,8 +235,13 @@ class DecimalTest:
         self.assertEqual(f.quantize(1), 23)
         self.assertEqual(f.quantize('10'), 20)
         self.assertEqual(f.quantize(_StdLibDecimal(100)), 0)
+        f = Decimal(1.4, 28)
         for quant in [Decimal('0.02'), Decimal(3), Fraction(1, 3)]:
-            r = f.quantize(quant) / quant
+            q = f.quantize(quant)
+            d = abs(f - q)
+            print(f, quant, q, d)
+            self.assertTrue(d < quant)
+            r = q / quant
             self.assertEqual(r.denominator, 1)
         self.assertRaises(TypeError, f.quantize, complex(5))
         self.assertRaises(TypeError, f.quantize, 'a')
