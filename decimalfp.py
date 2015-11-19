@@ -236,6 +236,7 @@ also support all rounding modes mentioned above.
 
 
 from __future__ import absolute_import
+import platform
 # rounding modes
 from decimal import ROUND_DOWN, ROUND_UP, ROUND_HALF_DOWN, ROUND_HALF_UP,\
     ROUND_HALF_EVEN, ROUND_CEILING, ROUND_FLOOR, ROUND_05UP
@@ -243,12 +244,12 @@ from decimal import ROUND_DOWN, ROUND_UP, ROUND_HALF_DOWN, ROUND_HALF_UP,\
 from decimal import getcontext as _getcontext
 
 
-__version__ = 0, 9, 11
+__version__ = 0, 9, 12
 
 __metaclass__ = type
 
 
-# precision limit for division or conversion without explicitely given
+# precision limit for division or conversion without explicitly given
 # precision
 LIMIT_PREC = 32
 
@@ -270,10 +271,16 @@ def set_rounding(rounding):
     ctx.rounding = rounding
 
 
-try:
-    # Cython / C implementation available?
-    from _cdecimalfp import Decimal
-except ImportError:
+# The Cython / C implementation works properly under CPython, but not under
+# PyPy (other implementations not tested yet)
+_impl = platform.python_implementation()
+if _impl == 'CPython':
+    try:
+        # Cython / C implementation available?
+        from _cdecimalfp import Decimal
+    except ImportError:
+        from _pydecimalfp import Decimal
+else:
     from _pydecimalfp import Decimal
 
 

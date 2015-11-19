@@ -16,6 +16,7 @@
 
 from __future__ import absolute_import, division
 import sys
+import platform
 import os
 import copy
 import unittest
@@ -67,7 +68,7 @@ class DecimalTest:
         self.assertEqual(Decimal(-1, 2), -1)
         self.assertTrue(Decimal(-37, 100))
         self.assertEqual(Decimal(-37, 100), -37)
-        self.assertTrue(Decimal(sys.maxsize**100))
+        self.assertTrue(Decimal(sys.maxsize ** 100))
         self.assertTrue(Decimal(1.111e12))
         self.assertEqual(Decimal(1.111e12), 1.111e12)
         self.assertTrue(Decimal(sys.float_info.max))
@@ -356,9 +357,9 @@ class DecimalTest:
                          Fraction(3602879701896397, 18014398509481984))
         self.assertEqual(0.3 - Decimal('0.5'),
                          Fraction(-3602879701896397, 18014398509481984))
-        self.assertEqual(Decimal(2**32) * 0.3,
+        self.assertEqual(Decimal(2 ** 32) * 0.3,
                          Decimal('1288490188.7999999523162841796875'))
-        self.assertEqual(0.3 * Decimal(2**32),
+        self.assertEqual(0.3 * Decimal(2 ** 32),
                          Decimal('1288490188.7999999523162841796875'))
         self.assertEqual(Decimal('0.5') * 0.3,
                          Fraction(5404319552844595, 36028797018963968))
@@ -376,7 +377,7 @@ class DecimalTest:
         self.assertEqual(loads(dumps(d)), d)
         d = Decimal(-37, 100)
         self.assertEqual(loads(dumps(d)), d)
-        d = Decimal(sys.maxsize**100)
+        d = Decimal(sys.maxsize ** 100)
         self.assertEqual(loads(dumps(d)), d)
         d = Decimal(1.111e12)
         self.assertEqual(loads(dumps(d)), d)
@@ -432,6 +433,8 @@ class PyImplTest(unittest.TestCase, DecimalTest):
         Decimal = _PyDecimal
 
 
+@unittest.skipIf(platform.python_implementation() != 'CPython',
+                 'Skip CImplTest unless running CPython.')
 class CImplTest(unittest.TestCase, DecimalTest):
 
     """Testing the Cython implementation."""
