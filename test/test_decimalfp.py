@@ -14,6 +14,10 @@
 ## $Source$
 ## $Revision$
 
+
+"""Test driver for both implementations of decimalfp"""
+
+
 from __future__ import absolute_import, division
 import sys
 import platform
@@ -33,7 +37,7 @@ from _cdecimalfp import Decimal as _CDecimal
 
 Decimal = None
 
-__version__ = 0, 9, 11
+__version__ = 0, 9, 13
 
 __metaclass__ = type
 
@@ -51,9 +55,11 @@ class IntWrapper():
         self.i = i
 
     def __int__(self):
+        """int(self)"""
         return self.i
 
     def __eq__(self, i):
+        """self == i"""
         return self.i == i
 
 
