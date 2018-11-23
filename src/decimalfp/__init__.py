@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 ##----------------------------------------------------------------------------
-## Name:        decimalfp
+## Name:        decimalfp (package)
 ## Purpose:     Decimal fixed-point arithmetic
 ##
 ## Author:      Michael Amrhein (mamrhein@users.sourceforge.net)
@@ -15,7 +15,7 @@
 ## $Revision$
 
 
-"""The module `decimalfp` provides a :class:`Decimal` number type which can
+"""The package `decimalfp` provides a :class:`Decimal` number type which can
 represent decimal numbers of arbitrary magnitude and arbitrary precision, i.e.
 any number of fractional digits.
 
@@ -236,66 +236,51 @@ also support all rounding modes mentioned above.
 
 
 from __future__ import absolute_import
-import platform
-# rounding modes
-from decimal import ROUND_DOWN, ROUND_UP, ROUND_HALF_DOWN, ROUND_HALF_UP,\
-    ROUND_HALF_EVEN, ROUND_CEILING, ROUND_FLOOR, ROUND_05UP
-# function to get context from decimal
-from decimal import getcontext as _getcontext
+
+# local imports
+from .rounding import (
+    ROUND_05UP,
+    ROUND_CEILING,
+    ROUND_DOWN,
+    ROUND_FLOOR,
+    ROUND_HALF_DOWN,
+    ROUND_HALF_EVEN,
+    ROUND_HALF_UP,
+    ROUND_UP,
+)
+from .rounding import get_limit_prec, get_rounding, set_rounding
 
 
 __version__ = 0, 9, 12
 
-__metaclass__ = type
-
-
-# precision limit for division or conversion without explicitly given
-# precision
-LIMIT_PREC = 32
-
-
-def _get_limit_prec():
-    return LIMIT_PREC
-
-
-# functions to get / set rounding mode
-def get_rounding():
-    """Return rounding mode from current context."""
-    ctx = _getcontext()
-    return ctx.rounding
-
-
-def set_rounding(rounding):
-    """Set rounding mode in current context."""
-    ctx = _getcontext()
-    ctx.rounding = rounding
-
 
 # The Cython / C implementation works properly under CPython, but not under
 # PyPy (other implementations not tested yet)
+import platform                                             # noqa: I100, I202
 _impl = platform.python_implementation()
 if _impl == 'CPython':
     try:
         # Cython / C implementation available?
-        from _cdecimalfp import Decimal
+        from ._cdecimalfp import Decimal
     except ImportError:
-        from _pydecimalfp import Decimal
+        from ._pydecimalfp import Decimal
 else:
-    from _pydecimalfp import Decimal
+    from ._pydecimalfp import Decimal
+del platform
 
 
 # define public namespace
 __all__ = [
     'Decimal',
+    'get_limit_prec',
     'get_rounding',
     'set_rounding',
-    'ROUND_DOWN',
-    'ROUND_UP',
-    'ROUND_HALF_DOWN',
-    'ROUND_HALF_UP',
-    'ROUND_HALF_EVEN',
-    'ROUND_CEILING',
-    'ROUND_FLOOR',
     'ROUND_05UP',
-    'LIMIT_PREC'
+    'ROUND_CEILING',
+    'ROUND_DOWN',
+    'ROUND_FLOOR',
+    'ROUND_HALF_DOWN',
+    'ROUND_HALF_EVEN',
+    'ROUND_HALF_UP',
+    'ROUND_UP',
 ]

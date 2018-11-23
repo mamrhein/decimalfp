@@ -15,29 +15,39 @@
 ## $Revision$
 
 
-"""Test driver for both implementations of decimalfp"""
+"""Test driver for both implementations of decimalfp."""
 
 
 from __future__ import absolute_import, division
-import sys
-import platform
-import os
+
 import copy
-import unittest
-import math
 import locale
-from pickle import dumps, loads
+import math
+import os
+import platform
+import sys
+import unittest
 from decimal import Decimal as _StdLibDecimal
 from fractions import Fraction
-from decimalfp import set_rounding, ROUND_DOWN, ROUND_UP, ROUND_HALF_DOWN, \
-    ROUND_HALF_UP, ROUND_HALF_EVEN, ROUND_CEILING, ROUND_FLOOR, ROUND_05UP, \
-    LIMIT_PREC
-from _pydecimalfp import Decimal as _PyDecimal
-from _cdecimalfp import Decimal as _CDecimal
+from pickle import dumps, loads
+
+from decimalfp import (
+    ROUND_05UP,
+    ROUND_CEILING,
+    ROUND_DOWN,
+    ROUND_FLOOR,
+    ROUND_HALF_DOWN,
+    ROUND_HALF_EVEN,
+    ROUND_HALF_UP,
+    ROUND_UP,
+    set_rounding,
+)
+from decimalfp._cdecimalfp import Decimal as _CDecimal
+from decimalfp._pydecimalfp import Decimal as _PyDecimal
+from decimalfp.rounding import LIMIT_PREC
+
 
 Decimal = None
-
-__version__ = 0, 9, 13
 
 __metaclass__ = type
 
@@ -246,7 +256,6 @@ class DecimalTest:
         for quant in [Decimal('0.02'), Decimal(3), Fraction(1, 3)]:
             q = f.quantize(quant)
             d = abs(f - q)
-            print(f, quant, q, d)
             self.assertTrue(d < quant)
             r = q / quant
             self.assertEqual(r.denominator, 1)

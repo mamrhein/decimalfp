@@ -20,28 +20,37 @@
 
 
 from __future__ import absolute_import, division
+
+# standard lib imports
 import locale
 import math
 import numbers
-from decimalfp import _get_limit_prec, get_rounding
-from libc.limits cimport LLONG_MAX
-from libc.stdlib cimport atoi
+from decimal import Decimal as _StdLibDecimal
+from fractions import Fraction, gcd
+from functools import reduce
+# local imports
+from .rounding import (
+    ROUND_05UP,
+    ROUND_CEILING,
+    ROUND_DOWN,
+    ROUND_FLOOR,
+    ROUND_HALF_DOWN,
+    ROUND_HALF_EVEN,
+    ROUND_HALF_UP,
+    ROUND_UP,
+)
+from .rounding import get_limit_prec, get_rounding
+
+# cython cimports
 from cpython.long cimport *
 from cpython.number cimport *
 from cpython.object cimport PyObject_RichCompare
-from cpython.version cimport PY_MAJOR_VERSION
-from decimal import Decimal as _StdLibDecimal
-from fractions import gcd, Fraction
-from functools import reduce
-# rounding modes
-from decimal import ROUND_DOWN, ROUND_UP, ROUND_HALF_DOWN, ROUND_HALF_UP,\
-    ROUND_HALF_EVEN, ROUND_CEILING, ROUND_FLOOR, ROUND_05UP
-
-
-__version__ = 0, 9, 11
+from libc.limits cimport LLONG_MAX
+from libc.stdlib cimport atoi
 
 
 # Python 2 / Python 3
+from cpython.version cimport PY_MAJOR_VERSION
 if PY_MAJOR_VERSION < 3:
     # rounding mode of builtin round function
     DFLT_ROUNDING = ROUND_HALF_UP
@@ -289,7 +298,7 @@ cdef class Decimal:
             if exact:
                 raise
             else:
-                return cls(r, _get_limit_prec())
+                return cls(r, get_limit_prec())
 
     @property
     def precision(self):
@@ -820,7 +829,7 @@ cdef bint _approx_rational(Decimal dec, object num, object den,
     Sets `dec` to q * 10 ** -p. Returns True if r != 0, False otherwise.
     """
     cdef int maxPrec, prec
-    maxPrec = max(minPrec, _get_limit_prec())
+    maxPrec = max(minPrec, get_limit_prec())
     while True:
         prec = (minPrec + maxPrec) // 2
         quot, rem = divmod(num * base10pow(prec), den)

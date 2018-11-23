@@ -15,23 +15,25 @@
 ## $Revision$
 
 
-"""Compare performance of different implementations of Decimal"""
+"""Compare performance of different implementations of Decimal."""
 
 
 from __future__ import absolute_import, division, print_function
+
 import math
 import platform
-from timeit import Timer
-import decimalfp                                                    # noqa
 from decimal import Decimal as StdLibDecimal                        # noqa
-from _pydecimalfp import Decimal as PyDecimal                       # noqa
+from timeit import Timer
+
+import decimalfp                                                    # noqa
+from decimalfp._pydecimalfp import Decimal as PyDecimal             # noqa
 
 PY_IMPL = platform.python_implementation()
 PY_VERSION = platform.python_version()
 
 # use C implementation only under CPython
 if PY_IMPL == 'CPython':
-    from _cdecimalfp import Decimal as CDecimal                     # noqa
+    from decimalfp._cdecimalfp import Decimal as CDecimal           # noqa
     dec_impls = ("StdLibDecimal", "PyDecimal", "CDecimal")
 else:
     dec_impls = ("StdLibDecimal", "PyDecimal")
