@@ -23,13 +23,17 @@ from __future__ import absolute_import, division
 
 # standard lib imports
 import locale
-import math
 import numbers
 import operator
 import sys
 from decimal import Decimal as _StdLibDecimal
-from fractions import Fraction, gcd
+from fractions import Fraction
 from functools import reduce
+from math import floor, log10
+try:
+    from math import gcd
+except ImportError:
+    from fractions import gcd
 
 # local imports
 from .rounding import (
@@ -302,7 +306,7 @@ class Decimal(numbers.Rational):
         I.e. the largest integer exp so that 10 ** exp <= self.
 
         """
-        return int(math.floor(math.log10(abs(self._value)))) - self._precision
+        return int(floor(log10(abs(self._value)))) - self._precision
 
     @property
     def numerator(self):
@@ -1295,7 +1299,7 @@ def floordiv1(x, y):
     if isinstance(y, (Decimal, numbers.Integral, _StdLibDecimal)):
         return divmod1(x, y)[0]
     else:
-        return Decimal(math.floor(x / y), x._precision)
+        return Decimal(floor(x / y), x._precision)
 
 
 def floordiv2(x, y):
@@ -1307,7 +1311,7 @@ def floordiv2(x, y):
     if isinstance(x, (Decimal, numbers.Integral, _StdLibDecimal)):
         return divmod2(x, y)[0]
     else:
-        return Decimal(math.floor(x / y), y._precision)
+        return Decimal(floor(x / y), y._precision)
 
 
 def mod1(x, y):

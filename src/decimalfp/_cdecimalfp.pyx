@@ -23,11 +23,16 @@ from __future__ import absolute_import, division
 
 # standard lib imports
 import locale
-import math
 import numbers
 from decimal import Decimal as _StdLibDecimal
-from fractions import Fraction, gcd
+from fractions import Fraction
 from functools import reduce
+from math import floor, log10
+try:
+    from math import gcd
+except ImportError:
+    from fractions import gcd
+
 # local imports
 from .rounding import (
     ROUND_05UP,
@@ -66,7 +71,7 @@ str_types = (py_bytes, py_str)
 
 # constants used for power to 10
 cdef PYLONG_10 = PyLong_FromLong(10)
-cdef LLONG_MAX_LOG10 = int(math.log10(PyLong_FromLongLong(LLONG_MAX)))
+cdef LLONG_MAX_LOG10 = int(log10(PyLong_FromLongLong(LLONG_MAX)))
 
 
 # Extension type Decimal
@@ -309,7 +314,7 @@ cdef class Decimal:
     def magnitude(self):
         """Return magnitude of `self` in terms of power to 10, i.e. the
         largest integer exp so that 10 ** exp <= self."""
-        return int(math.floor(math.log10(abs(self._value)))) - self._precision
+        return int(floor(log10(abs(self._value)))) - self._precision
 
     @property
     def numerator(self):
@@ -1263,7 +1268,7 @@ cdef object floordiv1(Decimal x, object y):
     if isinstance(y, (Decimal, numbers.Integral, _StdLibDecimal)):
         return divmod1(x, y)[0]
     else:
-        return Decimal(math.floor(x / y), x._precision)
+        return Decimal(floor(x / y), x._precision)
 
 
 cdef object floordiv2(object x, Decimal y):
@@ -1271,7 +1276,7 @@ cdef object floordiv2(object x, Decimal y):
     if isinstance(x, (Decimal, numbers.Integral, _StdLibDecimal)):
         return divmod2(x, y)[0]
     else:
-        return Decimal(math.floor(x / y), y._precision)
+        return Decimal(floor(x / y), y._precision)
 
 
 cdef object mod1(Decimal x, object y):
