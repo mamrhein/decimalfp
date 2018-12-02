@@ -25,18 +25,13 @@ import platform
 from decimal import Decimal as StdLibDecimal                        # noqa
 from timeit import Timer
 
-import decimalfp                                                    # noqa
 from decimalfp._pydecimalfp import Decimal as PyDecimal             # noqa
+from decimalfp._cdecimalfp import Decimal as CDecimal               # noqa
 
 PY_IMPL = platform.python_implementation()
 PY_VERSION = platform.python_version()
 
-# use C implementation only under CPython
-if PY_IMPL == 'CPython':
-    from decimalfp._cdecimalfp import Decimal as CDecimal           # noqa
-    dec_impls = ("StdLibDecimal", "PyDecimal", "CDecimal")
-else:
-    dec_impls = ("StdLibDecimal", "PyDecimal")
+dec_impls = ("StdLibDecimal", "PyDecimal", "CDecimal")
 
 
 def testComputation(cls):
