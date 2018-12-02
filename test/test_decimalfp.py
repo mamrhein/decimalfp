@@ -24,7 +24,6 @@ import copy
 import locale
 import math
 import os
-import platform
 import sys
 import unittest
 from decimal import Decimal as _StdLibDecimal
@@ -32,31 +31,19 @@ from fractions import Fraction
 from pickle import dumps, loads
 
 from decimalfp import (
-    ROUND_05UP,
-    ROUND_CEILING,
-    ROUND_DOWN,
-    ROUND_FLOOR,
-    ROUND_HALF_DOWN,
-    ROUND_HALF_EVEN,
-    ROUND_HALF_UP,
-    ROUND_UP,
+    Decimal,
+    LIMIT_PREC,
+    ROUNDING,
     set_rounding,
 )
 from decimalfp._cdecimalfp import Decimal as _CDecimal
 from decimalfp._pydecimalfp import Decimal as _PyDecimal
-from decimalfp.rounding import LIMIT_PREC
-
-
-Decimal = None
 
 __metaclass__ = type
 
 
-rounding_modes = [ROUND_DOWN, ROUND_UP, ROUND_HALF_DOWN, ROUND_HALF_UP,
-                  ROUND_HALF_EVEN, ROUND_CEILING, ROUND_FLOOR, ROUND_05UP]
-
 # set default rounding to ROUND_HALF_UP
-set_rounding(ROUND_HALF_UP)
+set_rounding(ROUNDING.ROUND_HALF_UP)
 
 
 class IntWrapper():
@@ -280,12 +267,12 @@ class DecimalTest:
             d1 = _StdLibDecimal(i) / 4
             d2 = Decimal(d1, 2)
             self.assertEqual(round(d1), round(d2))
-        for rounding in rounding_modes:
+        for rounding in ROUNDING:
             for i in range(-34, 39, 11):
                 e = _StdLibDecimal(i)
                 d1 = e / 4
                 d2 = Decimal(d1, 2)
-                i1 = int(d1.quantize(e, rounding=rounding))
+                i1 = int(d1.quantize(e, rounding=rounding.name))
                 i2 = int(d2.adjusted(0, rounding=rounding))
                 self.assertEqual(i1, i2)
 
@@ -448,8 +435,6 @@ class PyImplTest(unittest.TestCase, DecimalTest):
         Decimal = _PyDecimal
 
 
-@unittest.skipIf(platform.python_implementation() != 'CPython',
-                 'Skip CImplTest unless running CPython.')
 class CImplTest(unittest.TestCase, DecimalTest):
 
     """Testing the Cython implementation."""

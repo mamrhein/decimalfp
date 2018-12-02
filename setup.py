@@ -1,5 +1,11 @@
-from distutils.core import setup, Extension
+import sys
+from setuptools import setup, Extension
 
+if sys.version_info[:2] < (3, 4):
+    # We need the back-port of enum
+    requirements = ['enum34']
+else:
+    requirements = []
 
 with open('README.txt') as file:
     long_description = file.read()
@@ -16,6 +22,7 @@ setup(
     packages=['decimalfp'],
     ext_modules=[Extension('decimalfp._cdecimalfp',
                            ['src/decimalfp/_cdecimalfp.c'])],
+    install_requires=requirements,
     license='BSD',
     keywords='fixed-point decimal number datatype',
     platforms='all',

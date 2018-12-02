@@ -15,7 +15,9 @@
 ## $Revision$
 
 
-"""The package `decimalfp` provides a :class:`Decimal` number type which can
+"""Decimal fixed-point arithmetic.
+
+The package `decimalfp` provides a :class:`Decimal` number type which can
 represent decimal numbers of arbitrary magnitude and arbitrary precision, i.e.
 any number of fractional digits.
 
@@ -206,12 +208,15 @@ In addition, via the method :meth:`adjusted` a :class:`Decimal` with a
 different precision can be derived, supporting all rounding modes defined by
 the standard library module `decimal`.
 
+The rounding modes defined in `decimal` are wrapped into the Enum
+:class:`ROUNDING`.
+
     >>> d = Decimal('12.345')
     >>> d.adjusted(2)           # default rounding mode is ROUND_HALF_EVEN !
     Decimal('12.34')
-    >>> d.adjusted(2, ROUND_HALF_UP)
+    >>> d.adjusted(2, ROUNDING.ROUND_HALF_UP)
     Decimal('12.35')
-    >>> d.adjusted(1, ROUND_UP)
+    >>> d.adjusted(1, ROUNDING.ROUND_UP)
     Decimal('12.4')
 
 For the details of the different rounding modes see the documentation of the
@@ -223,7 +228,7 @@ also support all rounding modes mentioned above.
 
     >>> d = Decimal('12.345')
     >>># equivalent to round(d, 2) or d.adjusted(2)
-    >>># (default rounding mode ROUND_HALF_EVEN):
+    >>># (default rounding mode ROUNDING.ROUND_HALF_EVEN):
     >>> d.quantize(Decimal('0.01'))
     Decimal('12.34')
     >>> d.quantize(Decimal('0.05'))
@@ -238,49 +243,37 @@ also support all rounding modes mentioned above.
 from __future__ import absolute_import
 
 # local imports
-from .rounding import (
-    ROUND_05UP,
-    ROUND_CEILING,
-    ROUND_DOWN,
-    ROUND_FLOOR,
-    ROUND_HALF_DOWN,
-    ROUND_HALF_EVEN,
-    ROUND_HALF_UP,
-    ROUND_UP,
-)
-from .rounding import get_limit_prec, get_rounding, set_rounding
+from .rounding import LIMIT_PREC, ROUNDING, get_rounding, set_rounding
 
 
 __version__ = 0, 9, 12
 
 
-# The Cython / C implementation works properly under CPython, but not under
-# PyPy (other implementations not tested yet)
+# Under PyPy the Cython / C implementation is slower than the Python
+# implementation, so we force to import the latter.
+# In addition, the import of the Python implementation can be forced by
+# setting the environment variable DECIMALFP_FORCE_PYTHON_IMPL
 import platform                                             # noqa: I100, I202
 _impl = platform.python_implementation()
-if _impl == 'CPython':
+del platform
+import os                                                   # noqa: I100, I202
+_force_python_impl = os.getenv('DECIMALFP_FORCE_PYTHON_IMPL')
+del os
+if _impl == 'PyPy' or _force_python_impl:
+    from ._pydecimalfp import Decimal
+else:
     try:
         # Cython / C implementation available?
         from ._cdecimalfp import Decimal
     except ImportError:
         from ._pydecimalfp import Decimal
-else:
-    from ._pydecimalfp import Decimal
-del platform
 
 
 # define public namespace
 __all__ = [
     'Decimal',
-    'get_limit_prec',
+    'LIMIT_PREC',
+    'ROUNDING',
     'get_rounding',
     'set_rounding',
-    'ROUND_05UP',
-    'ROUND_CEILING',
-    'ROUND_DOWN',
-    'ROUND_FLOOR',
-    'ROUND_HALF_DOWN',
-    'ROUND_HALF_EVEN',
-    'ROUND_HALF_UP',
-    'ROUND_UP',
 ]

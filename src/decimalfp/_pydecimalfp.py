@@ -25,7 +25,6 @@ from __future__ import absolute_import, division
 import locale
 import numbers
 import operator
-import sys
 from decimal import Decimal as _StdLibDecimal
 from fractions import Fraction
 from functools import reduce
@@ -36,26 +35,8 @@ except ImportError:
     from fractions import gcd
 
 # local imports
-from .rounding import (
-    ROUND_05UP,
-    ROUND_CEILING,
-    ROUND_DOWN,
-    ROUND_FLOOR,
-    ROUND_HALF_DOWN,
-    ROUND_HALF_EVEN,
-    ROUND_HALF_UP,
-    ROUND_UP,
-)
-from .rounding import get_limit_prec, get_rounding
+from .rounding import LIMIT_PREC, ROUNDING, get_rounding
 
-
-# Python 2 / Python 3
-if sys.version_info[0] < 3:
-    # rounding mode of builtin round function
-    DFLT_ROUNDING = ROUND_HALF_UP
-else:
-    # In 3.0 round changed from half-up to half-even !
-    DFLT_ROUNDING = ROUND_HALF_EVEN
 
 # Compatible testing for strings
 str = type(u'')                                                 # noqa: A001
@@ -91,8 +72,8 @@ class Decimal(numbers.Rational):
     calculated from the given value, if no precision is given. For performance
     reasons, in the latter case the conversion of a `numbers.Rational` (like
     `fractions.Fraction`) or a `float` tries to give an exact result as a
-    :class:`Decimal` only up to a fixed limit of fractional digits. This limit
-    defaults to 32 and is accessible as `decimalfp.LIMIT_PREC`.
+    :class:`Decimal` only up to a fixed limit of fractional digits
+    (`decimalfp.LIMIT_PREC`).
 
     Raises:
         TypeError: `precision` is given, but not of type `int`.
@@ -201,10 +182,10 @@ class Decimal(numbers.Rational):
         ev = None
         try:
             ev = float(value)
-        except:
+        except (TypeError, ValueError):
             try:
                 ev = int(value)
-            except:
+            except (TypeError, ValueError):
                 pass
         if ev == value:     # do we really have the same value?
             dec = Decimal(ev, precision)
@@ -292,7 +273,7 @@ class Decimal(numbers.Rational):
             if exact:
                 raise
             else:
-                return cls(r, get_limit_prec())
+                return cls(r, LIMIT_PREC)
 
     @property
     def precision(self):
@@ -359,7 +340,7 @@ class Decimal(numbers.Rational):
 
         Args:
             precision (int): number of fractional digits (default: None)
-            rounding (str): rounding mode (default: None)
+            rounding (ROUNDING): rounding mode (default: None)
 
         Returns:
             :class:`Decimal` instance derived from `self`, adjusted
@@ -392,7 +373,7 @@ class Decimal(numbers.Rational):
 
         Args:
             quant (Rational): quantum to get a multiple from
-            rounding (str): rounding mode (default: None)
+            rounding (ROUNDING): rounding mode (default: None)
 
         A string can be given for `quant` as long as it is convertable to a
         :class:`Decimal`.
@@ -652,68 +633,68 @@ class Decimal(numbers.Rational):
         result._value = abs(result._value)
         return result
 
-    def __add__(x, y):
-        """x + y"""                                         # noqa: D400, D403
-        return add(x, y)
+    def __add__(self, other):
+        """self + other"""                                  # noqa: D400, D403
+        return add(self, other)
 
     # other + self
     __radd__ = __add__
 
-    def __sub__(x, y):
-        """x - y"""                                         # noqa: D400, D403
-        return sub(x, y)
+    def __sub__(self, other):
+        """self - other"""                                  # noqa: D400, D403
+        return sub(self, other)
 
-    def __rsub__(x, y):
-        """y - x"""                                         # noqa: D400, D403
-        return add(-x, y)
+    def __rsub__(self, other):
+        """other - self"""                                  # noqa: D400, D403
+        return add(-self, other)
 
-    def __mul__(x, y):
-        """x * y"""                                         # noqa: D400, D403
-        return mul(x, y)
+    def __mul__(self, other):
+        """self * other"""                                  # noqa: D400, D403
+        return mul(self, other)
 
     # other * self
     __rmul__ = __mul__
 
-    def __div__(x, y):
-        """x / y"""                                         # noqa: D400, D403
-        return div1(x, y)
+    def __div__(self, other):
+        """self / other"""                                  # noqa: D400, D403
+        return div1(self, other)
 
-    def __rdiv__(x, y):
-        """y / x"""                                         # noqa: D400, D403
-        return div2(y, x)
+    def __rdiv__(self, other):
+        """other / self"""                                  # noqa: D400, D403
+        return div2(other, self)
 
     # Decimal division is true division
     __truediv__ = __div__
     __rtruediv__ = __rdiv__
 
-    def __divmod__(x, y):
-        """x // y, x % y"""                                 # noqa: D400, D403
-        return divmod1(x, y)
+    def __divmod__(self, other):
+        """self // other, self % other"""                   # noqa: D400, D403
+        return divmod1(self, other)
 
-    def __rdivmod__(x, y):
-        """y // x, y % x"""                                 # noqa: D400, D403
-        return divmod2(y, x)
+    def __rdivmod__(self, other):
+        """other // self, other % self"""                   # noqa: D400, D403
+        return divmod2(other, self)
 
-    def __floordiv__(x, y):
-        """x // y"""                                        # noqa: D400, D403
-        return floordiv1(x, y)
+    def __floordiv__(self, other):
+        """self // other"""                                 # noqa: D400, D403
+        return floordiv1(self, other)
 
-    def __rfloordiv__(x, y):
-        """y // x"""                                        # noqa: D400, D403
-        return floordiv2(y, x)
+    def __rfloordiv__(self, other):
+        """other // self"""                                 # noqa: D400, D403
+        return floordiv2(other, self)
 
-    def __mod__(x, y):
-        """x % y"""                                         # noqa: D400, D403
-        return mod1(x, y)
+    def __mod__(self, other):
+        """self % other"""                                  # noqa: D400, D403
+        return mod1(self, other)
 
-    def __rmod__(x, y):
-        """y % x"""                                         # noqa: D400, D403
-        return mod2(y, x)
+    def __rmod__(self, other):
+        """other % self"""                                  # noqa: D400, D403
+        return mod2(other, self)
 
-    def __pow__(x, y, mod=None):
-        """x ** y                                           # noqa: D400, D403
+    def __pow__(self, other, mod=None):
+        """self ** other
 
-        If y is an integer (or a Rational with denominator = 1), the
+        If other is an integer (or a Rational with denominator = 1), the
         result will be a Decimal. Otherwise, the result will be a float or
         complex since roots are generally irrational.
 
@@ -723,17 +704,17 @@ class Decimal(numbers.Rational):
         if mod is not None:
             raise TypeError("3rd argument not allowed unless all arguments "
                             "are integers")
-        return pow1(x, y)
+        return pow1(self, other)
 
-    def __rpow__(x, y, mod=None):
-        """y ** x                                           # noqa: D400, D403
+    def __rpow__(self, other, mod=None):
+        """other ** self
 
         `mod` must always be None (otherwise a `TypeError` is raised).
         """
         if mod is not None:
             raise TypeError("3rd argument not allowed unless all arguments "
                             "are integers")
-        return pow2(y, x)
+        return pow2(other, self)
 
     def __floor__(self):
         """math.floor(self)"""                                  # noqa: D400
@@ -746,7 +727,7 @@ class Decimal(numbers.Rational):
         return -(-n // d)
 
     def __round__(self, precision=None):
-        """round(self [, ndigits])                              # noqa: D400
+        """round(self [, ndigits])
 
         Round `self` to a given precision in decimal digits (default 0).
         `ndigits` may be negative.
@@ -757,16 +738,16 @@ class Decimal(numbers.Rational):
         """
         if precision is None:
             # return integer
-            return int(self.adjusted(0, DFLT_ROUNDING))
+            return int(self.adjusted(0, ROUNDING.default))
         # otherwise return Decimal
-        return self.adjusted(precision, DFLT_ROUNDING)
+        return self.adjusted(precision, ROUNDING.default)
 
 
 # helper functions:
 
 
 # parse string
-import re
+import re                                                   # noqa: I100, I202
 _pattern = r"""
             \s*
             (?P<sign>[+|-])?
@@ -779,6 +760,25 @@ _pattern = r"""
             \s*$
             """.encode()
 _parseString = re.compile(_pattern, re.VERBOSE).match
+
+# parse a format specifier
+# [[fill]align][sign][0][minimumwidth][,][.precision][type]
+_pattern = r"""
+            \A
+            (?:
+                (?P<fill>.)?
+                (?P<align>[<>=^])
+            )?
+            (?P<sign>[-+ ])?
+            (?P<zeropad>0)?
+            (?P<minimumwidth>(?!0)\d+)?
+            (?P<thousands_sep>,)?
+            (?:\.(?P<precision>0|(?!0)\d+))?
+            (?P<type>[fFn%])?
+            \Z
+            """
+_parseFormatSpec = re.compile(_pattern, re.VERBOSE).match
+del re, _pattern
 
 
 def _dec_from_str(dec, s, prec):
@@ -848,7 +848,7 @@ def _approx_rational(dec, num, den, minPrec=0):
     #     q * 10 ** -p + r = num / den
     # and p <= max(minPrec, LIMIT_PREC) and r -> 0.
     # Sets `dec` to q * 10 ** -p. Returns True if r != 0, False otherwise.
-    maxPrec = max(minPrec, get_limit_prec())
+    maxPrec = max(minPrec, LIMIT_PREC)
     while True:
         prec = (minPrec + maxPrec) // 2
         quot, rem = divmod(num * 10 ** prec, den)
@@ -864,26 +864,6 @@ def _approx_rational(dec, num, den, minPrec=0):
     dec._precision = prec
     return (rem != 0)
 
-
-# parse a format specifier
-# [[fill]align][sign][0][minimumwidth][,][.precision][type]
-
-_pattern = r"""
-            \A
-            (?:
-                (?P<fill>.)?
-                (?P<align>[<>=^])
-            )?
-            (?P<sign>[-+ ])?
-            (?P<zeropad>0)?
-            (?P<minimumwidth>(?!0)\d+)?
-            (?P<thousands_sep>,)?
-            (?:\.(?P<precision>0|(?!0)\d+))?
-            (?P<type>[fFn%])?
-            \Z
-            """
-_parseFormatSpec = re.compile(_pattern, re.VERBOSE).match
-del re, _pattern
 
 _dfltFormatParams = {'fill': ' ',
                      'align': '<',
@@ -1378,7 +1358,7 @@ def pow2(x, y):
 def _round(q, r, y, rounding=None):
     if rounding is None:
         rounding = get_rounding()
-    if rounding == ROUND_HALF_UP:
+    if rounding == ROUNDING.ROUND_HALF_UP:
         # Round 5 up (away from 0)
         # |remainder| > |divisor|/2 or
         # |remainder| = |divisor|/2 and quotient >= 0
@@ -1388,7 +1368,7 @@ def _round(q, r, y, rounding=None):
             return 1
         else:
             return 0
-    if rounding == ROUND_HALF_EVEN:
+    if rounding == ROUNDING.ROUND_HALF_EVEN:
         # Round 5 to even, rest to nearest
         # |remainder| > |divisor|/2 or
         # |remainder| = |divisor|/2 and quotient not even
@@ -1398,7 +1378,7 @@ def _round(q, r, y, rounding=None):
             return 1
         else:
             return 0
-    if rounding == ROUND_HALF_DOWN:
+    if rounding == ROUNDING.ROUND_HALF_DOWN:
         # Round 5 down
         # |remainder| > |divisor|/2 or
         # |remainder| = |divisor|/2 and quotient < 0
@@ -1408,29 +1388,29 @@ def _round(q, r, y, rounding=None):
             return 1
         else:
             return 0
-    if rounding == ROUND_DOWN:
+    if rounding == ROUNDING.ROUND_DOWN:
         # Round towards 0 (aka truncate)
         # quotient negativ => add 1
         if q < 0:
             return 1
         else:
             return 0
-    if rounding == ROUND_UP:
+    if rounding == ROUNDING.ROUND_UP:
         # Round away from 0
         # quotient not negativ => add 1
         if q >= 0:
             return 1
         else:
             return 0
-    if rounding == ROUND_CEILING:
+    if rounding == ROUNDING.ROUND_CEILING:
         # Round up (not away from 0 if negative)
         # => always add 1
         return 1
-    if rounding == ROUND_FLOOR:
+    if rounding == ROUNDING.ROUND_FLOOR:
         # Round down (not towards 0 if negative)
         # => never add 1
         return 0
-    if rounding == ROUND_05UP:
+    if rounding == ROUNDING.ROUND_05UP:
         # Round down unless last digit is 0 or 5
         # quotient not negativ and quotient divisible by 5 without remainder
         # or quotient negativ and (quotient + 1) not divisible by 5 without

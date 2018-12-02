@@ -34,17 +34,7 @@ except ImportError:
     from fractions import gcd
 
 # local imports
-from .rounding import (
-    ROUND_05UP,
-    ROUND_CEILING,
-    ROUND_DOWN,
-    ROUND_FLOOR,
-    ROUND_HALF_DOWN,
-    ROUND_HALF_EVEN,
-    ROUND_HALF_UP,
-    ROUND_UP,
-)
-from .rounding import get_limit_prec, get_rounding
+from .rounding import LIMIT_PREC, ROUNDING, get_rounding
 
 # cython cimports
 from cpython.long cimport *
@@ -53,15 +43,6 @@ from cpython.object cimport PyObject_RichCompare
 from libc.limits cimport LLONG_MAX
 from libc.stdlib cimport atoi
 
-
-# Python 2 / Python 3
-from cpython.version cimport PY_MAJOR_VERSION
-if PY_MAJOR_VERSION < 3:
-    # rounding mode of builtin round function
-    DFLT_ROUNDING = ROUND_HALF_UP
-else:
-    # In 3.0 round changed from half-up to half-even !
-    DFLT_ROUNDING = ROUND_HALF_EVEN
 
 # Compatible testing for strings
 py_str = type(u'')
@@ -303,7 +284,7 @@ cdef class Decimal:
             if exact:
                 raise
             else:
-                return cls(r, get_limit_prec())
+                return cls(r, LIMIT_PREC)
 
     @property
     def precision(self):
@@ -724,9 +705,9 @@ cdef class Decimal:
         """
         if precision is None:
             # return integer
-            return int(self.adjusted(0, DFLT_ROUNDING))
+            return int(self.adjusted(0, ROUNDING.default))
         # otherwise return Decimal
-        return self.adjusted(precision, DFLT_ROUNDING)
+        return self.adjusted(precision, ROUNDING.default)
 
 
 # register Decimal as Rational
@@ -756,6 +737,27 @@ _pattern = r"""
             \s*$
             """.encode()
 _parseString = re.compile(_pattern, re.VERBOSE).match
+
+# parse a format specifier
+# [[fill]align][sign][0][minimumwidth][,][.precision][type]
+
+_pattern = r"""
+            \A
+            (?:
+                (?P<fill>.)?
+                (?P<align>[<>=^])
+            )?
+            (?P<sign>[-+ ])?
+            (?P<zeropad>0)?
+            (?P<minimumwidth>(?!0)\d+)?
+            (?P<thousands_sep>,)?
+            (?:\.(?P<precision>0|(?!0)\d+))?
+            (?P<type>[fFn%])?
+            \Z
+            """
+_parseFormatSpec = re.compile(_pattern, re.VERBOSE).match
+del re, _pattern
+
 
 cdef void _dec_from_str(Decimal dec, bytes s, int prec) except *:
     cdef bytes sExp, sInt, sFrac
@@ -834,7 +836,7 @@ cdef bint _approx_rational(Decimal dec, object num, object den,
     Sets `dec` to q * 10 ** -p. Returns True if r != 0, False otherwise.
     """
     cdef int maxPrec, prec
-    maxPrec = max(minPrec, get_limit_prec())
+    maxPrec = max(minPrec, LIMIT_PREC)
     while True:
         prec = (minPrec + maxPrec) // 2
         quot, rem = divmod(num * base10pow(prec), den)
@@ -850,26 +852,6 @@ cdef bint _approx_rational(Decimal dec, object num, object den,
     dec._precision = prec
     return (rem != 0)
 
-
-# parse a format specifier
-# [[fill]align][sign][0][minimumwidth][,][.precision][type]
-
-_pattern = r"""
-            \A
-            (?:
-                (?P<fill>.)?
-                (?P<align>[<>=^])
-            )?
-            (?P<sign>[-+ ])?
-            (?P<zeropad>0)?
-            (?P<minimumwidth>(?!0)\d+)?
-            (?P<thousands_sep>,)?
-            (?:\.(?P<precision>0|(?!0)\d+))?
-            (?P<type>[fFn%])?
-            \Z
-            """
-_parseFormatSpec = re.compile(_pattern, re.VERBOSE).match
-del re, _pattern
 
 _dfltFormatParams = {'fill': ' ',
                      'align': '<',
@@ -1329,7 +1311,7 @@ cdef object pow2(object x, Decimal y):
 cdef int _round(q, r, y, rounding=None):
     if rounding is None:
         rounding = get_rounding()
-    if rounding == ROUND_HALF_UP:
+    if rounding == ROUNDING.ROUND_HALF_UP:
         # Round 5 up (away from 0)
         # |remainder| > |divisor|/2 or
         # |remainder| = |divisor|/2 and quotient >= 0
@@ -1339,7 +1321,7 @@ cdef int _round(q, r, y, rounding=None):
             return 1
         else:
             return 0
-    if rounding == ROUND_HALF_EVEN:
+    if rounding == ROUNDING.ROUND_HALF_EVEN:
         # Round 5 to even, rest to nearest
         # |remainder| > |divisor|/2 or
         # |remainder| = |divisor|/2 and quotient not even
@@ -1349,7 +1331,7 @@ cdef int _round(q, r, y, rounding=None):
             return 1
         else:
             return 0
-    if rounding == ROUND_HALF_DOWN:
+    if rounding == ROUNDING.ROUND_HALF_DOWN:
         # Round 5 down
         # |remainder| > |divisor|/2 or
         # |remainder| = |divisor|/2 and quotient < 0
@@ -1359,29 +1341,29 @@ cdef int _round(q, r, y, rounding=None):
             return 1
         else:
             return 0
-    if rounding == ROUND_DOWN:
+    if rounding == ROUNDING.ROUND_DOWN:
         # Round towards 0 (aka truncate)
         # quotient negativ => add 1
         if q < 0:
             return 1
         else:
             return 0
-    if rounding == ROUND_UP:
+    if rounding == ROUNDING.ROUND_UP:
         # Round away from 0
         # quotient not negativ => add 1
         if q >= 0:
             return 1
         else:
             return 0
-    if rounding == ROUND_CEILING:
+    if rounding == ROUNDING.ROUND_CEILING:
         # Round up (not away from 0 if negative)
         # => always add 1
         return 1
-    if rounding == ROUND_FLOOR:
+    if rounding == ROUNDING.ROUND_FLOOR:
         # Round down (not towards 0 if negative)
         # => never add 1
         return 0
-    if rounding == ROUND_05UP:
+    if rounding == ROUNDING.ROUND_05UP:
         # Round down unless last digit is 0 or 5
         # quotient not negativ and quotient divisible by 5 without remainder
         # or quotient negativ and (quotient + 1) not divisible by 5 without
