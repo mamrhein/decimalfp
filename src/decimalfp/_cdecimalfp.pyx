@@ -575,7 +575,7 @@ cdef class Decimal:
     def __int__(self):
         """math.trunc(self)"""
         return _int(self._value, self._precision)
-    #__trunc__ = __int__
+    __trunc__ = __int__
 
     # convert to float (may loose precision!)
     def __float__(self):

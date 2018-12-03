@@ -303,6 +303,8 @@ class DecimalTest:
         self.assertEqual(g ** -2, 1 / g ** 2)
         self.assertEqual(2 ** f, 2.0 ** 23.25)
         self.assertEqual(1 ** g, 1.0)
+        self.assertEqual(math.trunc(f), 23)
+        self.assertEqual(math.trunc(g), -23)
         self.assertEqual(math.floor(f), 23)
         self.assertEqual(math.floor(g), -24)
         self.assertEqual(math.ceil(f), 24)
