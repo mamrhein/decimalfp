@@ -37,6 +37,8 @@ except ImportError:
 # local imports
 from .rounding import LIMIT_PREC, ROUNDING, get_rounding
 
+__metaclass__ = type
+
 
 # Compatible testing for strings
 str = type(u'')                                                 # noqa: A001
@@ -44,7 +46,7 @@ bytes = type(b'')                                               # noqa: A001
 str_types = (bytes, str)
 
 
-class Decimal(numbers.Rational):
+class Decimal:
 
     """Decimal number with a given number of fractional digits.
 
@@ -741,6 +743,10 @@ class Decimal(numbers.Rational):
             return int(self.adjusted(0, ROUNDING.default))
         # otherwise return Decimal
         return self.adjusted(precision, ROUNDING.default)
+
+
+# register Decimal as Rational
+numbers.Rational.register(Decimal)
 
 
 # helper functions:
