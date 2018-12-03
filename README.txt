@@ -63,4 +63,4 @@ and ROUND_HALF_EVEN in Python 3.x). In addition, via the method `adjusted` a
 modes defined by the standard library module `decimal`.
 
 For more details see the documentation provided with the source distribution
-or `here <http://pythonhosted.org/decimalfp>`_.
+or `here <https://decimalfp.readthedocs.io/en/latest/>`_.
