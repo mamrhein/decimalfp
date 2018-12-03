@@ -7,17 +7,18 @@ if sys.version_info[:2] < (3, 4):
 else:
     requirements = []
 
-with open('README.txt') as file:
+with open('README.md') as file:
     long_description = file.read()
 
 setup(
     name="decimalfp",
-    version="0.9.13",
+    version="0.9.13.1",
     author="Michael Amrhein",
     author_email="michael@adrhinum.de",
     url="https://github.com/mamrhein/decimalfp",
     description="Decimal fixed-point arithmetic",
     long_description=long_description,
+    long_description_content_type="text/markdown",
     package_dir = {'': 'src'},
     packages=['decimalfp'],
     ext_modules=[Extension('decimalfp._cdecimalfp',
