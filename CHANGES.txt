@@ -1,5 +1,10 @@
 Version     Changes
 ------------------------------------------------------------------------------
+0.9.13      Wrapped rounding modes into the Enum 'ROUNDING'.
+            Made 'decimalfp' a package.
+            Changed 'Decimal' to a *virtual* subclass of 'Rational'.
+            Fixed missing '__trunc__' in Cython implementation.
+
 0.9.12      Use Cython implementation only under CPython.
 
 0.9.11      Fixed bug in Cython implementation of method `quantize`.
