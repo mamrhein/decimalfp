@@ -12,10 +12,10 @@ with open('README.txt') as file:
 
 setup(
     name="decimalfp",
-    version="0.9.12",
+    version="0.9.13",
     author="Michael Amrhein",
     author_email="michael@adrhinum.de",
-    url="https://pypi.python.org/pypi/decimalfp",
+    url="https://github.com/mamrhein/decimalfp",
     description="Decimal fixed-point arithmetic",
     long_description=long_description,
     package_dir = {'': 'src'},
@@ -27,7 +27,7 @@ setup(
     keywords='fixed-point decimal number datatype',
     platforms='all',
     classifiers=[
-        "Development Status :: 4 - Beta",
+        "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: BSD License",
         "Operating System :: OS Independent",

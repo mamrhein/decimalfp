@@ -246,7 +246,7 @@ from __future__ import absolute_import
 from .rounding import LIMIT_PREC, ROUNDING, get_rounding, set_rounding
 
 
-__version__ = 0, 9, 12
+__version__ = 0, 9, 13
 
 
 # Under PyPy the Cython / C implementation is slower than the Python
