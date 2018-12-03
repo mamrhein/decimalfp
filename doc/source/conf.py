@@ -14,7 +14,6 @@
 
 import sys
 import os
-#import sphinxcontrib
 import sphinx_py3doc_enhanced_theme
 
 # If extensions (or modules to document with autodoc) are in another directory,
@@ -22,6 +21,9 @@ import sphinx_py3doc_enhanced_theme
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #sys.path.insert(0, os.path.abspath('.'))
 sys.path.insert(0, os.path.abspath('..'))
+
+# Force Python implementation of decimalfp to be imported
+os.environ["DECIMALFP_FORCE_PYTHON_IMPL"] = "True"
 
 # -- General configuration ------------------------------------------------
 

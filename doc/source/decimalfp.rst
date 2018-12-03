@@ -16,7 +16,7 @@ Class `Decimal`
         __add__, __radd__, __sub__, __rsub__,
         __mul__, __rmul__, __pow__,
         __div__, __rdiv__, __truediv__, __rtruediv__,
-        __floor__, __ceil__, __round__,
+        __trunc__, __floor__, __ceil__, __round__,
         __repr__, __str__, __format__
 
 Rounding modes
