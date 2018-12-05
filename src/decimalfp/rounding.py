@@ -37,6 +37,8 @@ class ROUNDING(Enum):
 
     """Enumeration of rounding modes."""
 
+    # Implementation of __index__ depends on values in ROUNDING being ints
+    # starting with 1 !!!
     __next_value__ = 1
 
     def __new__(cls, doc):
@@ -46,6 +48,12 @@ class ROUNDING(Enum):
         cls.__next_value__ += 1
         member.__doc__ = doc
         return member
+
+    def __index__(self):
+        """Return `self` converted to an `int`."""
+        return self.value - 1
+
+    __int__ = __index__
 
     #: Round away from zero if last digit after rounding towards
     #: zero would have been 0 or 5; otherwise round towards zero.
