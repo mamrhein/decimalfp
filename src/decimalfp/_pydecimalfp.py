@@ -23,12 +23,12 @@ from __future__ import absolute_import, division
 
 # standard lib imports
 import locale
-import numbers
 import operator
 from decimal import Decimal as _StdLibDecimal
 from fractions import Fraction
 from functools import reduce
 from math import floor, log10
+from numbers import Complex, Integral, Rational, Real
 try:
     from math import gcd
 except ImportError:
@@ -51,20 +51,23 @@ class Decimal:
     """Decimal number with a given number of fractional digits.
 
     Args:
-        value (see below): numerical value (default: 0)
-        precision (int): number of fractional digits (default: None)
+        value (see below): numerical value (default: None)
+        precision (numbers.Integral): number of fractional digits (default:
+            None)
 
     If `value` is given, it must either be a string (type `str` or `unicode`
     in Python 2.x, `bytes` or `str` in Python 3.x), an instance of
-    `number.Integral` (for example `int` or `long` in Python 2.x, `int` in
+    `numbers.Integral` (for example `int` or `long` in Python 2.x, `int` in
     Python 3.x), `number.Rational` (for example `fractions.Fraction`),
-    `decimal.Decimal` or `float` or be convertable to a `float` or an `int`.
+    `decimal.Decimal`, a finite instance of `numbers.Real` (for example
+    `float`) or be convertable to a `float` or an `int`.
 
     If a string is given as value, it must be a string in one of two formats:
 
     * [+|-]<int>[.<frac>][<e|E>[+|-]<exp>] or
-
     * [+|-].<frac>[<e|E>[+|-]<exp>].
+
+    If given value is `None`, Decimal(0) is returned.
 
     Returns:
         :class:`Decimal` instance derived from `value` according
@@ -78,7 +81,7 @@ class Decimal:
     (`decimalfp.LIMIT_PREC`).
 
     Raises:
-        TypeError: `precision` is given, but not of type `int`.
+        TypeError: `precision` is given, but not of type `Integral`.
         TypeError: `value` is not an instance of the types listed above and
             not convertable to `float` or `int`.
         ValueError: `precision` is given, but not >= 0.
@@ -102,13 +105,14 @@ class Decimal:
                 self._precision = 0
                 return
         else:
-            if not isinstance(precision, int):
-                raise TypeError("Precision must be of <type 'int'>.")
+            if not isinstance(precision, Integral):
+                raise TypeError(
+                    "Precision must be of type 'numbers.Integral'.")
             if precision < 0:
                 raise ValueError("Precision must be >= 0.")
             if value is None:
                 self._value = 0
-                self._precision = precision
+                self._precision = int(precision)
                 return
 
         # Decimal
@@ -133,14 +137,14 @@ class Decimal:
             return
 
         # Integral
-        if isinstance(value, numbers.Integral):
-            lValue = int(value)
+        if isinstance(value, Integral):
+            value = int(value)
             if precision is None:
                 self._precision = 0
-                self._value = lValue
+                self._value = value
             else:
                 self._precision = precision
-                self._value = lValue * 10 ** precision
+                self._value = value * 10 ** precision
             return
 
         # Decimal (from standard library)
@@ -155,7 +159,7 @@ class Decimal:
                 raise ValueError("Can't convert %s to Decimal." % repr(value))
 
         # Rational
-        if isinstance(value, numbers.Rational):
+        if isinstance(value, Rational):
             prec = -1 if precision is None else precision
             num, den = value.numerator, value.denominator
             try:
@@ -165,18 +169,18 @@ class Decimal:
                                      % repr(value))
             return
 
-        # Float
-        if isinstance(value, float):
+        # Real
+        if isinstance(value, Real):
             try:
                 num, den = value.as_integer_ratio()
-            except (ValueError, OverflowError):
+            except (ValueError, OverflowError, AttributeError):
                 raise ValueError("Can't convert %s to Decimal." % repr(value))
             prec = -1 if precision is None else precision
             try:
                 _dec_from_rational(self, num, den, prec)
             except ValueError:
-                    raise ValueError("Can't convert %s exactly to Decimal."
-                                     % repr(value))
+                raise ValueError("Can't convert %s exactly to Decimal."
+                                 % repr(value))
             return
 
         # Others
@@ -217,7 +221,7 @@ class Decimal:
         Beware that Decimal.from_float(0.3) != Decimal('0.3').
 
         """
-        if not isinstance(f, (float, numbers.Integral)):
+        if not isinstance(f, (float, Integral)):
             raise TypeError("%s is not a float." % repr(f))
         return cls(f)
 
@@ -241,7 +245,7 @@ class Decimal:
             ValueError: `d` can not be converted to a :class:`Decimal`.
 
         """
-        if not isinstance(d, (Decimal, numbers.Integral, _StdLibDecimal)):
+        if not isinstance(d, (Decimal, Integral, _StdLibDecimal)):
             raise TypeError("%s is not a Decimal." % repr(d))
         return cls(d)
 
@@ -267,7 +271,7 @@ class Decimal:
         precision = `LIMIT_PREC`.
 
         """
-        if not isinstance(r, numbers.Real):
+        if not isinstance(r, Real):
             raise TypeError("%s is not a Real." % repr(r))
         try:
             return cls(r)
@@ -341,7 +345,8 @@ class Decimal:
         """Return adjusted copy of `self`.
 
         Args:
-            precision (int): number of fractional digits (default: None)
+            precision (numbers.Integral): number of fractional digits
+                (default: None)
             rounding (ROUNDING): rounding mode (default: None)
 
         Returns:
@@ -364,10 +369,10 @@ class Decimal:
             result._value = v
             result._precision = p
         else:
-            if not isinstance(precision, int):
-                raise TypeError("Precision must be of <type 'int'>.")
+            if not isinstance(precision, Integral):
+                raise TypeError("Precision must be of type 'Integral'.")
             result = Decimal(self)
-            _adjust(result, precision, rounding)
+            _adjust(result, int(precision), rounding)
         return result
 
     def quantize(self, quant, rounding=None):
@@ -548,26 +553,29 @@ class Decimal:
                 return (_get_adjusted_value(self, otherPrec), other._value)
             else:
                 return (self._value, _get_adjusted_value(other, selfPrec))
-        if isinstance(other, numbers.Integral):
-            return self._value, other * 10 ** self._precision
-        if isinstance(other, numbers.Rational):
+        if isinstance(other, Integral):
+            return self._value, int(other) * 10 ** self._precision
+        if isinstance(other, Rational):
             return (self.numerator * other.denominator,
                     other.numerator * self.denominator)
-        if isinstance(other, float):
-            num, den = other.as_integer_ratio()
+        if isinstance(other, Real):
+            try:
+                num, den = other.as_integer_ratio()
+            except (ValueError, OverflowError, AttributeError):
+                raise NotImplementedError
             return (self.numerator * den, num * self.denominator)
         if isinstance(other, _StdLibDecimal):
             return (self, Decimal(other))
-        if isinstance(other, numbers.Complex) and other.imag == 0:
+        if isinstance(other, Complex) and other.imag == 0:
             return self._make_comparable(other.real)
         else:
-            raise TypeError
+            raise NotImplementedError
 
     def _compare(self, other, op):
         """Compare self and other using operator op."""
         try:
             selfVal, otherVal = self._make_comparable(other)
-        except TypeError:
+        except NotImplementedError:
             return NotImplemented
         return op(selfVal, otherVal)
 
@@ -746,7 +754,7 @@ class Decimal:
 
 
 # register Decimal as Rational
-numbers.Rational.register(Decimal)
+Rational.register(Decimal)
 
 
 # helper functions:
@@ -1059,20 +1067,23 @@ def add(x, y):
             result = Decimal(y)
             result._value += x._value * 10 ** -p
         return result
-    elif isinstance(y, numbers.Integral):
+    elif isinstance(y, Integral):
         p = x._precision
         result = Decimal(x)
-        result._value += y * 10 ** p
+        result._value += int(y) * 10 ** p
         return result
-    elif isinstance(y, numbers.Rational):
+    elif isinstance(y, Rational):
         y_numerator, y_denominator = (y.numerator, y.denominator)
-    elif isinstance(y, float):
-        y_numerator, y_denominator = y.as_integer_ratio()
+    elif isinstance(y, Real):
+        try:
+            y_numerator, y_denominator = y.as_integer_ratio()
+        except (ValueError, OverflowError, AttributeError):
+            raise ValueError("Unsupported operand: %s" % repr(y))
     elif isinstance(y, _StdLibDecimal):
         return add(x, Decimal(y))
     else:
         return NotImplemented
-    # handle Rational and float
+    # handle Rational and Real
     x_denominator = 10 ** x._precision
     num = x._value * y_denominator + x_denominator * y_numerator
     den = y_denominator * x_denominator
@@ -1099,20 +1110,23 @@ def sub(x, y):
             result = Decimal(y)
             result._value = x._value * 10 ** -p - y._value
         return result
-    elif isinstance(y, numbers.Integral):
+    elif isinstance(y, Integral):
         p = x._precision
         result = Decimal(x)
-        result._value -= y * 10 ** p
+        result._value -= int(y) * 10 ** p
         return result
-    elif isinstance(y, numbers.Rational):
+    elif isinstance(y, Rational):
         y_numerator, y_denominator = (y.numerator, y.denominator)
-    elif isinstance(y, float):
-        y_numerator, y_denominator = y.as_integer_ratio()
+    elif isinstance(y, Real):
+        try:
+            y_numerator, y_denominator = y.as_integer_ratio()
+        except (ValueError, OverflowError, AttributeError):
+            raise ValueError("Unsupported operand: %s" % repr(y))
     elif isinstance(y, _StdLibDecimal):
         return sub(x, Decimal(y))
     else:
         return NotImplemented
-    # handle Rational and float
+    # handle Rational and Real
     x_denominator = 10 ** x._precision
     num = x._value * y_denominator - x_denominator * y_numerator
     den = y_denominator * x_denominator
@@ -1132,19 +1146,22 @@ def mul(x, y):
         result._value *= y._value
         result._precision += y._precision
         return result
-    elif isinstance(y, numbers.Integral):
+    elif isinstance(y, Integral):
         result = Decimal(x)
         result._value *= y
         return result
-    elif isinstance(y, numbers.Rational):
+    elif isinstance(y, Rational):
         y_numerator, y_denominator = (y.numerator, y.denominator)
-    elif isinstance(y, float):
-        y_numerator, y_denominator = y.as_integer_ratio()
+    elif isinstance(y, Real):
+        try:
+            y_numerator, y_denominator = y.as_integer_ratio()
+        except (ValueError, OverflowError, AttributeError):
+            raise ValueError("Unsupported operand: %s" % repr(y))
     elif isinstance(y, _StdLibDecimal):
         return x.__mul__(Decimal(y))
     else:
         return NotImplemented
-    # handle Rational and float
+    # handle Rational and Real
     num = x._value * y_numerator
     den = y_denominator * 10 ** x._precision
     minPrec = x._precision
@@ -1165,15 +1182,18 @@ def div1(x, y):
         minPrec = max(0, xp - yp)
         # return num / den as Decimal or as Fraction
         return _div(num, den, minPrec)
-    elif isinstance(y, numbers.Rational):       # includes Integral
+    elif isinstance(y, Rational):       # includes Integral
         y_numerator, y_denominator = (y.numerator, y.denominator)
-    elif isinstance(y, float):
-        y_numerator, y_denominator = y.as_integer_ratio()
+    elif isinstance(y, Real):
+        try:
+            y_numerator, y_denominator = y.as_integer_ratio()
+        except (ValueError, OverflowError, AttributeError):
+            raise ValueError("Unsupported operand: %s" % repr(y))
     elif isinstance(y, _StdLibDecimal):
         return div1(x, Decimal(y))
     else:
         return NotImplemented
-    # handle Rational and float
+    # handle Rational and Real
     num = x._value * y_denominator
     den = y_numerator * 10 ** x._precision
     minPrec = x._precision
@@ -1194,15 +1214,18 @@ def div2(x, y):
         minPrec = max(0, xp - yp)
         # return num / den as Decimal or as Fraction
         return _div(num, den, minPrec)
-    if isinstance(x, numbers.Rational):
+    if isinstance(x, Rational):
         x_numerator, x_denominator = (x.numerator, x.denominator)
-    elif isinstance(x, float):
-        x_numerator, x_denominator = x.as_integer_ratio()
+    elif isinstance(x, Real):
+        try:
+            x_numerator, x_denominator = x.as_integer_ratio()
+        except (ValueError, OverflowError, AttributeError):
+            raise ValueError("Unsupported operand: %s" % repr(x))
     elif isinstance(x, _StdLibDecimal):
         return div1(Decimal(x), y)
     else:
         return NotImplemented
-    # handle Rational and float
+    # handle Rational and Real
     num = x_numerator * 10 ** y._precision
     den = y._value * x_denominator
     minPrec = y._precision
@@ -1229,7 +1252,7 @@ def divmod1(x, y):
         q = xv // yv
         r._value = xv - q * yv
         return Decimal(q, r._precision), r
-    elif isinstance(y, numbers.Integral):
+    elif isinstance(y, Integral):
         r = Decimal(x)
         xv = x._value
         xp = x._precision
@@ -1262,7 +1285,7 @@ def divmod2(x, y):
         q = xv // yv
         r._value = xv - q * yv
         return Decimal(q, r._precision), r
-    elif isinstance(x, numbers.Integral):
+    elif isinstance(x, Integral):
         r = Decimal(y)
         yv = y._value
         yp = y._precision
@@ -1282,7 +1305,7 @@ def floordiv1(x, y):
     x must be a Decimal.
 
     """
-    if isinstance(y, (Decimal, numbers.Integral, _StdLibDecimal)):
+    if isinstance(y, (Decimal, Integral, _StdLibDecimal)):
         return divmod1(x, y)[0]
     else:
         return Decimal(floor(x / y), x._precision)
@@ -1294,7 +1317,7 @@ def floordiv2(x, y):
     y must be a Decimal.
 
     """
-    if isinstance(x, (Decimal, numbers.Integral, _StdLibDecimal)):
+    if isinstance(x, (Decimal, Integral, _StdLibDecimal)):
         return divmod2(x, y)[0]
     else:
         return Decimal(floor(x / y), y._precision)
@@ -1306,7 +1329,7 @@ def mod1(x, y):
     x must be a Decimal.
 
     """
-    if isinstance(y, (Decimal, numbers.Integral, _StdLibDecimal)):
+    if isinstance(y, (Decimal, Integral, _StdLibDecimal)):
         return divmod1(x, y)[1]
     else:
         return x - y * (x // y)
@@ -1318,7 +1341,7 @@ def mod2(x, y):
     y must be a Decimal.
 
     """
-    if isinstance(x, (Decimal, numbers.Integral, _StdLibDecimal)):
+    if isinstance(x, (Decimal, Integral, _StdLibDecimal)):
         return divmod2(x, y)[1]
     else:
         return x - y * (x // y)
@@ -1330,7 +1353,7 @@ def pow1(x, y):
     x must be a Decimal.
 
     """
-    if isinstance(y, numbers.Integral):
+    if isinstance(y, Integral):
         exp = int(y)
         if exp >= 0:
             result = Decimal()
@@ -1339,7 +1362,7 @@ def pow1(x, y):
             return result
         else:
             return 1 / pow1(x, -y)
-    elif isinstance(y, numbers.Rational):
+    elif isinstance(y, Rational):
         if y.denominator == 1:
             return x ** y.numerator
         else:

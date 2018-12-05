@@ -23,6 +23,7 @@ from __future__ import absolute_import, division
 import copy
 import locale
 import math
+import operator
 import os
 import sys
 import unittest
@@ -373,6 +374,15 @@ class DecimalTest:
                          Fraction(5404319552844595, 36028797018963968))
         self.assertEqual(Decimal(2) / 0.3,
                          Fraction(36028797018963968, 5404319552844595))
+        # corner cases
+        nan = float('nan')
+        inf = float('inf')
+        for op in (operator.add, operator.sub, operator.mul, operator.truediv,
+                   operator.floordiv, operator.mod):
+            self.assertRaises(ValueError, op, f, nan)
+            self.assertRaises(ValueError, op, nan, f)
+            self.assertRaises(ValueError, op, f, inf)
+            self.assertRaises(ValueError, op, inf, f)
 
     def testPickle(self):
         d = Decimal(Decimal(1))

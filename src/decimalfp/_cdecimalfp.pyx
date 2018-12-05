@@ -23,11 +23,11 @@ from __future__ import absolute_import, division
 
 # standard lib imports
 import locale
-import numbers
 from decimal import Decimal as _StdLibDecimal
 from fractions import Fraction
 from functools import reduce
 from math import floor, log10
+from numbers import Complex, Integral, Rational, Real
 try:
     from math import gcd
 except ImportError:
@@ -62,20 +62,23 @@ cdef class Decimal:
     """Decimal number with a given number of fractional digits.
 
     Args:
-        value (see below): numerical value (default: 0)
-        precision (int): number of fractional digits (default: None)
+        value (see below): numerical value (default: None)
+        precision (numbers.Integral): number of fractional digits (default:
+            None)
 
     If `value` is given, it must either be a string (type `str` or `unicode`
     in Python 2.x, `bytes` or `str` in Python 3.x), an instance of
-    `number.Integral` (for example `int` or `long` in Python 2.x, `int` in
+    `numbers.Integral` (for example `int` or `long` in Python 2.x, `int` in
     Python 3.x), `number.Rational` (for example `fractions.Fraction`),
-    `decimal.Decimal` or `float` or be convertable to a `float` or an `int`.
+    `decimal.Decimal`, a finite instance of `numbers.Real` (for example
+    `float`) or be convertable to a `float` or an `int`.
 
     If a string is given as value, it must be a string in one of two formats:
 
     * [+|-]<int>[.<frac>][<e|E>[+|-]<exp>] or
-
     * [+|-].<frac>[<e|E>[+|-]<exp>].
+
+    If given value is `None`, Decimal(0) is returned.
 
     Returns:
         :class:`Decimal` instance derived from `value` according
@@ -85,11 +88,11 @@ cdef class Decimal:
     calculated from the given value, if no precision is given. For performance
     reasons, in the latter case the conversion of a `numbers.Rational` (like
     `fractions.Fraction`) or a `float` tries to give an exact result as a
-    :class:`Decimal` only up to a fixed limit of fractional digits. This limit
-    defaults to 32 and is accessible as `decimalfp.LIMIT_PREC`.
+    :class:`Decimal` only up to a fixed limit of fractional digits
+    (`decimalfp.LIMIT_PREC`).
 
     Raises:
-        TypeError: `precision` is given, but not of type `int`.
+        TypeError: `precision` is given, but not of type `Integral`.
         TypeError: `value` is not an instance of the types listed above and
             not convertable to `float` or `int`.
         ValueError: `precision` is given, but not >= 0.
@@ -97,6 +100,7 @@ cdef class Decimal:
             of fractional digits <= `LIMIT_PREC` if no `precision` is given).
 
     :class:`Decimal` instances are immutable.
+
     """
 
     cdef object _value
@@ -145,7 +149,7 @@ cdef class Decimal:
             return
 
         # Integral
-        if isinstance(value, numbers.Integral):
+        if isinstance(value, Integral):
             lValue = PyNumber_Long(value)
             if precision is None:
                 self._precision = 0
@@ -167,7 +171,7 @@ cdef class Decimal:
                 raise ValueError("Can't convert %s to Decimal." % repr(value))
 
         # Rational
-        if isinstance(value, numbers.Rational):
+        if isinstance(value, Rational):
             prec = -1 if precision is None else precision
             num, den = value.numerator, value.denominator
             try:
@@ -228,7 +232,7 @@ cdef class Decimal:
 
         Beware that Decimal.from_float(0.3) != Decimal('0.3').
         """
-        if not isinstance(f, (float, numbers.Integral)):
+        if not isinstance(f, (float, Integral)):
             raise TypeError("%s is not a float." % repr(f))
         return cls(f)
 
@@ -251,7 +255,7 @@ cdef class Decimal:
             TypeError: `d` is not an instance of the types listed above.
             ValueError: `d` can not be converted to a :class:`Decimal`.
         """
-        if not isinstance(d, (Decimal, numbers.Integral, _StdLibDecimal)):
+        if not isinstance(d, (Decimal, Integral, _StdLibDecimal)):
             raise TypeError("%s is not a Decimal." % repr(d))
         return cls(d)
 
@@ -276,7 +280,7 @@ cdef class Decimal:
         `Decimal` with a precision <= `LIMIT_PREC`, the result is rounded to a
         precision = `LIMIT_PREC`.
         """
-        if not isinstance(r, numbers.Real):
+        if not isinstance(r, Real):
             raise TypeError("%s is not a Real." % repr(r))
         try:
             return cls(r)
@@ -533,9 +537,9 @@ cdef class Decimal:
             else:
                 return (self._value,
                         _get_adjusted_value(<Decimal>other, selfPrec))
-        if isinstance(other, numbers.Integral):
+        if isinstance(other, Integral):
             return self._value, other * base10pow(self._precision)
-        if isinstance(other, numbers.Rational):
+        if isinstance(other, Rational):
             return (self.numerator * other.denominator,
                     other.numerator * self.denominator)
         if isinstance(other, float):
@@ -543,7 +547,7 @@ cdef class Decimal:
             return (self.numerator * den, num * self.denominator)
         if isinstance(other, _StdLibDecimal):
             return (self, Decimal(other))
-        if isinstance(other, numbers.Complex) and other.imag == 0:
+        if isinstance(other, Complex) and other.imag == 0:
             return self._make_comparable(other.real)
         else:
             raise TypeError
@@ -711,7 +715,7 @@ cdef class Decimal:
 
 
 # register Decimal as Rational
-numbers.Rational.register(Decimal)
+Rational.register(Decimal)
 
 
 # helper functions:
@@ -1044,20 +1048,23 @@ cdef object add(Decimal x, object y):
             result = Decimal(y)
             result._value += x._value * base10pow(-p)
         return result
-    elif isinstance(y, numbers.Integral):
+    elif isinstance(y, Integral):
         p = x._precision
         result = Decimal(x)
         result._value += y * base10pow(p)
         return result
-    elif isinstance(y, numbers.Rational):
+    elif isinstance(y, Rational):
         y_numerator, y_denominator = (y.numerator, y.denominator)
-    elif isinstance(y, float):
-        y_numerator, y_denominator = y.as_integer_ratio()
+    elif isinstance(y, Real):
+        try:
+            y_numerator, y_denominator = y.as_integer_ratio()
+        except (ValueError, OverflowError, AttributeError):
+            raise ValueError("Unsupported operand: %s" % repr(y))
     elif isinstance(y, _StdLibDecimal):
         return add(x, Decimal(y))
     else:
         return NotImplemented
-    # handle Rational and float
+    # handle Rational and Real
     x_denominator = base10pow(x._precision)
     num = x._value * y_denominator + x_denominator * y_numerator
     den = y_denominator * x_denominator
@@ -1082,20 +1089,23 @@ cdef object sub(Decimal x, object y):
             result = Decimal(y)
             result._value = x._value * base10pow(-p) - (<Decimal>y)._value
         return result
-    elif isinstance(y, numbers.Integral):
+    elif isinstance(y, Integral):
         p = x._precision
         result = Decimal(x)
         result._value -= y * base10pow(p)
         return result
-    elif isinstance(y, numbers.Rational):
+    elif isinstance(y, Rational):
         y_numerator, y_denominator = (y.numerator, y.denominator)
-    elif isinstance(y, float):
-        y_numerator, y_denominator = y.as_integer_ratio()
+    elif isinstance(y, Real):
+        try:
+            y_numerator, y_denominator = y.as_integer_ratio()
+        except (ValueError, OverflowError, AttributeError):
+            raise ValueError("Unsupported operand: %s" % repr(y))
     elif isinstance(y, _StdLibDecimal):
         return sub(x, Decimal(y))
     else:
         return NotImplemented
-    # handle Rational and float
+    # handle Rational and Real
     x_denominator = base10pow(x._precision)
     num = x._value * y_denominator - x_denominator * y_numerator
     den = y_denominator * x_denominator
@@ -1111,19 +1121,22 @@ cdef object mul(Decimal x, object y):
         (<Decimal>result)._value *= (<Decimal>y)._value
         (<Decimal>result)._precision += (<Decimal>y)._precision
         return result
-    elif isinstance(y, numbers.Integral):
+    elif isinstance(y, Integral):
         result = Decimal(x)
         (<Decimal>result)._value *= y
         return result
-    elif isinstance(y, numbers.Rational):
+    elif isinstance(y, Rational):
         y_numerator, y_denominator = (y.numerator, y.denominator)
-    elif isinstance(y, float):
-        y_numerator, y_denominator = y.as_integer_ratio()
+    elif isinstance(y, Real):
+        try:
+            y_numerator, y_denominator = y.as_integer_ratio()
+        except (ValueError, OverflowError, AttributeError):
+            raise ValueError("Unsupported operand: %s" % repr(y))
     elif isinstance(y, _StdLibDecimal):
         return x.__mul__(Decimal(y))
     else:
         return NotImplemented
-    # handle Rational and float
+    # handle Rational and Real
     num = x._value * y_numerator
     den = y_denominator * base10pow(x._precision)
     minPrec = x._precision
@@ -1141,15 +1154,18 @@ cdef object div1(Decimal x, object y):
         minPrec = max(0, xp - yp)
         # return num / den as Decimal or as Fraction
         return _div(num, den, minPrec)
-    elif isinstance(y, numbers.Rational):       # includes Integral
+    elif isinstance(y, Rational):       # includes Integral
         y_numerator, y_denominator = (y.numerator, y.denominator)
-    elif isinstance(y, float):
-        y_numerator, y_denominator = y.as_integer_ratio()
+    elif isinstance(y, Real):
+        try:
+            y_numerator, y_denominator = y.as_integer_ratio()
+        except (ValueError, OverflowError, AttributeError):
+            raise ValueError("Unsupported operand: %s" % repr(y))
     elif isinstance(y, _StdLibDecimal):
         return div1(x, Decimal(y))
     else:
         return NotImplemented
-    # handle Rational and float
+    # handle Rational and Real
     num = x._value * y_denominator
     den = y_numerator * base10pow(x._precision)
     minPrec = x._precision
@@ -1167,10 +1183,13 @@ cdef object div2(object x, Decimal y):
         minPrec = max(0, xp - yp)
         # return num / den as Decimal or as Fraction
         return _div(num, den, minPrec)
-    if isinstance(x, numbers.Rational):
+    if isinstance(x, Rational):
         x_numerator, x_denominator = (x.numerator, x.denominator)
-    elif isinstance(x, float):
-        x_numerator, x_denominator = x.as_integer_ratio()
+    elif isinstance(y, Real):
+        try:
+            x_numerator, x_denominator = x.as_integer_ratio()
+        except (ValueError, OverflowError, AttributeError):
+            raise ValueError("Unsupported operand: %s" % repr(x))
     elif isinstance(x, _StdLibDecimal):
         return div1(Decimal(x), y)
     else:
@@ -1200,7 +1219,7 @@ cdef tuple divmod1(Decimal x, object y):
         q = xv // yv
         r._value = xv - q * yv
         return Decimal(q, r._precision), r
-    elif isinstance(y, numbers.Integral):
+    elif isinstance(y, Integral):
         r = Decimal(x)
         xv = x._value
         xp = x._precision
@@ -1231,7 +1250,7 @@ cdef tuple divmod2(object x, Decimal y):
         q = xv // yv
         r._value = xv - q * yv
         return Decimal(q, r._precision), r
-    elif isinstance(x, numbers.Integral):
+    elif isinstance(x, Integral):
         r = Decimal(y)
         yv = y._value
         yp = y._precision
@@ -1247,7 +1266,7 @@ cdef tuple divmod2(object x, Decimal y):
 
 cdef object floordiv1(Decimal x, object y):
     """x // y"""
-    if isinstance(y, (Decimal, numbers.Integral, _StdLibDecimal)):
+    if isinstance(y, (Decimal, Integral, _StdLibDecimal)):
         return divmod1(x, y)[0]
     else:
         return Decimal(floor(x / y), x._precision)
@@ -1255,7 +1274,7 @@ cdef object floordiv1(Decimal x, object y):
 
 cdef object floordiv2(object x, Decimal y):
     """x // y"""
-    if isinstance(x, (Decimal, numbers.Integral, _StdLibDecimal)):
+    if isinstance(x, (Decimal, Integral, _StdLibDecimal)):
         return divmod2(x, y)[0]
     else:
         return Decimal(floor(x / y), y._precision)
@@ -1263,7 +1282,7 @@ cdef object floordiv2(object x, Decimal y):
 
 cdef object mod1(Decimal x, object y):
     """x % y"""
-    if isinstance(y, (Decimal, numbers.Integral, _StdLibDecimal)):
+    if isinstance(y, (Decimal, Integral, _StdLibDecimal)):
         return divmod1(x, y)[1]
     else:
         return x - y * (x // y)
@@ -1271,7 +1290,7 @@ cdef object mod1(Decimal x, object y):
 
 cdef object mod2(object x, Decimal y):
     """x % y"""
-    if isinstance(x, (Decimal, numbers.Integral, _StdLibDecimal)):
+    if isinstance(x, (Decimal, Integral, _StdLibDecimal)):
         return divmod2(x, y)[1]
     else:
         return x - y * (x // y)
@@ -1281,7 +1300,7 @@ cdef object pow1(Decimal x, object y):
     """x ** y"""
     cdef int exp
     cdef Decimal result
-    if isinstance(y, numbers.Integral):
+    if isinstance(y, Integral):
         exp = int(y)
         if exp >= 0:
             result = Decimal()
@@ -1290,7 +1309,7 @@ cdef object pow1(Decimal x, object y):
             return result
         else:
             return 1 / pow1(x, -y)
-    elif isinstance(y, numbers.Rational):
+    elif isinstance(y, Rational):
         if y.denominator == 1:
             return x ** y.numerator
         else:
