@@ -65,9 +65,12 @@ class DecimalTest:
 
     """Mix-in defining the tests."""
 
-    def testConstructor(self):
+    def test_constructor(self):
+        self.assertEqual(Decimal(), 0)
+        self.assertEqual(Decimal(precision=3), 0)
         self.assertTrue(Decimal(Decimal(1)))
         self.assertEqual(Decimal(Decimal(1)), Decimal(1))
+        self.assertEqual(Decimal(Decimal('1.248'), 2), Decimal('1.25'))
         self.assertTrue(Decimal(-1, 2))
         self.assertEqual(Decimal(-1, 2), -1)
         self.assertTrue(Decimal(-37, 100))
@@ -114,7 +117,15 @@ class DecimalTest:
         self.assertEqual(Decimal('0.33'), Fraction('0.33'))
         self.assertEqual(Decimal(IntWrapper(7)), Decimal('7'))
 
-    def testAlternateConstructors(self):
+    def test_properties(self):
+        d = Decimal('18.123')
+        self.assertEqual(d.precision, 3)
+        d = Decimal('18.123', 5)
+        self.assertEqual(d.precision, 5)
+        self.assertIs(d.real, d)
+        self.assertEqual(d.imag, 0)
+
+    def test_alternate_constructors(self):
         self.assertEqual(Decimal.from_float(1.111e12), Decimal(1.111e12))
         self.assertEqual(Decimal.from_float(12), Decimal(12))
         self.assertRaises(TypeError, Decimal.from_float, '1.111e12')
@@ -128,8 +139,11 @@ class DecimalTest:
         self.assertRaises(ValueError, Decimal.from_real, Fraction(1, 3))
         self.assertEqual(Decimal.from_real(Fraction(1, 3), exact=False),
                          Decimal(Fraction(1, 3), LIMIT_PREC))
+        self.assertRaises(ValueError, Decimal.from_real, float('nan'))
+        self.assertRaises(ValueError, Decimal.from_real, float('inf'))
+        self.assertRaises(TypeError, Decimal.from_real, 'a')
 
-    def testHash(self):
+    def test_hash(self):
         d = Decimal('7.5')
         self.assertEqual(hash(d), hash(d))
         self.assertEqual(hash(d), hash(Decimal(d)))
@@ -141,7 +155,7 @@ class DecimalTest:
         self.assertEqual(hash(Decimal('0.25')), hash(Fraction(1, 4)))
         self.assertEqual(hash(Decimal('0.33')), hash(Fraction('0.33')))
 
-    def testMagnitude(self):
+    def test_magnitude(self):
         self.assertEqual(Decimal('12.345').magnitude, 1)
         self.assertEqual(Decimal('10').magnitude, 1)
         self.assertEqual(Decimal('-286718.338524635465625').magnitude, 5)
@@ -150,26 +164,42 @@ class DecimalTest:
         self.assertEqual(Decimal('-0.0012345').magnitude, -3)
         self.assertEqual(Decimal('-0.01').magnitude, -2)
 
-    def testCoercions(self):
-        f = Decimal('23.456')
+    def test_coercions(self):
+        f = Decimal('23.4560')
         g = Decimal('57.99999999999999999999999999999999999')
+        h = Decimal('.07')
+        i = Decimal('-59.')
         self.assertEqual(int(f), 23)
         self.assertEqual(int(-f), -23)
         self.assertEqual(int(g), 57)
         self.assertEqual(int(-g), -57)
+        self.assertEqual(int(h), 0)
+        self.assertEqual(int(-h), 0)
+        self.assertEqual(int(i), -59)
+        self.assertEqual(int(-i), 59)
         self.assertEqual(float(f), 23.456)
         self.assertEqual(float(g), 58.0)
-        self.assertEqual(str(f), '23.456')
+        self.assertEqual(float(h), 0.07)
+        self.assertEqual(float(i), -59.)
+        self.assertEqual(str(f), '23.4560')
         self.assertEqual(str(g), '57.99999999999999999999999999999999999')
+        self.assertEqual(str(h), '0.07')
+        self.assertEqual(str(i), '-59')
         self.assertTrue(float(Decimal(sys.float_info.max)))
         self.assertEqual(str(Decimal(-20.7e-3, 5)), '-0.02070')
         self.assertEqual(str(Decimal(-20.7e-12, 13)), '-0.0000000000207')
         self.assertEqual(str(Decimal(-20.5e-12, 13)), '-0.0000000000205')
+        self.assertEqual(str(Decimal()), '0')
+        self.assertEqual(str(Decimal(0, 2)), '0.00')
         self.assertEqual(repr(Decimal('-23.400007', 3)),
                          "Decimal('-23.4', 3)")
-        self.assertEqual(repr(f), "Decimal('23.456')")
+        self.assertEqual(repr(f), "Decimal('23.456', 4)")
         self.assertEqual(repr(f), repr(copy.copy(f)))
         self.assertEqual(repr(f), repr(copy.deepcopy(f)))
+        self.assertEqual(repr(h), "Decimal('0.07')")
+        self.assertEqual(repr(i), "Decimal(-59)")
+        self.assertEqual(repr(Decimal()), 'Decimal(0)')
+        self.assertEqual(repr(Decimal(0, 2)), 'Decimal(0, 2)')
 
     def test_as_tuple(self):
         d = Decimal('23')
@@ -179,7 +209,7 @@ class DecimalTest:
         d = Decimal('-12.3000')
         self.assertEqual(d.as_tuple(), (1, 123000, -4))
 
-    def testComparision(self):
+    def test_comparision(self):
         f = Decimal('23.456')
         g = Decimal('23.4562398')
         h = Decimal('-12.3')
@@ -194,31 +224,60 @@ class DecimalTest:
         self.assertTrue(min(f, h) == min(h, f) == h)
         self.assertTrue(max(f, h) == max(h, f) == f)
 
-    def testMixedTypeComparision(self):
-        f = Decimal('23.456')
+    def test_mixed_type_comparision(self):
+        d = Decimal('23.456')
+        f = _StdLibDecimal('-23.456')
         g = Fraction('23.4562398')
-        h = -12.5
-        self.assertTrue(f == Fraction('23.456'))
-        self.assertTrue(Decimal(h) == h)
+        h = -12.5 + 0j
+        self.assertTrue(d == Fraction('23.456'))
+        self.assertTrue(Decimal('-12.5') == h)
         self.assertTrue(Decimal('-12.3') != h)
-        self.assertTrue(f != g)
-        self.assertTrue(f < g)
-        self.assertTrue(g >= f)
-        self.assertTrue(min(f, g) == min(g, f) == f)
-        self.assertTrue(max(f, g) == max(g, f) == g)
-        self.assertTrue(g != h)
-        self.assertTrue(h < g)
-        self.assertTrue(g >= h)
-        self.assertTrue(min(f, h) == min(h, f) == h)
-        self.assertTrue(max(f, h) == max(h, f) == f)
-        self.assertNotEqual(f, 'abc')
-        # following tests raise exception in Python3
-        #self.assertTrue(f < 'abc')
-        #self.assertTrue(f <= 'abc')
-        #self.assertTrue('abc' > f)
-        #self.assertTrue('abc' >= f)
+        self.assertEqual(-d, f)
+        self.assertTrue(d > f)
+        self.assertTrue(f <= d)
+        self.assertTrue(d != g)
+        self.assertTrue(d < g)
+        self.assertTrue(g >= d)
+        self.assertTrue(min(d, g) == min(g, d) == d)
+        self.assertTrue(max(d, g) == max(g, d) == g)
+        self.assertTrue(d != h)
+        self.assertTrue(h < d)
+        self.assertTrue(d >= h)
+        self.assertTrue(min(d, h) == min(h, d) == h)
+        self.assertTrue(max(d, h) == max(h, d) == d)
+        self.assertNotEqual(d, 'abc')
+        if sys.version_info.major < 3:
+            # these tests raise exception in Python3
+            self.assertTrue(d < 'abc')
+            self.assertTrue(d <= 'abc')
+            self.assertTrue('abc' > d)
+            self.assertTrue('abc' >= d)
+        # corner cases
+        nan = float('nan')
+        inf = float('inf')
+        cmplx = 7 + 3j
+        for op in (operator.eq, operator.ne):
+            self.assertFalse(d == nan)
+            self.assertFalse(nan == d)
+            self.assertFalse(d == inf)
+            self.assertFalse(inf == d)
+            self.assertFalse(d == cmplx)
+            self.assertFalse(cmplx == d)
+            self.assertTrue(d != nan)
+            self.assertTrue(nan != d)
+            self.assertTrue(d != inf)
+            self.assertTrue(inf != d)
+            self.assertTrue(d != cmplx)
+            self.assertTrue(cmplx != d)
+        for op in (operator.lt, operator.le, operator.gt, operator.ge):
+            self.assertRaises(TypeError, op, d, nan)
+            self.assertRaises(TypeError, op, nan, d)
+            self.assertRaises(TypeError, op, d, inf)
+            self.assertRaises(TypeError, op, inf, d)
+            self.assertRaises(TypeError, op, d, cmplx)
+            self.assertRaises(TypeError, op, cmplx, d)
 
-    def testAdjustment(self):
+    def test_adjustment(self):
         f = Decimal('23.456')
         g = Decimal('23.4562398').adjusted(3)
         h = Decimal('23.4565').adjusted(3)
@@ -229,8 +288,13 @@ class DecimalTest:
         self.assertEqual(f.adjusted(-1), 20)
         self.assertEqual(f.adjusted(-5), 0)
         self.assertRaises(TypeError, f.adjusted, 3.7)
+        f = Decimal('23.45600')
+        self.assertEqual(f.precision, 5)
+        g = f.adjusted()
+        self.assertEqual(f, g)
+        self.assertEqual(g.precision, 3)
 
-    def testQuantization(self):
+    def test_quantization(self):
         f = Decimal('23.456')
         g = Decimal('23.4562398').quantize(Decimal('0.001'))
         h = Decimal('23.4565').quantize(Decimal('0.001'))
@@ -250,7 +314,7 @@ class DecimalTest:
         self.assertRaises(TypeError, f.quantize, complex(5))
         self.assertRaises(TypeError, f.quantize, 'a')
 
-    def testRounding(self):
+    def test_rounding(self):
         self.assertEqual(round(Decimal('23.456')), 23)
         self.assertEqual(round(Decimal('23.456'), 1), Decimal('23.5'))
         self.assertEqual(round(Decimal('2345.6'), -2), Decimal('2300'))
@@ -277,16 +341,22 @@ class DecimalTest:
                 i2 = int(d2.adjusted(0, rounding=rounding))
                 self.assertEqual(i1, i2)
 
-    def testComputation(self):
+    def test_computation(self):
         f = Decimal('23.25')
         g = Decimal('-23.2562398')
         h = f + g
         self.assertEqual(--f, +f)
+        self.assertEqual(f + f, 2 * f)
+        self.assertEqual(f - f, 0)
+        self.assertEqual(f + g, g + f)
+        self.assertNotEqual(f - g, g - f)
         self.assertEqual(abs(g), abs(-g))
         self.assertEqual(g - g, 0)
         self.assertEqual(f + g - h, 0)
         self.assertEqual(f - 23.25, 0)
         self.assertEqual(23.25 - f, 0)
+        self.assertEqual(f * g, g * f)
+        self.assertNotEqual(f / g, g / f)
         self.assertTrue(-(3 * f) == (-3) * f == 3 * (-f))
         self.assertTrue((2 * f) * f == f * (2 * f) == f * (f * 2))
         self.assertEqual(3 * h, 3 * f + 3 * g)
@@ -299,10 +369,29 @@ class DecimalTest:
         self.assertEqual(g // -f, 1)
         self.assertEqual(g % -f, h)
         self.assertEqual(divmod(24, f), (Decimal(1, 2), Decimal('.75')))
+        self.assertEqual(divmod(f, g), (-1, h))
+        self.assertEqual(divmod(-f, g), (0, -f))
+        self.assertEqual(divmod(f, -g), (0, f))
+        self.assertEqual(divmod(-f, -g), (-1, -h))
+        self.assertEqual(divmod(g, f), (-2, 2 * f + g))
         self.assertEqual(divmod(-g, f), (1, -h))
+        self.assertEqual(divmod(g, -f), (1, h))
+        self.assertEqual(divmod(-g, -f), (-2, -2 * f - g))
+        self.assertNotEqual(divmod(g, f), divmod(f, g))
+        self.assertEqual(divmod(f, g), (f // g, f % g))
+        self.assertEqual(divmod(-f, g), (-f // g, -f % g))
+        self.assertEqual(divmod(f, -g), (f // -g, f % -g))
+        self.assertEqual(divmod(-f, -g), (-f // -g, -f % -g))
+        self.assertEqual(divmod(g, f), (g // f, g % f))
+        self.assertEqual(divmod(-g, f), (-g // f, -g % f))
+        self.assertEqual(divmod(g, -f), (g // -f, g % -f))
+        self.assertEqual(divmod(-g, -f), (-g // -f, -g % -f))
         self.assertEqual(f ** 2, f * f)
+        self.assertEqual(f ** Decimal(3), f ** 3)
         self.assertEqual(g ** -2, 1 / g ** 2)
         self.assertEqual(2 ** f, 2.0 ** 23.25)
+        self.assertEqual(Decimal(2) ** f, 2.0 ** 23.25)
+        self.assertEqual(f ** 2.5, 23.25 ** 2.5)
         self.assertEqual(1 ** g, 1.0)
         self.assertEqual(math.trunc(f), 23)
         self.assertEqual(math.trunc(g), -23)
@@ -312,8 +401,9 @@ class DecimalTest:
         self.assertEqual(math.ceil(g), -23)
         self.assertEqual(round(f), 23)
         self.assertEqual(round(g), -23)
+        self.assertRaises(TypeError, pow, f, 2, 5)
 
-    def testMixedTypeComputation(self):
+    def test_mixed_type_computation(self):
         f = Decimal('21.456')
         g = Fraction(1, 3)
         h = -12.5
@@ -377,14 +467,17 @@ class DecimalTest:
         # corner cases
         nan = float('nan')
         inf = float('inf')
+        cmplx = 7 + 3j
         for op in (operator.add, operator.sub, operator.mul, operator.truediv,
                    operator.floordiv, operator.mod):
             self.assertRaises(ValueError, op, f, nan)
             self.assertRaises(ValueError, op, nan, f)
             self.assertRaises(ValueError, op, f, inf)
             self.assertRaises(ValueError, op, inf, f)
+            self.assertRaises(TypeError, op, f, cmplx)
+            self.assertRaises(TypeError, op, cmplx, f)
 
-    def testPickle(self):
+    def test_pickle(self):
         d = Decimal(Decimal(1))
         self.assertEqual(loads(dumps(d)), d)
         d = Decimal(-1, 2)
@@ -408,7 +501,7 @@ class DecimalTest:
         d = Decimal('+1e-2000')
         self.assertEqual(loads(dumps(d)), d)
 
-    def testFormat(self):
+    def test_format(self):
         d = Decimal('1234567890.12345678901234567890')
         loc = locale.getlocale()
         if sys.platform == 'win32':
@@ -428,7 +521,12 @@ class DecimalTest:
         d = Decimal('0.0038')
         self.assertEqual(format(d), str(d))
         self.assertEqual(format(d, '<.3'), str(d.adjusted(3)))
+        self.assertEqual(format(d, '<.4'), str(d.adjusted(4)))
         self.assertEqual(format(d, '<.7'), str(d.adjusted(7)))
+        d = Decimal('-59.')
+        self.assertEqual(format(d), str(d))
+        self.assertEqual(format(d, '<.3'), str(d.adjusted(3)))
+        self.assertEqual(format(d, '>10.3'), '   %s' % d.adjusted(3))
         locale.setlocale(locale.LC_ALL, loc)
         self.assertRaises(ValueError, format, d, ' +012.5F')
         self.assertRaises(ValueError, format, d, '_+012.5F')
