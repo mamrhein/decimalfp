@@ -31,7 +31,7 @@ from math import floor, log10
 from numbers import Complex, Integral, Rational, Real
 try:
     from math import gcd
-except ImportError:
+except ImportError:                                         # pragma: no cover
     from fractions import gcd
 
 # local imports
@@ -721,7 +721,7 @@ class Decimal:
 
         `mod` must always be None (otherwise a `TypeError` is raised).
         """
-        if mod is not None:
+        if mod is not None:                                 # pragma: no cover
             raise TypeError("3rd argument not allowed unless all arguments "
                             "are integers")
         return pow2(other, self)
@@ -956,6 +956,10 @@ def _padDigits(digits, minWidth, fill, sep=None, grouping=None):
 
 
 def _iterGrouping(grouping):
+    # From Python docs: 'grouping' is a sequence of numbers specifying which
+    # relative positions the 'thousands_sep' is expected. If the sequence is
+    # terminated with CHAR_MAX, no further grouping is performed. If the
+    # sequence terminates with a 0, the last group size is repeatedly used.
     k = None
     for i in grouping[:-1]:
         yield i
@@ -964,7 +968,7 @@ def _iterGrouping(grouping):
     if i == 0:
         while k:
             yield k
-    elif i != locale.CHAR_MAX:
+    elif i != locale.CHAR_MAX:                              # pragma: no cover
         yield i
 
 
@@ -1033,7 +1037,7 @@ def _int(v, p):
             return v // 10 ** p
         else:
             return -(-v // 10 ** p)
-    else:
+    else:   # can't happen!
         return v * 10 ** -p
 
 

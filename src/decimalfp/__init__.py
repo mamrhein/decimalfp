@@ -261,7 +261,7 @@ _force_python_impl = os.getenv('DECIMALFP_FORCE_PYTHON_IMPL')
 del os
 if _impl == 'PyPy' or _force_python_impl:
     from ._pydecimalfp import Decimal
-else:
+else:                                                       # pragma: no cover
     try:
         # Cython / C implementation available?
         from ._cdecimalfp import Decimal
