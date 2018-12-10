@@ -542,21 +542,24 @@ cdef class Decimal:
         if isinstance(other, Rational):
             return (self.numerator * other.denominator,
                     other.numerator * self.denominator)
-        if isinstance(other, float):
-            num, den = other.as_integer_ratio()
+        if isinstance(other, Real):
+            try:
+                num, den = other.as_integer_ratio()
+            except (ValueError, OverflowError, AttributeError):
+                raise NotImplementedError
             return (self.numerator * den, num * self.denominator)
         if isinstance(other, _StdLibDecimal):
             return (self, Decimal(other))
         if isinstance(other, Complex) and other.imag == 0:
             return self._make_comparable(other.real)
         else:
-            raise TypeError
+            raise NotImplementedError
 
     def __richcmp__(self, other, int op):
         """Compare self and other using operator op."""
         try:
             selfVal, otherVal = self._make_comparable(other)
-        except TypeError:
+        except NotImplementedError:
             return NotImplemented
         return PyObject_RichCompare(selfVal, otherVal, op)
 
@@ -1185,7 +1188,7 @@ cdef object div2(object x, Decimal y):
         return _div(num, den, minPrec)
     if isinstance(x, Rational):
         x_numerator, x_denominator = (x.numerator, x.denominator)
-    elif isinstance(y, Real):
+    elif isinstance(x, Real):
         try:
             x_numerator, x_denominator = x.as_integer_ratio()
         except (ValueError, OverflowError, AttributeError):
