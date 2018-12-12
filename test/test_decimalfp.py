@@ -247,35 +247,41 @@ class DecimalTest:
         self.assertTrue(max(d, h) == max(h, d) == d)
         self.assertNotEqual(d, 'abc')
         if sys.version_info.major < 3:
-            # these tests raise exception in Python3
             self.assertTrue(d < 'abc')
             self.assertTrue(d <= 'abc')
             self.assertTrue('abc' > d)
             self.assertTrue('abc' >= d)
+        else:
+            for op in (operator.lt, operator.le, operator.gt, operator.ge):
+                self.assertRaises(TypeError, op, d, 'abc')
+                self.assertRaises(TypeError, op, 'abc', d)
         # corner cases
         nan = float('nan')
         inf = float('inf')
         cmplx = 7 + 3j
-        for op in (operator.eq, operator.ne):
-            self.assertFalse(d == nan)
-            self.assertFalse(nan == d)
-            self.assertFalse(d == inf)
-            self.assertFalse(inf == d)
-            self.assertFalse(d == cmplx)
-            self.assertFalse(cmplx == d)
-            self.assertTrue(d != nan)
-            self.assertTrue(nan != d)
-            self.assertTrue(d != inf)
-            self.assertTrue(inf != d)
-            self.assertTrue(d != cmplx)
-            self.assertTrue(cmplx != d)
+        for num in (nan, inf, cmplx):
+            self.assertFalse(d == num)
+            self.assertFalse(num == d)
+            self.assertTrue(d != num)
+            self.assertTrue(num != d)
+        for op in (operator.lt, operator.le):
+            self.assertTrue(op(d, inf))
+            self.assertFalse(op(inf, d))
+        for op in (operator.gt, operator.ge):
+            self.assertFalse(op(d, inf))
+            self.assertTrue(op(inf, d))
         for op in (operator.lt, operator.le, operator.gt, operator.ge):
-            self.assertRaises(TypeError, op, d, nan)
-            self.assertRaises(TypeError, op, nan, d)
-            self.assertRaises(TypeError, op, d, inf)
-            self.assertRaises(TypeError, op, inf, d)
-            self.assertRaises(TypeError, op, d, cmplx)
-            self.assertRaises(TypeError, op, cmplx, d)
+            self.assertFalse(op(d, nan))
+            self.assertFalse(op(nan, d))
+        if sys.version_info.major < 3:
+            self.assertTrue(d < cmplx)
+            self.assertTrue(d <= cmplx)
+            self.assertTrue(cmplx > d)
+            self.assertTrue(cmplx >= d)
+        else:
+            for op in (operator.lt, operator.le, operator.gt, operator.ge):
+                self.assertRaises(TypeError, op, d, cmplx)
+                self.assertRaises(TypeError, op, cmplx, d)
 
     def test_adjustment(self):
         f = Decimal('23.456')
