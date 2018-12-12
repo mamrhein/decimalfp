@@ -545,11 +545,8 @@ cdef class Decimal:
         if isinstance(other, Real):
             try:
                 num, den = other.as_integer_ratio()
-            except AttributeError:
+            except (ValueError, OverflowError, AttributeError):
                 raise NotImplementedError
-            except (ValueError, OverflowError):
-                # 'nan' and 'inf'
-                return self._value, other
             return (self.numerator * den, num * self.denominator)
         if isinstance(other, _StdLibDecimal):
             return (self, Decimal(other))

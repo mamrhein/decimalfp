@@ -561,11 +561,8 @@ class Decimal:
         if isinstance(other, Real):
             try:
                 num, den = other.as_integer_ratio()
-            except AttributeError:
+            except (ValueError, OverflowError, AttributeError):
                 raise NotImplementedError
-            except (ValueError, OverflowError):
-                # 'nan' and 'inf'
-                return self._value, other
             return (self.numerator * den, num * self.denominator)
         if isinstance(other, _StdLibDecimal):
             return (self, Decimal(other))
@@ -1279,7 +1276,7 @@ def divmod2(x, y):
     y must be a Decimal.
 
     """
-    if isinstance(x, Decimal):      # can't happen!
+    if isinstance(x, Decimal):
         xp, yp = x._precision, y._precision
         if xp >= yp:
             r = Decimal(x)
