@@ -102,3 +102,9 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+# all hidden files
+.*
+
+# cython generated html files in src
+src/*/*.html
