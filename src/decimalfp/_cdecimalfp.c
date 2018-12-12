@@ -832,7 +832,7 @@ struct __pyx_opt_args_9decimalfp_11_cdecimalfp__get_adjusted_value;
 struct __pyx_opt_args_9decimalfp_11_cdecimalfp__div_rounded;
 struct __pyx_opt_args_9decimalfp_11_cdecimalfp__round;
 
-/* "decimalfp/_cdecimalfp.pyx":836
+/* "decimalfp/_cdecimalfp.pyx":839
  * 
  * 
  * cdef bint _approx_rational(Decimal dec, object num, object den,             # <<<<<<<<<<<<<<
@@ -844,7 +844,7 @@ struct __pyx_opt_args_9decimalfp_11_cdecimalfp__approx_rational {
   int minPrec;
 };
 
-/* "decimalfp/_cdecimalfp.pyx":955
+/* "decimalfp/_cdecimalfp.pyx":958
  * 
  * 
  * cdef void _adjust(Decimal dec, int prec, object rounding=None) except *:             # <<<<<<<<<<<<<<
@@ -856,7 +856,7 @@ struct __pyx_opt_args_9decimalfp_11_cdecimalfp__adjust {
   PyObject *rounding;
 };
 
-/* "decimalfp/_cdecimalfp.pyx":972
+/* "decimalfp/_cdecimalfp.pyx":975
  * 
  * 
  * cdef object _get_adjusted_value(Decimal dec, int prec, object rounding=None):             # <<<<<<<<<<<<<<
@@ -868,7 +868,7 @@ struct __pyx_opt_args_9decimalfp_11_cdecimalfp__get_adjusted_value {
   PyObject *rounding;
 };
 
-/* "decimalfp/_cdecimalfp.pyx":1002
+/* "decimalfp/_cdecimalfp.pyx":1005
  * 
  * # divide x by y, return rounded result
  * cdef object _div_rounded(object x, object y, object rounding=None):             # <<<<<<<<<<<<<<
@@ -880,7 +880,7 @@ struct __pyx_opt_args_9decimalfp_11_cdecimalfp__div_rounded {
   PyObject *rounding;
 };
 
-/* "decimalfp/_cdecimalfp.pyx":1333
+/* "decimalfp/_cdecimalfp.pyx":1336
  * # helper for different rounding modes
  * 
  * cdef int _round(q, r, y, rounding=None):             # <<<<<<<<<<<<<<
@@ -906,7 +906,7 @@ struct __pyx_obj_9decimalfp_11_cdecimalfp_Decimal {
 };
 
 
-/* "decimalfp/_cdecimalfp.pyx":939
+/* "decimalfp/_cdecimalfp.pyx":942
  * 
  * 
  * def _iterGrouping(grouping):             # <<<<<<<<<<<<<<
@@ -8429,7 +8429,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_30_make_comparable(s
  *         if isinstance(other, Real):
  *             try:             # <<<<<<<<<<<<<<
  *                 num, den = other.as_integer_ratio()
- *             except (ValueError, OverflowError, AttributeError):
+ *             except AttributeError:
  */
     {
       __Pyx_PyThreadState_declare
@@ -8444,7 +8444,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_30_make_comparable(s
  *         if isinstance(other, Real):
  *             try:
  *                 num, den = other.as_integer_ratio()             # <<<<<<<<<<<<<<
- *             except (ValueError, OverflowError, AttributeError):
+ *             except AttributeError:
  *                 raise NotImplementedError
  */
         __pyx_t_8 = __Pyx_PyObject_GetAttrStr(__pyx_v_other, __pyx_n_s_as_integer_ratio); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 547, __pyx_L8_error)
@@ -8520,7 +8520,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_30_make_comparable(s
  *         if isinstance(other, Real):
  *             try:             # <<<<<<<<<<<<<<
  *                 num, den = other.as_integer_ratio()
- *             except (ValueError, OverflowError, AttributeError):
+ *             except AttributeError:
  */
       }
       __Pyx_XDECREF(__pyx_t_9); __pyx_t_9 = 0;
@@ -8536,11 +8536,11 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_30_make_comparable(s
       /* "decimalfp/_cdecimalfp.pyx":548
  *             try:
  *                 num, den = other.as_integer_ratio()
- *             except (ValueError, OverflowError, AttributeError):             # <<<<<<<<<<<<<<
+ *             except AttributeError:             # <<<<<<<<<<<<<<
  *                 raise NotImplementedError
- *             return (self.numerator * den, num * self.denominator)
+ *             except (ValueError, OverflowError):
  */
-      __pyx_t_4 = __Pyx_PyErr_ExceptionMatches(__pyx_builtin_ValueError) || __Pyx_PyErr_ExceptionMatches(__pyx_builtin_OverflowError) || __Pyx_PyErr_ExceptionMatches(__pyx_builtin_AttributeError);
+      __pyx_t_4 = __Pyx_PyErr_ExceptionMatches(__pyx_builtin_AttributeError);
       if (__pyx_t_4) {
         __Pyx_AddTraceback("decimalfp._cdecimalfp.Decimal._make_comparable", __pyx_clineno, __pyx_lineno, __pyx_filename);
         if (__Pyx_GetException(&__pyx_t_5, &__pyx_t_7, &__pyx_t_8) < 0) __PYX_ERR(0, 548, __pyx_L10_except_error)
@@ -8550,13 +8550,52 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_30_make_comparable(s
 
         /* "decimalfp/_cdecimalfp.pyx":549
  *                 num, den = other.as_integer_ratio()
- *             except (ValueError, OverflowError, AttributeError):
+ *             except AttributeError:
  *                 raise NotImplementedError             # <<<<<<<<<<<<<<
- *             return (self.numerator * den, num * self.denominator)
- *         if isinstance(other, _StdLibDecimal):
+ *             except (ValueError, OverflowError):
+ *                 # 'nan' and 'inf'
  */
         __Pyx_Raise(__pyx_builtin_NotImplementedError, 0, 0, 0);
         __PYX_ERR(0, 549, __pyx_L10_except_error)
+      }
+
+      /* "decimalfp/_cdecimalfp.pyx":550
+ *             except AttributeError:
+ *                 raise NotImplementedError
+ *             except (ValueError, OverflowError):             # <<<<<<<<<<<<<<
+ *                 # 'nan' and 'inf'
+ *                 return self._value, other
+ */
+      __pyx_t_4 = __Pyx_PyErr_ExceptionMatches(__pyx_builtin_ValueError) || __Pyx_PyErr_ExceptionMatches(__pyx_builtin_OverflowError);
+      if (__pyx_t_4) {
+        __Pyx_AddTraceback("decimalfp._cdecimalfp.Decimal._make_comparable", __pyx_clineno, __pyx_lineno, __pyx_filename);
+        if (__Pyx_GetException(&__pyx_t_8, &__pyx_t_7, &__pyx_t_5) < 0) __PYX_ERR(0, 550, __pyx_L10_except_error)
+        __Pyx_GOTREF(__pyx_t_8);
+        __Pyx_GOTREF(__pyx_t_7);
+        __Pyx_GOTREF(__pyx_t_5);
+
+        /* "decimalfp/_cdecimalfp.pyx":552
+ *             except (ValueError, OverflowError):
+ *                 # 'nan' and 'inf'
+ *                 return self._value, other             # <<<<<<<<<<<<<<
+ *             return (self.numerator * den, num * self.denominator)
+ *         if isinstance(other, _StdLibDecimal):
+ */
+        __Pyx_XDECREF(__pyx_r);
+        __pyx_t_6 = PyTuple_New(2); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 552, __pyx_L10_except_error)
+        __Pyx_GOTREF(__pyx_t_6);
+        __Pyx_INCREF(__pyx_v_self->_value);
+        __Pyx_GIVEREF(__pyx_v_self->_value);
+        PyTuple_SET_ITEM(__pyx_t_6, 0, __pyx_v_self->_value);
+        __Pyx_INCREF(__pyx_v_other);
+        __Pyx_GIVEREF(__pyx_v_other);
+        PyTuple_SET_ITEM(__pyx_t_6, 1, __pyx_v_other);
+        __pyx_r = __pyx_t_6;
+        __pyx_t_6 = 0;
+        __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
+        __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
+        __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
+        goto __pyx_L11_except_return;
       }
       goto __pyx_L10_except_error;
       __pyx_L10_except_error:;
@@ -8566,44 +8605,50 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_30_make_comparable(s
  *         if isinstance(other, Real):
  *             try:             # <<<<<<<<<<<<<<
  *                 num, den = other.as_integer_ratio()
- *             except (ValueError, OverflowError, AttributeError):
+ *             except AttributeError:
  */
       __Pyx_XGIVEREF(__pyx_t_9);
       __Pyx_XGIVEREF(__pyx_t_10);
       __Pyx_XGIVEREF(__pyx_t_11);
       __Pyx_ExceptionReset(__pyx_t_9, __pyx_t_10, __pyx_t_11);
       goto __pyx_L1_error;
+      __pyx_L11_except_return:;
+      __Pyx_XGIVEREF(__pyx_t_9);
+      __Pyx_XGIVEREF(__pyx_t_10);
+      __Pyx_XGIVEREF(__pyx_t_11);
+      __Pyx_ExceptionReset(__pyx_t_9, __pyx_t_10, __pyx_t_11);
+      goto __pyx_L0;
       __pyx_L13_try_end:;
     }
 
-    /* "decimalfp/_cdecimalfp.pyx":550
- *             except (ValueError, OverflowError, AttributeError):
- *                 raise NotImplementedError
+    /* "decimalfp/_cdecimalfp.pyx":553
+ *                 # 'nan' and 'inf'
+ *                 return self._value, other
  *             return (self.numerator * den, num * self.denominator)             # <<<<<<<<<<<<<<
  *         if isinstance(other, _StdLibDecimal):
  *             return (self, Decimal(other))
  */
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_8 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_numerator); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 550, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_8);
-    __pyx_t_7 = PyNumber_Multiply(__pyx_t_8, __pyx_v_den); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 550, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_7);
-    __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-    __pyx_t_8 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_denominator); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 550, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_8);
-    __pyx_t_5 = PyNumber_Multiply(__pyx_v_num, __pyx_t_8); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 550, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_numerator); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 553, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
-    __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-    __pyx_t_8 = PyTuple_New(2); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 550, __pyx_L1_error)
+    __pyx_t_7 = PyNumber_Multiply(__pyx_t_5, __pyx_v_den); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 553, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_7);
+    __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
+    __pyx_t_5 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_denominator); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 553, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_5);
+    __pyx_t_8 = PyNumber_Multiply(__pyx_v_num, __pyx_t_5); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 553, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_8);
+    __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
+    __pyx_t_5 = PyTuple_New(2); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 553, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_5);
     __Pyx_GIVEREF(__pyx_t_7);
-    PyTuple_SET_ITEM(__pyx_t_8, 0, __pyx_t_7);
-    __Pyx_GIVEREF(__pyx_t_5);
-    PyTuple_SET_ITEM(__pyx_t_8, 1, __pyx_t_5);
+    PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_t_7);
+    __Pyx_GIVEREF(__pyx_t_8);
+    PyTuple_SET_ITEM(__pyx_t_5, 1, __pyx_t_8);
     __pyx_t_7 = 0;
-    __pyx_t_5 = 0;
-    __pyx_r = __pyx_t_8;
     __pyx_t_8 = 0;
+    __pyx_r = __pyx_t_5;
+    __pyx_t_5 = 0;
     goto __pyx_L0;
 
     /* "decimalfp/_cdecimalfp.pyx":545
@@ -8615,21 +8660,21 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_30_make_comparable(s
  */
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":551
- *                 raise NotImplementedError
+  /* "decimalfp/_cdecimalfp.pyx":554
+ *                 return self._value, other
  *             return (self.numerator * den, num * self.denominator)
  *         if isinstance(other, _StdLibDecimal):             # <<<<<<<<<<<<<<
  *             return (self, Decimal(other))
  *         if isinstance(other, Complex) and other.imag == 0:
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_8, __pyx_n_s_StdLibDecimal); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 551, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_8);
-  __pyx_t_1 = PyObject_IsInstance(__pyx_v_other, __pyx_t_8); if (unlikely(__pyx_t_1 == ((int)-1))) __PYX_ERR(0, 551, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
+  __Pyx_GetModuleGlobalName(__pyx_t_5, __pyx_n_s_StdLibDecimal); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 554, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_5);
+  __pyx_t_1 = PyObject_IsInstance(__pyx_v_other, __pyx_t_5); if (unlikely(__pyx_t_1 == ((int)-1))) __PYX_ERR(0, 554, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   __pyx_t_2 = (__pyx_t_1 != 0);
   if (__pyx_t_2) {
 
-    /* "decimalfp/_cdecimalfp.pyx":552
+    /* "decimalfp/_cdecimalfp.pyx":555
  *             return (self.numerator * den, num * self.denominator)
  *         if isinstance(other, _StdLibDecimal):
  *             return (self, Decimal(other))             # <<<<<<<<<<<<<<
@@ -8637,22 +8682,22 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_30_make_comparable(s
  *             return self._make_comparable(other.real)
  */
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_8 = __Pyx_PyObject_CallOneArg(((PyObject *)__pyx_ptype_9decimalfp_11_cdecimalfp_Decimal), __pyx_v_other); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 552, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_8);
-    __pyx_t_5 = PyTuple_New(2); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 552, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_PyObject_CallOneArg(((PyObject *)__pyx_ptype_9decimalfp_11_cdecimalfp_Decimal), __pyx_v_other); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 555, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
+    __pyx_t_8 = PyTuple_New(2); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 555, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_8);
     __Pyx_INCREF(((PyObject *)__pyx_v_self));
     __Pyx_GIVEREF(((PyObject *)__pyx_v_self));
-    PyTuple_SET_ITEM(__pyx_t_5, 0, ((PyObject *)__pyx_v_self));
-    __Pyx_GIVEREF(__pyx_t_8);
-    PyTuple_SET_ITEM(__pyx_t_5, 1, __pyx_t_8);
-    __pyx_t_8 = 0;
-    __pyx_r = __pyx_t_5;
+    PyTuple_SET_ITEM(__pyx_t_8, 0, ((PyObject *)__pyx_v_self));
+    __Pyx_GIVEREF(__pyx_t_5);
+    PyTuple_SET_ITEM(__pyx_t_8, 1, __pyx_t_5);
     __pyx_t_5 = 0;
+    __pyx_r = __pyx_t_8;
+    __pyx_t_8 = 0;
     goto __pyx_L0;
 
-    /* "decimalfp/_cdecimalfp.pyx":551
- *                 raise NotImplementedError
+    /* "decimalfp/_cdecimalfp.pyx":554
+ *                 return self._value, other
  *             return (self.numerator * den, num * self.denominator)
  *         if isinstance(other, _StdLibDecimal):             # <<<<<<<<<<<<<<
  *             return (self, Decimal(other))
@@ -8660,35 +8705,35 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_30_make_comparable(s
  */
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":553
+  /* "decimalfp/_cdecimalfp.pyx":556
  *         if isinstance(other, _StdLibDecimal):
  *             return (self, Decimal(other))
  *         if isinstance(other, Complex) and other.imag == 0:             # <<<<<<<<<<<<<<
  *             return self._make_comparable(other.real)
  *         else:
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_5, __pyx_n_s_Complex); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 553, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_1 = PyObject_IsInstance(__pyx_v_other, __pyx_t_5); if (unlikely(__pyx_t_1 == ((int)-1))) __PYX_ERR(0, 553, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
+  __Pyx_GetModuleGlobalName(__pyx_t_8, __pyx_n_s_Complex); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 556, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_8);
+  __pyx_t_1 = PyObject_IsInstance(__pyx_v_other, __pyx_t_8); if (unlikely(__pyx_t_1 == ((int)-1))) __PYX_ERR(0, 556, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
   __pyx_t_13 = (__pyx_t_1 != 0);
   if (__pyx_t_13) {
   } else {
     __pyx_t_2 = __pyx_t_13;
-    goto __pyx_L20_bool_binop_done;
+    goto __pyx_L22_bool_binop_done;
   }
-  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_v_other, __pyx_n_s_imag); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 553, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_8 = __Pyx_PyInt_EqObjC(__pyx_t_5, __pyx_int_0, 0, 0); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 553, __pyx_L1_error)
+  __pyx_t_8 = __Pyx_PyObject_GetAttrStr(__pyx_v_other, __pyx_n_s_imag); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 556, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_8);
-  __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  __pyx_t_13 = __Pyx_PyObject_IsTrue(__pyx_t_8); if (unlikely(__pyx_t_13 < 0)) __PYX_ERR(0, 553, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyInt_EqObjC(__pyx_t_8, __pyx_int_0, 0, 0); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 556, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_5);
   __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
+  __pyx_t_13 = __Pyx_PyObject_IsTrue(__pyx_t_5); if (unlikely(__pyx_t_13 < 0)) __PYX_ERR(0, 556, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   __pyx_t_2 = __pyx_t_13;
-  __pyx_L20_bool_binop_done:;
+  __pyx_L22_bool_binop_done:;
   if (likely(__pyx_t_2)) {
 
-    /* "decimalfp/_cdecimalfp.pyx":554
+    /* "decimalfp/_cdecimalfp.pyx":557
  *             return (self, Decimal(other))
  *         if isinstance(other, Complex) and other.imag == 0:
  *             return self._make_comparable(other.real)             # <<<<<<<<<<<<<<
@@ -8696,31 +8741,31 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_30_make_comparable(s
  *             raise NotImplementedError
  */
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_5 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_make_comparable); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 554, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_5);
-    __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_v_other, __pyx_n_s_real); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 554, __pyx_L1_error)
+    __pyx_t_8 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_make_comparable); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 557, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_8);
+    __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_v_other, __pyx_n_s_real); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 557, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_7);
     __pyx_t_6 = NULL;
-    if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_5))) {
-      __pyx_t_6 = PyMethod_GET_SELF(__pyx_t_5);
+    if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_8))) {
+      __pyx_t_6 = PyMethod_GET_SELF(__pyx_t_8);
       if (likely(__pyx_t_6)) {
-        PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_5);
+        PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_8);
         __Pyx_INCREF(__pyx_t_6);
         __Pyx_INCREF(function);
-        __Pyx_DECREF_SET(__pyx_t_5, function);
+        __Pyx_DECREF_SET(__pyx_t_8, function);
       }
     }
-    __pyx_t_8 = (__pyx_t_6) ? __Pyx_PyObject_Call2Args(__pyx_t_5, __pyx_t_6, __pyx_t_7) : __Pyx_PyObject_CallOneArg(__pyx_t_5, __pyx_t_7);
+    __pyx_t_5 = (__pyx_t_6) ? __Pyx_PyObject_Call2Args(__pyx_t_8, __pyx_t_6, __pyx_t_7) : __Pyx_PyObject_CallOneArg(__pyx_t_8, __pyx_t_7);
     __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
     __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-    if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 554, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_8);
-    __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-    __pyx_r = __pyx_t_8;
-    __pyx_t_8 = 0;
+    if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 557, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_5);
+    __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
+    __pyx_r = __pyx_t_5;
+    __pyx_t_5 = 0;
     goto __pyx_L0;
 
-    /* "decimalfp/_cdecimalfp.pyx":553
+    /* "decimalfp/_cdecimalfp.pyx":556
  *         if isinstance(other, _StdLibDecimal):
  *             return (self, Decimal(other))
  *         if isinstance(other, Complex) and other.imag == 0:             # <<<<<<<<<<<<<<
@@ -8729,7 +8774,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_30_make_comparable(s
  */
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":556
+  /* "decimalfp/_cdecimalfp.pyx":559
  *             return self._make_comparable(other.real)
  *         else:
  *             raise NotImplementedError             # <<<<<<<<<<<<<<
@@ -8738,7 +8783,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_30_make_comparable(s
  */
   /*else*/ {
     __Pyx_Raise(__pyx_builtin_NotImplementedError, 0, 0, 0);
-    __PYX_ERR(0, 556, __pyx_L1_error)
+    __PYX_ERR(0, 559, __pyx_L1_error)
   }
 
   /* "decimalfp/_cdecimalfp.pyx":527
@@ -8765,7 +8810,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_30_make_comparable(s
   return __pyx_r;
 }
 
-/* "decimalfp/_cdecimalfp.pyx":558
+/* "decimalfp/_cdecimalfp.pyx":561
  *             raise NotImplementedError
  * 
  *     def __richcmp__(self, other, int op):             # <<<<<<<<<<<<<<
@@ -8802,7 +8847,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_32__richcmp__(struct
   int __pyx_t_9;
   __Pyx_RefNannySetupContext("__richcmp__", 0);
 
-  /* "decimalfp/_cdecimalfp.pyx":560
+  /* "decimalfp/_cdecimalfp.pyx":563
  *     def __richcmp__(self, other, int op):
  *         """Compare self and other using operator op."""
  *         try:             # <<<<<<<<<<<<<<
@@ -8818,14 +8863,14 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_32__richcmp__(struct
     __Pyx_XGOTREF(__pyx_t_3);
     /*try:*/ {
 
-      /* "decimalfp/_cdecimalfp.pyx":561
+      /* "decimalfp/_cdecimalfp.pyx":564
  *         """Compare self and other using operator op."""
  *         try:
  *             selfVal, otherVal = self._make_comparable(other)             # <<<<<<<<<<<<<<
  *         except NotImplementedError:
  *             return NotImplemented
  */
-      __pyx_t_5 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_make_comparable); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 561, __pyx_L3_error)
+      __pyx_t_5 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_make_comparable); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 564, __pyx_L3_error)
       __Pyx_GOTREF(__pyx_t_5);
       __pyx_t_6 = NULL;
       if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_5))) {
@@ -8839,7 +8884,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_32__richcmp__(struct
       }
       __pyx_t_4 = (__pyx_t_6) ? __Pyx_PyObject_Call2Args(__pyx_t_5, __pyx_t_6, __pyx_v_other) : __Pyx_PyObject_CallOneArg(__pyx_t_5, __pyx_v_other);
       __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
-      if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 561, __pyx_L3_error)
+      if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 564, __pyx_L3_error)
       __Pyx_GOTREF(__pyx_t_4);
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
       if ((likely(PyTuple_CheckExact(__pyx_t_4))) || (PyList_CheckExact(__pyx_t_4))) {
@@ -8848,7 +8893,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_32__richcmp__(struct
         if (unlikely(size != 2)) {
           if (size > 2) __Pyx_RaiseTooManyValuesError(2);
           else if (size >= 0) __Pyx_RaiseNeedMoreValuesError(size);
-          __PYX_ERR(0, 561, __pyx_L3_error)
+          __PYX_ERR(0, 564, __pyx_L3_error)
         }
         #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
         if (likely(PyTuple_CheckExact(sequence))) {
@@ -8861,15 +8906,15 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_32__richcmp__(struct
         __Pyx_INCREF(__pyx_t_5);
         __Pyx_INCREF(__pyx_t_6);
         #else
-        __pyx_t_5 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 561, __pyx_L3_error)
+        __pyx_t_5 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 564, __pyx_L3_error)
         __Pyx_GOTREF(__pyx_t_5);
-        __pyx_t_6 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 561, __pyx_L3_error)
+        __pyx_t_6 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 564, __pyx_L3_error)
         __Pyx_GOTREF(__pyx_t_6);
         #endif
         __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
       } else {
         Py_ssize_t index = -1;
-        __pyx_t_7 = PyObject_GetIter(__pyx_t_4); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 561, __pyx_L3_error)
+        __pyx_t_7 = PyObject_GetIter(__pyx_t_4); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 564, __pyx_L3_error)
         __Pyx_GOTREF(__pyx_t_7);
         __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
         __pyx_t_8 = Py_TYPE(__pyx_t_7)->tp_iternext;
@@ -8877,7 +8922,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_32__richcmp__(struct
         __Pyx_GOTREF(__pyx_t_5);
         index = 1; __pyx_t_6 = __pyx_t_8(__pyx_t_7); if (unlikely(!__pyx_t_6)) goto __pyx_L9_unpacking_failed;
         __Pyx_GOTREF(__pyx_t_6);
-        if (__Pyx_IternextUnpackEndCheck(__pyx_t_8(__pyx_t_7), 2) < 0) __PYX_ERR(0, 561, __pyx_L3_error)
+        if (__Pyx_IternextUnpackEndCheck(__pyx_t_8(__pyx_t_7), 2) < 0) __PYX_ERR(0, 564, __pyx_L3_error)
         __pyx_t_8 = NULL;
         __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
         goto __pyx_L10_unpacking_done;
@@ -8885,7 +8930,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_32__richcmp__(struct
         __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
         __pyx_t_8 = NULL;
         if (__Pyx_IterFinish() == 0) __Pyx_RaiseNeedMoreValuesError(index);
-        __PYX_ERR(0, 561, __pyx_L3_error)
+        __PYX_ERR(0, 564, __pyx_L3_error)
         __pyx_L10_unpacking_done:;
       }
       __pyx_v_selfVal = __pyx_t_5;
@@ -8893,7 +8938,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_32__richcmp__(struct
       __pyx_v_otherVal = __pyx_t_6;
       __pyx_t_6 = 0;
 
-      /* "decimalfp/_cdecimalfp.pyx":560
+      /* "decimalfp/_cdecimalfp.pyx":563
  *     def __richcmp__(self, other, int op):
  *         """Compare self and other using operator op."""
  *         try:             # <<<<<<<<<<<<<<
@@ -8911,7 +8956,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_32__richcmp__(struct
     __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
     __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-    /* "decimalfp/_cdecimalfp.pyx":562
+    /* "decimalfp/_cdecimalfp.pyx":565
  *         try:
  *             selfVal, otherVal = self._make_comparable(other)
  *         except NotImplementedError:             # <<<<<<<<<<<<<<
@@ -8921,12 +8966,12 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_32__richcmp__(struct
     __pyx_t_9 = __Pyx_PyErr_ExceptionMatches(__pyx_builtin_NotImplementedError);
     if (__pyx_t_9) {
       __Pyx_AddTraceback("decimalfp._cdecimalfp.Decimal.__richcmp__", __pyx_clineno, __pyx_lineno, __pyx_filename);
-      if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_6, &__pyx_t_5) < 0) __PYX_ERR(0, 562, __pyx_L5_except_error)
+      if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_6, &__pyx_t_5) < 0) __PYX_ERR(0, 565, __pyx_L5_except_error)
       __Pyx_GOTREF(__pyx_t_4);
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_GOTREF(__pyx_t_5);
 
-      /* "decimalfp/_cdecimalfp.pyx":563
+      /* "decimalfp/_cdecimalfp.pyx":566
  *             selfVal, otherVal = self._make_comparable(other)
  *         except NotImplementedError:
  *             return NotImplemented             # <<<<<<<<<<<<<<
@@ -8944,7 +8989,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_32__richcmp__(struct
     goto __pyx_L5_except_error;
     __pyx_L5_except_error:;
 
-    /* "decimalfp/_cdecimalfp.pyx":560
+    /* "decimalfp/_cdecimalfp.pyx":563
  *     def __richcmp__(self, other, int op):
  *         """Compare self and other using operator op."""
  *         try:             # <<<<<<<<<<<<<<
@@ -8965,7 +9010,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_32__richcmp__(struct
     __pyx_L8_try_end:;
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":564
+  /* "decimalfp/_cdecimalfp.pyx":567
  *         except NotImplementedError:
  *             return NotImplemented
  *         return PyObject_RichCompare(selfVal, otherVal, op)             # <<<<<<<<<<<<<<
@@ -8973,13 +9018,13 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_32__richcmp__(struct
  *     def __hash__(self):
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_5 = PyObject_RichCompare(__pyx_v_selfVal, __pyx_v_otherVal, __pyx_v_op); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 564, __pyx_L1_error)
+  __pyx_t_5 = PyObject_RichCompare(__pyx_v_selfVal, __pyx_v_otherVal, __pyx_v_op); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 567, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __pyx_r = __pyx_t_5;
   __pyx_t_5 = 0;
   goto __pyx_L0;
 
-  /* "decimalfp/_cdecimalfp.pyx":558
+  /* "decimalfp/_cdecimalfp.pyx":561
  *             raise NotImplementedError
  * 
  *     def __richcmp__(self, other, int op):             # <<<<<<<<<<<<<<
@@ -9003,7 +9048,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_32__richcmp__(struct
   return __pyx_r;
 }
 
-/* "decimalfp/_cdecimalfp.pyx":566
+/* "decimalfp/_cdecimalfp.pyx":569
  *         return PyObject_RichCompare(selfVal, otherVal, op)
  * 
  *     def __hash__(self):             # <<<<<<<<<<<<<<
@@ -9043,7 +9088,7 @@ static Py_hash_t __pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_34__hash__(struct __
   PyObject *__pyx_t_8 = NULL;
   __Pyx_RefNannySetupContext("__hash__", 0);
 
-  /* "decimalfp/_cdecimalfp.pyx":569
+  /* "decimalfp/_cdecimalfp.pyx":572
  *         """hash(self)"""
  *         cdef int sp
  *         sv, sp = self._value, self._precision             # <<<<<<<<<<<<<<
@@ -9057,7 +9102,7 @@ static Py_hash_t __pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_34__hash__(struct __
   __pyx_t_1 = 0;
   __pyx_v_sp = __pyx_t_2;
 
-  /* "decimalfp/_cdecimalfp.pyx":570
+  /* "decimalfp/_cdecimalfp.pyx":573
  *         cdef int sp
  *         sv, sp = self._value, self._precision
  *         if sp == 0:                         # if self == int(self),             # <<<<<<<<<<<<<<
@@ -9067,18 +9112,18 @@ static Py_hash_t __pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_34__hash__(struct __
   __pyx_t_3 = ((__pyx_v_sp == 0) != 0);
   if (__pyx_t_3) {
 
-    /* "decimalfp/_cdecimalfp.pyx":571
+    /* "decimalfp/_cdecimalfp.pyx":574
  *         sv, sp = self._value, self._precision
  *         if sp == 0:                         # if self == int(self),
  *             return hash(sv)                           # same hash as int             # <<<<<<<<<<<<<<
  *         else:                               # otherwise same hash as
  *             return hash(Fraction(sv, base10pow(sp)))  # equivalent fraction
  */
-    __pyx_t_4 = PyObject_Hash(__pyx_v_sv); if (unlikely(__pyx_t_4 == ((Py_hash_t)-1))) __PYX_ERR(0, 571, __pyx_L1_error)
+    __pyx_t_4 = PyObject_Hash(__pyx_v_sv); if (unlikely(__pyx_t_4 == ((Py_hash_t)-1))) __PYX_ERR(0, 574, __pyx_L1_error)
     __pyx_r = __pyx_t_4;
     goto __pyx_L0;
 
-    /* "decimalfp/_cdecimalfp.pyx":570
+    /* "decimalfp/_cdecimalfp.pyx":573
  *         cdef int sp
  *         sv, sp = self._value, self._precision
  *         if sp == 0:                         # if self == int(self),             # <<<<<<<<<<<<<<
@@ -9087,7 +9132,7 @@ static Py_hash_t __pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_34__hash__(struct __
  */
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":573
+  /* "decimalfp/_cdecimalfp.pyx":576
  *             return hash(sv)                           # same hash as int
  *         else:                               # otherwise same hash as
  *             return hash(Fraction(sv, base10pow(sp)))  # equivalent fraction             # <<<<<<<<<<<<<<
@@ -9095,9 +9140,9 @@ static Py_hash_t __pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_34__hash__(struct __
  *     # return 0 or 1 for truth-value testing
  */
   /*else*/ {
-    __Pyx_GetModuleGlobalName(__pyx_t_5, __pyx_n_s_Fraction); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 573, __pyx_L1_error)
+    __Pyx_GetModuleGlobalName(__pyx_t_5, __pyx_n_s_Fraction); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 576, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
-    __pyx_t_6 = __pyx_f_9decimalfp_11_cdecimalfp_base10pow(__pyx_v_sp); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 573, __pyx_L1_error)
+    __pyx_t_6 = __pyx_f_9decimalfp_11_cdecimalfp_base10pow(__pyx_v_sp); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 576, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
     __pyx_t_7 = NULL;
     __pyx_t_2 = 0;
@@ -9114,7 +9159,7 @@ static Py_hash_t __pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_34__hash__(struct __
     #if CYTHON_FAST_PYCALL
     if (PyFunction_Check(__pyx_t_5)) {
       PyObject *__pyx_temp[3] = {__pyx_t_7, __pyx_v_sv, __pyx_t_6};
-      __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_5, __pyx_temp+1-__pyx_t_2, 2+__pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 573, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_5, __pyx_temp+1-__pyx_t_2, 2+__pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 576, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_7); __pyx_t_7 = 0;
       __Pyx_GOTREF(__pyx_t_1);
       __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
@@ -9123,14 +9168,14 @@ static Py_hash_t __pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_34__hash__(struct __
     #if CYTHON_FAST_PYCCALL
     if (__Pyx_PyFastCFunction_Check(__pyx_t_5)) {
       PyObject *__pyx_temp[3] = {__pyx_t_7, __pyx_v_sv, __pyx_t_6};
-      __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_5, __pyx_temp+1-__pyx_t_2, 2+__pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 573, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_5, __pyx_temp+1-__pyx_t_2, 2+__pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 576, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_7); __pyx_t_7 = 0;
       __Pyx_GOTREF(__pyx_t_1);
       __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
     } else
     #endif
     {
-      __pyx_t_8 = PyTuple_New(2+__pyx_t_2); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 573, __pyx_L1_error)
+      __pyx_t_8 = PyTuple_New(2+__pyx_t_2); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 576, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_8);
       if (__pyx_t_7) {
         __Pyx_GIVEREF(__pyx_t_7); PyTuple_SET_ITEM(__pyx_t_8, 0, __pyx_t_7); __pyx_t_7 = NULL;
@@ -9141,18 +9186,18 @@ static Py_hash_t __pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_34__hash__(struct __
       __Pyx_GIVEREF(__pyx_t_6);
       PyTuple_SET_ITEM(__pyx_t_8, 1+__pyx_t_2, __pyx_t_6);
       __pyx_t_6 = 0;
-      __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_t_8, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 573, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_t_8, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 576, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_1);
       __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
     }
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-    __pyx_t_4 = PyObject_Hash(__pyx_t_1); if (unlikely(__pyx_t_4 == ((Py_hash_t)-1))) __PYX_ERR(0, 573, __pyx_L1_error)
+    __pyx_t_4 = PyObject_Hash(__pyx_t_1); if (unlikely(__pyx_t_4 == ((Py_hash_t)-1))) __PYX_ERR(0, 576, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
     __pyx_r = __pyx_t_4;
     goto __pyx_L0;
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":566
+  /* "decimalfp/_cdecimalfp.pyx":569
  *         return PyObject_RichCompare(selfVal, otherVal, op)
  * 
  *     def __hash__(self):             # <<<<<<<<<<<<<<
@@ -9176,7 +9221,7 @@ static Py_hash_t __pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_34__hash__(struct __
   return __pyx_r;
 }
 
-/* "decimalfp/_cdecimalfp.pyx":576
+/* "decimalfp/_cdecimalfp.pyx":579
  * 
  *     # return 0 or 1 for truth-value testing
  *     def __nonzero__(self):             # <<<<<<<<<<<<<<
@@ -9204,21 +9249,21 @@ static int __pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_36__nonzero__(struct __pyx
   int __pyx_t_2;
   __Pyx_RefNannySetupContext("__nonzero__", 0);
 
-  /* "decimalfp/_cdecimalfp.pyx":578
+  /* "decimalfp/_cdecimalfp.pyx":581
  *     def __nonzero__(self):
  *         """bool(self)"""
  *         return self._value != 0             # <<<<<<<<<<<<<<
  *     #__bool__ = __nonzero__
  * 
  */
-  __pyx_t_1 = __Pyx_PyInt_NeObjC(__pyx_v_self->_value, __pyx_int_0, 0, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 578, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyInt_NeObjC(__pyx_v_self->_value, __pyx_int_0, 0, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 581, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyInt_As_int(__pyx_t_1); if (unlikely((__pyx_t_2 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 578, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyInt_As_int(__pyx_t_1); if (unlikely((__pyx_t_2 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 581, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_r = __pyx_t_2;
   goto __pyx_L0;
 
-  /* "decimalfp/_cdecimalfp.pyx":576
+  /* "decimalfp/_cdecimalfp.pyx":579
  * 
  *     # return 0 or 1 for truth-value testing
  *     def __nonzero__(self):             # <<<<<<<<<<<<<<
@@ -9236,7 +9281,7 @@ static int __pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_36__nonzero__(struct __pyx
   return __pyx_r;
 }
 
-/* "decimalfp/_cdecimalfp.pyx":582
+/* "decimalfp/_cdecimalfp.pyx":585
  * 
  *     # return integer portion as int
  *     def __int__(self):             # <<<<<<<<<<<<<<
@@ -9268,7 +9313,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_38__int__(struct __p
   PyObject *__pyx_t_2 = NULL;
   __Pyx_RefNannySetupContext("__int__", 0);
 
-  /* "decimalfp/_cdecimalfp.pyx":584
+  /* "decimalfp/_cdecimalfp.pyx":587
  *     def __int__(self):
  *         """math.trunc(self)"""
  *         return _int(self._value, self._precision)             # <<<<<<<<<<<<<<
@@ -9278,14 +9323,14 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_38__int__(struct __p
   __Pyx_XDECREF(__pyx_r);
   __pyx_t_1 = __pyx_v_self->_value;
   __Pyx_INCREF(__pyx_t_1);
-  __pyx_t_2 = __pyx_f_9decimalfp_11_cdecimalfp__int(__pyx_t_1, __pyx_v_self->_precision); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 584, __pyx_L1_error)
+  __pyx_t_2 = __pyx_f_9decimalfp_11_cdecimalfp__int(__pyx_t_1, __pyx_v_self->_precision); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 587, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_r = __pyx_t_2;
   __pyx_t_2 = 0;
   goto __pyx_L0;
 
-  /* "decimalfp/_cdecimalfp.pyx":582
+  /* "decimalfp/_cdecimalfp.pyx":585
  * 
  *     # return integer portion as int
  *     def __int__(self):             # <<<<<<<<<<<<<<
@@ -9305,7 +9350,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_38__int__(struct __p
   return __pyx_r;
 }
 
-/* "decimalfp/_cdecimalfp.pyx":588
+/* "decimalfp/_cdecimalfp.pyx":591
  * 
  *     # convert to float (may loose precision!)
  *     def __float__(self):             # <<<<<<<<<<<<<<
@@ -9337,7 +9382,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_40__float__(struct _
   PyObject *__pyx_t_2 = NULL;
   __Pyx_RefNannySetupContext("__float__", 0);
 
-  /* "decimalfp/_cdecimalfp.pyx":590
+  /* "decimalfp/_cdecimalfp.pyx":593
  *     def __float__(self):
  *         """float(self)"""
  *         return self._value / base10pow(self._precision)             # <<<<<<<<<<<<<<
@@ -9345,16 +9390,16 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_40__float__(struct _
  *     def __pos__(self):
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __pyx_f_9decimalfp_11_cdecimalfp_base10pow(__pyx_v_self->_precision); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 590, __pyx_L1_error)
+  __pyx_t_1 = __pyx_f_9decimalfp_11_cdecimalfp_base10pow(__pyx_v_self->_precision); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 593, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyNumber_Divide(__pyx_v_self->_value, __pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 590, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyNumber_Divide(__pyx_v_self->_value, __pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 593, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_r = __pyx_t_2;
   __pyx_t_2 = 0;
   goto __pyx_L0;
 
-  /* "decimalfp/_cdecimalfp.pyx":588
+  /* "decimalfp/_cdecimalfp.pyx":591
  * 
  *     # convert to float (may loose precision!)
  *     def __float__(self):             # <<<<<<<<<<<<<<
@@ -9374,7 +9419,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_40__float__(struct _
   return __pyx_r;
 }
 
-/* "decimalfp/_cdecimalfp.pyx":592
+/* "decimalfp/_cdecimalfp.pyx":595
  *         return self._value / base10pow(self._precision)
  * 
  *     def __pos__(self):             # <<<<<<<<<<<<<<
@@ -9404,7 +9449,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_42__pos__(struct __p
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__pos__", 0);
 
-  /* "decimalfp/_cdecimalfp.pyx":594
+  /* "decimalfp/_cdecimalfp.pyx":597
  *     def __pos__(self):
  *         """+self"""
  *         return self             # <<<<<<<<<<<<<<
@@ -9416,7 +9461,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_42__pos__(struct __p
   __pyx_r = ((PyObject *)__pyx_v_self);
   goto __pyx_L0;
 
-  /* "decimalfp/_cdecimalfp.pyx":592
+  /* "decimalfp/_cdecimalfp.pyx":595
  *         return self._value / base10pow(self._precision)
  * 
  *     def __pos__(self):             # <<<<<<<<<<<<<<
@@ -9431,7 +9476,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_42__pos__(struct __p
   return __pyx_r;
 }
 
-/* "decimalfp/_cdecimalfp.pyx":596
+/* "decimalfp/_cdecimalfp.pyx":599
  *         return self
  * 
  *     def __neg__(self):             # <<<<<<<<<<<<<<
@@ -9463,26 +9508,26 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_44__neg__(struct __p
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("__neg__", 0);
 
-  /* "decimalfp/_cdecimalfp.pyx":599
+  /* "decimalfp/_cdecimalfp.pyx":602
  *         """-self"""
  *         cdef Decimal result
  *         result = Decimal(self)             # <<<<<<<<<<<<<<
  *         result._value = -result._value
  *         return result
  */
-  __pyx_t_1 = __Pyx_PyObject_CallOneArg(((PyObject *)__pyx_ptype_9decimalfp_11_cdecimalfp_Decimal), ((PyObject *)__pyx_v_self)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 599, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_CallOneArg(((PyObject *)__pyx_ptype_9decimalfp_11_cdecimalfp_Decimal), ((PyObject *)__pyx_v_self)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 602, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_v_result = ((struct __pyx_obj_9decimalfp_11_cdecimalfp_Decimal *)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "decimalfp/_cdecimalfp.pyx":600
+  /* "decimalfp/_cdecimalfp.pyx":603
  *         cdef Decimal result
  *         result = Decimal(self)
  *         result._value = -result._value             # <<<<<<<<<<<<<<
  *         return result
  * 
  */
-  __pyx_t_1 = PyNumber_Negative(__pyx_v_result->_value); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 600, __pyx_L1_error)
+  __pyx_t_1 = PyNumber_Negative(__pyx_v_result->_value); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 603, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_GIVEREF(__pyx_t_1);
   __Pyx_GOTREF(__pyx_v_result->_value);
@@ -9490,7 +9535,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_44__neg__(struct __p
   __pyx_v_result->_value = __pyx_t_1;
   __pyx_t_1 = 0;
 
-  /* "decimalfp/_cdecimalfp.pyx":601
+  /* "decimalfp/_cdecimalfp.pyx":604
  *         result = Decimal(self)
  *         result._value = -result._value
  *         return result             # <<<<<<<<<<<<<<
@@ -9502,7 +9547,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_44__neg__(struct __p
   __pyx_r = ((PyObject *)__pyx_v_result);
   goto __pyx_L0;
 
-  /* "decimalfp/_cdecimalfp.pyx":596
+  /* "decimalfp/_cdecimalfp.pyx":599
  *         return self
  * 
  *     def __neg__(self):             # <<<<<<<<<<<<<<
@@ -9522,7 +9567,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_44__neg__(struct __p
   return __pyx_r;
 }
 
-/* "decimalfp/_cdecimalfp.pyx":603
+/* "decimalfp/_cdecimalfp.pyx":606
  *         return result
  * 
  *     def __abs__(self):             # <<<<<<<<<<<<<<
@@ -9555,19 +9600,19 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_46__abs__(struct __p
   PyObject *__pyx_t_2 = NULL;
   __Pyx_RefNannySetupContext("__abs__", 0);
 
-  /* "decimalfp/_cdecimalfp.pyx":606
+  /* "decimalfp/_cdecimalfp.pyx":609
  *         """abs(self)"""
  *         cdef Decimal result
  *         result = Decimal(self)             # <<<<<<<<<<<<<<
  *         result._value = abs(result._value)
  *         return result
  */
-  __pyx_t_1 = __Pyx_PyObject_CallOneArg(((PyObject *)__pyx_ptype_9decimalfp_11_cdecimalfp_Decimal), ((PyObject *)__pyx_v_self)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 606, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_CallOneArg(((PyObject *)__pyx_ptype_9decimalfp_11_cdecimalfp_Decimal), ((PyObject *)__pyx_v_self)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 609, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_v_result = ((struct __pyx_obj_9decimalfp_11_cdecimalfp_Decimal *)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "decimalfp/_cdecimalfp.pyx":607
+  /* "decimalfp/_cdecimalfp.pyx":610
  *         cdef Decimal result
  *         result = Decimal(self)
  *         result._value = abs(result._value)             # <<<<<<<<<<<<<<
@@ -9576,7 +9621,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_46__abs__(struct __p
  */
   __pyx_t_1 = __pyx_v_result->_value;
   __Pyx_INCREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyNumber_Absolute(__pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 607, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyNumber_Absolute(__pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 610, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_GIVEREF(__pyx_t_2);
@@ -9585,7 +9630,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_46__abs__(struct __p
   __pyx_v_result->_value = __pyx_t_2;
   __pyx_t_2 = 0;
 
-  /* "decimalfp/_cdecimalfp.pyx":608
+  /* "decimalfp/_cdecimalfp.pyx":611
  *         result = Decimal(self)
  *         result._value = abs(result._value)
  *         return result             # <<<<<<<<<<<<<<
@@ -9597,7 +9642,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_46__abs__(struct __p
   __pyx_r = ((PyObject *)__pyx_v_result);
   goto __pyx_L0;
 
-  /* "decimalfp/_cdecimalfp.pyx":603
+  /* "decimalfp/_cdecimalfp.pyx":606
  *         return result
  * 
  *     def __abs__(self):             # <<<<<<<<<<<<<<
@@ -9618,7 +9663,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_46__abs__(struct __p
   return __pyx_r;
 }
 
-/* "decimalfp/_cdecimalfp.pyx":610
+/* "decimalfp/_cdecimalfp.pyx":613
  *         return result
  * 
  *     def __add__(x, y):             # <<<<<<<<<<<<<<
@@ -9651,7 +9696,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_48__add__(PyObject *
   PyObject *__pyx_t_3 = NULL;
   __Pyx_RefNannySetupContext("__add__", 0);
 
-  /* "decimalfp/_cdecimalfp.pyx":612
+  /* "decimalfp/_cdecimalfp.pyx":615
  *     def __add__(x, y):
  *         """x + y"""
  *         if isinstance(x, Decimal):             # <<<<<<<<<<<<<<
@@ -9662,7 +9707,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_48__add__(PyObject *
   __pyx_t_2 = (__pyx_t_1 != 0);
   if (__pyx_t_2) {
 
-    /* "decimalfp/_cdecimalfp.pyx":613
+    /* "decimalfp/_cdecimalfp.pyx":616
  *         """x + y"""
  *         if isinstance(x, Decimal):
  *             return add(x, y)             # <<<<<<<<<<<<<<
@@ -9670,14 +9715,14 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_48__add__(PyObject *
  *             return add(y, x)
  */
     __Pyx_XDECREF(__pyx_r);
-    if (!(likely(((__pyx_v_x) == Py_None) || likely(__Pyx_TypeTest(__pyx_v_x, __pyx_ptype_9decimalfp_11_cdecimalfp_Decimal))))) __PYX_ERR(0, 613, __pyx_L1_error)
-    __pyx_t_3 = __pyx_f_9decimalfp_11_cdecimalfp_add(((struct __pyx_obj_9decimalfp_11_cdecimalfp_Decimal *)__pyx_v_x), __pyx_v_y); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 613, __pyx_L1_error)
+    if (!(likely(((__pyx_v_x) == Py_None) || likely(__Pyx_TypeTest(__pyx_v_x, __pyx_ptype_9decimalfp_11_cdecimalfp_Decimal))))) __PYX_ERR(0, 616, __pyx_L1_error)
+    __pyx_t_3 = __pyx_f_9decimalfp_11_cdecimalfp_add(((struct __pyx_obj_9decimalfp_11_cdecimalfp_Decimal *)__pyx_v_x), __pyx_v_y); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 616, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __pyx_r = __pyx_t_3;
     __pyx_t_3 = 0;
     goto __pyx_L0;
 
-    /* "decimalfp/_cdecimalfp.pyx":612
+    /* "decimalfp/_cdecimalfp.pyx":615
  *     def __add__(x, y):
  *         """x + y"""
  *         if isinstance(x, Decimal):             # <<<<<<<<<<<<<<
@@ -9686,7 +9731,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_48__add__(PyObject *
  */
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":614
+  /* "decimalfp/_cdecimalfp.pyx":617
  *         if isinstance(x, Decimal):
  *             return add(x, y)
  *         if isinstance(y, Decimal):             # <<<<<<<<<<<<<<
@@ -9697,7 +9742,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_48__add__(PyObject *
   __pyx_t_1 = (__pyx_t_2 != 0);
   if (__pyx_t_1) {
 
-    /* "decimalfp/_cdecimalfp.pyx":615
+    /* "decimalfp/_cdecimalfp.pyx":618
  *             return add(x, y)
  *         if isinstance(y, Decimal):
  *             return add(y, x)             # <<<<<<<<<<<<<<
@@ -9705,14 +9750,14 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_48__add__(PyObject *
  * 
  */
     __Pyx_XDECREF(__pyx_r);
-    if (!(likely(((__pyx_v_y) == Py_None) || likely(__Pyx_TypeTest(__pyx_v_y, __pyx_ptype_9decimalfp_11_cdecimalfp_Decimal))))) __PYX_ERR(0, 615, __pyx_L1_error)
-    __pyx_t_3 = __pyx_f_9decimalfp_11_cdecimalfp_add(((struct __pyx_obj_9decimalfp_11_cdecimalfp_Decimal *)__pyx_v_y), __pyx_v_x); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 615, __pyx_L1_error)
+    if (!(likely(((__pyx_v_y) == Py_None) || likely(__Pyx_TypeTest(__pyx_v_y, __pyx_ptype_9decimalfp_11_cdecimalfp_Decimal))))) __PYX_ERR(0, 618, __pyx_L1_error)
+    __pyx_t_3 = __pyx_f_9decimalfp_11_cdecimalfp_add(((struct __pyx_obj_9decimalfp_11_cdecimalfp_Decimal *)__pyx_v_y), __pyx_v_x); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 618, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __pyx_r = __pyx_t_3;
     __pyx_t_3 = 0;
     goto __pyx_L0;
 
-    /* "decimalfp/_cdecimalfp.pyx":614
+    /* "decimalfp/_cdecimalfp.pyx":617
  *         if isinstance(x, Decimal):
  *             return add(x, y)
  *         if isinstance(y, Decimal):             # <<<<<<<<<<<<<<
@@ -9721,7 +9766,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_48__add__(PyObject *
  */
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":616
+  /* "decimalfp/_cdecimalfp.pyx":619
  *         if isinstance(y, Decimal):
  *             return add(y, x)
  *         return NotImplemented             # <<<<<<<<<<<<<<
@@ -9733,7 +9778,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_48__add__(PyObject *
   __pyx_r = __pyx_builtin_NotImplemented;
   goto __pyx_L0;
 
-  /* "decimalfp/_cdecimalfp.pyx":610
+  /* "decimalfp/_cdecimalfp.pyx":613
  *         return result
  * 
  *     def __add__(x, y):             # <<<<<<<<<<<<<<
@@ -9752,7 +9797,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_48__add__(PyObject *
   return __pyx_r;
 }
 
-/* "decimalfp/_cdecimalfp.pyx":618
+/* "decimalfp/_cdecimalfp.pyx":621
  *         return NotImplemented
  * 
  *     def __sub__(x, y):             # <<<<<<<<<<<<<<
@@ -9786,7 +9831,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_50__sub__(PyObject *
   PyObject *__pyx_t_4 = NULL;
   __Pyx_RefNannySetupContext("__sub__", 0);
 
-  /* "decimalfp/_cdecimalfp.pyx":620
+  /* "decimalfp/_cdecimalfp.pyx":623
  *     def __sub__(x, y):
  *         """x - y"""
  *         if isinstance(x, Decimal):             # <<<<<<<<<<<<<<
@@ -9797,7 +9842,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_50__sub__(PyObject *
   __pyx_t_2 = (__pyx_t_1 != 0);
   if (__pyx_t_2) {
 
-    /* "decimalfp/_cdecimalfp.pyx":621
+    /* "decimalfp/_cdecimalfp.pyx":624
  *         """x - y"""
  *         if isinstance(x, Decimal):
  *             return sub(x, y)             # <<<<<<<<<<<<<<
@@ -9805,14 +9850,14 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_50__sub__(PyObject *
  *             return add(-y, x)
  */
     __Pyx_XDECREF(__pyx_r);
-    if (!(likely(((__pyx_v_x) == Py_None) || likely(__Pyx_TypeTest(__pyx_v_x, __pyx_ptype_9decimalfp_11_cdecimalfp_Decimal))))) __PYX_ERR(0, 621, __pyx_L1_error)
-    __pyx_t_3 = __pyx_f_9decimalfp_11_cdecimalfp_sub(((struct __pyx_obj_9decimalfp_11_cdecimalfp_Decimal *)__pyx_v_x), __pyx_v_y); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 621, __pyx_L1_error)
+    if (!(likely(((__pyx_v_x) == Py_None) || likely(__Pyx_TypeTest(__pyx_v_x, __pyx_ptype_9decimalfp_11_cdecimalfp_Decimal))))) __PYX_ERR(0, 624, __pyx_L1_error)
+    __pyx_t_3 = __pyx_f_9decimalfp_11_cdecimalfp_sub(((struct __pyx_obj_9decimalfp_11_cdecimalfp_Decimal *)__pyx_v_x), __pyx_v_y); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 624, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __pyx_r = __pyx_t_3;
     __pyx_t_3 = 0;
     goto __pyx_L0;
 
-    /* "decimalfp/_cdecimalfp.pyx":620
+    /* "decimalfp/_cdecimalfp.pyx":623
  *     def __sub__(x, y):
  *         """x - y"""
  *         if isinstance(x, Decimal):             # <<<<<<<<<<<<<<
@@ -9821,7 +9866,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_50__sub__(PyObject *
  */
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":622
+  /* "decimalfp/_cdecimalfp.pyx":625
  *         if isinstance(x, Decimal):
  *             return sub(x, y)
  *         if isinstance(y, Decimal):             # <<<<<<<<<<<<<<
@@ -9832,7 +9877,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_50__sub__(PyObject *
   __pyx_t_1 = (__pyx_t_2 != 0);
   if (__pyx_t_1) {
 
-    /* "decimalfp/_cdecimalfp.pyx":623
+    /* "decimalfp/_cdecimalfp.pyx":626
  *             return sub(x, y)
  *         if isinstance(y, Decimal):
  *             return add(-y, x)             # <<<<<<<<<<<<<<
@@ -9840,17 +9885,17 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_50__sub__(PyObject *
  * 
  */
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_3 = PyNumber_Negative(__pyx_v_y); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 623, __pyx_L1_error)
+    __pyx_t_3 = PyNumber_Negative(__pyx_v_y); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 626, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
-    if (!(likely(((__pyx_t_3) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_3, __pyx_ptype_9decimalfp_11_cdecimalfp_Decimal))))) __PYX_ERR(0, 623, __pyx_L1_error)
-    __pyx_t_4 = __pyx_f_9decimalfp_11_cdecimalfp_add(((struct __pyx_obj_9decimalfp_11_cdecimalfp_Decimal *)__pyx_t_3), __pyx_v_x); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 623, __pyx_L1_error)
+    if (!(likely(((__pyx_t_3) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_3, __pyx_ptype_9decimalfp_11_cdecimalfp_Decimal))))) __PYX_ERR(0, 626, __pyx_L1_error)
+    __pyx_t_4 = __pyx_f_9decimalfp_11_cdecimalfp_add(((struct __pyx_obj_9decimalfp_11_cdecimalfp_Decimal *)__pyx_t_3), __pyx_v_x); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 626, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     __pyx_r = __pyx_t_4;
     __pyx_t_4 = 0;
     goto __pyx_L0;
 
-    /* "decimalfp/_cdecimalfp.pyx":622
+    /* "decimalfp/_cdecimalfp.pyx":625
  *         if isinstance(x, Decimal):
  *             return sub(x, y)
  *         if isinstance(y, Decimal):             # <<<<<<<<<<<<<<
@@ -9859,7 +9904,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_50__sub__(PyObject *
  */
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":624
+  /* "decimalfp/_cdecimalfp.pyx":627
  *         if isinstance(y, Decimal):
  *             return add(-y, x)
  *         return NotImplemented             # <<<<<<<<<<<<<<
@@ -9871,7 +9916,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_50__sub__(PyObject *
   __pyx_r = __pyx_builtin_NotImplemented;
   goto __pyx_L0;
 
-  /* "decimalfp/_cdecimalfp.pyx":618
+  /* "decimalfp/_cdecimalfp.pyx":621
  *         return NotImplemented
  * 
  *     def __sub__(x, y):             # <<<<<<<<<<<<<<
@@ -9891,7 +9936,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_50__sub__(PyObject *
   return __pyx_r;
 }
 
-/* "decimalfp/_cdecimalfp.pyx":626
+/* "decimalfp/_cdecimalfp.pyx":629
  *         return NotImplemented
  * 
  *     def __mul__(x, y):             # <<<<<<<<<<<<<<
@@ -9924,7 +9969,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_52__mul__(PyObject *
   PyObject *__pyx_t_3 = NULL;
   __Pyx_RefNannySetupContext("__mul__", 0);
 
-  /* "decimalfp/_cdecimalfp.pyx":628
+  /* "decimalfp/_cdecimalfp.pyx":631
  *     def __mul__(x, y):
  *         """x * y"""
  *         if isinstance(x, Decimal):             # <<<<<<<<<<<<<<
@@ -9935,7 +9980,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_52__mul__(PyObject *
   __pyx_t_2 = (__pyx_t_1 != 0);
   if (__pyx_t_2) {
 
-    /* "decimalfp/_cdecimalfp.pyx":629
+    /* "decimalfp/_cdecimalfp.pyx":632
  *         """x * y"""
  *         if isinstance(x, Decimal):
  *             return mul(x, y)             # <<<<<<<<<<<<<<
@@ -9943,14 +9988,14 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_52__mul__(PyObject *
  *             return mul(y, x)
  */
     __Pyx_XDECREF(__pyx_r);
-    if (!(likely(((__pyx_v_x) == Py_None) || likely(__Pyx_TypeTest(__pyx_v_x, __pyx_ptype_9decimalfp_11_cdecimalfp_Decimal))))) __PYX_ERR(0, 629, __pyx_L1_error)
-    __pyx_t_3 = __pyx_f_9decimalfp_11_cdecimalfp_mul(((struct __pyx_obj_9decimalfp_11_cdecimalfp_Decimal *)__pyx_v_x), __pyx_v_y); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 629, __pyx_L1_error)
+    if (!(likely(((__pyx_v_x) == Py_None) || likely(__Pyx_TypeTest(__pyx_v_x, __pyx_ptype_9decimalfp_11_cdecimalfp_Decimal))))) __PYX_ERR(0, 632, __pyx_L1_error)
+    __pyx_t_3 = __pyx_f_9decimalfp_11_cdecimalfp_mul(((struct __pyx_obj_9decimalfp_11_cdecimalfp_Decimal *)__pyx_v_x), __pyx_v_y); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 632, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __pyx_r = __pyx_t_3;
     __pyx_t_3 = 0;
     goto __pyx_L0;
 
-    /* "decimalfp/_cdecimalfp.pyx":628
+    /* "decimalfp/_cdecimalfp.pyx":631
  *     def __mul__(x, y):
  *         """x * y"""
  *         if isinstance(x, Decimal):             # <<<<<<<<<<<<<<
@@ -9959,7 +10004,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_52__mul__(PyObject *
  */
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":630
+  /* "decimalfp/_cdecimalfp.pyx":633
  *         if isinstance(x, Decimal):
  *             return mul(x, y)
  *         if isinstance(y, Decimal):             # <<<<<<<<<<<<<<
@@ -9970,7 +10015,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_52__mul__(PyObject *
   __pyx_t_1 = (__pyx_t_2 != 0);
   if (__pyx_t_1) {
 
-    /* "decimalfp/_cdecimalfp.pyx":631
+    /* "decimalfp/_cdecimalfp.pyx":634
  *             return mul(x, y)
  *         if isinstance(y, Decimal):
  *             return mul(y, x)             # <<<<<<<<<<<<<<
@@ -9978,14 +10023,14 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_52__mul__(PyObject *
  * 
  */
     __Pyx_XDECREF(__pyx_r);
-    if (!(likely(((__pyx_v_y) == Py_None) || likely(__Pyx_TypeTest(__pyx_v_y, __pyx_ptype_9decimalfp_11_cdecimalfp_Decimal))))) __PYX_ERR(0, 631, __pyx_L1_error)
-    __pyx_t_3 = __pyx_f_9decimalfp_11_cdecimalfp_mul(((struct __pyx_obj_9decimalfp_11_cdecimalfp_Decimal *)__pyx_v_y), __pyx_v_x); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 631, __pyx_L1_error)
+    if (!(likely(((__pyx_v_y) == Py_None) || likely(__Pyx_TypeTest(__pyx_v_y, __pyx_ptype_9decimalfp_11_cdecimalfp_Decimal))))) __PYX_ERR(0, 634, __pyx_L1_error)
+    __pyx_t_3 = __pyx_f_9decimalfp_11_cdecimalfp_mul(((struct __pyx_obj_9decimalfp_11_cdecimalfp_Decimal *)__pyx_v_y), __pyx_v_x); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 634, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __pyx_r = __pyx_t_3;
     __pyx_t_3 = 0;
     goto __pyx_L0;
 
-    /* "decimalfp/_cdecimalfp.pyx":630
+    /* "decimalfp/_cdecimalfp.pyx":633
  *         if isinstance(x, Decimal):
  *             return mul(x, y)
  *         if isinstance(y, Decimal):             # <<<<<<<<<<<<<<
@@ -9994,7 +10039,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_52__mul__(PyObject *
  */
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":632
+  /* "decimalfp/_cdecimalfp.pyx":635
  *         if isinstance(y, Decimal):
  *             return mul(y, x)
  *         return NotImplemented             # <<<<<<<<<<<<<<
@@ -10006,7 +10051,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_52__mul__(PyObject *
   __pyx_r = __pyx_builtin_NotImplemented;
   goto __pyx_L0;
 
-  /* "decimalfp/_cdecimalfp.pyx":626
+  /* "decimalfp/_cdecimalfp.pyx":629
  *         return NotImplemented
  * 
  *     def __mul__(x, y):             # <<<<<<<<<<<<<<
@@ -10025,7 +10070,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_52__mul__(PyObject *
   return __pyx_r;
 }
 
-/* "decimalfp/_cdecimalfp.pyx":634
+/* "decimalfp/_cdecimalfp.pyx":637
  *         return NotImplemented
  * 
  *     def __div__(x, y):             # <<<<<<<<<<<<<<
@@ -10061,7 +10106,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_54__div__(PyObject *
   PyObject *__pyx_t_3 = NULL;
   __Pyx_RefNannySetupContext("__div__", 0);
 
-  /* "decimalfp/_cdecimalfp.pyx":636
+  /* "decimalfp/_cdecimalfp.pyx":639
  *     def __div__(x, y):
  *         """x / y"""
  *         if isinstance(x, Decimal):             # <<<<<<<<<<<<<<
@@ -10072,7 +10117,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_54__div__(PyObject *
   __pyx_t_2 = (__pyx_t_1 != 0);
   if (__pyx_t_2) {
 
-    /* "decimalfp/_cdecimalfp.pyx":637
+    /* "decimalfp/_cdecimalfp.pyx":640
  *         """x / y"""
  *         if isinstance(x, Decimal):
  *             return div1(x, y)             # <<<<<<<<<<<<<<
@@ -10080,14 +10125,14 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_54__div__(PyObject *
  *             return div2(x, y)
  */
     __Pyx_XDECREF(__pyx_r);
-    if (!(likely(((__pyx_v_x) == Py_None) || likely(__Pyx_TypeTest(__pyx_v_x, __pyx_ptype_9decimalfp_11_cdecimalfp_Decimal))))) __PYX_ERR(0, 637, __pyx_L1_error)
-    __pyx_t_3 = __pyx_f_9decimalfp_11_cdecimalfp_div1(((struct __pyx_obj_9decimalfp_11_cdecimalfp_Decimal *)__pyx_v_x), __pyx_v_y); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 637, __pyx_L1_error)
+    if (!(likely(((__pyx_v_x) == Py_None) || likely(__Pyx_TypeTest(__pyx_v_x, __pyx_ptype_9decimalfp_11_cdecimalfp_Decimal))))) __PYX_ERR(0, 640, __pyx_L1_error)
+    __pyx_t_3 = __pyx_f_9decimalfp_11_cdecimalfp_div1(((struct __pyx_obj_9decimalfp_11_cdecimalfp_Decimal *)__pyx_v_x), __pyx_v_y); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 640, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __pyx_r = __pyx_t_3;
     __pyx_t_3 = 0;
     goto __pyx_L0;
 
-    /* "decimalfp/_cdecimalfp.pyx":636
+    /* "decimalfp/_cdecimalfp.pyx":639
  *     def __div__(x, y):
  *         """x / y"""
  *         if isinstance(x, Decimal):             # <<<<<<<<<<<<<<
@@ -10096,7 +10141,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_54__div__(PyObject *
  */
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":638
+  /* "decimalfp/_cdecimalfp.pyx":641
  *         if isinstance(x, Decimal):
  *             return div1(x, y)
  *         if isinstance(y, Decimal):             # <<<<<<<<<<<<<<
@@ -10107,7 +10152,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_54__div__(PyObject *
   __pyx_t_1 = (__pyx_t_2 != 0);
   if (__pyx_t_1) {
 
-    /* "decimalfp/_cdecimalfp.pyx":639
+    /* "decimalfp/_cdecimalfp.pyx":642
  *             return div1(x, y)
  *         if isinstance(y, Decimal):
  *             return div2(x, y)             # <<<<<<<<<<<<<<
@@ -10115,14 +10160,14 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_54__div__(PyObject *
  * 
  */
     __Pyx_XDECREF(__pyx_r);
-    if (!(likely(((__pyx_v_y) == Py_None) || likely(__Pyx_TypeTest(__pyx_v_y, __pyx_ptype_9decimalfp_11_cdecimalfp_Decimal))))) __PYX_ERR(0, 639, __pyx_L1_error)
-    __pyx_t_3 = __pyx_f_9decimalfp_11_cdecimalfp_div2(__pyx_v_x, ((struct __pyx_obj_9decimalfp_11_cdecimalfp_Decimal *)__pyx_v_y)); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 639, __pyx_L1_error)
+    if (!(likely(((__pyx_v_y) == Py_None) || likely(__Pyx_TypeTest(__pyx_v_y, __pyx_ptype_9decimalfp_11_cdecimalfp_Decimal))))) __PYX_ERR(0, 642, __pyx_L1_error)
+    __pyx_t_3 = __pyx_f_9decimalfp_11_cdecimalfp_div2(__pyx_v_x, ((struct __pyx_obj_9decimalfp_11_cdecimalfp_Decimal *)__pyx_v_y)); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 642, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __pyx_r = __pyx_t_3;
     __pyx_t_3 = 0;
     goto __pyx_L0;
 
-    /* "decimalfp/_cdecimalfp.pyx":638
+    /* "decimalfp/_cdecimalfp.pyx":641
  *         if isinstance(x, Decimal):
  *             return div1(x, y)
  *         if isinstance(y, Decimal):             # <<<<<<<<<<<<<<
@@ -10131,7 +10176,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_54__div__(PyObject *
  */
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":640
+  /* "decimalfp/_cdecimalfp.pyx":643
  *         if isinstance(y, Decimal):
  *             return div2(x, y)
  *         return NotImplemented             # <<<<<<<<<<<<<<
@@ -10143,7 +10188,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_54__div__(PyObject *
   __pyx_r = __pyx_builtin_NotImplemented;
   goto __pyx_L0;
 
-  /* "decimalfp/_cdecimalfp.pyx":634
+  /* "decimalfp/_cdecimalfp.pyx":637
  *         return NotImplemented
  * 
  *     def __div__(x, y):             # <<<<<<<<<<<<<<
@@ -10163,7 +10208,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_54__div__(PyObject *
 }
 #endif /*!(#if PY_MAJOR_VERSION < 3 || (CYTHON_COMPILING_IN_PYPY && PY_VERSION_HEX < 0x03050000))*/
 
-/* "decimalfp/_cdecimalfp.pyx":643
+/* "decimalfp/_cdecimalfp.pyx":646
  * 
  *     # Decimal division is true division
  *     def __truediv__(x, y):             # <<<<<<<<<<<<<<
@@ -10196,7 +10241,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_56__truediv__(PyObje
   PyObject *__pyx_t_3 = NULL;
   __Pyx_RefNannySetupContext("__truediv__", 0);
 
-  /* "decimalfp/_cdecimalfp.pyx":645
+  /* "decimalfp/_cdecimalfp.pyx":648
  *     def __truediv__(x, y):
  *         """x / y"""
  *         if isinstance(x, Decimal):             # <<<<<<<<<<<<<<
@@ -10207,7 +10252,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_56__truediv__(PyObje
   __pyx_t_2 = (__pyx_t_1 != 0);
   if (__pyx_t_2) {
 
-    /* "decimalfp/_cdecimalfp.pyx":646
+    /* "decimalfp/_cdecimalfp.pyx":649
  *         """x / y"""
  *         if isinstance(x, Decimal):
  *             return div1(x, y)             # <<<<<<<<<<<<<<
@@ -10215,14 +10260,14 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_56__truediv__(PyObje
  *             return div2(x, y)
  */
     __Pyx_XDECREF(__pyx_r);
-    if (!(likely(((__pyx_v_x) == Py_None) || likely(__Pyx_TypeTest(__pyx_v_x, __pyx_ptype_9decimalfp_11_cdecimalfp_Decimal))))) __PYX_ERR(0, 646, __pyx_L1_error)
-    __pyx_t_3 = __pyx_f_9decimalfp_11_cdecimalfp_div1(((struct __pyx_obj_9decimalfp_11_cdecimalfp_Decimal *)__pyx_v_x), __pyx_v_y); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 646, __pyx_L1_error)
+    if (!(likely(((__pyx_v_x) == Py_None) || likely(__Pyx_TypeTest(__pyx_v_x, __pyx_ptype_9decimalfp_11_cdecimalfp_Decimal))))) __PYX_ERR(0, 649, __pyx_L1_error)
+    __pyx_t_3 = __pyx_f_9decimalfp_11_cdecimalfp_div1(((struct __pyx_obj_9decimalfp_11_cdecimalfp_Decimal *)__pyx_v_x), __pyx_v_y); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 649, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __pyx_r = __pyx_t_3;
     __pyx_t_3 = 0;
     goto __pyx_L0;
 
-    /* "decimalfp/_cdecimalfp.pyx":645
+    /* "decimalfp/_cdecimalfp.pyx":648
  *     def __truediv__(x, y):
  *         """x / y"""
  *         if isinstance(x, Decimal):             # <<<<<<<<<<<<<<
@@ -10231,7 +10276,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_56__truediv__(PyObje
  */
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":647
+  /* "decimalfp/_cdecimalfp.pyx":650
  *         if isinstance(x, Decimal):
  *             return div1(x, y)
  *         if isinstance(y, Decimal):             # <<<<<<<<<<<<<<
@@ -10242,7 +10287,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_56__truediv__(PyObje
   __pyx_t_1 = (__pyx_t_2 != 0);
   if (__pyx_t_1) {
 
-    /* "decimalfp/_cdecimalfp.pyx":648
+    /* "decimalfp/_cdecimalfp.pyx":651
  *             return div1(x, y)
  *         if isinstance(y, Decimal):
  *             return div2(x, y)             # <<<<<<<<<<<<<<
@@ -10250,14 +10295,14 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_56__truediv__(PyObje
  * 
  */
     __Pyx_XDECREF(__pyx_r);
-    if (!(likely(((__pyx_v_y) == Py_None) || likely(__Pyx_TypeTest(__pyx_v_y, __pyx_ptype_9decimalfp_11_cdecimalfp_Decimal))))) __PYX_ERR(0, 648, __pyx_L1_error)
-    __pyx_t_3 = __pyx_f_9decimalfp_11_cdecimalfp_div2(__pyx_v_x, ((struct __pyx_obj_9decimalfp_11_cdecimalfp_Decimal *)__pyx_v_y)); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 648, __pyx_L1_error)
+    if (!(likely(((__pyx_v_y) == Py_None) || likely(__Pyx_TypeTest(__pyx_v_y, __pyx_ptype_9decimalfp_11_cdecimalfp_Decimal))))) __PYX_ERR(0, 651, __pyx_L1_error)
+    __pyx_t_3 = __pyx_f_9decimalfp_11_cdecimalfp_div2(__pyx_v_x, ((struct __pyx_obj_9decimalfp_11_cdecimalfp_Decimal *)__pyx_v_y)); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 651, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __pyx_r = __pyx_t_3;
     __pyx_t_3 = 0;
     goto __pyx_L0;
 
-    /* "decimalfp/_cdecimalfp.pyx":647
+    /* "decimalfp/_cdecimalfp.pyx":650
  *         if isinstance(x, Decimal):
  *             return div1(x, y)
  *         if isinstance(y, Decimal):             # <<<<<<<<<<<<<<
@@ -10266,7 +10311,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_56__truediv__(PyObje
  */
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":649
+  /* "decimalfp/_cdecimalfp.pyx":652
  *         if isinstance(y, Decimal):
  *             return div2(x, y)
  *         return NotImplemented             # <<<<<<<<<<<<<<
@@ -10278,7 +10323,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_56__truediv__(PyObje
   __pyx_r = __pyx_builtin_NotImplemented;
   goto __pyx_L0;
 
-  /* "decimalfp/_cdecimalfp.pyx":643
+  /* "decimalfp/_cdecimalfp.pyx":646
  * 
  *     # Decimal division is true division
  *     def __truediv__(x, y):             # <<<<<<<<<<<<<<
@@ -10297,7 +10342,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_56__truediv__(PyObje
   return __pyx_r;
 }
 
-/* "decimalfp/_cdecimalfp.pyx":651
+/* "decimalfp/_cdecimalfp.pyx":654
  *         return NotImplemented
  * 
  *     def __divmod__(x, y):             # <<<<<<<<<<<<<<
@@ -10330,7 +10375,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_58__divmod__(PyObjec
   PyObject *__pyx_t_3 = NULL;
   __Pyx_RefNannySetupContext("__divmod__", 0);
 
-  /* "decimalfp/_cdecimalfp.pyx":653
+  /* "decimalfp/_cdecimalfp.pyx":656
  *     def __divmod__(x, y):
  *         """x // y, x % y"""
  *         if isinstance(x, Decimal):             # <<<<<<<<<<<<<<
@@ -10341,7 +10386,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_58__divmod__(PyObjec
   __pyx_t_2 = (__pyx_t_1 != 0);
   if (__pyx_t_2) {
 
-    /* "decimalfp/_cdecimalfp.pyx":654
+    /* "decimalfp/_cdecimalfp.pyx":657
  *         """x // y, x % y"""
  *         if isinstance(x, Decimal):
  *             return divmod1(x, y)             # <<<<<<<<<<<<<<
@@ -10349,14 +10394,14 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_58__divmod__(PyObjec
  *             return divmod2(x, y)
  */
     __Pyx_XDECREF(__pyx_r);
-    if (!(likely(((__pyx_v_x) == Py_None) || likely(__Pyx_TypeTest(__pyx_v_x, __pyx_ptype_9decimalfp_11_cdecimalfp_Decimal))))) __PYX_ERR(0, 654, __pyx_L1_error)
-    __pyx_t_3 = __pyx_f_9decimalfp_11_cdecimalfp_divmod1(((struct __pyx_obj_9decimalfp_11_cdecimalfp_Decimal *)__pyx_v_x), __pyx_v_y); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 654, __pyx_L1_error)
+    if (!(likely(((__pyx_v_x) == Py_None) || likely(__Pyx_TypeTest(__pyx_v_x, __pyx_ptype_9decimalfp_11_cdecimalfp_Decimal))))) __PYX_ERR(0, 657, __pyx_L1_error)
+    __pyx_t_3 = __pyx_f_9decimalfp_11_cdecimalfp_divmod1(((struct __pyx_obj_9decimalfp_11_cdecimalfp_Decimal *)__pyx_v_x), __pyx_v_y); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 657, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __pyx_r = __pyx_t_3;
     __pyx_t_3 = 0;
     goto __pyx_L0;
 
-    /* "decimalfp/_cdecimalfp.pyx":653
+    /* "decimalfp/_cdecimalfp.pyx":656
  *     def __divmod__(x, y):
  *         """x // y, x % y"""
  *         if isinstance(x, Decimal):             # <<<<<<<<<<<<<<
@@ -10365,7 +10410,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_58__divmod__(PyObjec
  */
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":655
+  /* "decimalfp/_cdecimalfp.pyx":658
  *         if isinstance(x, Decimal):
  *             return divmod1(x, y)
  *         if isinstance(y, Decimal):             # <<<<<<<<<<<<<<
@@ -10376,7 +10421,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_58__divmod__(PyObjec
   __pyx_t_1 = (__pyx_t_2 != 0);
   if (__pyx_t_1) {
 
-    /* "decimalfp/_cdecimalfp.pyx":656
+    /* "decimalfp/_cdecimalfp.pyx":659
  *             return divmod1(x, y)
  *         if isinstance(y, Decimal):
  *             return divmod2(x, y)             # <<<<<<<<<<<<<<
@@ -10384,14 +10429,14 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_58__divmod__(PyObjec
  * 
  */
     __Pyx_XDECREF(__pyx_r);
-    if (!(likely(((__pyx_v_y) == Py_None) || likely(__Pyx_TypeTest(__pyx_v_y, __pyx_ptype_9decimalfp_11_cdecimalfp_Decimal))))) __PYX_ERR(0, 656, __pyx_L1_error)
-    __pyx_t_3 = __pyx_f_9decimalfp_11_cdecimalfp_divmod2(__pyx_v_x, ((struct __pyx_obj_9decimalfp_11_cdecimalfp_Decimal *)__pyx_v_y)); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 656, __pyx_L1_error)
+    if (!(likely(((__pyx_v_y) == Py_None) || likely(__Pyx_TypeTest(__pyx_v_y, __pyx_ptype_9decimalfp_11_cdecimalfp_Decimal))))) __PYX_ERR(0, 659, __pyx_L1_error)
+    __pyx_t_3 = __pyx_f_9decimalfp_11_cdecimalfp_divmod2(__pyx_v_x, ((struct __pyx_obj_9decimalfp_11_cdecimalfp_Decimal *)__pyx_v_y)); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 659, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __pyx_r = __pyx_t_3;
     __pyx_t_3 = 0;
     goto __pyx_L0;
 
-    /* "decimalfp/_cdecimalfp.pyx":655
+    /* "decimalfp/_cdecimalfp.pyx":658
  *         if isinstance(x, Decimal):
  *             return divmod1(x, y)
  *         if isinstance(y, Decimal):             # <<<<<<<<<<<<<<
@@ -10400,7 +10445,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_58__divmod__(PyObjec
  */
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":657
+  /* "decimalfp/_cdecimalfp.pyx":660
  *         if isinstance(y, Decimal):
  *             return divmod2(x, y)
  *         return NotImplemented             # <<<<<<<<<<<<<<
@@ -10412,7 +10457,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_58__divmod__(PyObjec
   __pyx_r = __pyx_builtin_NotImplemented;
   goto __pyx_L0;
 
-  /* "decimalfp/_cdecimalfp.pyx":651
+  /* "decimalfp/_cdecimalfp.pyx":654
  *         return NotImplemented
  * 
  *     def __divmod__(x, y):             # <<<<<<<<<<<<<<
@@ -10431,7 +10476,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_58__divmod__(PyObjec
   return __pyx_r;
 }
 
-/* "decimalfp/_cdecimalfp.pyx":659
+/* "decimalfp/_cdecimalfp.pyx":662
  *         return NotImplemented
  * 
  *     def __floordiv__(x, y):             # <<<<<<<<<<<<<<
@@ -10464,7 +10509,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_60__floordiv__(PyObj
   PyObject *__pyx_t_3 = NULL;
   __Pyx_RefNannySetupContext("__floordiv__", 0);
 
-  /* "decimalfp/_cdecimalfp.pyx":661
+  /* "decimalfp/_cdecimalfp.pyx":664
  *     def __floordiv__(x, y):
  *         """x // y"""
  *         if isinstance(x, Decimal):             # <<<<<<<<<<<<<<
@@ -10475,7 +10520,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_60__floordiv__(PyObj
   __pyx_t_2 = (__pyx_t_1 != 0);
   if (__pyx_t_2) {
 
-    /* "decimalfp/_cdecimalfp.pyx":662
+    /* "decimalfp/_cdecimalfp.pyx":665
  *         """x // y"""
  *         if isinstance(x, Decimal):
  *             return floordiv1(x, y)             # <<<<<<<<<<<<<<
@@ -10483,14 +10528,14 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_60__floordiv__(PyObj
  *             return floordiv2(x, y)
  */
     __Pyx_XDECREF(__pyx_r);
-    if (!(likely(((__pyx_v_x) == Py_None) || likely(__Pyx_TypeTest(__pyx_v_x, __pyx_ptype_9decimalfp_11_cdecimalfp_Decimal))))) __PYX_ERR(0, 662, __pyx_L1_error)
-    __pyx_t_3 = __pyx_f_9decimalfp_11_cdecimalfp_floordiv1(((struct __pyx_obj_9decimalfp_11_cdecimalfp_Decimal *)__pyx_v_x), __pyx_v_y); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 662, __pyx_L1_error)
+    if (!(likely(((__pyx_v_x) == Py_None) || likely(__Pyx_TypeTest(__pyx_v_x, __pyx_ptype_9decimalfp_11_cdecimalfp_Decimal))))) __PYX_ERR(0, 665, __pyx_L1_error)
+    __pyx_t_3 = __pyx_f_9decimalfp_11_cdecimalfp_floordiv1(((struct __pyx_obj_9decimalfp_11_cdecimalfp_Decimal *)__pyx_v_x), __pyx_v_y); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 665, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __pyx_r = __pyx_t_3;
     __pyx_t_3 = 0;
     goto __pyx_L0;
 
-    /* "decimalfp/_cdecimalfp.pyx":661
+    /* "decimalfp/_cdecimalfp.pyx":664
  *     def __floordiv__(x, y):
  *         """x // y"""
  *         if isinstance(x, Decimal):             # <<<<<<<<<<<<<<
@@ -10499,7 +10544,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_60__floordiv__(PyObj
  */
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":663
+  /* "decimalfp/_cdecimalfp.pyx":666
  *         if isinstance(x, Decimal):
  *             return floordiv1(x, y)
  *         if isinstance(y, Decimal):             # <<<<<<<<<<<<<<
@@ -10510,7 +10555,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_60__floordiv__(PyObj
   __pyx_t_1 = (__pyx_t_2 != 0);
   if (__pyx_t_1) {
 
-    /* "decimalfp/_cdecimalfp.pyx":664
+    /* "decimalfp/_cdecimalfp.pyx":667
  *             return floordiv1(x, y)
  *         if isinstance(y, Decimal):
  *             return floordiv2(x, y)             # <<<<<<<<<<<<<<
@@ -10518,14 +10563,14 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_60__floordiv__(PyObj
  * 
  */
     __Pyx_XDECREF(__pyx_r);
-    if (!(likely(((__pyx_v_y) == Py_None) || likely(__Pyx_TypeTest(__pyx_v_y, __pyx_ptype_9decimalfp_11_cdecimalfp_Decimal))))) __PYX_ERR(0, 664, __pyx_L1_error)
-    __pyx_t_3 = __pyx_f_9decimalfp_11_cdecimalfp_floordiv2(__pyx_v_x, ((struct __pyx_obj_9decimalfp_11_cdecimalfp_Decimal *)__pyx_v_y)); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 664, __pyx_L1_error)
+    if (!(likely(((__pyx_v_y) == Py_None) || likely(__Pyx_TypeTest(__pyx_v_y, __pyx_ptype_9decimalfp_11_cdecimalfp_Decimal))))) __PYX_ERR(0, 667, __pyx_L1_error)
+    __pyx_t_3 = __pyx_f_9decimalfp_11_cdecimalfp_floordiv2(__pyx_v_x, ((struct __pyx_obj_9decimalfp_11_cdecimalfp_Decimal *)__pyx_v_y)); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 667, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __pyx_r = __pyx_t_3;
     __pyx_t_3 = 0;
     goto __pyx_L0;
 
-    /* "decimalfp/_cdecimalfp.pyx":663
+    /* "decimalfp/_cdecimalfp.pyx":666
  *         if isinstance(x, Decimal):
  *             return floordiv1(x, y)
  *         if isinstance(y, Decimal):             # <<<<<<<<<<<<<<
@@ -10534,7 +10579,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_60__floordiv__(PyObj
  */
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":665
+  /* "decimalfp/_cdecimalfp.pyx":668
  *         if isinstance(y, Decimal):
  *             return floordiv2(x, y)
  *         return NotImplemented             # <<<<<<<<<<<<<<
@@ -10546,7 +10591,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_60__floordiv__(PyObj
   __pyx_r = __pyx_builtin_NotImplemented;
   goto __pyx_L0;
 
-  /* "decimalfp/_cdecimalfp.pyx":659
+  /* "decimalfp/_cdecimalfp.pyx":662
  *         return NotImplemented
  * 
  *     def __floordiv__(x, y):             # <<<<<<<<<<<<<<
@@ -10565,7 +10610,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_60__floordiv__(PyObj
   return __pyx_r;
 }
 
-/* "decimalfp/_cdecimalfp.pyx":667
+/* "decimalfp/_cdecimalfp.pyx":670
  *         return NotImplemented
  * 
  *     def __mod__(x, y):             # <<<<<<<<<<<<<<
@@ -10598,7 +10643,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_62__mod__(PyObject *
   PyObject *__pyx_t_3 = NULL;
   __Pyx_RefNannySetupContext("__mod__", 0);
 
-  /* "decimalfp/_cdecimalfp.pyx":669
+  /* "decimalfp/_cdecimalfp.pyx":672
  *     def __mod__(x, y):
  *         """x % y"""
  *         if isinstance(x, Decimal):             # <<<<<<<<<<<<<<
@@ -10609,7 +10654,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_62__mod__(PyObject *
   __pyx_t_2 = (__pyx_t_1 != 0);
   if (__pyx_t_2) {
 
-    /* "decimalfp/_cdecimalfp.pyx":670
+    /* "decimalfp/_cdecimalfp.pyx":673
  *         """x % y"""
  *         if isinstance(x, Decimal):
  *             return mod1(x, y)             # <<<<<<<<<<<<<<
@@ -10617,14 +10662,14 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_62__mod__(PyObject *
  *             return mod2(x, y)
  */
     __Pyx_XDECREF(__pyx_r);
-    if (!(likely(((__pyx_v_x) == Py_None) || likely(__Pyx_TypeTest(__pyx_v_x, __pyx_ptype_9decimalfp_11_cdecimalfp_Decimal))))) __PYX_ERR(0, 670, __pyx_L1_error)
-    __pyx_t_3 = __pyx_f_9decimalfp_11_cdecimalfp_mod1(((struct __pyx_obj_9decimalfp_11_cdecimalfp_Decimal *)__pyx_v_x), __pyx_v_y); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 670, __pyx_L1_error)
+    if (!(likely(((__pyx_v_x) == Py_None) || likely(__Pyx_TypeTest(__pyx_v_x, __pyx_ptype_9decimalfp_11_cdecimalfp_Decimal))))) __PYX_ERR(0, 673, __pyx_L1_error)
+    __pyx_t_3 = __pyx_f_9decimalfp_11_cdecimalfp_mod1(((struct __pyx_obj_9decimalfp_11_cdecimalfp_Decimal *)__pyx_v_x), __pyx_v_y); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 673, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __pyx_r = __pyx_t_3;
     __pyx_t_3 = 0;
     goto __pyx_L0;
 
-    /* "decimalfp/_cdecimalfp.pyx":669
+    /* "decimalfp/_cdecimalfp.pyx":672
  *     def __mod__(x, y):
  *         """x % y"""
  *         if isinstance(x, Decimal):             # <<<<<<<<<<<<<<
@@ -10633,7 +10678,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_62__mod__(PyObject *
  */
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":671
+  /* "decimalfp/_cdecimalfp.pyx":674
  *         if isinstance(x, Decimal):
  *             return mod1(x, y)
  *         if isinstance(y, Decimal):             # <<<<<<<<<<<<<<
@@ -10644,7 +10689,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_62__mod__(PyObject *
   __pyx_t_1 = (__pyx_t_2 != 0);
   if (__pyx_t_1) {
 
-    /* "decimalfp/_cdecimalfp.pyx":672
+    /* "decimalfp/_cdecimalfp.pyx":675
  *             return mod1(x, y)
  *         if isinstance(y, Decimal):
  *             return mod2(x, y)             # <<<<<<<<<<<<<<
@@ -10652,14 +10697,14 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_62__mod__(PyObject *
  * 
  */
     __Pyx_XDECREF(__pyx_r);
-    if (!(likely(((__pyx_v_y) == Py_None) || likely(__Pyx_TypeTest(__pyx_v_y, __pyx_ptype_9decimalfp_11_cdecimalfp_Decimal))))) __PYX_ERR(0, 672, __pyx_L1_error)
-    __pyx_t_3 = __pyx_f_9decimalfp_11_cdecimalfp_mod2(__pyx_v_x, ((struct __pyx_obj_9decimalfp_11_cdecimalfp_Decimal *)__pyx_v_y)); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 672, __pyx_L1_error)
+    if (!(likely(((__pyx_v_y) == Py_None) || likely(__Pyx_TypeTest(__pyx_v_y, __pyx_ptype_9decimalfp_11_cdecimalfp_Decimal))))) __PYX_ERR(0, 675, __pyx_L1_error)
+    __pyx_t_3 = __pyx_f_9decimalfp_11_cdecimalfp_mod2(__pyx_v_x, ((struct __pyx_obj_9decimalfp_11_cdecimalfp_Decimal *)__pyx_v_y)); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 675, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __pyx_r = __pyx_t_3;
     __pyx_t_3 = 0;
     goto __pyx_L0;
 
-    /* "decimalfp/_cdecimalfp.pyx":671
+    /* "decimalfp/_cdecimalfp.pyx":674
  *         if isinstance(x, Decimal):
  *             return mod1(x, y)
  *         if isinstance(y, Decimal):             # <<<<<<<<<<<<<<
@@ -10668,7 +10713,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_62__mod__(PyObject *
  */
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":673
+  /* "decimalfp/_cdecimalfp.pyx":676
  *         if isinstance(y, Decimal):
  *             return mod2(x, y)
  *         return NotImplemented             # <<<<<<<<<<<<<<
@@ -10680,7 +10725,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_62__mod__(PyObject *
   __pyx_r = __pyx_builtin_NotImplemented;
   goto __pyx_L0;
 
-  /* "decimalfp/_cdecimalfp.pyx":667
+  /* "decimalfp/_cdecimalfp.pyx":670
  *         return NotImplemented
  * 
  *     def __mod__(x, y):             # <<<<<<<<<<<<<<
@@ -10699,7 +10744,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_62__mod__(PyObject *
   return __pyx_r;
 }
 
-/* "decimalfp/_cdecimalfp.pyx":675
+/* "decimalfp/_cdecimalfp.pyx":678
  *         return NotImplemented
  * 
  *     def __pow__(x, y, mod):             # <<<<<<<<<<<<<<
@@ -10732,7 +10777,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_64__pow__(PyObject *
   PyObject *__pyx_t_3 = NULL;
   __Pyx_RefNannySetupContext("__pow__", 0);
 
-  /* "decimalfp/_cdecimalfp.pyx":684
+  /* "decimalfp/_cdecimalfp.pyx":687
  *         `mod` must always be None (otherwise a `TypeError` is raised).
  *         """
  *         if mod is not None:             # <<<<<<<<<<<<<<
@@ -10743,20 +10788,20 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_64__pow__(PyObject *
   __pyx_t_2 = (__pyx_t_1 != 0);
   if (unlikely(__pyx_t_2)) {
 
-    /* "decimalfp/_cdecimalfp.pyx":685
+    /* "decimalfp/_cdecimalfp.pyx":688
  *         """
  *         if mod is not None:
  *             raise TypeError("3rd argument not allowed unless all arguments "             # <<<<<<<<<<<<<<
  *                             "are integers")
  *         if isinstance(x, Decimal):
  */
-    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__7, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 685, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__7, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 688, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_Raise(__pyx_t_3, 0, 0, 0);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    __PYX_ERR(0, 685, __pyx_L1_error)
+    __PYX_ERR(0, 688, __pyx_L1_error)
 
-    /* "decimalfp/_cdecimalfp.pyx":684
+    /* "decimalfp/_cdecimalfp.pyx":687
  *         `mod` must always be None (otherwise a `TypeError` is raised).
  *         """
  *         if mod is not None:             # <<<<<<<<<<<<<<
@@ -10765,7 +10810,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_64__pow__(PyObject *
  */
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":687
+  /* "decimalfp/_cdecimalfp.pyx":690
  *             raise TypeError("3rd argument not allowed unless all arguments "
  *                             "are integers")
  *         if isinstance(x, Decimal):             # <<<<<<<<<<<<<<
@@ -10776,7 +10821,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_64__pow__(PyObject *
   __pyx_t_1 = (__pyx_t_2 != 0);
   if (__pyx_t_1) {
 
-    /* "decimalfp/_cdecimalfp.pyx":688
+    /* "decimalfp/_cdecimalfp.pyx":691
  *                             "are integers")
  *         if isinstance(x, Decimal):
  *             return pow1(x, y)             # <<<<<<<<<<<<<<
@@ -10784,14 +10829,14 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_64__pow__(PyObject *
  *             return pow2(x, y)
  */
     __Pyx_XDECREF(__pyx_r);
-    if (!(likely(((__pyx_v_x) == Py_None) || likely(__Pyx_TypeTest(__pyx_v_x, __pyx_ptype_9decimalfp_11_cdecimalfp_Decimal))))) __PYX_ERR(0, 688, __pyx_L1_error)
-    __pyx_t_3 = __pyx_f_9decimalfp_11_cdecimalfp_pow1(((struct __pyx_obj_9decimalfp_11_cdecimalfp_Decimal *)__pyx_v_x), __pyx_v_y); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 688, __pyx_L1_error)
+    if (!(likely(((__pyx_v_x) == Py_None) || likely(__Pyx_TypeTest(__pyx_v_x, __pyx_ptype_9decimalfp_11_cdecimalfp_Decimal))))) __PYX_ERR(0, 691, __pyx_L1_error)
+    __pyx_t_3 = __pyx_f_9decimalfp_11_cdecimalfp_pow1(((struct __pyx_obj_9decimalfp_11_cdecimalfp_Decimal *)__pyx_v_x), __pyx_v_y); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 691, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __pyx_r = __pyx_t_3;
     __pyx_t_3 = 0;
     goto __pyx_L0;
 
-    /* "decimalfp/_cdecimalfp.pyx":687
+    /* "decimalfp/_cdecimalfp.pyx":690
  *             raise TypeError("3rd argument not allowed unless all arguments "
  *                             "are integers")
  *         if isinstance(x, Decimal):             # <<<<<<<<<<<<<<
@@ -10800,7 +10845,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_64__pow__(PyObject *
  */
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":689
+  /* "decimalfp/_cdecimalfp.pyx":692
  *         if isinstance(x, Decimal):
  *             return pow1(x, y)
  *         if isinstance(y, Decimal):             # <<<<<<<<<<<<<<
@@ -10811,7 +10856,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_64__pow__(PyObject *
   __pyx_t_2 = (__pyx_t_1 != 0);
   if (__pyx_t_2) {
 
-    /* "decimalfp/_cdecimalfp.pyx":690
+    /* "decimalfp/_cdecimalfp.pyx":693
  *             return pow1(x, y)
  *         if isinstance(y, Decimal):
  *             return pow2(x, y)             # <<<<<<<<<<<<<<
@@ -10819,14 +10864,14 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_64__pow__(PyObject *
  * 
  */
     __Pyx_XDECREF(__pyx_r);
-    if (!(likely(((__pyx_v_y) == Py_None) || likely(__Pyx_TypeTest(__pyx_v_y, __pyx_ptype_9decimalfp_11_cdecimalfp_Decimal))))) __PYX_ERR(0, 690, __pyx_L1_error)
-    __pyx_t_3 = __pyx_f_9decimalfp_11_cdecimalfp_pow2(__pyx_v_x, ((struct __pyx_obj_9decimalfp_11_cdecimalfp_Decimal *)__pyx_v_y)); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 690, __pyx_L1_error)
+    if (!(likely(((__pyx_v_y) == Py_None) || likely(__Pyx_TypeTest(__pyx_v_y, __pyx_ptype_9decimalfp_11_cdecimalfp_Decimal))))) __PYX_ERR(0, 693, __pyx_L1_error)
+    __pyx_t_3 = __pyx_f_9decimalfp_11_cdecimalfp_pow2(__pyx_v_x, ((struct __pyx_obj_9decimalfp_11_cdecimalfp_Decimal *)__pyx_v_y)); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 693, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __pyx_r = __pyx_t_3;
     __pyx_t_3 = 0;
     goto __pyx_L0;
 
-    /* "decimalfp/_cdecimalfp.pyx":689
+    /* "decimalfp/_cdecimalfp.pyx":692
  *         if isinstance(x, Decimal):
  *             return pow1(x, y)
  *         if isinstance(y, Decimal):             # <<<<<<<<<<<<<<
@@ -10835,7 +10880,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_64__pow__(PyObject *
  */
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":691
+  /* "decimalfp/_cdecimalfp.pyx":694
  *         if isinstance(y, Decimal):
  *             return pow2(x, y)
  *         return NotImplemented             # <<<<<<<<<<<<<<
@@ -10847,7 +10892,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_64__pow__(PyObject *
   __pyx_r = __pyx_builtin_NotImplemented;
   goto __pyx_L0;
 
-  /* "decimalfp/_cdecimalfp.pyx":675
+  /* "decimalfp/_cdecimalfp.pyx":678
  *         return NotImplemented
  * 
  *     def __pow__(x, y, mod):             # <<<<<<<<<<<<<<
@@ -10866,7 +10911,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_64__pow__(PyObject *
   return __pyx_r;
 }
 
-/* "decimalfp/_cdecimalfp.pyx":693
+/* "decimalfp/_cdecimalfp.pyx":696
  *         return NotImplemented
  * 
  *     def __floor__(self):             # <<<<<<<<<<<<<<
@@ -10897,7 +10942,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_66__floor__(struct _
   PyObject *__pyx_t_2 = NULL;
   __Pyx_RefNannySetupContext("__floor__", 0);
 
-  /* "decimalfp/_cdecimalfp.pyx":695
+  /* "decimalfp/_cdecimalfp.pyx":698
  *     def __floor__(self):
  *         """math.floor(self)"""
  *         n, d = self._value, base10pow(self._precision)             # <<<<<<<<<<<<<<
@@ -10906,14 +10951,14 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_66__floor__(struct _
  */
   __pyx_t_1 = __pyx_v_self->_value;
   __Pyx_INCREF(__pyx_t_1);
-  __pyx_t_2 = __pyx_f_9decimalfp_11_cdecimalfp_base10pow(__pyx_v_self->_precision); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 695, __pyx_L1_error)
+  __pyx_t_2 = __pyx_f_9decimalfp_11_cdecimalfp_base10pow(__pyx_v_self->_precision); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 698, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_v_n = __pyx_t_1;
   __pyx_t_1 = 0;
   __pyx_v_d = __pyx_t_2;
   __pyx_t_2 = 0;
 
-  /* "decimalfp/_cdecimalfp.pyx":696
+  /* "decimalfp/_cdecimalfp.pyx":699
  *         """math.floor(self)"""
  *         n, d = self._value, base10pow(self._precision)
  *         return n // d             # <<<<<<<<<<<<<<
@@ -10921,13 +10966,13 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_66__floor__(struct _
  *     def __ceil__(self):
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_2 = PyNumber_FloorDivide(__pyx_v_n, __pyx_v_d); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 696, __pyx_L1_error)
+  __pyx_t_2 = PyNumber_FloorDivide(__pyx_v_n, __pyx_v_d); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 699, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_r = __pyx_t_2;
   __pyx_t_2 = 0;
   goto __pyx_L0;
 
-  /* "decimalfp/_cdecimalfp.pyx":693
+  /* "decimalfp/_cdecimalfp.pyx":696
  *         return NotImplemented
  * 
  *     def __floor__(self):             # <<<<<<<<<<<<<<
@@ -10949,7 +10994,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_66__floor__(struct _
   return __pyx_r;
 }
 
-/* "decimalfp/_cdecimalfp.pyx":698
+/* "decimalfp/_cdecimalfp.pyx":701
  *         return n // d
  * 
  *     def __ceil__(self):             # <<<<<<<<<<<<<<
@@ -10980,7 +11025,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_68__ceil__(struct __
   PyObject *__pyx_t_2 = NULL;
   __Pyx_RefNannySetupContext("__ceil__", 0);
 
-  /* "decimalfp/_cdecimalfp.pyx":700
+  /* "decimalfp/_cdecimalfp.pyx":703
  *     def __ceil__(self):
  *         """math.ceil(self)"""
  *         n, d = self._value, base10pow(self._precision)             # <<<<<<<<<<<<<<
@@ -10989,14 +11034,14 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_68__ceil__(struct __
  */
   __pyx_t_1 = __pyx_v_self->_value;
   __Pyx_INCREF(__pyx_t_1);
-  __pyx_t_2 = __pyx_f_9decimalfp_11_cdecimalfp_base10pow(__pyx_v_self->_precision); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 700, __pyx_L1_error)
+  __pyx_t_2 = __pyx_f_9decimalfp_11_cdecimalfp_base10pow(__pyx_v_self->_precision); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 703, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_v_n = __pyx_t_1;
   __pyx_t_1 = 0;
   __pyx_v_d = __pyx_t_2;
   __pyx_t_2 = 0;
 
-  /* "decimalfp/_cdecimalfp.pyx":701
+  /* "decimalfp/_cdecimalfp.pyx":704
  *         """math.ceil(self)"""
  *         n, d = self._value, base10pow(self._precision)
  *         return -(-n // d)             # <<<<<<<<<<<<<<
@@ -11004,19 +11049,19 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_68__ceil__(struct __
  *     def __round__(self, precision=None):
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_2 = PyNumber_Negative(__pyx_v_n); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 701, __pyx_L1_error)
+  __pyx_t_2 = PyNumber_Negative(__pyx_v_n); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 704, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_1 = PyNumber_FloorDivide(__pyx_t_2, __pyx_v_d); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 701, __pyx_L1_error)
+  __pyx_t_1 = PyNumber_FloorDivide(__pyx_t_2, __pyx_v_d); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 704, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = PyNumber_Negative(__pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 701, __pyx_L1_error)
+  __pyx_t_2 = PyNumber_Negative(__pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 704, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_r = __pyx_t_2;
   __pyx_t_2 = 0;
   goto __pyx_L0;
 
-  /* "decimalfp/_cdecimalfp.pyx":698
+  /* "decimalfp/_cdecimalfp.pyx":701
  *         return n // d
  * 
  *     def __ceil__(self):             # <<<<<<<<<<<<<<
@@ -11038,7 +11083,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_68__ceil__(struct __
   return __pyx_r;
 }
 
-/* "decimalfp/_cdecimalfp.pyx":703
+/* "decimalfp/_cdecimalfp.pyx":706
  *         return -(-n // d)
  * 
  *     def __round__(self, precision=None):             # <<<<<<<<<<<<<<
@@ -11076,7 +11121,7 @@ static PyObject *__pyx_pw_9decimalfp_11_cdecimalfp_7Decimal_71__round__(PyObject
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "__round__") < 0)) __PYX_ERR(0, 703, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "__round__") < 0)) __PYX_ERR(0, 706, __pyx_L3_error)
       }
     } else {
       switch (PyTuple_GET_SIZE(__pyx_args)) {
@@ -11090,7 +11135,7 @@ static PyObject *__pyx_pw_9decimalfp_11_cdecimalfp_7Decimal_71__round__(PyObject
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("__round__", 0, 0, 1, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 703, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("__round__", 0, 0, 1, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 706, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("decimalfp._cdecimalfp.Decimal.__round__", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -11116,7 +11161,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_70__round__(struct _
   PyObject *__pyx_t_8 = NULL;
   __Pyx_RefNannySetupContext("__round__", 0);
 
-  /* "decimalfp/_cdecimalfp.pyx":713
+  /* "decimalfp/_cdecimalfp.pyx":716
  *         otherwise a :class:`Decimal`.
  *         """
  *         if precision is None:             # <<<<<<<<<<<<<<
@@ -11127,7 +11172,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_70__round__(struct _
   __pyx_t_2 = (__pyx_t_1 != 0);
   if (__pyx_t_2) {
 
-    /* "decimalfp/_cdecimalfp.pyx":715
+    /* "decimalfp/_cdecimalfp.pyx":718
  *         if precision is None:
  *             # return integer
  *             return int(self.adjusted(0, ROUNDING.default))             # <<<<<<<<<<<<<<
@@ -11135,11 +11180,11 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_70__round__(struct _
  *         return self.adjusted(precision, ROUNDING.default)
  */
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_adjusted); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 715, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_adjusted); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 718, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
-    __Pyx_GetModuleGlobalName(__pyx_t_5, __pyx_n_s_ROUNDING); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 715, __pyx_L1_error)
+    __Pyx_GetModuleGlobalName(__pyx_t_5, __pyx_n_s_ROUNDING); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 718, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
-    __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_default); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 715, __pyx_L1_error)
+    __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_default); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 718, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     __pyx_t_5 = NULL;
@@ -11157,7 +11202,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_70__round__(struct _
     #if CYTHON_FAST_PYCALL
     if (PyFunction_Check(__pyx_t_4)) {
       PyObject *__pyx_temp[3] = {__pyx_t_5, __pyx_int_0, __pyx_t_6};
-      __pyx_t_3 = __Pyx_PyFunction_FastCall(__pyx_t_4, __pyx_temp+1-__pyx_t_7, 2+__pyx_t_7); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 715, __pyx_L1_error)
+      __pyx_t_3 = __Pyx_PyFunction_FastCall(__pyx_t_4, __pyx_temp+1-__pyx_t_7, 2+__pyx_t_7); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 718, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
       __Pyx_GOTREF(__pyx_t_3);
       __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
@@ -11166,14 +11211,14 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_70__round__(struct _
     #if CYTHON_FAST_PYCCALL
     if (__Pyx_PyFastCFunction_Check(__pyx_t_4)) {
       PyObject *__pyx_temp[3] = {__pyx_t_5, __pyx_int_0, __pyx_t_6};
-      __pyx_t_3 = __Pyx_PyCFunction_FastCall(__pyx_t_4, __pyx_temp+1-__pyx_t_7, 2+__pyx_t_7); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 715, __pyx_L1_error)
+      __pyx_t_3 = __Pyx_PyCFunction_FastCall(__pyx_t_4, __pyx_temp+1-__pyx_t_7, 2+__pyx_t_7); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 718, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
       __Pyx_GOTREF(__pyx_t_3);
       __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
     } else
     #endif
     {
-      __pyx_t_8 = PyTuple_New(2+__pyx_t_7); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 715, __pyx_L1_error)
+      __pyx_t_8 = PyTuple_New(2+__pyx_t_7); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 718, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_8);
       if (__pyx_t_5) {
         __Pyx_GIVEREF(__pyx_t_5); PyTuple_SET_ITEM(__pyx_t_8, 0, __pyx_t_5); __pyx_t_5 = NULL;
@@ -11184,19 +11229,19 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_70__round__(struct _
       __Pyx_GIVEREF(__pyx_t_6);
       PyTuple_SET_ITEM(__pyx_t_8, 1+__pyx_t_7, __pyx_t_6);
       __pyx_t_6 = 0;
-      __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_8, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 715, __pyx_L1_error)
+      __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_8, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 718, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
       __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
     }
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-    __pyx_t_4 = __Pyx_PyNumber_Int(__pyx_t_3); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 715, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_PyNumber_Int(__pyx_t_3); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 718, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     __pyx_r = __pyx_t_4;
     __pyx_t_4 = 0;
     goto __pyx_L0;
 
-    /* "decimalfp/_cdecimalfp.pyx":713
+    /* "decimalfp/_cdecimalfp.pyx":716
  *         otherwise a :class:`Decimal`.
  *         """
  *         if precision is None:             # <<<<<<<<<<<<<<
@@ -11205,7 +11250,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_70__round__(struct _
  */
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":717
+  /* "decimalfp/_cdecimalfp.pyx":720
  *             return int(self.adjusted(0, ROUNDING.default))
  *         # otherwise return Decimal
  *         return self.adjusted(precision, ROUNDING.default)             # <<<<<<<<<<<<<<
@@ -11213,11 +11258,11 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_70__round__(struct _
  * 
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_adjusted); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 717, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_adjusted); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 720, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __Pyx_GetModuleGlobalName(__pyx_t_8, __pyx_n_s_ROUNDING); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 717, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_8, __pyx_n_s_ROUNDING); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 720, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_8);
-  __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_t_8, __pyx_n_s_default); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 717, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_t_8, __pyx_n_s_default); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 720, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
   __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
   __pyx_t_8 = NULL;
@@ -11235,7 +11280,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_70__round__(struct _
   #if CYTHON_FAST_PYCALL
   if (PyFunction_Check(__pyx_t_3)) {
     PyObject *__pyx_temp[3] = {__pyx_t_8, __pyx_v_precision, __pyx_t_6};
-    __pyx_t_4 = __Pyx_PyFunction_FastCall(__pyx_t_3, __pyx_temp+1-__pyx_t_7, 2+__pyx_t_7); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 717, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_PyFunction_FastCall(__pyx_t_3, __pyx_temp+1-__pyx_t_7, 2+__pyx_t_7); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 720, __pyx_L1_error)
     __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
@@ -11244,14 +11289,14 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_70__round__(struct _
   #if CYTHON_FAST_PYCCALL
   if (__Pyx_PyFastCFunction_Check(__pyx_t_3)) {
     PyObject *__pyx_temp[3] = {__pyx_t_8, __pyx_v_precision, __pyx_t_6};
-    __pyx_t_4 = __Pyx_PyCFunction_FastCall(__pyx_t_3, __pyx_temp+1-__pyx_t_7, 2+__pyx_t_7); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 717, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_PyCFunction_FastCall(__pyx_t_3, __pyx_temp+1-__pyx_t_7, 2+__pyx_t_7); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 720, __pyx_L1_error)
     __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
   } else
   #endif
   {
-    __pyx_t_5 = PyTuple_New(2+__pyx_t_7); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 717, __pyx_L1_error)
+    __pyx_t_5 = PyTuple_New(2+__pyx_t_7); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 720, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     if (__pyx_t_8) {
       __Pyx_GIVEREF(__pyx_t_8); PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_t_8); __pyx_t_8 = NULL;
@@ -11262,7 +11307,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_70__round__(struct _
     __Pyx_GIVEREF(__pyx_t_6);
     PyTuple_SET_ITEM(__pyx_t_5, 1+__pyx_t_7, __pyx_t_6);
     __pyx_t_6 = 0;
-    __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_5, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 717, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_5, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 720, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   }
@@ -11271,7 +11316,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_70__round__(struct _
   __pyx_t_4 = 0;
   goto __pyx_L0;
 
-  /* "decimalfp/_cdecimalfp.pyx":703
+  /* "decimalfp/_cdecimalfp.pyx":706
  *         return -(-n // d)
  * 
  *     def __round__(self, precision=None):             # <<<<<<<<<<<<<<
@@ -11294,7 +11339,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_7Decimal_70__round__(struct _
   return __pyx_r;
 }
 
-/* "decimalfp/_cdecimalfp.pyx":728
+/* "decimalfp/_cdecimalfp.pyx":731
  * 
  * # 10 ** exp as PyLong
  * cdef object base10pow(int exp):             # <<<<<<<<<<<<<<
@@ -11311,26 +11356,26 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_base10pow(int __pyx_v_exp) {
   PyObject *__pyx_t_4 = NULL;
   __Pyx_RefNannySetupContext("base10pow", 0);
 
-  /* "decimalfp/_cdecimalfp.pyx":729
+  /* "decimalfp/_cdecimalfp.pyx":732
  * # 10 ** exp as PyLong
  * cdef object base10pow(int exp):
  *     if 0 <= exp < LLONG_MAX_LOG10:             # <<<<<<<<<<<<<<
  *         return PyLong_FromLongLong(10 ** exp)
  *     return PyNumber_Power(PYLONG_10, exp, None)
  */
-  __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_exp); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 729, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_exp); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 732, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = PyObject_RichCompare(__pyx_int_0, __pyx_t_1, Py_LE); __Pyx_XGOTREF(__pyx_t_2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 729, __pyx_L1_error)
+  __pyx_t_2 = PyObject_RichCompare(__pyx_int_0, __pyx_t_1, Py_LE); __Pyx_XGOTREF(__pyx_t_2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 732, __pyx_L1_error)
   if (__Pyx_PyObject_IsTrue(__pyx_t_2)) {
     __Pyx_DECREF(__pyx_t_2);
-    __pyx_t_2 = PyObject_RichCompare(__pyx_t_1, __pyx_v_9decimalfp_11_cdecimalfp_LLONG_MAX_LOG10, Py_LT); __Pyx_XGOTREF(__pyx_t_2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 729, __pyx_L1_error)
+    __pyx_t_2 = PyObject_RichCompare(__pyx_t_1, __pyx_v_9decimalfp_11_cdecimalfp_LLONG_MAX_LOG10, Py_LT); __Pyx_XGOTREF(__pyx_t_2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 732, __pyx_L1_error)
   }
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_3 = __Pyx_PyObject_IsTrue(__pyx_t_2); if (unlikely(__pyx_t_3 < 0)) __PYX_ERR(0, 729, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_IsTrue(__pyx_t_2); if (unlikely(__pyx_t_3 < 0)) __PYX_ERR(0, 732, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   if (__pyx_t_3) {
 
-    /* "decimalfp/_cdecimalfp.pyx":730
+    /* "decimalfp/_cdecimalfp.pyx":733
  * cdef object base10pow(int exp):
  *     if 0 <= exp < LLONG_MAX_LOG10:
  *         return PyLong_FromLongLong(10 ** exp)             # <<<<<<<<<<<<<<
@@ -11338,13 +11383,13 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_base10pow(int __pyx_v_exp) {
  * 
  */
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_2 = PyLong_FromLongLong(__Pyx_pow_long(10, ((long)__pyx_v_exp))); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 730, __pyx_L1_error)
+    __pyx_t_2 = PyLong_FromLongLong(__Pyx_pow_long(10, ((long)__pyx_v_exp))); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 733, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     __pyx_r = __pyx_t_2;
     __pyx_t_2 = 0;
     goto __pyx_L0;
 
-    /* "decimalfp/_cdecimalfp.pyx":729
+    /* "decimalfp/_cdecimalfp.pyx":732
  * # 10 ** exp as PyLong
  * cdef object base10pow(int exp):
  *     if 0 <= exp < LLONG_MAX_LOG10:             # <<<<<<<<<<<<<<
@@ -11353,7 +11398,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_base10pow(int __pyx_v_exp) {
  */
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":731
+  /* "decimalfp/_cdecimalfp.pyx":734
  *     if 0 <= exp < LLONG_MAX_LOG10:
  *         return PyLong_FromLongLong(10 ** exp)
  *     return PyNumber_Power(PYLONG_10, exp, None)             # <<<<<<<<<<<<<<
@@ -11363,9 +11408,9 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_base10pow(int __pyx_v_exp) {
   __Pyx_XDECREF(__pyx_r);
   __pyx_t_2 = __pyx_v_9decimalfp_11_cdecimalfp_PYLONG_10;
   __Pyx_INCREF(__pyx_t_2);
-  __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_exp); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 731, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_exp); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 734, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_4 = PyNumber_Power(__pyx_t_2, __pyx_t_1, Py_None); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 731, __pyx_L1_error)
+  __pyx_t_4 = PyNumber_Power(__pyx_t_2, __pyx_t_1, Py_None); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 734, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -11373,7 +11418,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_base10pow(int __pyx_v_exp) {
   __pyx_t_4 = 0;
   goto __pyx_L0;
 
-  /* "decimalfp/_cdecimalfp.pyx":728
+  /* "decimalfp/_cdecimalfp.pyx":731
  * 
  * # 10 ** exp as PyLong
  * cdef object base10pow(int exp):             # <<<<<<<<<<<<<<
@@ -11394,7 +11439,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_base10pow(int __pyx_v_exp) {
   return __pyx_r;
 }
 
-/* "decimalfp/_cdecimalfp.pyx":769
+/* "decimalfp/_cdecimalfp.pyx":772
  * 
  * 
  * cdef void _dec_from_str(Decimal dec, bytes s, int prec) except *:             # <<<<<<<<<<<<<<
@@ -11424,14 +11469,14 @@ static void __pyx_f_9decimalfp_11_cdecimalfp__dec_from_str(struct __pyx_obj_9dec
   Py_ssize_t __pyx_t_8;
   __Pyx_RefNannySetupContext("_dec_from_str", 0);
 
-  /* "decimalfp/_cdecimalfp.pyx":774
+  /* "decimalfp/_cdecimalfp.pyx":777
  *     cdef int exp, shift10
  *     cdef char *pend
  *     parsed = _parseString(s)             # <<<<<<<<<<<<<<
  *     if parsed is None:
  *         raise ValueError
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_parseString); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 774, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_parseString); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 777, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_t_3 = NULL;
   if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_2))) {
@@ -11445,13 +11490,13 @@ static void __pyx_f_9decimalfp_11_cdecimalfp__dec_from_str(struct __pyx_obj_9dec
   }
   __pyx_t_1 = (__pyx_t_3) ? __Pyx_PyObject_Call2Args(__pyx_t_2, __pyx_t_3, __pyx_v_s) : __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_v_s);
   __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
-  if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 774, __pyx_L1_error)
+  if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 777, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_v_parsed = __pyx_t_1;
   __pyx_t_1 = 0;
 
-  /* "decimalfp/_cdecimalfp.pyx":775
+  /* "decimalfp/_cdecimalfp.pyx":778
  *     cdef char *pend
  *     parsed = _parseString(s)
  *     if parsed is None:             # <<<<<<<<<<<<<<
@@ -11462,7 +11507,7 @@ static void __pyx_f_9decimalfp_11_cdecimalfp__dec_from_str(struct __pyx_obj_9dec
   __pyx_t_5 = (__pyx_t_4 != 0);
   if (unlikely(__pyx_t_5)) {
 
-    /* "decimalfp/_cdecimalfp.pyx":776
+    /* "decimalfp/_cdecimalfp.pyx":779
  *     parsed = _parseString(s)
  *     if parsed is None:
  *         raise ValueError             # <<<<<<<<<<<<<<
@@ -11470,9 +11515,9 @@ static void __pyx_f_9decimalfp_11_cdecimalfp__dec_from_str(struct __pyx_obj_9dec
  *     if sExp:
  */
     __Pyx_Raise(__pyx_builtin_ValueError, 0, 0, 0);
-    __PYX_ERR(0, 776, __pyx_L1_error)
+    __PYX_ERR(0, 779, __pyx_L1_error)
 
-    /* "decimalfp/_cdecimalfp.pyx":775
+    /* "decimalfp/_cdecimalfp.pyx":778
  *     cdef char *pend
  *     parsed = _parseString(s)
  *     if parsed is None:             # <<<<<<<<<<<<<<
@@ -11481,14 +11526,14 @@ static void __pyx_f_9decimalfp_11_cdecimalfp__dec_from_str(struct __pyx_obj_9dec
  */
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":777
+  /* "decimalfp/_cdecimalfp.pyx":780
  *     if parsed is None:
  *         raise ValueError
  *     sExp = parsed.group('exp')             # <<<<<<<<<<<<<<
  *     if sExp:
  *         exp = atoi(sExp)
  */
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_parsed, __pyx_n_s_group); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 777, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_parsed, __pyx_n_s_group); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 780, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_t_3 = NULL;
   if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_2))) {
@@ -11502,14 +11547,14 @@ static void __pyx_f_9decimalfp_11_cdecimalfp__dec_from_str(struct __pyx_obj_9dec
   }
   __pyx_t_1 = (__pyx_t_3) ? __Pyx_PyObject_Call2Args(__pyx_t_2, __pyx_t_3, __pyx_n_s_exp) : __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_n_s_exp);
   __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
-  if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 777, __pyx_L1_error)
+  if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 780, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  if (!(likely(PyBytes_CheckExact(__pyx_t_1))||((__pyx_t_1) == Py_None)||(PyErr_Format(PyExc_TypeError, "Expected %.16s, got %.200s", "bytes", Py_TYPE(__pyx_t_1)->tp_name), 0))) __PYX_ERR(0, 777, __pyx_L1_error)
+  if (!(likely(PyBytes_CheckExact(__pyx_t_1))||((__pyx_t_1) == Py_None)||(PyErr_Format(PyExc_TypeError, "Expected %.16s, got %.200s", "bytes", Py_TYPE(__pyx_t_1)->tp_name), 0))) __PYX_ERR(0, 780, __pyx_L1_error)
   __pyx_v_sExp = ((PyObject*)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "decimalfp/_cdecimalfp.pyx":778
+  /* "decimalfp/_cdecimalfp.pyx":781
  *         raise ValueError
  *     sExp = parsed.group('exp')
  *     if sExp:             # <<<<<<<<<<<<<<
@@ -11519,7 +11564,7 @@ static void __pyx_f_9decimalfp_11_cdecimalfp__dec_from_str(struct __pyx_obj_9dec
   __pyx_t_5 = (__pyx_v_sExp != Py_None)&&(PyBytes_GET_SIZE(__pyx_v_sExp) != 0);
   if (__pyx_t_5) {
 
-    /* "decimalfp/_cdecimalfp.pyx":779
+    /* "decimalfp/_cdecimalfp.pyx":782
  *     sExp = parsed.group('exp')
  *     if sExp:
  *         exp = atoi(sExp)             # <<<<<<<<<<<<<<
@@ -11528,12 +11573,12 @@ static void __pyx_f_9decimalfp_11_cdecimalfp__dec_from_str(struct __pyx_obj_9dec
  */
     if (unlikely(__pyx_v_sExp == Py_None)) {
       PyErr_SetString(PyExc_TypeError, "expected bytes, NoneType found");
-      __PYX_ERR(0, 779, __pyx_L1_error)
+      __PYX_ERR(0, 782, __pyx_L1_error)
     }
-    __pyx_t_6 = __Pyx_PyBytes_AsString(__pyx_v_sExp); if (unlikely((!__pyx_t_6) && PyErr_Occurred())) __PYX_ERR(0, 779, __pyx_L1_error)
+    __pyx_t_6 = __Pyx_PyBytes_AsString(__pyx_v_sExp); if (unlikely((!__pyx_t_6) && PyErr_Occurred())) __PYX_ERR(0, 782, __pyx_L1_error)
     __pyx_v_exp = atoi(__pyx_t_6);
 
-    /* "decimalfp/_cdecimalfp.pyx":778
+    /* "decimalfp/_cdecimalfp.pyx":781
  *         raise ValueError
  *     sExp = parsed.group('exp')
  *     if sExp:             # <<<<<<<<<<<<<<
@@ -11543,7 +11588,7 @@ static void __pyx_f_9decimalfp_11_cdecimalfp__dec_from_str(struct __pyx_obj_9dec
     goto __pyx_L4;
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":781
+  /* "decimalfp/_cdecimalfp.pyx":784
  *         exp = atoi(sExp)
  *     else:
  *         exp = 0             # <<<<<<<<<<<<<<
@@ -11555,14 +11600,14 @@ static void __pyx_f_9decimalfp_11_cdecimalfp__dec_from_str(struct __pyx_obj_9dec
   }
   __pyx_L4:;
 
-  /* "decimalfp/_cdecimalfp.pyx":782
+  /* "decimalfp/_cdecimalfp.pyx":785
  *     else:
  *         exp = 0
  *     sInt = parsed.group('int')             # <<<<<<<<<<<<<<
  *     if sInt:
  *         nInt = PyLong_FromString(sInt, &pend, 10)
  */
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_parsed, __pyx_n_s_group); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 782, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_parsed, __pyx_n_s_group); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 785, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_t_3 = NULL;
   if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_2))) {
@@ -11576,14 +11621,14 @@ static void __pyx_f_9decimalfp_11_cdecimalfp__dec_from_str(struct __pyx_obj_9dec
   }
   __pyx_t_1 = (__pyx_t_3) ? __Pyx_PyObject_Call2Args(__pyx_t_2, __pyx_t_3, __pyx_n_s_int) : __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_n_s_int);
   __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
-  if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 782, __pyx_L1_error)
+  if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 785, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  if (!(likely(PyBytes_CheckExact(__pyx_t_1))||((__pyx_t_1) == Py_None)||(PyErr_Format(PyExc_TypeError, "Expected %.16s, got %.200s", "bytes", Py_TYPE(__pyx_t_1)->tp_name), 0))) __PYX_ERR(0, 782, __pyx_L1_error)
+  if (!(likely(PyBytes_CheckExact(__pyx_t_1))||((__pyx_t_1) == Py_None)||(PyErr_Format(PyExc_TypeError, "Expected %.16s, got %.200s", "bytes", Py_TYPE(__pyx_t_1)->tp_name), 0))) __PYX_ERR(0, 785, __pyx_L1_error)
   __pyx_v_sInt = ((PyObject*)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "decimalfp/_cdecimalfp.pyx":783
+  /* "decimalfp/_cdecimalfp.pyx":786
  *         exp = 0
  *     sInt = parsed.group('int')
  *     if sInt:             # <<<<<<<<<<<<<<
@@ -11593,7 +11638,7 @@ static void __pyx_f_9decimalfp_11_cdecimalfp__dec_from_str(struct __pyx_obj_9dec
   __pyx_t_5 = (__pyx_v_sInt != Py_None)&&(PyBytes_GET_SIZE(__pyx_v_sInt) != 0);
   if (__pyx_t_5) {
 
-    /* "decimalfp/_cdecimalfp.pyx":784
+    /* "decimalfp/_cdecimalfp.pyx":787
  *     sInt = parsed.group('int')
  *     if sInt:
  *         nInt = PyLong_FromString(sInt, &pend, 10)             # <<<<<<<<<<<<<<
@@ -11602,71 +11647,20 @@ static void __pyx_f_9decimalfp_11_cdecimalfp__dec_from_str(struct __pyx_obj_9dec
  */
     if (unlikely(__pyx_v_sInt == Py_None)) {
       PyErr_SetString(PyExc_TypeError, "expected bytes, NoneType found");
-      __PYX_ERR(0, 784, __pyx_L1_error)
+      __PYX_ERR(0, 787, __pyx_L1_error)
     }
-    __pyx_t_7 = __Pyx_PyBytes_AsWritableString(__pyx_v_sInt); if (unlikely((!__pyx_t_7) && PyErr_Occurred())) __PYX_ERR(0, 784, __pyx_L1_error)
-    __pyx_t_1 = PyLong_FromString(__pyx_t_7, (&__pyx_v_pend), 10); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 784, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_1);
-    __pyx_v_nInt = __pyx_t_1;
-    __pyx_t_1 = 0;
-
-    /* "decimalfp/_cdecimalfp.pyx":785
- *     if sInt:
- *         nInt = PyLong_FromString(sInt, &pend, 10)
- *         sFrac = parsed.group('frac')             # <<<<<<<<<<<<<<
- *     else:
- *         nInt = PyLong_FromLong(0)
- */
-    __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_parsed, __pyx_n_s_group); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 785, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_3 = NULL;
-    if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_2))) {
-      __pyx_t_3 = PyMethod_GET_SELF(__pyx_t_2);
-      if (likely(__pyx_t_3)) {
-        PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_2);
-        __Pyx_INCREF(__pyx_t_3);
-        __Pyx_INCREF(function);
-        __Pyx_DECREF_SET(__pyx_t_2, function);
-      }
-    }
-    __pyx_t_1 = (__pyx_t_3) ? __Pyx_PyObject_Call2Args(__pyx_t_2, __pyx_t_3, __pyx_n_s_frac) : __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_n_s_frac);
-    __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
-    if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 785, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_1);
-    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    if (!(likely(PyBytes_CheckExact(__pyx_t_1))||((__pyx_t_1) == Py_None)||(PyErr_Format(PyExc_TypeError, "Expected %.16s, got %.200s", "bytes", Py_TYPE(__pyx_t_1)->tp_name), 0))) __PYX_ERR(0, 785, __pyx_L1_error)
-    __pyx_v_sFrac = ((PyObject*)__pyx_t_1);
-    __pyx_t_1 = 0;
-
-    /* "decimalfp/_cdecimalfp.pyx":783
- *         exp = 0
- *     sInt = parsed.group('int')
- *     if sInt:             # <<<<<<<<<<<<<<
- *         nInt = PyLong_FromString(sInt, &pend, 10)
- *         sFrac = parsed.group('frac')
- */
-    goto __pyx_L5;
-  }
-
-  /* "decimalfp/_cdecimalfp.pyx":787
- *         sFrac = parsed.group('frac')
- *     else:
- *         nInt = PyLong_FromLong(0)             # <<<<<<<<<<<<<<
- *         sFrac = parsed.group('onlyfrac')
- *     if sFrac:
- */
-  /*else*/ {
-    __pyx_t_1 = PyLong_FromLong(0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 787, __pyx_L1_error)
+    __pyx_t_7 = __Pyx_PyBytes_AsWritableString(__pyx_v_sInt); if (unlikely((!__pyx_t_7) && PyErr_Occurred())) __PYX_ERR(0, 787, __pyx_L1_error)
+    __pyx_t_1 = PyLong_FromString(__pyx_t_7, (&__pyx_v_pend), 10); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 787, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __pyx_v_nInt = __pyx_t_1;
     __pyx_t_1 = 0;
 
     /* "decimalfp/_cdecimalfp.pyx":788
+ *     if sInt:
+ *         nInt = PyLong_FromString(sInt, &pend, 10)
+ *         sFrac = parsed.group('frac')             # <<<<<<<<<<<<<<
  *     else:
  *         nInt = PyLong_FromLong(0)
- *         sFrac = parsed.group('onlyfrac')             # <<<<<<<<<<<<<<
- *     if sFrac:
- *         nFrac = PyLong_FromString(sFrac, &pend, 10)
  */
     __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_parsed, __pyx_n_s_group); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 788, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
@@ -11680,7 +11674,7 @@ static void __pyx_f_9decimalfp_11_cdecimalfp__dec_from_str(struct __pyx_obj_9dec
         __Pyx_DECREF_SET(__pyx_t_2, function);
       }
     }
-    __pyx_t_1 = (__pyx_t_3) ? __Pyx_PyObject_Call2Args(__pyx_t_2, __pyx_t_3, __pyx_n_s_onlyfrac) : __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_n_s_onlyfrac);
+    __pyx_t_1 = (__pyx_t_3) ? __Pyx_PyObject_Call2Args(__pyx_t_2, __pyx_t_3, __pyx_n_s_frac) : __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_n_s_frac);
     __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
     if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 788, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
@@ -11688,10 +11682,61 @@ static void __pyx_f_9decimalfp_11_cdecimalfp__dec_from_str(struct __pyx_obj_9dec
     if (!(likely(PyBytes_CheckExact(__pyx_t_1))||((__pyx_t_1) == Py_None)||(PyErr_Format(PyExc_TypeError, "Expected %.16s, got %.200s", "bytes", Py_TYPE(__pyx_t_1)->tp_name), 0))) __PYX_ERR(0, 788, __pyx_L1_error)
     __pyx_v_sFrac = ((PyObject*)__pyx_t_1);
     __pyx_t_1 = 0;
+
+    /* "decimalfp/_cdecimalfp.pyx":786
+ *         exp = 0
+ *     sInt = parsed.group('int')
+ *     if sInt:             # <<<<<<<<<<<<<<
+ *         nInt = PyLong_FromString(sInt, &pend, 10)
+ *         sFrac = parsed.group('frac')
+ */
+    goto __pyx_L5;
+  }
+
+  /* "decimalfp/_cdecimalfp.pyx":790
+ *         sFrac = parsed.group('frac')
+ *     else:
+ *         nInt = PyLong_FromLong(0)             # <<<<<<<<<<<<<<
+ *         sFrac = parsed.group('onlyfrac')
+ *     if sFrac:
+ */
+  /*else*/ {
+    __pyx_t_1 = PyLong_FromLong(0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 790, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_1);
+    __pyx_v_nInt = __pyx_t_1;
+    __pyx_t_1 = 0;
+
+    /* "decimalfp/_cdecimalfp.pyx":791
+ *     else:
+ *         nInt = PyLong_FromLong(0)
+ *         sFrac = parsed.group('onlyfrac')             # <<<<<<<<<<<<<<
+ *     if sFrac:
+ *         nFrac = PyLong_FromString(sFrac, &pend, 10)
+ */
+    __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_parsed, __pyx_n_s_group); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 791, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_2);
+    __pyx_t_3 = NULL;
+    if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_2))) {
+      __pyx_t_3 = PyMethod_GET_SELF(__pyx_t_2);
+      if (likely(__pyx_t_3)) {
+        PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_2);
+        __Pyx_INCREF(__pyx_t_3);
+        __Pyx_INCREF(function);
+        __Pyx_DECREF_SET(__pyx_t_2, function);
+      }
+    }
+    __pyx_t_1 = (__pyx_t_3) ? __Pyx_PyObject_Call2Args(__pyx_t_2, __pyx_t_3, __pyx_n_s_onlyfrac) : __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_n_s_onlyfrac);
+    __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
+    if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 791, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_1);
+    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+    if (!(likely(PyBytes_CheckExact(__pyx_t_1))||((__pyx_t_1) == Py_None)||(PyErr_Format(PyExc_TypeError, "Expected %.16s, got %.200s", "bytes", Py_TYPE(__pyx_t_1)->tp_name), 0))) __PYX_ERR(0, 791, __pyx_L1_error)
+    __pyx_v_sFrac = ((PyObject*)__pyx_t_1);
+    __pyx_t_1 = 0;
   }
   __pyx_L5:;
 
-  /* "decimalfp/_cdecimalfp.pyx":789
+  /* "decimalfp/_cdecimalfp.pyx":792
  *         nInt = PyLong_FromLong(0)
  *         sFrac = parsed.group('onlyfrac')
  *     if sFrac:             # <<<<<<<<<<<<<<
@@ -11701,7 +11746,7 @@ static void __pyx_f_9decimalfp_11_cdecimalfp__dec_from_str(struct __pyx_obj_9dec
   __pyx_t_5 = (__pyx_v_sFrac != Py_None)&&(PyBytes_GET_SIZE(__pyx_v_sFrac) != 0);
   if (__pyx_t_5) {
 
-    /* "decimalfp/_cdecimalfp.pyx":790
+    /* "decimalfp/_cdecimalfp.pyx":793
  *         sFrac = parsed.group('onlyfrac')
  *     if sFrac:
  *         nFrac = PyLong_FromString(sFrac, &pend, 10)             # <<<<<<<<<<<<<<
@@ -11710,15 +11755,15 @@ static void __pyx_f_9decimalfp_11_cdecimalfp__dec_from_str(struct __pyx_obj_9dec
  */
     if (unlikely(__pyx_v_sFrac == Py_None)) {
       PyErr_SetString(PyExc_TypeError, "expected bytes, NoneType found");
-      __PYX_ERR(0, 790, __pyx_L1_error)
+      __PYX_ERR(0, 793, __pyx_L1_error)
     }
-    __pyx_t_7 = __Pyx_PyBytes_AsWritableString(__pyx_v_sFrac); if (unlikely((!__pyx_t_7) && PyErr_Occurred())) __PYX_ERR(0, 790, __pyx_L1_error)
-    __pyx_t_1 = PyLong_FromString(__pyx_t_7, (&__pyx_v_pend), 10); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 790, __pyx_L1_error)
+    __pyx_t_7 = __Pyx_PyBytes_AsWritableString(__pyx_v_sFrac); if (unlikely((!__pyx_t_7) && PyErr_Occurred())) __PYX_ERR(0, 793, __pyx_L1_error)
+    __pyx_t_1 = PyLong_FromString(__pyx_t_7, (&__pyx_v_pend), 10); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 793, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __pyx_v_nFrac = __pyx_t_1;
     __pyx_t_1 = 0;
 
-    /* "decimalfp/_cdecimalfp.pyx":791
+    /* "decimalfp/_cdecimalfp.pyx":794
  *     if sFrac:
  *         nFrac = PyLong_FromString(sFrac, &pend, 10)
  *         shift10 = len(sFrac)             # <<<<<<<<<<<<<<
@@ -11727,12 +11772,12 @@ static void __pyx_f_9decimalfp_11_cdecimalfp__dec_from_str(struct __pyx_obj_9dec
  */
     if (unlikely(__pyx_v_sFrac == Py_None)) {
       PyErr_SetString(PyExc_TypeError, "object of type 'NoneType' has no len()");
-      __PYX_ERR(0, 791, __pyx_L1_error)
+      __PYX_ERR(0, 794, __pyx_L1_error)
     }
-    __pyx_t_8 = PyBytes_GET_SIZE(__pyx_v_sFrac); if (unlikely(__pyx_t_8 == ((Py_ssize_t)-1))) __PYX_ERR(0, 791, __pyx_L1_error)
+    __pyx_t_8 = PyBytes_GET_SIZE(__pyx_v_sFrac); if (unlikely(__pyx_t_8 == ((Py_ssize_t)-1))) __PYX_ERR(0, 794, __pyx_L1_error)
     __pyx_v_shift10 = __pyx_t_8;
 
-    /* "decimalfp/_cdecimalfp.pyx":789
+    /* "decimalfp/_cdecimalfp.pyx":792
  *         nInt = PyLong_FromLong(0)
  *         sFrac = parsed.group('onlyfrac')
  *     if sFrac:             # <<<<<<<<<<<<<<
@@ -11742,7 +11787,7 @@ static void __pyx_f_9decimalfp_11_cdecimalfp__dec_from_str(struct __pyx_obj_9dec
     goto __pyx_L6;
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":793
+  /* "decimalfp/_cdecimalfp.pyx":796
  *         shift10 = len(sFrac)
  *     else:
  *         nFrac = PyLong_FromLong(0)             # <<<<<<<<<<<<<<
@@ -11750,12 +11795,12 @@ static void __pyx_f_9decimalfp_11_cdecimalfp__dec_from_str(struct __pyx_obj_9dec
  *     coeff = nInt * base10pow(shift10) + nFrac
  */
   /*else*/ {
-    __pyx_t_1 = PyLong_FromLong(0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 793, __pyx_L1_error)
+    __pyx_t_1 = PyLong_FromLong(0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 796, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __pyx_v_nFrac = __pyx_t_1;
     __pyx_t_1 = 0;
 
-    /* "decimalfp/_cdecimalfp.pyx":794
+    /* "decimalfp/_cdecimalfp.pyx":797
  *     else:
  *         nFrac = PyLong_FromLong(0)
  *         shift10 = 0             # <<<<<<<<<<<<<<
@@ -11766,25 +11811,25 @@ static void __pyx_f_9decimalfp_11_cdecimalfp__dec_from_str(struct __pyx_obj_9dec
   }
   __pyx_L6:;
 
-  /* "decimalfp/_cdecimalfp.pyx":795
+  /* "decimalfp/_cdecimalfp.pyx":798
  *         nFrac = PyLong_FromLong(0)
  *         shift10 = 0
  *     coeff = nInt * base10pow(shift10) + nFrac             # <<<<<<<<<<<<<<
  *     exp -= shift10
  *     if parsed.group('sign') == b'-':
  */
-  __pyx_t_1 = __pyx_f_9decimalfp_11_cdecimalfp_base10pow(__pyx_v_shift10); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 795, __pyx_L1_error)
+  __pyx_t_1 = __pyx_f_9decimalfp_11_cdecimalfp_base10pow(__pyx_v_shift10); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 798, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = PyNumber_Multiply(__pyx_v_nInt, __pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 795, __pyx_L1_error)
+  __pyx_t_2 = PyNumber_Multiply(__pyx_v_nInt, __pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 798, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = PyNumber_Add(__pyx_t_2, __pyx_v_nFrac); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 795, __pyx_L1_error)
+  __pyx_t_1 = PyNumber_Add(__pyx_t_2, __pyx_v_nFrac); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 798, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_v_coeff = __pyx_t_1;
   __pyx_t_1 = 0;
 
-  /* "decimalfp/_cdecimalfp.pyx":796
+  /* "decimalfp/_cdecimalfp.pyx":799
  *         shift10 = 0
  *     coeff = nInt * base10pow(shift10) + nFrac
  *     exp -= shift10             # <<<<<<<<<<<<<<
@@ -11793,14 +11838,14 @@ static void __pyx_f_9decimalfp_11_cdecimalfp__dec_from_str(struct __pyx_obj_9dec
  */
   __pyx_v_exp = (__pyx_v_exp - __pyx_v_shift10);
 
-  /* "decimalfp/_cdecimalfp.pyx":797
+  /* "decimalfp/_cdecimalfp.pyx":800
  *     coeff = nInt * base10pow(shift10) + nFrac
  *     exp -= shift10
  *     if parsed.group('sign') == b'-':             # <<<<<<<<<<<<<<
  *         coeff = -coeff
  *     _dec_from_coeff_exp(dec, coeff, exp, prec)
  */
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_parsed, __pyx_n_s_group); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 797, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_parsed, __pyx_n_s_group); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 800, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_t_3 = NULL;
   if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_2))) {
@@ -11814,26 +11859,26 @@ static void __pyx_f_9decimalfp_11_cdecimalfp__dec_from_str(struct __pyx_obj_9dec
   }
   __pyx_t_1 = (__pyx_t_3) ? __Pyx_PyObject_Call2Args(__pyx_t_2, __pyx_t_3, __pyx_n_s_sign) : __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_n_s_sign);
   __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
-  if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 797, __pyx_L1_error)
+  if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 800, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_5 = (__Pyx_PyBytes_Equals(__pyx_t_1, __pyx_kp_b__3, Py_EQ)); if (unlikely(__pyx_t_5 < 0)) __PYX_ERR(0, 797, __pyx_L1_error)
+  __pyx_t_5 = (__Pyx_PyBytes_Equals(__pyx_t_1, __pyx_kp_b__3, Py_EQ)); if (unlikely(__pyx_t_5 < 0)) __PYX_ERR(0, 800, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   if (__pyx_t_5) {
 
-    /* "decimalfp/_cdecimalfp.pyx":798
+    /* "decimalfp/_cdecimalfp.pyx":801
  *     exp -= shift10
  *     if parsed.group('sign') == b'-':
  *         coeff = -coeff             # <<<<<<<<<<<<<<
  *     _dec_from_coeff_exp(dec, coeff, exp, prec)
  * 
  */
-    __pyx_t_1 = PyNumber_Negative(__pyx_v_coeff); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 798, __pyx_L1_error)
+    __pyx_t_1 = PyNumber_Negative(__pyx_v_coeff); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 801, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF_SET(__pyx_v_coeff, __pyx_t_1);
     __pyx_t_1 = 0;
 
-    /* "decimalfp/_cdecimalfp.pyx":797
+    /* "decimalfp/_cdecimalfp.pyx":800
  *     coeff = nInt * base10pow(shift10) + nFrac
  *     exp -= shift10
  *     if parsed.group('sign') == b'-':             # <<<<<<<<<<<<<<
@@ -11842,16 +11887,16 @@ static void __pyx_f_9decimalfp_11_cdecimalfp__dec_from_str(struct __pyx_obj_9dec
  */
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":799
+  /* "decimalfp/_cdecimalfp.pyx":802
  *     if parsed.group('sign') == b'-':
  *         coeff = -coeff
  *     _dec_from_coeff_exp(dec, coeff, exp, prec)             # <<<<<<<<<<<<<<
  * 
  * 
  */
-  __pyx_f_9decimalfp_11_cdecimalfp__dec_from_coeff_exp(__pyx_v_dec, __pyx_v_coeff, __pyx_v_exp, __pyx_v_prec); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 799, __pyx_L1_error)
+  __pyx_f_9decimalfp_11_cdecimalfp__dec_from_coeff_exp(__pyx_v_dec, __pyx_v_coeff, __pyx_v_exp, __pyx_v_prec); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 802, __pyx_L1_error)
 
-  /* "decimalfp/_cdecimalfp.pyx":769
+  /* "decimalfp/_cdecimalfp.pyx":772
  * 
  * 
  * cdef void _dec_from_str(Decimal dec, bytes s, int prec) except *:             # <<<<<<<<<<<<<<
@@ -11877,7 +11922,7 @@ static void __pyx_f_9decimalfp_11_cdecimalfp__dec_from_str(struct __pyx_obj_9dec
   __Pyx_RefNannyFinishContext();
 }
 
-/* "decimalfp/_cdecimalfp.pyx":802
+/* "decimalfp/_cdecimalfp.pyx":805
  * 
  * 
  * cdef void _dec_from_coeff_exp(Decimal dec, object coeff, int exp,             # <<<<<<<<<<<<<<
@@ -11894,7 +11939,7 @@ static void __pyx_f_9decimalfp_11_cdecimalfp__dec_from_coeff_exp(struct __pyx_ob
   int __pyx_t_4;
   __Pyx_RefNannySetupContext("_dec_from_coeff_exp", 0);
 
-  /* "decimalfp/_cdecimalfp.pyx":807
+  /* "decimalfp/_cdecimalfp.pyx":810
  *     `prec`."""
  *     cdef int shift10
  *     if prec == -1:             # <<<<<<<<<<<<<<
@@ -11904,7 +11949,7 @@ static void __pyx_f_9decimalfp_11_cdecimalfp__dec_from_coeff_exp(struct __pyx_ob
   __pyx_t_1 = ((__pyx_v_prec == -1L) != 0);
   if (__pyx_t_1) {
 
-    /* "decimalfp/_cdecimalfp.pyx":808
+    /* "decimalfp/_cdecimalfp.pyx":811
  *     cdef int shift10
  *     if prec == -1:
  *         if exp > 0:             # <<<<<<<<<<<<<<
@@ -11914,7 +11959,7 @@ static void __pyx_f_9decimalfp_11_cdecimalfp__dec_from_coeff_exp(struct __pyx_ob
     __pyx_t_1 = ((__pyx_v_exp > 0) != 0);
     if (__pyx_t_1) {
 
-      /* "decimalfp/_cdecimalfp.pyx":809
+      /* "decimalfp/_cdecimalfp.pyx":812
  *     if prec == -1:
  *         if exp > 0:
  *             dec._precision = 0             # <<<<<<<<<<<<<<
@@ -11923,16 +11968,16 @@ static void __pyx_f_9decimalfp_11_cdecimalfp__dec_from_coeff_exp(struct __pyx_ob
  */
       __pyx_v_dec->_precision = 0;
 
-      /* "decimalfp/_cdecimalfp.pyx":810
+      /* "decimalfp/_cdecimalfp.pyx":813
  *         if exp > 0:
  *             dec._precision = 0
  *             dec._value = coeff * base10pow(exp)             # <<<<<<<<<<<<<<
  *         else:
  *             dec._precision = abs(exp)
  */
-      __pyx_t_2 = __pyx_f_9decimalfp_11_cdecimalfp_base10pow(__pyx_v_exp); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 810, __pyx_L1_error)
+      __pyx_t_2 = __pyx_f_9decimalfp_11_cdecimalfp_base10pow(__pyx_v_exp); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 813, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_2);
-      __pyx_t_3 = PyNumber_Multiply(__pyx_v_coeff, __pyx_t_2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 810, __pyx_L1_error)
+      __pyx_t_3 = PyNumber_Multiply(__pyx_v_coeff, __pyx_t_2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 813, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
       __Pyx_GIVEREF(__pyx_t_3);
@@ -11941,7 +11986,7 @@ static void __pyx_f_9decimalfp_11_cdecimalfp__dec_from_coeff_exp(struct __pyx_ob
       __pyx_v_dec->_value = __pyx_t_3;
       __pyx_t_3 = 0;
 
-      /* "decimalfp/_cdecimalfp.pyx":808
+      /* "decimalfp/_cdecimalfp.pyx":811
  *     cdef int shift10
  *     if prec == -1:
  *         if exp > 0:             # <<<<<<<<<<<<<<
@@ -11951,7 +11996,7 @@ static void __pyx_f_9decimalfp_11_cdecimalfp__dec_from_coeff_exp(struct __pyx_ob
       goto __pyx_L4;
     }
 
-    /* "decimalfp/_cdecimalfp.pyx":812
+    /* "decimalfp/_cdecimalfp.pyx":815
  *             dec._value = coeff * base10pow(exp)
  *         else:
  *             dec._precision = abs(exp)             # <<<<<<<<<<<<<<
@@ -11959,10 +12004,10 @@ static void __pyx_f_9decimalfp_11_cdecimalfp__dec_from_coeff_exp(struct __pyx_ob
  *     else:
  */
     /*else*/ {
-      __pyx_t_4 = abs(__pyx_v_exp); if (unlikely(__pyx_t_4 == ((int)-1))) __PYX_ERR(0, 812, __pyx_L1_error)
+      __pyx_t_4 = abs(__pyx_v_exp); if (unlikely(__pyx_t_4 == ((int)-1))) __PYX_ERR(0, 815, __pyx_L1_error)
       __pyx_v_dec->_precision = __pyx_t_4;
 
-      /* "decimalfp/_cdecimalfp.pyx":813
+      /* "decimalfp/_cdecimalfp.pyx":816
  *         else:
  *             dec._precision = abs(exp)
  *             dec._value = coeff             # <<<<<<<<<<<<<<
@@ -11977,7 +12022,7 @@ static void __pyx_f_9decimalfp_11_cdecimalfp__dec_from_coeff_exp(struct __pyx_ob
     }
     __pyx_L4:;
 
-    /* "decimalfp/_cdecimalfp.pyx":807
+    /* "decimalfp/_cdecimalfp.pyx":810
  *     `prec`."""
  *     cdef int shift10
  *     if prec == -1:             # <<<<<<<<<<<<<<
@@ -11987,7 +12032,7 @@ static void __pyx_f_9decimalfp_11_cdecimalfp__dec_from_coeff_exp(struct __pyx_ob
     goto __pyx_L3;
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":815
+  /* "decimalfp/_cdecimalfp.pyx":818
  *             dec._value = coeff
  *     else:
  *         dec._precision = prec             # <<<<<<<<<<<<<<
@@ -11997,7 +12042,7 @@ static void __pyx_f_9decimalfp_11_cdecimalfp__dec_from_coeff_exp(struct __pyx_ob
   /*else*/ {
     __pyx_v_dec->_precision = __pyx_v_prec;
 
-    /* "decimalfp/_cdecimalfp.pyx":816
+    /* "decimalfp/_cdecimalfp.pyx":819
  *     else:
  *         dec._precision = prec
  *         shift10 = exp + prec             # <<<<<<<<<<<<<<
@@ -12006,7 +12051,7 @@ static void __pyx_f_9decimalfp_11_cdecimalfp__dec_from_coeff_exp(struct __pyx_ob
  */
     __pyx_v_shift10 = (__pyx_v_exp + __pyx_v_prec);
 
-    /* "decimalfp/_cdecimalfp.pyx":817
+    /* "decimalfp/_cdecimalfp.pyx":820
  *         dec._precision = prec
  *         shift10 = exp + prec
  *         if shift10 == 0:             # <<<<<<<<<<<<<<
@@ -12016,7 +12061,7 @@ static void __pyx_f_9decimalfp_11_cdecimalfp__dec_from_coeff_exp(struct __pyx_ob
     __pyx_t_1 = ((__pyx_v_shift10 == 0) != 0);
     if (__pyx_t_1) {
 
-      /* "decimalfp/_cdecimalfp.pyx":818
+      /* "decimalfp/_cdecimalfp.pyx":821
  *         shift10 = exp + prec
  *         if shift10 == 0:
  *             dec._value = coeff             # <<<<<<<<<<<<<<
@@ -12029,7 +12074,7 @@ static void __pyx_f_9decimalfp_11_cdecimalfp__dec_from_coeff_exp(struct __pyx_ob
       __Pyx_DECREF(__pyx_v_dec->_value);
       __pyx_v_dec->_value = __pyx_v_coeff;
 
-      /* "decimalfp/_cdecimalfp.pyx":817
+      /* "decimalfp/_cdecimalfp.pyx":820
  *         dec._precision = prec
  *         shift10 = exp + prec
  *         if shift10 == 0:             # <<<<<<<<<<<<<<
@@ -12038,7 +12083,7 @@ static void __pyx_f_9decimalfp_11_cdecimalfp__dec_from_coeff_exp(struct __pyx_ob
  */
     }
 
-    /* "decimalfp/_cdecimalfp.pyx":819
+    /* "decimalfp/_cdecimalfp.pyx":822
  *         if shift10 == 0:
  *             dec._value = coeff
  *         if shift10 > 0:             # <<<<<<<<<<<<<<
@@ -12048,16 +12093,16 @@ static void __pyx_f_9decimalfp_11_cdecimalfp__dec_from_coeff_exp(struct __pyx_ob
     __pyx_t_1 = ((__pyx_v_shift10 > 0) != 0);
     if (__pyx_t_1) {
 
-      /* "decimalfp/_cdecimalfp.pyx":820
+      /* "decimalfp/_cdecimalfp.pyx":823
  *             dec._value = coeff
  *         if shift10 > 0:
  *             dec._value = coeff * base10pow(shift10)             # <<<<<<<<<<<<<<
  *         else:
  *             dec._value = _div_rounded(coeff, base10pow(-shift10))
  */
-      __pyx_t_3 = __pyx_f_9decimalfp_11_cdecimalfp_base10pow(__pyx_v_shift10); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 820, __pyx_L1_error)
+      __pyx_t_3 = __pyx_f_9decimalfp_11_cdecimalfp_base10pow(__pyx_v_shift10); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 823, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
-      __pyx_t_2 = PyNumber_Multiply(__pyx_v_coeff, __pyx_t_3); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 820, __pyx_L1_error)
+      __pyx_t_2 = PyNumber_Multiply(__pyx_v_coeff, __pyx_t_3); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 823, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_2);
       __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
       __Pyx_GIVEREF(__pyx_t_2);
@@ -12066,7 +12111,7 @@ static void __pyx_f_9decimalfp_11_cdecimalfp__dec_from_coeff_exp(struct __pyx_ob
       __pyx_v_dec->_value = __pyx_t_2;
       __pyx_t_2 = 0;
 
-      /* "decimalfp/_cdecimalfp.pyx":819
+      /* "decimalfp/_cdecimalfp.pyx":822
  *         if shift10 == 0:
  *             dec._value = coeff
  *         if shift10 > 0:             # <<<<<<<<<<<<<<
@@ -12076,7 +12121,7 @@ static void __pyx_f_9decimalfp_11_cdecimalfp__dec_from_coeff_exp(struct __pyx_ob
       goto __pyx_L6;
     }
 
-    /* "decimalfp/_cdecimalfp.pyx":822
+    /* "decimalfp/_cdecimalfp.pyx":825
  *             dec._value = coeff * base10pow(shift10)
  *         else:
  *             dec._value = _div_rounded(coeff, base10pow(-shift10))             # <<<<<<<<<<<<<<
@@ -12084,9 +12129,9 @@ static void __pyx_f_9decimalfp_11_cdecimalfp__dec_from_coeff_exp(struct __pyx_ob
  * 
  */
     /*else*/ {
-      __pyx_t_2 = __pyx_f_9decimalfp_11_cdecimalfp_base10pow((-__pyx_v_shift10)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 822, __pyx_L1_error)
+      __pyx_t_2 = __pyx_f_9decimalfp_11_cdecimalfp_base10pow((-__pyx_v_shift10)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 825, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_2);
-      __pyx_t_3 = __pyx_f_9decimalfp_11_cdecimalfp__div_rounded(__pyx_v_coeff, __pyx_t_2, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 822, __pyx_L1_error)
+      __pyx_t_3 = __pyx_f_9decimalfp_11_cdecimalfp__div_rounded(__pyx_v_coeff, __pyx_t_2, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 825, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
       __Pyx_GIVEREF(__pyx_t_3);
@@ -12099,7 +12144,7 @@ static void __pyx_f_9decimalfp_11_cdecimalfp__dec_from_coeff_exp(struct __pyx_ob
   }
   __pyx_L3:;
 
-  /* "decimalfp/_cdecimalfp.pyx":802
+  /* "decimalfp/_cdecimalfp.pyx":805
  * 
  * 
  * cdef void _dec_from_coeff_exp(Decimal dec, object coeff, int exp,             # <<<<<<<<<<<<<<
@@ -12117,7 +12162,7 @@ static void __pyx_f_9decimalfp_11_cdecimalfp__dec_from_coeff_exp(struct __pyx_ob
   __Pyx_RefNannyFinishContext();
 }
 
-/* "decimalfp/_cdecimalfp.pyx":825
+/* "decimalfp/_cdecimalfp.pyx":828
  * 
  * 
  * cdef void _dec_from_rational(Decimal dec, object num, object den,             # <<<<<<<<<<<<<<
@@ -12133,7 +12178,7 @@ static void __pyx_f_9decimalfp_11_cdecimalfp__dec_from_rational(struct __pyx_obj
   PyObject *__pyx_t_3 = NULL;
   __Pyx_RefNannySetupContext("_dec_from_rational", 0);
 
-  /* "decimalfp/_cdecimalfp.pyx":827
+  /* "decimalfp/_cdecimalfp.pyx":830
  * cdef void _dec_from_rational(Decimal dec, object num, object den,
  *                              int prec) except *:
  *     if prec >= 0:             # <<<<<<<<<<<<<<
@@ -12143,19 +12188,19 @@ static void __pyx_f_9decimalfp_11_cdecimalfp__dec_from_rational(struct __pyx_obj
   __pyx_t_1 = ((__pyx_v_prec >= 0) != 0);
   if (__pyx_t_1) {
 
-    /* "decimalfp/_cdecimalfp.pyx":828
+    /* "decimalfp/_cdecimalfp.pyx":831
  *                              int prec) except *:
  *     if prec >= 0:
  *         dec._value = _div_rounded(num * base10pow(prec), den)             # <<<<<<<<<<<<<<
  *         dec._precision = prec
  *     else:
  */
-    __pyx_t_2 = __pyx_f_9decimalfp_11_cdecimalfp_base10pow(__pyx_v_prec); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 828, __pyx_L1_error)
+    __pyx_t_2 = __pyx_f_9decimalfp_11_cdecimalfp_base10pow(__pyx_v_prec); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 831, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_3 = PyNumber_Multiply(__pyx_v_num, __pyx_t_2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 828, __pyx_L1_error)
+    __pyx_t_3 = PyNumber_Multiply(__pyx_v_num, __pyx_t_2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 831, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    __pyx_t_2 = __pyx_f_9decimalfp_11_cdecimalfp__div_rounded(__pyx_t_3, __pyx_v_den, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 828, __pyx_L1_error)
+    __pyx_t_2 = __pyx_f_9decimalfp_11_cdecimalfp__div_rounded(__pyx_t_3, __pyx_v_den, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 831, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     __Pyx_GIVEREF(__pyx_t_2);
@@ -12164,7 +12209,7 @@ static void __pyx_f_9decimalfp_11_cdecimalfp__dec_from_rational(struct __pyx_obj
     __pyx_v_dec->_value = __pyx_t_2;
     __pyx_t_2 = 0;
 
-    /* "decimalfp/_cdecimalfp.pyx":829
+    /* "decimalfp/_cdecimalfp.pyx":832
  *     if prec >= 0:
  *         dec._value = _div_rounded(num * base10pow(prec), den)
  *         dec._precision = prec             # <<<<<<<<<<<<<<
@@ -12173,7 +12218,7 @@ static void __pyx_f_9decimalfp_11_cdecimalfp__dec_from_rational(struct __pyx_obj
  */
     __pyx_v_dec->_precision = __pyx_v_prec;
 
-    /* "decimalfp/_cdecimalfp.pyx":827
+    /* "decimalfp/_cdecimalfp.pyx":830
  * cdef void _dec_from_rational(Decimal dec, object num, object den,
  *                              int prec) except *:
  *     if prec >= 0:             # <<<<<<<<<<<<<<
@@ -12183,7 +12228,7 @@ static void __pyx_f_9decimalfp_11_cdecimalfp__dec_from_rational(struct __pyx_obj
     goto __pyx_L3;
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":831
+  /* "decimalfp/_cdecimalfp.pyx":834
  *         dec._precision = prec
  *     else:
  *         rem = _approx_rational(dec, num, den)             # <<<<<<<<<<<<<<
@@ -12191,10 +12236,10 @@ static void __pyx_f_9decimalfp_11_cdecimalfp__dec_from_rational(struct __pyx_obj
  *             raise ValueError
  */
   /*else*/ {
-    __pyx_t_1 = __pyx_f_9decimalfp_11_cdecimalfp__approx_rational(__pyx_v_dec, __pyx_v_num, __pyx_v_den, NULL); if (unlikely(__pyx_t_1 == ((int)-1) && PyErr_Occurred())) __PYX_ERR(0, 831, __pyx_L1_error)
+    __pyx_t_1 = __pyx_f_9decimalfp_11_cdecimalfp__approx_rational(__pyx_v_dec, __pyx_v_num, __pyx_v_den, NULL); if (unlikely(__pyx_t_1 == ((int)-1) && PyErr_Occurred())) __PYX_ERR(0, 834, __pyx_L1_error)
     __pyx_v_rem = __pyx_t_1;
 
-    /* "decimalfp/_cdecimalfp.pyx":832
+    /* "decimalfp/_cdecimalfp.pyx":835
  *     else:
  *         rem = _approx_rational(dec, num, den)
  *         if rem:             # <<<<<<<<<<<<<<
@@ -12204,7 +12249,7 @@ static void __pyx_f_9decimalfp_11_cdecimalfp__dec_from_rational(struct __pyx_obj
     __pyx_t_1 = (__pyx_v_rem != 0);
     if (unlikely(__pyx_t_1)) {
 
-      /* "decimalfp/_cdecimalfp.pyx":833
+      /* "decimalfp/_cdecimalfp.pyx":836
  *         rem = _approx_rational(dec, num, den)
  *         if rem:
  *             raise ValueError             # <<<<<<<<<<<<<<
@@ -12212,9 +12257,9 @@ static void __pyx_f_9decimalfp_11_cdecimalfp__dec_from_rational(struct __pyx_obj
  * 
  */
       __Pyx_Raise(__pyx_builtin_ValueError, 0, 0, 0);
-      __PYX_ERR(0, 833, __pyx_L1_error)
+      __PYX_ERR(0, 836, __pyx_L1_error)
 
-      /* "decimalfp/_cdecimalfp.pyx":832
+      /* "decimalfp/_cdecimalfp.pyx":835
  *     else:
  *         rem = _approx_rational(dec, num, den)
  *         if rem:             # <<<<<<<<<<<<<<
@@ -12225,7 +12270,7 @@ static void __pyx_f_9decimalfp_11_cdecimalfp__dec_from_rational(struct __pyx_obj
   }
   __pyx_L3:;
 
-  /* "decimalfp/_cdecimalfp.pyx":825
+  /* "decimalfp/_cdecimalfp.pyx":828
  * 
  * 
  * cdef void _dec_from_rational(Decimal dec, object num, object den,             # <<<<<<<<<<<<<<
@@ -12243,7 +12288,7 @@ static void __pyx_f_9decimalfp_11_cdecimalfp__dec_from_rational(struct __pyx_obj
   __Pyx_RefNannyFinishContext();
 }
 
-/* "decimalfp/_cdecimalfp.pyx":836
+/* "decimalfp/_cdecimalfp.pyx":839
  * 
  * 
  * cdef bint _approx_rational(Decimal dec, object num, object den,             # <<<<<<<<<<<<<<
@@ -12273,37 +12318,37 @@ static int __pyx_f_9decimalfp_11_cdecimalfp__approx_rational(struct __pyx_obj_9d
     }
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":846
+  /* "decimalfp/_cdecimalfp.pyx":849
  *     """
  *     cdef int maxPrec, prec
  *     maxPrec = max(minPrec, LIMIT_PREC)             # <<<<<<<<<<<<<<
  *     while True:
  *         prec = (minPrec + maxPrec) // 2
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_LIMIT_PREC); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 846, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_LIMIT_PREC); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 849, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_t_2 = __pyx_v_minPrec;
-  __pyx_t_4 = __Pyx_PyInt_From_int(__pyx_t_2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 846, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyInt_From_int(__pyx_t_2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 849, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_5 = PyObject_RichCompare(__pyx_t_1, __pyx_t_4, Py_GT); __Pyx_XGOTREF(__pyx_t_5); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 846, __pyx_L1_error)
+  __pyx_t_5 = PyObject_RichCompare(__pyx_t_1, __pyx_t_4, Py_GT); __Pyx_XGOTREF(__pyx_t_5); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 849, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_6 = __Pyx_PyObject_IsTrue(__pyx_t_5); if (unlikely(__pyx_t_6 < 0)) __PYX_ERR(0, 846, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyObject_IsTrue(__pyx_t_5); if (unlikely(__pyx_t_6 < 0)) __PYX_ERR(0, 849, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   if (__pyx_t_6) {
     __Pyx_INCREF(__pyx_t_1);
     __pyx_t_3 = __pyx_t_1;
   } else {
-    __pyx_t_5 = __Pyx_PyInt_From_int(__pyx_t_2); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 846, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_PyInt_From_int(__pyx_t_2); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 849, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     __pyx_t_3 = __pyx_t_5;
     __pyx_t_5 = 0;
   }
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_2 = __Pyx_PyInt_As_int(__pyx_t_3); if (unlikely((__pyx_t_2 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 846, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyInt_As_int(__pyx_t_3); if (unlikely((__pyx_t_2 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 849, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_v_maxPrec = __pyx_t_2;
 
-  /* "decimalfp/_cdecimalfp.pyx":847
+  /* "decimalfp/_cdecimalfp.pyx":850
  *     cdef int maxPrec, prec
  *     maxPrec = max(minPrec, LIMIT_PREC)
  *     while True:             # <<<<<<<<<<<<<<
@@ -12312,7 +12357,7 @@ static int __pyx_f_9decimalfp_11_cdecimalfp__approx_rational(struct __pyx_obj_9d
  */
   while (1) {
 
-    /* "decimalfp/_cdecimalfp.pyx":848
+    /* "decimalfp/_cdecimalfp.pyx":851
  *     maxPrec = max(minPrec, LIMIT_PREC)
  *     while True:
  *         prec = (minPrec + maxPrec) // 2             # <<<<<<<<<<<<<<
@@ -12321,19 +12366,19 @@ static int __pyx_f_9decimalfp_11_cdecimalfp__approx_rational(struct __pyx_obj_9d
  */
     __pyx_v_prec = __Pyx_div_long((__pyx_v_minPrec + __pyx_v_maxPrec), 2);
 
-    /* "decimalfp/_cdecimalfp.pyx":849
+    /* "decimalfp/_cdecimalfp.pyx":852
  *     while True:
  *         prec = (minPrec + maxPrec) // 2
  *         quot, rem = divmod(num * base10pow(prec), den)             # <<<<<<<<<<<<<<
  *         if prec == maxPrec:
  *             break
  */
-    __pyx_t_3 = __pyx_f_9decimalfp_11_cdecimalfp_base10pow(__pyx_v_prec); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 849, __pyx_L1_error)
+    __pyx_t_3 = __pyx_f_9decimalfp_11_cdecimalfp_base10pow(__pyx_v_prec); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 852, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_1 = PyNumber_Multiply(__pyx_v_num, __pyx_t_3); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 849, __pyx_L1_error)
+    __pyx_t_1 = PyNumber_Multiply(__pyx_v_num, __pyx_t_3); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 852, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    __pyx_t_3 = PyNumber_Divmod(__pyx_t_1, __pyx_v_den); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 849, __pyx_L1_error)
+    __pyx_t_3 = PyNumber_Divmod(__pyx_t_1, __pyx_v_den); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 852, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
     if ((likely(PyTuple_CheckExact(__pyx_t_3))) || (PyList_CheckExact(__pyx_t_3))) {
@@ -12342,7 +12387,7 @@ static int __pyx_f_9decimalfp_11_cdecimalfp__approx_rational(struct __pyx_obj_9d
       if (unlikely(size != 2)) {
         if (size > 2) __Pyx_RaiseTooManyValuesError(2);
         else if (size >= 0) __Pyx_RaiseNeedMoreValuesError(size);
-        __PYX_ERR(0, 849, __pyx_L1_error)
+        __PYX_ERR(0, 852, __pyx_L1_error)
       }
       #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
       if (likely(PyTuple_CheckExact(sequence))) {
@@ -12355,15 +12400,15 @@ static int __pyx_f_9decimalfp_11_cdecimalfp__approx_rational(struct __pyx_obj_9d
       __Pyx_INCREF(__pyx_t_1);
       __Pyx_INCREF(__pyx_t_5);
       #else
-      __pyx_t_1 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 849, __pyx_L1_error)
+      __pyx_t_1 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 852, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_1);
-      __pyx_t_5 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 849, __pyx_L1_error)
+      __pyx_t_5 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 852, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_5);
       #endif
       __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     } else {
       Py_ssize_t index = -1;
-      __pyx_t_4 = PyObject_GetIter(__pyx_t_3); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 849, __pyx_L1_error)
+      __pyx_t_4 = PyObject_GetIter(__pyx_t_3); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 852, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_4);
       __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
       __pyx_t_7 = Py_TYPE(__pyx_t_4)->tp_iternext;
@@ -12371,7 +12416,7 @@ static int __pyx_f_9decimalfp_11_cdecimalfp__approx_rational(struct __pyx_obj_9d
       __Pyx_GOTREF(__pyx_t_1);
       index = 1; __pyx_t_5 = __pyx_t_7(__pyx_t_4); if (unlikely(!__pyx_t_5)) goto __pyx_L5_unpacking_failed;
       __Pyx_GOTREF(__pyx_t_5);
-      if (__Pyx_IternextUnpackEndCheck(__pyx_t_7(__pyx_t_4), 2) < 0) __PYX_ERR(0, 849, __pyx_L1_error)
+      if (__Pyx_IternextUnpackEndCheck(__pyx_t_7(__pyx_t_4), 2) < 0) __PYX_ERR(0, 852, __pyx_L1_error)
       __pyx_t_7 = NULL;
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
       goto __pyx_L6_unpacking_done;
@@ -12379,7 +12424,7 @@ static int __pyx_f_9decimalfp_11_cdecimalfp__approx_rational(struct __pyx_obj_9d
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
       __pyx_t_7 = NULL;
       if (__Pyx_IterFinish() == 0) __Pyx_RaiseNeedMoreValuesError(index);
-      __PYX_ERR(0, 849, __pyx_L1_error)
+      __PYX_ERR(0, 852, __pyx_L1_error)
       __pyx_L6_unpacking_done:;
     }
     __Pyx_XDECREF_SET(__pyx_v_quot, __pyx_t_1);
@@ -12387,7 +12432,7 @@ static int __pyx_f_9decimalfp_11_cdecimalfp__approx_rational(struct __pyx_obj_9d
     __Pyx_XDECREF_SET(__pyx_v_rem, __pyx_t_5);
     __pyx_t_5 = 0;
 
-    /* "decimalfp/_cdecimalfp.pyx":850
+    /* "decimalfp/_cdecimalfp.pyx":853
  *         prec = (minPrec + maxPrec) // 2
  *         quot, rem = divmod(num * base10pow(prec), den)
  *         if prec == maxPrec:             # <<<<<<<<<<<<<<
@@ -12397,7 +12442,7 @@ static int __pyx_f_9decimalfp_11_cdecimalfp__approx_rational(struct __pyx_obj_9d
     __pyx_t_6 = ((__pyx_v_prec == __pyx_v_maxPrec) != 0);
     if (__pyx_t_6) {
 
-      /* "decimalfp/_cdecimalfp.pyx":851
+      /* "decimalfp/_cdecimalfp.pyx":854
  *         quot, rem = divmod(num * base10pow(prec), den)
  *         if prec == maxPrec:
  *             break             # <<<<<<<<<<<<<<
@@ -12406,7 +12451,7 @@ static int __pyx_f_9decimalfp_11_cdecimalfp__approx_rational(struct __pyx_obj_9d
  */
       goto __pyx_L4_break;
 
-      /* "decimalfp/_cdecimalfp.pyx":850
+      /* "decimalfp/_cdecimalfp.pyx":853
  *         prec = (minPrec + maxPrec) // 2
  *         quot, rem = divmod(num * base10pow(prec), den)
  *         if prec == maxPrec:             # <<<<<<<<<<<<<<
@@ -12415,20 +12460,20 @@ static int __pyx_f_9decimalfp_11_cdecimalfp__approx_rational(struct __pyx_obj_9d
  */
     }
 
-    /* "decimalfp/_cdecimalfp.pyx":852
+    /* "decimalfp/_cdecimalfp.pyx":855
  *         if prec == maxPrec:
  *             break
  *         if rem == 0:             # <<<<<<<<<<<<<<
  *             maxPrec = prec
  *         elif minPrec >= maxPrec - 2:
  */
-    __pyx_t_3 = __Pyx_PyInt_EqObjC(__pyx_v_rem, __pyx_int_0, 0, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 852, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyInt_EqObjC(__pyx_v_rem, __pyx_int_0, 0, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 855, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_6 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely(__pyx_t_6 < 0)) __PYX_ERR(0, 852, __pyx_L1_error)
+    __pyx_t_6 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely(__pyx_t_6 < 0)) __PYX_ERR(0, 855, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     if (__pyx_t_6) {
 
-      /* "decimalfp/_cdecimalfp.pyx":853
+      /* "decimalfp/_cdecimalfp.pyx":856
  *             break
  *         if rem == 0:
  *             maxPrec = prec             # <<<<<<<<<<<<<<
@@ -12437,7 +12482,7 @@ static int __pyx_f_9decimalfp_11_cdecimalfp__approx_rational(struct __pyx_obj_9d
  */
       __pyx_v_maxPrec = __pyx_v_prec;
 
-      /* "decimalfp/_cdecimalfp.pyx":852
+      /* "decimalfp/_cdecimalfp.pyx":855
  *         if prec == maxPrec:
  *             break
  *         if rem == 0:             # <<<<<<<<<<<<<<
@@ -12447,7 +12492,7 @@ static int __pyx_f_9decimalfp_11_cdecimalfp__approx_rational(struct __pyx_obj_9d
       goto __pyx_L8;
     }
 
-    /* "decimalfp/_cdecimalfp.pyx":854
+    /* "decimalfp/_cdecimalfp.pyx":857
  *         if rem == 0:
  *             maxPrec = prec
  *         elif minPrec >= maxPrec - 2:             # <<<<<<<<<<<<<<
@@ -12457,7 +12502,7 @@ static int __pyx_f_9decimalfp_11_cdecimalfp__approx_rational(struct __pyx_obj_9d
     __pyx_t_6 = ((__pyx_v_minPrec >= (__pyx_v_maxPrec - 2)) != 0);
     if (__pyx_t_6) {
 
-      /* "decimalfp/_cdecimalfp.pyx":855
+      /* "decimalfp/_cdecimalfp.pyx":858
  *             maxPrec = prec
  *         elif minPrec >= maxPrec - 2:
  *             minPrec = maxPrec             # <<<<<<<<<<<<<<
@@ -12466,7 +12511,7 @@ static int __pyx_f_9decimalfp_11_cdecimalfp__approx_rational(struct __pyx_obj_9d
  */
       __pyx_v_minPrec = __pyx_v_maxPrec;
 
-      /* "decimalfp/_cdecimalfp.pyx":854
+      /* "decimalfp/_cdecimalfp.pyx":857
  *         if rem == 0:
  *             maxPrec = prec
  *         elif minPrec >= maxPrec - 2:             # <<<<<<<<<<<<<<
@@ -12476,7 +12521,7 @@ static int __pyx_f_9decimalfp_11_cdecimalfp__approx_rational(struct __pyx_obj_9d
       goto __pyx_L8;
     }
 
-    /* "decimalfp/_cdecimalfp.pyx":857
+    /* "decimalfp/_cdecimalfp.pyx":860
  *             minPrec = maxPrec
  *         else:
  *             minPrec = prec             # <<<<<<<<<<<<<<
@@ -12490,21 +12535,21 @@ static int __pyx_f_9decimalfp_11_cdecimalfp__approx_rational(struct __pyx_obj_9d
   }
   __pyx_L4_break:;
 
-  /* "decimalfp/_cdecimalfp.pyx":858
+  /* "decimalfp/_cdecimalfp.pyx":861
  *         else:
  *             minPrec = prec
  *     dec._value = quot             # <<<<<<<<<<<<<<
  *     dec._precision = prec
  *     return (rem != 0)
  */
-  if (unlikely(!__pyx_v_quot)) { __Pyx_RaiseUnboundLocalError("quot"); __PYX_ERR(0, 858, __pyx_L1_error) }
+  if (unlikely(!__pyx_v_quot)) { __Pyx_RaiseUnboundLocalError("quot"); __PYX_ERR(0, 861, __pyx_L1_error) }
   __Pyx_INCREF(__pyx_v_quot);
   __Pyx_GIVEREF(__pyx_v_quot);
   __Pyx_GOTREF(__pyx_v_dec->_value);
   __Pyx_DECREF(__pyx_v_dec->_value);
   __pyx_v_dec->_value = __pyx_v_quot;
 
-  /* "decimalfp/_cdecimalfp.pyx":859
+  /* "decimalfp/_cdecimalfp.pyx":862
  *             minPrec = prec
  *     dec._value = quot
  *     dec._precision = prec             # <<<<<<<<<<<<<<
@@ -12513,22 +12558,22 @@ static int __pyx_f_9decimalfp_11_cdecimalfp__approx_rational(struct __pyx_obj_9d
  */
   __pyx_v_dec->_precision = __pyx_v_prec;
 
-  /* "decimalfp/_cdecimalfp.pyx":860
+  /* "decimalfp/_cdecimalfp.pyx":863
  *     dec._value = quot
  *     dec._precision = prec
  *     return (rem != 0)             # <<<<<<<<<<<<<<
  * 
  * 
  */
-  if (unlikely(!__pyx_v_rem)) { __Pyx_RaiseUnboundLocalError("rem"); __PYX_ERR(0, 860, __pyx_L1_error) }
-  __pyx_t_3 = __Pyx_PyInt_NeObjC(__pyx_v_rem, __pyx_int_0, 0, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 860, __pyx_L1_error)
+  if (unlikely(!__pyx_v_rem)) { __Pyx_RaiseUnboundLocalError("rem"); __PYX_ERR(0, 863, __pyx_L1_error) }
+  __pyx_t_3 = __Pyx_PyInt_NeObjC(__pyx_v_rem, __pyx_int_0, 0, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 863, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_6 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely((__pyx_t_6 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 860, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely((__pyx_t_6 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 863, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_r = __pyx_t_6;
   goto __pyx_L0;
 
-  /* "decimalfp/_cdecimalfp.pyx":836
+  /* "decimalfp/_cdecimalfp.pyx":839
  * 
  * 
  * cdef bint _approx_rational(Decimal dec, object num, object den,             # <<<<<<<<<<<<<<
@@ -12551,7 +12596,7 @@ static int __pyx_f_9decimalfp_11_cdecimalfp__approx_rational(struct __pyx_obj_9d
   return __pyx_r;
 }
 
-/* "decimalfp/_cdecimalfp.pyx":875
+/* "decimalfp/_cdecimalfp.pyx":878
  * 
  * 
  * def _getFormatParams(formatSpec):             # <<<<<<<<<<<<<<
@@ -12599,14 +12644,14 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp__getFormatParams(CYTHON_UNUSE
   PyObject *__pyx_t_6 = NULL;
   __Pyx_RefNannySetupContext("_getFormatParams", 0);
 
-  /* "decimalfp/_cdecimalfp.pyx":876
+  /* "decimalfp/_cdecimalfp.pyx":879
  * 
  * def _getFormatParams(formatSpec):
  *     m = _parseFormatSpec(formatSpec)             # <<<<<<<<<<<<<<
  *     if m is None:
  *         raise ValueError("Invalid format specifier: " + formatSpec)
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_parseFormatSpec); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 876, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_parseFormatSpec); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 879, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_t_3 = NULL;
   if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_2))) {
@@ -12620,13 +12665,13 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp__getFormatParams(CYTHON_UNUSE
   }
   __pyx_t_1 = (__pyx_t_3) ? __Pyx_PyObject_Call2Args(__pyx_t_2, __pyx_t_3, __pyx_v_formatSpec) : __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_v_formatSpec);
   __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
-  if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 876, __pyx_L1_error)
+  if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 879, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_v_m = __pyx_t_1;
   __pyx_t_1 = 0;
 
-  /* "decimalfp/_cdecimalfp.pyx":877
+  /* "decimalfp/_cdecimalfp.pyx":880
  * def _getFormatParams(formatSpec):
  *     m = _parseFormatSpec(formatSpec)
  *     if m is None:             # <<<<<<<<<<<<<<
@@ -12637,23 +12682,23 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp__getFormatParams(CYTHON_UNUSE
   __pyx_t_5 = (__pyx_t_4 != 0);
   if (unlikely(__pyx_t_5)) {
 
-    /* "decimalfp/_cdecimalfp.pyx":878
+    /* "decimalfp/_cdecimalfp.pyx":881
  *     m = _parseFormatSpec(formatSpec)
  *     if m is None:
  *         raise ValueError("Invalid format specifier: " + formatSpec)             # <<<<<<<<<<<<<<
  *     fill = m.group('fill')
  *     zeropad = m.group('zeropad')
  */
-    __pyx_t_1 = PyNumber_Add(__pyx_kp_s_Invalid_format_specifier, __pyx_v_formatSpec); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 878, __pyx_L1_error)
+    __pyx_t_1 = PyNumber_Add(__pyx_kp_s_Invalid_format_specifier, __pyx_v_formatSpec); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 881, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_builtin_ValueError, __pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 878, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_builtin_ValueError, __pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 881, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
     __Pyx_Raise(__pyx_t_2, 0, 0, 0);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    __PYX_ERR(0, 878, __pyx_L1_error)
+    __PYX_ERR(0, 881, __pyx_L1_error)
 
-    /* "decimalfp/_cdecimalfp.pyx":877
+    /* "decimalfp/_cdecimalfp.pyx":880
  * def _getFormatParams(formatSpec):
  *     m = _parseFormatSpec(formatSpec)
  *     if m is None:             # <<<<<<<<<<<<<<
@@ -12662,14 +12707,14 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp__getFormatParams(CYTHON_UNUSE
  */
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":879
+  /* "decimalfp/_cdecimalfp.pyx":882
  *     if m is None:
  *         raise ValueError("Invalid format specifier: " + formatSpec)
  *     fill = m.group('fill')             # <<<<<<<<<<<<<<
  *     zeropad = m.group('zeropad')
  *     if fill:                            # fill overrules zeropad
  */
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_m, __pyx_n_s_group); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 879, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_m, __pyx_n_s_group); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 882, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_t_3 = NULL;
   if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_1))) {
@@ -12683,20 +12728,20 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp__getFormatParams(CYTHON_UNUSE
   }
   __pyx_t_2 = (__pyx_t_3) ? __Pyx_PyObject_Call2Args(__pyx_t_1, __pyx_t_3, __pyx_n_s_fill) : __Pyx_PyObject_CallOneArg(__pyx_t_1, __pyx_n_s_fill);
   __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
-  if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 879, __pyx_L1_error)
+  if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 882, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_v_fill = __pyx_t_2;
   __pyx_t_2 = 0;
 
-  /* "decimalfp/_cdecimalfp.pyx":880
+  /* "decimalfp/_cdecimalfp.pyx":883
  *         raise ValueError("Invalid format specifier: " + formatSpec)
  *     fill = m.group('fill')
  *     zeropad = m.group('zeropad')             # <<<<<<<<<<<<<<
  *     if fill:                            # fill overrules zeropad
  *         fmtFill = fill
  */
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_m, __pyx_n_s_group); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 880, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_m, __pyx_n_s_group); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 883, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_t_3 = NULL;
   if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_1))) {
@@ -12710,23 +12755,23 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp__getFormatParams(CYTHON_UNUSE
   }
   __pyx_t_2 = (__pyx_t_3) ? __Pyx_PyObject_Call2Args(__pyx_t_1, __pyx_t_3, __pyx_n_s_zeropad) : __Pyx_PyObject_CallOneArg(__pyx_t_1, __pyx_n_s_zeropad);
   __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
-  if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 880, __pyx_L1_error)
+  if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 883, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_v_zeropad = __pyx_t_2;
   __pyx_t_2 = 0;
 
-  /* "decimalfp/_cdecimalfp.pyx":881
+  /* "decimalfp/_cdecimalfp.pyx":884
  *     fill = m.group('fill')
  *     zeropad = m.group('zeropad')
  *     if fill:                            # fill overrules zeropad             # <<<<<<<<<<<<<<
  *         fmtFill = fill
  *         fmtAlign = m.group('align')
  */
-  __pyx_t_5 = __Pyx_PyObject_IsTrue(__pyx_v_fill); if (unlikely(__pyx_t_5 < 0)) __PYX_ERR(0, 881, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyObject_IsTrue(__pyx_v_fill); if (unlikely(__pyx_t_5 < 0)) __PYX_ERR(0, 884, __pyx_L1_error)
   if (__pyx_t_5) {
 
-    /* "decimalfp/_cdecimalfp.pyx":882
+    /* "decimalfp/_cdecimalfp.pyx":885
  *     zeropad = m.group('zeropad')
  *     if fill:                            # fill overrules zeropad
  *         fmtFill = fill             # <<<<<<<<<<<<<<
@@ -12736,14 +12781,14 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp__getFormatParams(CYTHON_UNUSE
     __Pyx_INCREF(__pyx_v_fill);
     __pyx_v_fmtFill = __pyx_v_fill;
 
-    /* "decimalfp/_cdecimalfp.pyx":883
+    /* "decimalfp/_cdecimalfp.pyx":886
  *     if fill:                            # fill overrules zeropad
  *         fmtFill = fill
  *         fmtAlign = m.group('align')             # <<<<<<<<<<<<<<
  *     elif zeropad:                       # zeropad overrules align
  *         fmtFill = '0'
  */
-    __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_m, __pyx_n_s_group); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 883, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_m, __pyx_n_s_group); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 886, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __pyx_t_3 = NULL;
     if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_1))) {
@@ -12757,13 +12802,13 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp__getFormatParams(CYTHON_UNUSE
     }
     __pyx_t_2 = (__pyx_t_3) ? __Pyx_PyObject_Call2Args(__pyx_t_1, __pyx_t_3, __pyx_n_s_align) : __Pyx_PyObject_CallOneArg(__pyx_t_1, __pyx_n_s_align);
     __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
-    if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 883, __pyx_L1_error)
+    if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 886, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
     __pyx_v_fmtAlign = __pyx_t_2;
     __pyx_t_2 = 0;
 
-    /* "decimalfp/_cdecimalfp.pyx":881
+    /* "decimalfp/_cdecimalfp.pyx":884
  *     fill = m.group('fill')
  *     zeropad = m.group('zeropad')
  *     if fill:                            # fill overrules zeropad             # <<<<<<<<<<<<<<
@@ -12773,17 +12818,17 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp__getFormatParams(CYTHON_UNUSE
     goto __pyx_L4;
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":884
+  /* "decimalfp/_cdecimalfp.pyx":887
  *         fmtFill = fill
  *         fmtAlign = m.group('align')
  *     elif zeropad:                       # zeropad overrules align             # <<<<<<<<<<<<<<
  *         fmtFill = '0'
  *         fmtAlign = "="
  */
-  __pyx_t_5 = __Pyx_PyObject_IsTrue(__pyx_v_zeropad); if (unlikely(__pyx_t_5 < 0)) __PYX_ERR(0, 884, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyObject_IsTrue(__pyx_v_zeropad); if (unlikely(__pyx_t_5 < 0)) __PYX_ERR(0, 887, __pyx_L1_error)
   if (__pyx_t_5) {
 
-    /* "decimalfp/_cdecimalfp.pyx":885
+    /* "decimalfp/_cdecimalfp.pyx":888
  *         fmtAlign = m.group('align')
  *     elif zeropad:                       # zeropad overrules align
  *         fmtFill = '0'             # <<<<<<<<<<<<<<
@@ -12793,7 +12838,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp__getFormatParams(CYTHON_UNUSE
     __Pyx_INCREF(__pyx_kp_s_0);
     __pyx_v_fmtFill = __pyx_kp_s_0;
 
-    /* "decimalfp/_cdecimalfp.pyx":886
+    /* "decimalfp/_cdecimalfp.pyx":889
  *     elif zeropad:                       # zeropad overrules align
  *         fmtFill = '0'
  *         fmtAlign = "="             # <<<<<<<<<<<<<<
@@ -12803,7 +12848,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp__getFormatParams(CYTHON_UNUSE
     __Pyx_INCREF(__pyx_kp_s__6);
     __pyx_v_fmtAlign = __pyx_kp_s__6;
 
-    /* "decimalfp/_cdecimalfp.pyx":884
+    /* "decimalfp/_cdecimalfp.pyx":887
  *         fmtFill = fill
  *         fmtAlign = m.group('align')
  *     elif zeropad:                       # zeropad overrules align             # <<<<<<<<<<<<<<
@@ -12813,7 +12858,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp__getFormatParams(CYTHON_UNUSE
     goto __pyx_L4;
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":888
+  /* "decimalfp/_cdecimalfp.pyx":891
  *         fmtAlign = "="
  *     else:
  *         fmtFill = _dfltFormatParams['fill']             # <<<<<<<<<<<<<<
@@ -12821,22 +12866,22 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp__getFormatParams(CYTHON_UNUSE
  *     fmtSign = m.group('sign') or _dfltFormatParams['sign']
  */
   /*else*/ {
-    __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_dfltFormatParams); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 888, __pyx_L1_error)
+    __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_dfltFormatParams); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 891, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_1 = __Pyx_PyObject_Dict_GetItem(__pyx_t_2, __pyx_n_s_fill); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 888, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_Dict_GetItem(__pyx_t_2, __pyx_n_s_fill); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 891, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     __pyx_v_fmtFill = __pyx_t_1;
     __pyx_t_1 = 0;
 
-    /* "decimalfp/_cdecimalfp.pyx":889
+    /* "decimalfp/_cdecimalfp.pyx":892
  *     else:
  *         fmtFill = _dfltFormatParams['fill']
  *         fmtAlign = m.group('align') or _dfltFormatParams['align']             # <<<<<<<<<<<<<<
  *     fmtSign = m.group('sign') or _dfltFormatParams['sign']
  *     minimumwidth = m.group('minimumwidth')
  */
-    __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_m, __pyx_n_s_group); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 889, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_m, __pyx_n_s_group); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 892, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __pyx_t_6 = NULL;
     if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_3))) {
@@ -12850,10 +12895,10 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp__getFormatParams(CYTHON_UNUSE
     }
     __pyx_t_2 = (__pyx_t_6) ? __Pyx_PyObject_Call2Args(__pyx_t_3, __pyx_t_6, __pyx_n_s_align) : __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_n_s_align);
     __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
-    if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 889, __pyx_L1_error)
+    if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 892, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    __pyx_t_5 = __Pyx_PyObject_IsTrue(__pyx_t_2); if (unlikely(__pyx_t_5 < 0)) __PYX_ERR(0, 889, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_PyObject_IsTrue(__pyx_t_2); if (unlikely(__pyx_t_5 < 0)) __PYX_ERR(0, 892, __pyx_L1_error)
     if (!__pyx_t_5) {
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     } else {
@@ -12862,9 +12907,9 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp__getFormatParams(CYTHON_UNUSE
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
       goto __pyx_L5_bool_binop_done;
     }
-    __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_dfltFormatParams); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 889, __pyx_L1_error)
+    __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_dfltFormatParams); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 892, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_3 = __Pyx_PyObject_Dict_GetItem(__pyx_t_2, __pyx_n_s_align); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 889, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyObject_Dict_GetItem(__pyx_t_2, __pyx_n_s_align); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 892, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     __Pyx_INCREF(__pyx_t_3);
@@ -12876,14 +12921,14 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp__getFormatParams(CYTHON_UNUSE
   }
   __pyx_L4:;
 
-  /* "decimalfp/_cdecimalfp.pyx":890
+  /* "decimalfp/_cdecimalfp.pyx":893
  *         fmtFill = _dfltFormatParams['fill']
  *         fmtAlign = m.group('align') or _dfltFormatParams['align']
  *     fmtSign = m.group('sign') or _dfltFormatParams['sign']             # <<<<<<<<<<<<<<
  *     minimumwidth = m.group('minimumwidth')
  *     if minimumwidth:
  */
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_m, __pyx_n_s_group); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 890, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_m, __pyx_n_s_group); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 893, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_t_6 = NULL;
   if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_2))) {
@@ -12897,10 +12942,10 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp__getFormatParams(CYTHON_UNUSE
   }
   __pyx_t_3 = (__pyx_t_6) ? __Pyx_PyObject_Call2Args(__pyx_t_2, __pyx_t_6, __pyx_n_s_sign) : __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_n_s_sign);
   __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
-  if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 890, __pyx_L1_error)
+  if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 893, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_5 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely(__pyx_t_5 < 0)) __PYX_ERR(0, 890, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely(__pyx_t_5 < 0)) __PYX_ERR(0, 893, __pyx_L1_error)
   if (!__pyx_t_5) {
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   } else {
@@ -12909,9 +12954,9 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp__getFormatParams(CYTHON_UNUSE
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     goto __pyx_L7_bool_binop_done;
   }
-  __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_dfltFormatParams); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 890, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_dfltFormatParams); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 893, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = __Pyx_PyObject_Dict_GetItem(__pyx_t_3, __pyx_n_s_sign); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 890, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_Dict_GetItem(__pyx_t_3, __pyx_n_s_sign); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 893, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_INCREF(__pyx_t_2);
@@ -12921,14 +12966,14 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp__getFormatParams(CYTHON_UNUSE
   __pyx_v_fmtSign = __pyx_t_1;
   __pyx_t_1 = 0;
 
-  /* "decimalfp/_cdecimalfp.pyx":891
+  /* "decimalfp/_cdecimalfp.pyx":894
  *         fmtAlign = m.group('align') or _dfltFormatParams['align']
  *     fmtSign = m.group('sign') or _dfltFormatParams['sign']
  *     minimumwidth = m.group('minimumwidth')             # <<<<<<<<<<<<<<
  *     if minimumwidth:
  *         fmtMinWidth = int(minimumwidth)
  */
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_m, __pyx_n_s_group); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 891, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_m, __pyx_n_s_group); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 894, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_t_3 = NULL;
   if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_2))) {
@@ -12942,35 +12987,35 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp__getFormatParams(CYTHON_UNUSE
   }
   __pyx_t_1 = (__pyx_t_3) ? __Pyx_PyObject_Call2Args(__pyx_t_2, __pyx_t_3, __pyx_n_s_minimumwidth) : __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_n_s_minimumwidth);
   __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
-  if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 891, __pyx_L1_error)
+  if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 894, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_v_minimumwidth = __pyx_t_1;
   __pyx_t_1 = 0;
 
-  /* "decimalfp/_cdecimalfp.pyx":892
+  /* "decimalfp/_cdecimalfp.pyx":895
  *     fmtSign = m.group('sign') or _dfltFormatParams['sign']
  *     minimumwidth = m.group('minimumwidth')
  *     if minimumwidth:             # <<<<<<<<<<<<<<
  *         fmtMinWidth = int(minimumwidth)
  *     else:
  */
-  __pyx_t_5 = __Pyx_PyObject_IsTrue(__pyx_v_minimumwidth); if (unlikely(__pyx_t_5 < 0)) __PYX_ERR(0, 892, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyObject_IsTrue(__pyx_v_minimumwidth); if (unlikely(__pyx_t_5 < 0)) __PYX_ERR(0, 895, __pyx_L1_error)
   if (__pyx_t_5) {
 
-    /* "decimalfp/_cdecimalfp.pyx":893
+    /* "decimalfp/_cdecimalfp.pyx":896
  *     minimumwidth = m.group('minimumwidth')
  *     if minimumwidth:
  *         fmtMinWidth = int(minimumwidth)             # <<<<<<<<<<<<<<
  *     else:
  *         fmtMinWidth = _dfltFormatParams['minimumwidth']
  */
-    __pyx_t_1 = __Pyx_PyNumber_Int(__pyx_v_minimumwidth); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 893, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyNumber_Int(__pyx_v_minimumwidth); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 896, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __pyx_v_fmtMinWidth = __pyx_t_1;
     __pyx_t_1 = 0;
 
-    /* "decimalfp/_cdecimalfp.pyx":892
+    /* "decimalfp/_cdecimalfp.pyx":895
  *     fmtSign = m.group('sign') or _dfltFormatParams['sign']
  *     minimumwidth = m.group('minimumwidth')
  *     if minimumwidth:             # <<<<<<<<<<<<<<
@@ -12980,7 +13025,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp__getFormatParams(CYTHON_UNUSE
     goto __pyx_L9;
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":895
+  /* "decimalfp/_cdecimalfp.pyx":898
  *         fmtMinWidth = int(minimumwidth)
  *     else:
  *         fmtMinWidth = _dfltFormatParams['minimumwidth']             # <<<<<<<<<<<<<<
@@ -12988,9 +13033,9 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp__getFormatParams(CYTHON_UNUSE
  *     if fmtType == 'n':
  */
   /*else*/ {
-    __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_dfltFormatParams); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 895, __pyx_L1_error)
+    __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_dfltFormatParams); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 898, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_2 = __Pyx_PyObject_Dict_GetItem(__pyx_t_1, __pyx_n_s_minimumwidth); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 895, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_PyObject_Dict_GetItem(__pyx_t_1, __pyx_n_s_minimumwidth); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 898, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
     __pyx_v_fmtMinWidth = __pyx_t_2;
@@ -12998,14 +13043,14 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp__getFormatParams(CYTHON_UNUSE
   }
   __pyx_L9:;
 
-  /* "decimalfp/_cdecimalfp.pyx":896
+  /* "decimalfp/_cdecimalfp.pyx":899
  *     else:
  *         fmtMinWidth = _dfltFormatParams['minimumwidth']
  *     fmtType = m.group('type') or _dfltFormatParams['type']             # <<<<<<<<<<<<<<
  *     if fmtType == 'n':
  *         lconv = locale.localeconv()
  */
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_m, __pyx_n_s_group); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 896, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_m, __pyx_n_s_group); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 899, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __pyx_t_6 = NULL;
   if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_3))) {
@@ -13019,10 +13064,10 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp__getFormatParams(CYTHON_UNUSE
   }
   __pyx_t_1 = (__pyx_t_6) ? __Pyx_PyObject_Call2Args(__pyx_t_3, __pyx_t_6, __pyx_n_s_type) : __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_n_s_type);
   __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
-  if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 896, __pyx_L1_error)
+  if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 899, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_5 = __Pyx_PyObject_IsTrue(__pyx_t_1); if (unlikely(__pyx_t_5 < 0)) __PYX_ERR(0, 896, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyObject_IsTrue(__pyx_t_1); if (unlikely(__pyx_t_5 < 0)) __PYX_ERR(0, 899, __pyx_L1_error)
   if (!__pyx_t_5) {
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   } else {
@@ -13031,9 +13076,9 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp__getFormatParams(CYTHON_UNUSE
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
     goto __pyx_L10_bool_binop_done;
   }
-  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_dfltFormatParams); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 896, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_dfltFormatParams); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 899, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_3 = __Pyx_PyObject_Dict_GetItem(__pyx_t_1, __pyx_n_s_type); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 896, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_Dict_GetItem(__pyx_t_1, __pyx_n_s_type); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 899, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_INCREF(__pyx_t_3);
@@ -13043,26 +13088,26 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp__getFormatParams(CYTHON_UNUSE
   __pyx_v_fmtType = __pyx_t_2;
   __pyx_t_2 = 0;
 
-  /* "decimalfp/_cdecimalfp.pyx":897
+  /* "decimalfp/_cdecimalfp.pyx":900
  *         fmtMinWidth = _dfltFormatParams['minimumwidth']
  *     fmtType = m.group('type') or _dfltFormatParams['type']
  *     if fmtType == 'n':             # <<<<<<<<<<<<<<
  *         lconv = locale.localeconv()
  *         fmtThousandsSep = m.group('thousands_sep') and lconv['thousands_sep']
  */
-  __pyx_t_5 = (__Pyx_PyString_Equals(__pyx_v_fmtType, __pyx_n_s_n, Py_EQ)); if (unlikely(__pyx_t_5 < 0)) __PYX_ERR(0, 897, __pyx_L1_error)
+  __pyx_t_5 = (__Pyx_PyString_Equals(__pyx_v_fmtType, __pyx_n_s_n, Py_EQ)); if (unlikely(__pyx_t_5 < 0)) __PYX_ERR(0, 900, __pyx_L1_error)
   if (__pyx_t_5) {
 
-    /* "decimalfp/_cdecimalfp.pyx":898
+    /* "decimalfp/_cdecimalfp.pyx":901
  *     fmtType = m.group('type') or _dfltFormatParams['type']
  *     if fmtType == 'n':
  *         lconv = locale.localeconv()             # <<<<<<<<<<<<<<
  *         fmtThousandsSep = m.group('thousands_sep') and lconv['thousands_sep']
  *         fmtGrouping = lconv['grouping']
  */
-    __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_locale); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 898, __pyx_L1_error)
+    __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_locale); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 901, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_localeconv); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 898, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_localeconv); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 901, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     __pyx_t_3 = NULL;
@@ -13077,20 +13122,20 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp__getFormatParams(CYTHON_UNUSE
     }
     __pyx_t_2 = (__pyx_t_3) ? __Pyx_PyObject_CallOneArg(__pyx_t_1, __pyx_t_3) : __Pyx_PyObject_CallNoArg(__pyx_t_1);
     __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
-    if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 898, __pyx_L1_error)
+    if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 901, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
     __pyx_v_lconv = __pyx_t_2;
     __pyx_t_2 = 0;
 
-    /* "decimalfp/_cdecimalfp.pyx":899
+    /* "decimalfp/_cdecimalfp.pyx":902
  *     if fmtType == 'n':
  *         lconv = locale.localeconv()
  *         fmtThousandsSep = m.group('thousands_sep') and lconv['thousands_sep']             # <<<<<<<<<<<<<<
  *         fmtGrouping = lconv['grouping']
  *         fmtDecimalPoint = lconv['decimal_point']
  */
-    __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_m, __pyx_n_s_group); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 899, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_m, __pyx_n_s_group); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 902, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __pyx_t_6 = NULL;
     if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_3))) {
@@ -13104,10 +13149,10 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp__getFormatParams(CYTHON_UNUSE
     }
     __pyx_t_1 = (__pyx_t_6) ? __Pyx_PyObject_Call2Args(__pyx_t_3, __pyx_t_6, __pyx_n_s_thousands_sep) : __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_n_s_thousands_sep);
     __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
-    if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 899, __pyx_L1_error)
+    if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 902, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    __pyx_t_5 = __Pyx_PyObject_IsTrue(__pyx_t_1); if (unlikely(__pyx_t_5 < 0)) __PYX_ERR(0, 899, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_PyObject_IsTrue(__pyx_t_1); if (unlikely(__pyx_t_5 < 0)) __PYX_ERR(0, 902, __pyx_L1_error)
     if (__pyx_t_5) {
       __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
     } else {
@@ -13116,7 +13161,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp__getFormatParams(CYTHON_UNUSE
       __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
       goto __pyx_L13_bool_binop_done;
     }
-    __pyx_t_1 = __Pyx_PyObject_Dict_GetItem(__pyx_v_lconv, __pyx_n_s_thousands_sep); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 899, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_Dict_GetItem(__pyx_v_lconv, __pyx_n_s_thousands_sep); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 902, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_INCREF(__pyx_t_1);
     __pyx_t_2 = __pyx_t_1;
@@ -13125,31 +13170,31 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp__getFormatParams(CYTHON_UNUSE
     __pyx_v_fmtThousandsSep = __pyx_t_2;
     __pyx_t_2 = 0;
 
-    /* "decimalfp/_cdecimalfp.pyx":900
+    /* "decimalfp/_cdecimalfp.pyx":903
  *         lconv = locale.localeconv()
  *         fmtThousandsSep = m.group('thousands_sep') and lconv['thousands_sep']
  *         fmtGrouping = lconv['grouping']             # <<<<<<<<<<<<<<
  *         fmtDecimalPoint = lconv['decimal_point']
  *     else:
  */
-    __pyx_t_2 = __Pyx_PyObject_Dict_GetItem(__pyx_v_lconv, __pyx_n_s_grouping); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 900, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_PyObject_Dict_GetItem(__pyx_v_lconv, __pyx_n_s_grouping); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 903, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     __pyx_v_fmtGrouping = __pyx_t_2;
     __pyx_t_2 = 0;
 
-    /* "decimalfp/_cdecimalfp.pyx":901
+    /* "decimalfp/_cdecimalfp.pyx":904
  *         fmtThousandsSep = m.group('thousands_sep') and lconv['thousands_sep']
  *         fmtGrouping = lconv['grouping']
  *         fmtDecimalPoint = lconv['decimal_point']             # <<<<<<<<<<<<<<
  *     else:
  *         fmtThousandsSep = (m.group('thousands_sep') or
  */
-    __pyx_t_2 = __Pyx_PyObject_Dict_GetItem(__pyx_v_lconv, __pyx_n_s_decimal_point); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 901, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_PyObject_Dict_GetItem(__pyx_v_lconv, __pyx_n_s_decimal_point); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 904, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     __pyx_v_fmtDecimalPoint = __pyx_t_2;
     __pyx_t_2 = 0;
 
-    /* "decimalfp/_cdecimalfp.pyx":897
+    /* "decimalfp/_cdecimalfp.pyx":900
  *         fmtMinWidth = _dfltFormatParams['minimumwidth']
  *     fmtType = m.group('type') or _dfltFormatParams['type']
  *     if fmtType == 'n':             # <<<<<<<<<<<<<<
@@ -13159,7 +13204,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp__getFormatParams(CYTHON_UNUSE
     goto __pyx_L12;
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":903
+  /* "decimalfp/_cdecimalfp.pyx":906
  *         fmtDecimalPoint = lconv['decimal_point']
  *     else:
  *         fmtThousandsSep = (m.group('thousands_sep') or             # <<<<<<<<<<<<<<
@@ -13167,7 +13212,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp__getFormatParams(CYTHON_UNUSE
  *         fmtGrouping = _dfltFormatParams['grouping']
  */
   /*else*/ {
-    __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_m, __pyx_n_s_group); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 903, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_m, __pyx_n_s_group); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 906, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __pyx_t_6 = NULL;
     if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_3))) {
@@ -13181,10 +13226,10 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp__getFormatParams(CYTHON_UNUSE
     }
     __pyx_t_1 = (__pyx_t_6) ? __Pyx_PyObject_Call2Args(__pyx_t_3, __pyx_t_6, __pyx_n_s_thousands_sep) : __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_n_s_thousands_sep);
     __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
-    if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 903, __pyx_L1_error)
+    if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 906, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    __pyx_t_5 = __Pyx_PyObject_IsTrue(__pyx_t_1); if (unlikely(__pyx_t_5 < 0)) __PYX_ERR(0, 903, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_PyObject_IsTrue(__pyx_t_1); if (unlikely(__pyx_t_5 < 0)) __PYX_ERR(0, 906, __pyx_L1_error)
     if (!__pyx_t_5) {
       __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
     } else {
@@ -13194,16 +13239,16 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp__getFormatParams(CYTHON_UNUSE
       goto __pyx_L15_bool_binop_done;
     }
 
-    /* "decimalfp/_cdecimalfp.pyx":904
+    /* "decimalfp/_cdecimalfp.pyx":907
  *     else:
  *         fmtThousandsSep = (m.group('thousands_sep') or
  *                            _dfltFormatParams['thousands_sep'])             # <<<<<<<<<<<<<<
  *         fmtGrouping = _dfltFormatParams['grouping']
  *         fmtDecimalPoint = _dfltFormatParams['decimal_point']
  */
-    __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_dfltFormatParams); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 904, __pyx_L1_error)
+    __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_dfltFormatParams); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 907, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_3 = __Pyx_PyObject_Dict_GetItem(__pyx_t_1, __pyx_n_s_thousands_sep); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 904, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyObject_Dict_GetItem(__pyx_t_1, __pyx_n_s_thousands_sep); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 907, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
     __Pyx_INCREF(__pyx_t_3);
@@ -13213,31 +13258,31 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp__getFormatParams(CYTHON_UNUSE
     __pyx_v_fmtThousandsSep = __pyx_t_2;
     __pyx_t_2 = 0;
 
-    /* "decimalfp/_cdecimalfp.pyx":905
+    /* "decimalfp/_cdecimalfp.pyx":908
  *         fmtThousandsSep = (m.group('thousands_sep') or
  *                            _dfltFormatParams['thousands_sep'])
  *         fmtGrouping = _dfltFormatParams['grouping']             # <<<<<<<<<<<<<<
  *         fmtDecimalPoint = _dfltFormatParams['decimal_point']
  *     precision = m.group('precision')
  */
-    __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_dfltFormatParams); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 905, __pyx_L1_error)
+    __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_dfltFormatParams); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 908, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_3 = __Pyx_PyObject_Dict_GetItem(__pyx_t_2, __pyx_n_s_grouping); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 905, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyObject_Dict_GetItem(__pyx_t_2, __pyx_n_s_grouping); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 908, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     __pyx_v_fmtGrouping = __pyx_t_3;
     __pyx_t_3 = 0;
 
-    /* "decimalfp/_cdecimalfp.pyx":906
+    /* "decimalfp/_cdecimalfp.pyx":909
  *                            _dfltFormatParams['thousands_sep'])
  *         fmtGrouping = _dfltFormatParams['grouping']
  *         fmtDecimalPoint = _dfltFormatParams['decimal_point']             # <<<<<<<<<<<<<<
  *     precision = m.group('precision')
  *     if precision:
  */
-    __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_dfltFormatParams); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 906, __pyx_L1_error)
+    __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_dfltFormatParams); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 909, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_2 = __Pyx_PyObject_Dict_GetItem(__pyx_t_3, __pyx_n_s_decimal_point); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 906, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_PyObject_Dict_GetItem(__pyx_t_3, __pyx_n_s_decimal_point); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 909, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     __pyx_v_fmtDecimalPoint = __pyx_t_2;
@@ -13245,14 +13290,14 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp__getFormatParams(CYTHON_UNUSE
   }
   __pyx_L12:;
 
-  /* "decimalfp/_cdecimalfp.pyx":907
+  /* "decimalfp/_cdecimalfp.pyx":910
  *         fmtGrouping = _dfltFormatParams['grouping']
  *         fmtDecimalPoint = _dfltFormatParams['decimal_point']
  *     precision = m.group('precision')             # <<<<<<<<<<<<<<
  *     if precision:
  *         fmtPrecision = int(precision)
  */
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_m, __pyx_n_s_group); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 907, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_m, __pyx_n_s_group); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 910, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __pyx_t_1 = NULL;
   if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_3))) {
@@ -13266,35 +13311,35 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp__getFormatParams(CYTHON_UNUSE
   }
   __pyx_t_2 = (__pyx_t_1) ? __Pyx_PyObject_Call2Args(__pyx_t_3, __pyx_t_1, __pyx_n_s_precision) : __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_n_s_precision);
   __Pyx_XDECREF(__pyx_t_1); __pyx_t_1 = 0;
-  if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 907, __pyx_L1_error)
+  if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 910, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_v_precision = __pyx_t_2;
   __pyx_t_2 = 0;
 
-  /* "decimalfp/_cdecimalfp.pyx":908
+  /* "decimalfp/_cdecimalfp.pyx":911
  *         fmtDecimalPoint = _dfltFormatParams['decimal_point']
  *     precision = m.group('precision')
  *     if precision:             # <<<<<<<<<<<<<<
  *         fmtPrecision = int(precision)
  *     else:
  */
-  __pyx_t_5 = __Pyx_PyObject_IsTrue(__pyx_v_precision); if (unlikely(__pyx_t_5 < 0)) __PYX_ERR(0, 908, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyObject_IsTrue(__pyx_v_precision); if (unlikely(__pyx_t_5 < 0)) __PYX_ERR(0, 911, __pyx_L1_error)
   if (__pyx_t_5) {
 
-    /* "decimalfp/_cdecimalfp.pyx":909
+    /* "decimalfp/_cdecimalfp.pyx":912
  *     precision = m.group('precision')
  *     if precision:
  *         fmtPrecision = int(precision)             # <<<<<<<<<<<<<<
  *     else:
  *         fmtPrecision = None
  */
-    __pyx_t_2 = __Pyx_PyNumber_Int(__pyx_v_precision); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 909, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_PyNumber_Int(__pyx_v_precision); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 912, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     __pyx_v_fmtPrecision = __pyx_t_2;
     __pyx_t_2 = 0;
 
-    /* "decimalfp/_cdecimalfp.pyx":908
+    /* "decimalfp/_cdecimalfp.pyx":911
  *         fmtDecimalPoint = _dfltFormatParams['decimal_point']
  *     precision = m.group('precision')
  *     if precision:             # <<<<<<<<<<<<<<
@@ -13304,7 +13349,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp__getFormatParams(CYTHON_UNUSE
     goto __pyx_L17;
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":911
+  /* "decimalfp/_cdecimalfp.pyx":914
  *         fmtPrecision = int(precision)
  *     else:
  *         fmtPrecision = None             # <<<<<<<<<<<<<<
@@ -13317,7 +13362,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp__getFormatParams(CYTHON_UNUSE
   }
   __pyx_L17:;
 
-  /* "decimalfp/_cdecimalfp.pyx":912
+  /* "decimalfp/_cdecimalfp.pyx":915
  *     else:
  *         fmtPrecision = None
  *     return (fmtFill, fmtAlign, fmtSign, fmtMinWidth, fmtThousandsSep,             # <<<<<<<<<<<<<<
@@ -13326,14 +13371,14 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp__getFormatParams(CYTHON_UNUSE
  */
   __Pyx_XDECREF(__pyx_r);
 
-  /* "decimalfp/_cdecimalfp.pyx":913
+  /* "decimalfp/_cdecimalfp.pyx":916
  *         fmtPrecision = None
  *     return (fmtFill, fmtAlign, fmtSign, fmtMinWidth, fmtThousandsSep,
  *             fmtGrouping, fmtDecimalPoint, fmtPrecision, fmtType)             # <<<<<<<<<<<<<<
  * 
  * 
  */
-  __pyx_t_2 = PyTuple_New(9); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 912, __pyx_L1_error)
+  __pyx_t_2 = PyTuple_New(9); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 915, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_INCREF(__pyx_v_fmtFill);
   __Pyx_GIVEREF(__pyx_v_fmtFill);
@@ -13366,7 +13411,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp__getFormatParams(CYTHON_UNUSE
   __pyx_t_2 = 0;
   goto __pyx_L0;
 
-  /* "decimalfp/_cdecimalfp.pyx":875
+  /* "decimalfp/_cdecimalfp.pyx":878
  * 
  * 
  * def _getFormatParams(formatSpec):             # <<<<<<<<<<<<<<
@@ -13403,7 +13448,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp__getFormatParams(CYTHON_UNUSE
   return __pyx_r;
 }
 
-/* "decimalfp/_cdecimalfp.pyx":916
+/* "decimalfp/_cdecimalfp.pyx":919
  * 
  * 
  * def _padDigits(digits, minWidth, fill, sep=None, grouping=None):             # <<<<<<<<<<<<<<
@@ -13454,13 +13499,13 @@ static PyObject *__pyx_pw_9decimalfp_11_cdecimalfp_3_padDigits(PyObject *__pyx_s
         case  1:
         if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_minWidth)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("_padDigits", 0, 3, 5, 1); __PYX_ERR(0, 916, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("_padDigits", 0, 3, 5, 1); __PYX_ERR(0, 919, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
         if (likely((values[2] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_fill)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("_padDigits", 0, 3, 5, 2); __PYX_ERR(0, 916, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("_padDigits", 0, 3, 5, 2); __PYX_ERR(0, 919, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  3:
@@ -13476,7 +13521,7 @@ static PyObject *__pyx_pw_9decimalfp_11_cdecimalfp_3_padDigits(PyObject *__pyx_s
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "_padDigits") < 0)) __PYX_ERR(0, 916, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "_padDigits") < 0)) __PYX_ERR(0, 919, __pyx_L3_error)
       }
     } else {
       switch (PyTuple_GET_SIZE(__pyx_args)) {
@@ -13499,7 +13544,7 @@ static PyObject *__pyx_pw_9decimalfp_11_cdecimalfp_3_padDigits(PyObject *__pyx_s
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("_padDigits", 0, 3, 5, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 916, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("_padDigits", 0, 3, 5, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 919, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("decimalfp._cdecimalfp._padDigits", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -13539,50 +13584,50 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_2_padDigits(CYTHON_UNUSED PyO
   __Pyx_RefNannySetupContext("_padDigits", 0);
   __Pyx_INCREF(__pyx_v_digits);
 
-  /* "decimalfp/_cdecimalfp.pyx":917
+  /* "decimalfp/_cdecimalfp.pyx":920
  * 
  * def _padDigits(digits, minWidth, fill, sep=None, grouping=None):
  *     nDigits = len(digits)             # <<<<<<<<<<<<<<
  *     if sep and grouping:
  *         slices = []
  */
-  __pyx_t_1 = PyObject_Length(__pyx_v_digits); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 917, __pyx_L1_error)
-  __pyx_t_2 = PyInt_FromSsize_t(__pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 917, __pyx_L1_error)
+  __pyx_t_1 = PyObject_Length(__pyx_v_digits); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 920, __pyx_L1_error)
+  __pyx_t_2 = PyInt_FromSsize_t(__pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 920, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_v_nDigits = __pyx_t_2;
   __pyx_t_2 = 0;
 
-  /* "decimalfp/_cdecimalfp.pyx":918
+  /* "decimalfp/_cdecimalfp.pyx":921
  * def _padDigits(digits, minWidth, fill, sep=None, grouping=None):
  *     nDigits = len(digits)
  *     if sep and grouping:             # <<<<<<<<<<<<<<
  *         slices = []
  *         i = j = 0
  */
-  __pyx_t_4 = __Pyx_PyObject_IsTrue(__pyx_v_sep); if (unlikely(__pyx_t_4 < 0)) __PYX_ERR(0, 918, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_IsTrue(__pyx_v_sep); if (unlikely(__pyx_t_4 < 0)) __PYX_ERR(0, 921, __pyx_L1_error)
   if (__pyx_t_4) {
   } else {
     __pyx_t_3 = __pyx_t_4;
     goto __pyx_L4_bool_binop_done;
   }
-  __pyx_t_4 = __Pyx_PyObject_IsTrue(__pyx_v_grouping); if (unlikely(__pyx_t_4 < 0)) __PYX_ERR(0, 918, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_IsTrue(__pyx_v_grouping); if (unlikely(__pyx_t_4 < 0)) __PYX_ERR(0, 921, __pyx_L1_error)
   __pyx_t_3 = __pyx_t_4;
   __pyx_L4_bool_binop_done:;
   if (__pyx_t_3) {
 
-    /* "decimalfp/_cdecimalfp.pyx":919
+    /* "decimalfp/_cdecimalfp.pyx":922
  *     nDigits = len(digits)
  *     if sep and grouping:
  *         slices = []             # <<<<<<<<<<<<<<
  *         i = j = 0
  *         limit = max(minWidth, nDigits) if fill == '0' else nDigits
  */
-    __pyx_t_2 = PyList_New(0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 919, __pyx_L1_error)
+    __pyx_t_2 = PyList_New(0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 922, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     __pyx_v_slices = ((PyObject*)__pyx_t_2);
     __pyx_t_2 = 0;
 
-    /* "decimalfp/_cdecimalfp.pyx":920
+    /* "decimalfp/_cdecimalfp.pyx":923
  *     if sep and grouping:
  *         slices = []
  *         i = j = 0             # <<<<<<<<<<<<<<
@@ -13594,21 +13639,21 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_2_padDigits(CYTHON_UNUSED PyO
     __Pyx_INCREF(__pyx_int_0);
     __pyx_v_j = __pyx_int_0;
 
-    /* "decimalfp/_cdecimalfp.pyx":921
+    /* "decimalfp/_cdecimalfp.pyx":924
  *         slices = []
  *         i = j = 0
  *         limit = max(minWidth, nDigits) if fill == '0' else nDigits             # <<<<<<<<<<<<<<
  *         for l in _iterGrouping(grouping):
  *             j = min(i + l, limit)
  */
-    __pyx_t_3 = (__Pyx_PyString_Equals(__pyx_v_fill, __pyx_kp_s_0, Py_EQ)); if (unlikely(__pyx_t_3 < 0)) __PYX_ERR(0, 921, __pyx_L1_error)
+    __pyx_t_3 = (__Pyx_PyString_Equals(__pyx_v_fill, __pyx_kp_s_0, Py_EQ)); if (unlikely(__pyx_t_3 < 0)) __PYX_ERR(0, 924, __pyx_L1_error)
     if (__pyx_t_3) {
       __Pyx_INCREF(__pyx_v_nDigits);
       __pyx_t_5 = __pyx_v_nDigits;
       __Pyx_INCREF(__pyx_v_minWidth);
       __pyx_t_6 = __pyx_v_minWidth;
-      __pyx_t_8 = PyObject_RichCompare(__pyx_t_5, __pyx_t_6, Py_GT); __Pyx_XGOTREF(__pyx_t_8); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 921, __pyx_L1_error)
-      __pyx_t_4 = __Pyx_PyObject_IsTrue(__pyx_t_8); if (unlikely(__pyx_t_4 < 0)) __PYX_ERR(0, 921, __pyx_L1_error)
+      __pyx_t_8 = PyObject_RichCompare(__pyx_t_5, __pyx_t_6, Py_GT); __Pyx_XGOTREF(__pyx_t_8); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 924, __pyx_L1_error)
+      __pyx_t_4 = __Pyx_PyObject_IsTrue(__pyx_t_8); if (unlikely(__pyx_t_4 < 0)) __PYX_ERR(0, 924, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
       if (__pyx_t_4) {
         __Pyx_INCREF(__pyx_t_5);
@@ -13629,14 +13674,14 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_2_padDigits(CYTHON_UNUSED PyO
     __pyx_v_limit = __pyx_t_2;
     __pyx_t_2 = 0;
 
-    /* "decimalfp/_cdecimalfp.pyx":922
+    /* "decimalfp/_cdecimalfp.pyx":925
  *         i = j = 0
  *         limit = max(minWidth, nDigits) if fill == '0' else nDigits
  *         for l in _iterGrouping(grouping):             # <<<<<<<<<<<<<<
  *             j = min(i + l, limit)
  *             slices.append((i, j))
  */
-    __Pyx_GetModuleGlobalName(__pyx_t_7, __pyx_n_s_iterGrouping); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 922, __pyx_L1_error)
+    __Pyx_GetModuleGlobalName(__pyx_t_7, __pyx_n_s_iterGrouping); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 925, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_7);
     __pyx_t_5 = NULL;
     if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_7))) {
@@ -13650,16 +13695,16 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_2_padDigits(CYTHON_UNUSED PyO
     }
     __pyx_t_2 = (__pyx_t_5) ? __Pyx_PyObject_Call2Args(__pyx_t_7, __pyx_t_5, __pyx_v_grouping) : __Pyx_PyObject_CallOneArg(__pyx_t_7, __pyx_v_grouping);
     __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
-    if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 922, __pyx_L1_error)
+    if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 925, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
     if (likely(PyList_CheckExact(__pyx_t_2)) || PyTuple_CheckExact(__pyx_t_2)) {
       __pyx_t_7 = __pyx_t_2; __Pyx_INCREF(__pyx_t_7); __pyx_t_1 = 0;
       __pyx_t_9 = NULL;
     } else {
-      __pyx_t_1 = -1; __pyx_t_7 = PyObject_GetIter(__pyx_t_2); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 922, __pyx_L1_error)
+      __pyx_t_1 = -1; __pyx_t_7 = PyObject_GetIter(__pyx_t_2); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 925, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_7);
-      __pyx_t_9 = Py_TYPE(__pyx_t_7)->tp_iternext; if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 922, __pyx_L1_error)
+      __pyx_t_9 = Py_TYPE(__pyx_t_7)->tp_iternext; if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 925, __pyx_L1_error)
     }
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     for (;;) {
@@ -13667,17 +13712,17 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_2_padDigits(CYTHON_UNUSED PyO
         if (likely(PyList_CheckExact(__pyx_t_7))) {
           if (__pyx_t_1 >= PyList_GET_SIZE(__pyx_t_7)) break;
           #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-          __pyx_t_2 = PyList_GET_ITEM(__pyx_t_7, __pyx_t_1); __Pyx_INCREF(__pyx_t_2); __pyx_t_1++; if (unlikely(0 < 0)) __PYX_ERR(0, 922, __pyx_L1_error)
+          __pyx_t_2 = PyList_GET_ITEM(__pyx_t_7, __pyx_t_1); __Pyx_INCREF(__pyx_t_2); __pyx_t_1++; if (unlikely(0 < 0)) __PYX_ERR(0, 925, __pyx_L1_error)
           #else
-          __pyx_t_2 = PySequence_ITEM(__pyx_t_7, __pyx_t_1); __pyx_t_1++; if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 922, __pyx_L1_error)
+          __pyx_t_2 = PySequence_ITEM(__pyx_t_7, __pyx_t_1); __pyx_t_1++; if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 925, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_2);
           #endif
         } else {
           if (__pyx_t_1 >= PyTuple_GET_SIZE(__pyx_t_7)) break;
           #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-          __pyx_t_2 = PyTuple_GET_ITEM(__pyx_t_7, __pyx_t_1); __Pyx_INCREF(__pyx_t_2); __pyx_t_1++; if (unlikely(0 < 0)) __PYX_ERR(0, 922, __pyx_L1_error)
+          __pyx_t_2 = PyTuple_GET_ITEM(__pyx_t_7, __pyx_t_1); __Pyx_INCREF(__pyx_t_2); __pyx_t_1++; if (unlikely(0 < 0)) __PYX_ERR(0, 925, __pyx_L1_error)
           #else
-          __pyx_t_2 = PySequence_ITEM(__pyx_t_7, __pyx_t_1); __pyx_t_1++; if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 922, __pyx_L1_error)
+          __pyx_t_2 = PySequence_ITEM(__pyx_t_7, __pyx_t_1); __pyx_t_1++; if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 925, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_2);
           #endif
         }
@@ -13687,7 +13732,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_2_padDigits(CYTHON_UNUSED PyO
           PyObject* exc_type = PyErr_Occurred();
           if (exc_type) {
             if (likely(__Pyx_PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
-            else __PYX_ERR(0, 922, __pyx_L1_error)
+            else __PYX_ERR(0, 925, __pyx_L1_error)
           }
           break;
         }
@@ -13696,7 +13741,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_2_padDigits(CYTHON_UNUSED PyO
       __Pyx_XDECREF_SET(__pyx_v_l, __pyx_t_2);
       __pyx_t_2 = 0;
 
-      /* "decimalfp/_cdecimalfp.pyx":923
+      /* "decimalfp/_cdecimalfp.pyx":926
  *         limit = max(minWidth, nDigits) if fill == '0' else nDigits
  *         for l in _iterGrouping(grouping):
  *             j = min(i + l, limit)             # <<<<<<<<<<<<<<
@@ -13705,10 +13750,10 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_2_padDigits(CYTHON_UNUSED PyO
  */
       __Pyx_INCREF(__pyx_v_limit);
       __pyx_t_2 = __pyx_v_limit;
-      __pyx_t_5 = PyNumber_Add(__pyx_v_i, __pyx_v_l); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 923, __pyx_L1_error)
+      __pyx_t_5 = PyNumber_Add(__pyx_v_i, __pyx_v_l); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 926, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_5);
-      __pyx_t_8 = PyObject_RichCompare(__pyx_t_2, __pyx_t_5, Py_LT); __Pyx_XGOTREF(__pyx_t_8); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 923, __pyx_L1_error)
-      __pyx_t_3 = __Pyx_PyObject_IsTrue(__pyx_t_8); if (unlikely(__pyx_t_3 < 0)) __PYX_ERR(0, 923, __pyx_L1_error)
+      __pyx_t_8 = PyObject_RichCompare(__pyx_t_2, __pyx_t_5, Py_LT); __Pyx_XGOTREF(__pyx_t_8); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 926, __pyx_L1_error)
+      __pyx_t_3 = __Pyx_PyObject_IsTrue(__pyx_t_8); if (unlikely(__pyx_t_3 < 0)) __PYX_ERR(0, 926, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
       if (__pyx_t_3) {
         __Pyx_INCREF(__pyx_t_2);
@@ -13725,14 +13770,14 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_2_padDigits(CYTHON_UNUSED PyO
       __Pyx_DECREF_SET(__pyx_v_j, __pyx_t_2);
       __pyx_t_2 = 0;
 
-      /* "decimalfp/_cdecimalfp.pyx":924
+      /* "decimalfp/_cdecimalfp.pyx":927
  *         for l in _iterGrouping(grouping):
  *             j = min(i + l, limit)
  *             slices.append((i, j))             # <<<<<<<<<<<<<<
  *             if j >= limit:
  *                 break
  */
-      __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 924, __pyx_L1_error)
+      __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 927, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_2);
       __Pyx_INCREF(__pyx_v_i);
       __Pyx_GIVEREF(__pyx_v_i);
@@ -13740,22 +13785,22 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_2_padDigits(CYTHON_UNUSED PyO
       __Pyx_INCREF(__pyx_v_j);
       __Pyx_GIVEREF(__pyx_v_j);
       PyTuple_SET_ITEM(__pyx_t_2, 1, __pyx_v_j);
-      __pyx_t_10 = __Pyx_PyList_Append(__pyx_v_slices, __pyx_t_2); if (unlikely(__pyx_t_10 == ((int)-1))) __PYX_ERR(0, 924, __pyx_L1_error)
+      __pyx_t_10 = __Pyx_PyList_Append(__pyx_v_slices, __pyx_t_2); if (unlikely(__pyx_t_10 == ((int)-1))) __PYX_ERR(0, 927, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-      /* "decimalfp/_cdecimalfp.pyx":925
+      /* "decimalfp/_cdecimalfp.pyx":928
  *             j = min(i + l, limit)
  *             slices.append((i, j))
  *             if j >= limit:             # <<<<<<<<<<<<<<
  *                 break
  *             i = j
  */
-      __pyx_t_2 = PyObject_RichCompare(__pyx_v_j, __pyx_v_limit, Py_GE); __Pyx_XGOTREF(__pyx_t_2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 925, __pyx_L1_error)
-      __pyx_t_3 = __Pyx_PyObject_IsTrue(__pyx_t_2); if (unlikely(__pyx_t_3 < 0)) __PYX_ERR(0, 925, __pyx_L1_error)
+      __pyx_t_2 = PyObject_RichCompare(__pyx_v_j, __pyx_v_limit, Py_GE); __Pyx_XGOTREF(__pyx_t_2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 928, __pyx_L1_error)
+      __pyx_t_3 = __Pyx_PyObject_IsTrue(__pyx_t_2); if (unlikely(__pyx_t_3 < 0)) __PYX_ERR(0, 928, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
       if (__pyx_t_3) {
 
-        /* "decimalfp/_cdecimalfp.pyx":926
+        /* "decimalfp/_cdecimalfp.pyx":929
  *             slices.append((i, j))
  *             if j >= limit:
  *                 break             # <<<<<<<<<<<<<<
@@ -13764,7 +13809,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_2_padDigits(CYTHON_UNUSED PyO
  */
         goto __pyx_L7_break;
 
-        /* "decimalfp/_cdecimalfp.pyx":925
+        /* "decimalfp/_cdecimalfp.pyx":928
  *             j = min(i + l, limit)
  *             slices.append((i, j))
  *             if j >= limit:             # <<<<<<<<<<<<<<
@@ -13773,7 +13818,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_2_padDigits(CYTHON_UNUSED PyO
  */
       }
 
-      /* "decimalfp/_cdecimalfp.pyx":927
+      /* "decimalfp/_cdecimalfp.pyx":930
  *             if j >= limit:
  *                 break
  *             i = j             # <<<<<<<<<<<<<<
@@ -13783,7 +13828,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_2_padDigits(CYTHON_UNUSED PyO
       __Pyx_INCREF(__pyx_v_j);
       __Pyx_DECREF_SET(__pyx_v_i, __pyx_v_j);
 
-      /* "decimalfp/_cdecimalfp.pyx":928
+      /* "decimalfp/_cdecimalfp.pyx":931
  *                 break
  *             i = j
  *             limit = max(limit - 1, nDigits, i + 1)             # <<<<<<<<<<<<<<
@@ -13792,12 +13837,12 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_2_padDigits(CYTHON_UNUSED PyO
  */
       __Pyx_INCREF(__pyx_v_nDigits);
       __pyx_t_2 = __pyx_v_nDigits;
-      __pyx_t_6 = __Pyx_PyInt_AddObjC(__pyx_v_i, __pyx_int_1, 1, 0); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 928, __pyx_L1_error)
+      __pyx_t_6 = __Pyx_PyInt_AddObjC(__pyx_v_i, __pyx_int_1, 1, 0); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 931, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_6);
-      __pyx_t_5 = __Pyx_PyInt_SubtractObjC(__pyx_v_limit, __pyx_int_1, 1, 0); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 928, __pyx_L1_error)
+      __pyx_t_5 = __Pyx_PyInt_SubtractObjC(__pyx_v_limit, __pyx_int_1, 1, 0); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 931, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_5);
-      __pyx_t_11 = PyObject_RichCompare(__pyx_t_2, __pyx_t_5, Py_GT); __Pyx_XGOTREF(__pyx_t_11); if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 928, __pyx_L1_error)
-      __pyx_t_3 = __Pyx_PyObject_IsTrue(__pyx_t_11); if (unlikely(__pyx_t_3 < 0)) __PYX_ERR(0, 928, __pyx_L1_error)
+      __pyx_t_11 = PyObject_RichCompare(__pyx_t_2, __pyx_t_5, Py_GT); __Pyx_XGOTREF(__pyx_t_11); if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 931, __pyx_L1_error)
+      __pyx_t_3 = __Pyx_PyObject_IsTrue(__pyx_t_11); if (unlikely(__pyx_t_3 < 0)) __PYX_ERR(0, 931, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
       if (__pyx_t_3) {
         __Pyx_INCREF(__pyx_t_2);
@@ -13810,8 +13855,8 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_2_padDigits(CYTHON_UNUSED PyO
       __Pyx_INCREF(__pyx_t_8);
       __pyx_t_5 = __pyx_t_8;
       __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-      __pyx_t_11 = PyObject_RichCompare(__pyx_t_6, __pyx_t_5, Py_GT); __Pyx_XGOTREF(__pyx_t_11); if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 928, __pyx_L1_error)
-      __pyx_t_3 = __Pyx_PyObject_IsTrue(__pyx_t_11); if (unlikely(__pyx_t_3 < 0)) __PYX_ERR(0, 928, __pyx_L1_error)
+      __pyx_t_11 = PyObject_RichCompare(__pyx_t_6, __pyx_t_5, Py_GT); __Pyx_XGOTREF(__pyx_t_11); if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 931, __pyx_L1_error)
+      __pyx_t_3 = __Pyx_PyObject_IsTrue(__pyx_t_11); if (unlikely(__pyx_t_3 < 0)) __PYX_ERR(0, 931, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
       if (__pyx_t_3) {
         __Pyx_INCREF(__pyx_t_6);
@@ -13829,7 +13874,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_2_padDigits(CYTHON_UNUSED PyO
       __Pyx_DECREF_SET(__pyx_v_limit, __pyx_t_2);
       __pyx_t_2 = 0;
 
-      /* "decimalfp/_cdecimalfp.pyx":922
+      /* "decimalfp/_cdecimalfp.pyx":925
  *         i = j = 0
  *         limit = max(minWidth, nDigits) if fill == '0' else nDigits
  *         for l in _iterGrouping(grouping):             # <<<<<<<<<<<<<<
@@ -13840,26 +13885,26 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_2_padDigits(CYTHON_UNUSED PyO
     __pyx_L7_break:;
     __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
 
-    /* "decimalfp/_cdecimalfp.pyx":929
+    /* "decimalfp/_cdecimalfp.pyx":932
  *             i = j
  *             limit = max(limit - 1, nDigits, i + 1)
  *         if j < limit:             # <<<<<<<<<<<<<<
  *             slices.append((j, limit))
  *         digits = (limit - nDigits) * fill + digits
  */
-    __pyx_t_7 = PyObject_RichCompare(__pyx_v_j, __pyx_v_limit, Py_LT); __Pyx_XGOTREF(__pyx_t_7); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 929, __pyx_L1_error)
-    __pyx_t_3 = __Pyx_PyObject_IsTrue(__pyx_t_7); if (unlikely(__pyx_t_3 < 0)) __PYX_ERR(0, 929, __pyx_L1_error)
+    __pyx_t_7 = PyObject_RichCompare(__pyx_v_j, __pyx_v_limit, Py_LT); __Pyx_XGOTREF(__pyx_t_7); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 932, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyObject_IsTrue(__pyx_t_7); if (unlikely(__pyx_t_3 < 0)) __PYX_ERR(0, 932, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
     if (__pyx_t_3) {
 
-      /* "decimalfp/_cdecimalfp.pyx":930
+      /* "decimalfp/_cdecimalfp.pyx":933
  *             limit = max(limit - 1, nDigits, i + 1)
  *         if j < limit:
  *             slices.append((j, limit))             # <<<<<<<<<<<<<<
  *         digits = (limit - nDigits) * fill + digits
  *         raw = sep.join([digits[limit - j: limit - i]
  */
-      __pyx_t_7 = PyTuple_New(2); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 930, __pyx_L1_error)
+      __pyx_t_7 = PyTuple_New(2); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 933, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_7);
       __Pyx_INCREF(__pyx_v_j);
       __Pyx_GIVEREF(__pyx_v_j);
@@ -13867,10 +13912,10 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_2_padDigits(CYTHON_UNUSED PyO
       __Pyx_INCREF(__pyx_v_limit);
       __Pyx_GIVEREF(__pyx_v_limit);
       PyTuple_SET_ITEM(__pyx_t_7, 1, __pyx_v_limit);
-      __pyx_t_10 = __Pyx_PyList_Append(__pyx_v_slices, __pyx_t_7); if (unlikely(__pyx_t_10 == ((int)-1))) __PYX_ERR(0, 930, __pyx_L1_error)
+      __pyx_t_10 = __Pyx_PyList_Append(__pyx_v_slices, __pyx_t_7); if (unlikely(__pyx_t_10 == ((int)-1))) __PYX_ERR(0, 933, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
 
-      /* "decimalfp/_cdecimalfp.pyx":929
+      /* "decimalfp/_cdecimalfp.pyx":932
  *             i = j
  *             limit = max(limit - 1, nDigits, i + 1)
  *         if j < limit:             # <<<<<<<<<<<<<<
@@ -13879,37 +13924,37 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_2_padDigits(CYTHON_UNUSED PyO
  */
     }
 
-    /* "decimalfp/_cdecimalfp.pyx":931
+    /* "decimalfp/_cdecimalfp.pyx":934
  *         if j < limit:
  *             slices.append((j, limit))
  *         digits = (limit - nDigits) * fill + digits             # <<<<<<<<<<<<<<
  *         raw = sep.join([digits[limit - j: limit - i]
  *                        for i, j in reversed(slices)])
  */
-    __pyx_t_7 = PyNumber_Subtract(__pyx_v_limit, __pyx_v_nDigits); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 931, __pyx_L1_error)
+    __pyx_t_7 = PyNumber_Subtract(__pyx_v_limit, __pyx_v_nDigits); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 934, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_7);
-    __pyx_t_2 = PyNumber_Multiply(__pyx_t_7, __pyx_v_fill); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 931, __pyx_L1_error)
+    __pyx_t_2 = PyNumber_Multiply(__pyx_t_7, __pyx_v_fill); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 934, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-    __pyx_t_7 = PyNumber_Add(__pyx_t_2, __pyx_v_digits); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 931, __pyx_L1_error)
+    __pyx_t_7 = PyNumber_Add(__pyx_t_2, __pyx_v_digits); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 934, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_7);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     __Pyx_DECREF_SET(__pyx_v_digits, __pyx_t_7);
     __pyx_t_7 = 0;
 
-    /* "decimalfp/_cdecimalfp.pyx":932
+    /* "decimalfp/_cdecimalfp.pyx":935
  *             slices.append((j, limit))
  *         digits = (limit - nDigits) * fill + digits
  *         raw = sep.join([digits[limit - j: limit - i]             # <<<<<<<<<<<<<<
  *                        for i, j in reversed(slices)])
  *         return (minWidth - len(raw)) * fill + raw
  */
-    __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_sep, __pyx_n_s_join); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 932, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_sep, __pyx_n_s_join); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 935, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_8 = PyList_New(0); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 932, __pyx_L1_error)
+    __pyx_t_8 = PyList_New(0); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 935, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_8);
 
-    /* "decimalfp/_cdecimalfp.pyx":933
+    /* "decimalfp/_cdecimalfp.pyx":936
  *         digits = (limit - nDigits) * fill + digits
  *         raw = sep.join([digits[limit - j: limit - i]
  *                        for i, j in reversed(slices)])             # <<<<<<<<<<<<<<
@@ -13921,9 +13966,9 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_2_padDigits(CYTHON_UNUSED PyO
       if (__pyx_t_1 < 0) break;
       if (__pyx_t_1 >= PyList_GET_SIZE(__pyx_t_6)) break;
       #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-      __pyx_t_5 = PyList_GET_ITEM(__pyx_t_6, __pyx_t_1); __Pyx_INCREF(__pyx_t_5); __pyx_t_1--; if (unlikely(0 < 0)) __PYX_ERR(0, 933, __pyx_L1_error)
+      __pyx_t_5 = PyList_GET_ITEM(__pyx_t_6, __pyx_t_1); __Pyx_INCREF(__pyx_t_5); __pyx_t_1--; if (unlikely(0 < 0)) __PYX_ERR(0, 936, __pyx_L1_error)
       #else
-      __pyx_t_5 = PySequence_ITEM(__pyx_t_6, __pyx_t_1); __pyx_t_1--; if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 933, __pyx_L1_error)
+      __pyx_t_5 = PySequence_ITEM(__pyx_t_6, __pyx_t_1); __pyx_t_1--; if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 936, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_5);
       #endif
       if ((likely(PyTuple_CheckExact(__pyx_t_5))) || (PyList_CheckExact(__pyx_t_5))) {
@@ -13932,7 +13977,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_2_padDigits(CYTHON_UNUSED PyO
         if (unlikely(size != 2)) {
           if (size > 2) __Pyx_RaiseTooManyValuesError(2);
           else if (size >= 0) __Pyx_RaiseNeedMoreValuesError(size);
-          __PYX_ERR(0, 933, __pyx_L1_error)
+          __PYX_ERR(0, 936, __pyx_L1_error)
         }
         #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
         if (likely(PyTuple_CheckExact(sequence))) {
@@ -13945,15 +13990,15 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_2_padDigits(CYTHON_UNUSED PyO
         __Pyx_INCREF(__pyx_t_11);
         __Pyx_INCREF(__pyx_t_12);
         #else
-        __pyx_t_11 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 933, __pyx_L1_error)
+        __pyx_t_11 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 936, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_11);
-        __pyx_t_12 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 933, __pyx_L1_error)
+        __pyx_t_12 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 936, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_12);
         #endif
         __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
       } else {
         Py_ssize_t index = -1;
-        __pyx_t_13 = PyObject_GetIter(__pyx_t_5); if (unlikely(!__pyx_t_13)) __PYX_ERR(0, 933, __pyx_L1_error)
+        __pyx_t_13 = PyObject_GetIter(__pyx_t_5); if (unlikely(!__pyx_t_13)) __PYX_ERR(0, 936, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_13);
         __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
         __pyx_t_14 = Py_TYPE(__pyx_t_13)->tp_iternext;
@@ -13961,7 +14006,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_2_padDigits(CYTHON_UNUSED PyO
         __Pyx_GOTREF(__pyx_t_11);
         index = 1; __pyx_t_12 = __pyx_t_14(__pyx_t_13); if (unlikely(!__pyx_t_12)) goto __pyx_L12_unpacking_failed;
         __Pyx_GOTREF(__pyx_t_12);
-        if (__Pyx_IternextUnpackEndCheck(__pyx_t_14(__pyx_t_13), 2) < 0) __PYX_ERR(0, 933, __pyx_L1_error)
+        if (__Pyx_IternextUnpackEndCheck(__pyx_t_14(__pyx_t_13), 2) < 0) __PYX_ERR(0, 936, __pyx_L1_error)
         __pyx_t_14 = NULL;
         __Pyx_DECREF(__pyx_t_13); __pyx_t_13 = 0;
         goto __pyx_L13_unpacking_done;
@@ -13969,7 +14014,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_2_padDigits(CYTHON_UNUSED PyO
         __Pyx_DECREF(__pyx_t_13); __pyx_t_13 = 0;
         __pyx_t_14 = NULL;
         if (__Pyx_IterFinish() == 0) __Pyx_RaiseNeedMoreValuesError(index);
-        __PYX_ERR(0, 933, __pyx_L1_error)
+        __PYX_ERR(0, 936, __pyx_L1_error)
         __pyx_L13_unpacking_done:;
       }
       __Pyx_DECREF_SET(__pyx_v_i, __pyx_t_11);
@@ -13977,25 +14022,25 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_2_padDigits(CYTHON_UNUSED PyO
       __Pyx_DECREF_SET(__pyx_v_j, __pyx_t_12);
       __pyx_t_12 = 0;
 
-      /* "decimalfp/_cdecimalfp.pyx":932
+      /* "decimalfp/_cdecimalfp.pyx":935
  *             slices.append((j, limit))
  *         digits = (limit - nDigits) * fill + digits
  *         raw = sep.join([digits[limit - j: limit - i]             # <<<<<<<<<<<<<<
  *                        for i, j in reversed(slices)])
  *         return (minWidth - len(raw)) * fill + raw
  */
-      __pyx_t_5 = PyNumber_Subtract(__pyx_v_limit, __pyx_v_j); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 932, __pyx_L1_error)
+      __pyx_t_5 = PyNumber_Subtract(__pyx_v_limit, __pyx_v_j); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 935, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_5);
-      __pyx_t_12 = PyNumber_Subtract(__pyx_v_limit, __pyx_v_i); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 932, __pyx_L1_error)
+      __pyx_t_12 = PyNumber_Subtract(__pyx_v_limit, __pyx_v_i); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 935, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_12);
-      __pyx_t_11 = __Pyx_PyObject_GetSlice(__pyx_v_digits, 0, 0, &__pyx_t_5, &__pyx_t_12, NULL, 0, 0, 1); if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 932, __pyx_L1_error)
+      __pyx_t_11 = __Pyx_PyObject_GetSlice(__pyx_v_digits, 0, 0, &__pyx_t_5, &__pyx_t_12, NULL, 0, 0, 1); if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 935, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_11);
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
       __Pyx_DECREF(__pyx_t_12); __pyx_t_12 = 0;
-      if (unlikely(__Pyx_ListComp_Append(__pyx_t_8, (PyObject*)__pyx_t_11))) __PYX_ERR(0, 932, __pyx_L1_error)
+      if (unlikely(__Pyx_ListComp_Append(__pyx_t_8, (PyObject*)__pyx_t_11))) __PYX_ERR(0, 935, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
 
-      /* "decimalfp/_cdecimalfp.pyx":933
+      /* "decimalfp/_cdecimalfp.pyx":936
  *         digits = (limit - nDigits) * fill + digits
  *         raw = sep.join([digits[limit - j: limit - i]
  *                        for i, j in reversed(slices)])             # <<<<<<<<<<<<<<
@@ -14017,13 +14062,13 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_2_padDigits(CYTHON_UNUSED PyO
     __pyx_t_7 = (__pyx_t_6) ? __Pyx_PyObject_Call2Args(__pyx_t_2, __pyx_t_6, __pyx_t_8) : __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_t_8);
     __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
     __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-    if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 932, __pyx_L1_error)
+    if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 935, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_7);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     __pyx_v_raw = __pyx_t_7;
     __pyx_t_7 = 0;
 
-    /* "decimalfp/_cdecimalfp.pyx":934
+    /* "decimalfp/_cdecimalfp.pyx":937
  *         raw = sep.join([digits[limit - j: limit - i]
  *                        for i, j in reversed(slices)])
  *         return (minWidth - len(raw)) * fill + raw             # <<<<<<<<<<<<<<
@@ -14031,23 +14076,23 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_2_padDigits(CYTHON_UNUSED PyO
  *         return (minWidth - nDigits) * fill + digits
  */
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_1 = PyObject_Length(__pyx_v_raw); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 934, __pyx_L1_error)
-    __pyx_t_7 = PyInt_FromSsize_t(__pyx_t_1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 934, __pyx_L1_error)
+    __pyx_t_1 = PyObject_Length(__pyx_v_raw); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 937, __pyx_L1_error)
+    __pyx_t_7 = PyInt_FromSsize_t(__pyx_t_1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 937, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_7);
-    __pyx_t_2 = PyNumber_Subtract(__pyx_v_minWidth, __pyx_t_7); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 934, __pyx_L1_error)
+    __pyx_t_2 = PyNumber_Subtract(__pyx_v_minWidth, __pyx_t_7); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 937, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-    __pyx_t_7 = PyNumber_Multiply(__pyx_t_2, __pyx_v_fill); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 934, __pyx_L1_error)
+    __pyx_t_7 = PyNumber_Multiply(__pyx_t_2, __pyx_v_fill); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 937, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_7);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    __pyx_t_2 = PyNumber_Add(__pyx_t_7, __pyx_v_raw); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 934, __pyx_L1_error)
+    __pyx_t_2 = PyNumber_Add(__pyx_t_7, __pyx_v_raw); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 937, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
     __pyx_r = __pyx_t_2;
     __pyx_t_2 = 0;
     goto __pyx_L0;
 
-    /* "decimalfp/_cdecimalfp.pyx":918
+    /* "decimalfp/_cdecimalfp.pyx":921
  * def _padDigits(digits, minWidth, fill, sep=None, grouping=None):
  *     nDigits = len(digits)
  *     if sep and grouping:             # <<<<<<<<<<<<<<
@@ -14056,7 +14101,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_2_padDigits(CYTHON_UNUSED PyO
  */
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":936
+  /* "decimalfp/_cdecimalfp.pyx":939
  *         return (minWidth - len(raw)) * fill + raw
  *     else:
  *         return (minWidth - nDigits) * fill + digits             # <<<<<<<<<<<<<<
@@ -14065,12 +14110,12 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_2_padDigits(CYTHON_UNUSED PyO
  */
   /*else*/ {
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_2 = PyNumber_Subtract(__pyx_v_minWidth, __pyx_v_nDigits); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 936, __pyx_L1_error)
+    __pyx_t_2 = PyNumber_Subtract(__pyx_v_minWidth, __pyx_v_nDigits); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 939, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_7 = PyNumber_Multiply(__pyx_t_2, __pyx_v_fill); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 936, __pyx_L1_error)
+    __pyx_t_7 = PyNumber_Multiply(__pyx_t_2, __pyx_v_fill); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 939, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_7);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    __pyx_t_2 = PyNumber_Add(__pyx_t_7, __pyx_v_digits); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 936, __pyx_L1_error)
+    __pyx_t_2 = PyNumber_Add(__pyx_t_7, __pyx_v_digits); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 939, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
     __pyx_r = __pyx_t_2;
@@ -14078,7 +14123,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_2_padDigits(CYTHON_UNUSED PyO
     goto __pyx_L0;
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":916
+  /* "decimalfp/_cdecimalfp.pyx":919
  * 
  * 
  * def _padDigits(digits, minWidth, fill, sep=None, grouping=None):             # <<<<<<<<<<<<<<
@@ -14113,7 +14158,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_2_padDigits(CYTHON_UNUSED PyO
 }
 static PyObject *__pyx_gb_9decimalfp_11_cdecimalfp_6generator(__pyx_CoroutineObject *__pyx_generator, CYTHON_UNUSED PyThreadState *__pyx_tstate, PyObject *__pyx_sent_value); /* proto */
 
-/* "decimalfp/_cdecimalfp.pyx":939
+/* "decimalfp/_cdecimalfp.pyx":942
  * 
  * 
  * def _iterGrouping(grouping):             # <<<<<<<<<<<<<<
@@ -14144,7 +14189,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_4_iterGrouping(CYTHON_UNUSED 
   if (unlikely(!__pyx_cur_scope)) {
     __pyx_cur_scope = ((struct __pyx_obj_9decimalfp_11_cdecimalfp___pyx_scope_struct___iterGrouping *)Py_None);
     __Pyx_INCREF(Py_None);
-    __PYX_ERR(0, 939, __pyx_L1_error)
+    __PYX_ERR(0, 942, __pyx_L1_error)
   } else {
     __Pyx_GOTREF(__pyx_cur_scope);
   }
@@ -14152,7 +14197,7 @@ static PyObject *__pyx_pf_9decimalfp_11_cdecimalfp_4_iterGrouping(CYTHON_UNUSED 
   __Pyx_INCREF(__pyx_cur_scope->__pyx_v_grouping);
   __Pyx_GIVEREF(__pyx_cur_scope->__pyx_v_grouping);
   {
-    __pyx_CoroutineObject *gen = __Pyx_Generator_New((__pyx_coroutine_body_t) __pyx_gb_9decimalfp_11_cdecimalfp_6generator, __pyx_codeobj__8, (PyObject *) __pyx_cur_scope, __pyx_n_s_iterGrouping, __pyx_n_s_iterGrouping, __pyx_n_s_decimalfp__cdecimalfp); if (unlikely(!gen)) __PYX_ERR(0, 939, __pyx_L1_error)
+    __pyx_CoroutineObject *gen = __Pyx_Generator_New((__pyx_coroutine_body_t) __pyx_gb_9decimalfp_11_cdecimalfp_6generator, __pyx_codeobj__8, (PyObject *) __pyx_cur_scope, __pyx_n_s_iterGrouping, __pyx_n_s_iterGrouping, __pyx_n_s_decimalfp__cdecimalfp); if (unlikely(!gen)) __PYX_ERR(0, 942, __pyx_L1_error)
     __Pyx_DECREF(__pyx_cur_scope);
     __Pyx_RefNannyFinishContext();
     return (PyObject *) gen;
@@ -14189,9 +14234,9 @@ static PyObject *__pyx_gb_9decimalfp_11_cdecimalfp_6generator(__pyx_CoroutineObj
     return NULL;
   }
   __pyx_L3_first_run:;
-  if (unlikely(!__pyx_sent_value)) __PYX_ERR(0, 939, __pyx_L1_error)
+  if (unlikely(!__pyx_sent_value)) __PYX_ERR(0, 942, __pyx_L1_error)
 
-  /* "decimalfp/_cdecimalfp.pyx":940
+  /* "decimalfp/_cdecimalfp.pyx":943
  * 
  * def _iterGrouping(grouping):
  *     l = None             # <<<<<<<<<<<<<<
@@ -14202,22 +14247,22 @@ static PyObject *__pyx_gb_9decimalfp_11_cdecimalfp_6generator(__pyx_CoroutineObj
   __Pyx_GIVEREF(Py_None);
   __pyx_cur_scope->__pyx_v_l = Py_None;
 
-  /* "decimalfp/_cdecimalfp.pyx":941
+  /* "decimalfp/_cdecimalfp.pyx":944
  * def _iterGrouping(grouping):
  *     l = None
  *     for i in grouping[:-1]:             # <<<<<<<<<<<<<<
  *         yield i
  *         l = i
  */
-  __pyx_t_1 = __Pyx_PyObject_GetSlice(__pyx_cur_scope->__pyx_v_grouping, 0, -1L, NULL, NULL, &__pyx_slice__9, 0, 1, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 941, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_GetSlice(__pyx_cur_scope->__pyx_v_grouping, 0, -1L, NULL, NULL, &__pyx_slice__9, 0, 1, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 944, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   if (likely(PyList_CheckExact(__pyx_t_1)) || PyTuple_CheckExact(__pyx_t_1)) {
     __pyx_t_2 = __pyx_t_1; __Pyx_INCREF(__pyx_t_2); __pyx_t_3 = 0;
     __pyx_t_4 = NULL;
   } else {
-    __pyx_t_3 = -1; __pyx_t_2 = PyObject_GetIter(__pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 941, __pyx_L1_error)
+    __pyx_t_3 = -1; __pyx_t_2 = PyObject_GetIter(__pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 944, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_4 = Py_TYPE(__pyx_t_2)->tp_iternext; if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 941, __pyx_L1_error)
+    __pyx_t_4 = Py_TYPE(__pyx_t_2)->tp_iternext; if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 944, __pyx_L1_error)
   }
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   for (;;) {
@@ -14225,17 +14270,17 @@ static PyObject *__pyx_gb_9decimalfp_11_cdecimalfp_6generator(__pyx_CoroutineObj
       if (likely(PyList_CheckExact(__pyx_t_2))) {
         if (__pyx_t_3 >= PyList_GET_SIZE(__pyx_t_2)) break;
         #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-        __pyx_t_1 = PyList_GET_ITEM(__pyx_t_2, __pyx_t_3); __Pyx_INCREF(__pyx_t_1); __pyx_t_3++; if (unlikely(0 < 0)) __PYX_ERR(0, 941, __pyx_L1_error)
+        __pyx_t_1 = PyList_GET_ITEM(__pyx_t_2, __pyx_t_3); __Pyx_INCREF(__pyx_t_1); __pyx_t_3++; if (unlikely(0 < 0)) __PYX_ERR(0, 944, __pyx_L1_error)
         #else
-        __pyx_t_1 = PySequence_ITEM(__pyx_t_2, __pyx_t_3); __pyx_t_3++; if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 941, __pyx_L1_error)
+        __pyx_t_1 = PySequence_ITEM(__pyx_t_2, __pyx_t_3); __pyx_t_3++; if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 944, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_1);
         #endif
       } else {
         if (__pyx_t_3 >= PyTuple_GET_SIZE(__pyx_t_2)) break;
         #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-        __pyx_t_1 = PyTuple_GET_ITEM(__pyx_t_2, __pyx_t_3); __Pyx_INCREF(__pyx_t_1); __pyx_t_3++; if (unlikely(0 < 0)) __PYX_ERR(0, 941, __pyx_L1_error)
+        __pyx_t_1 = PyTuple_GET_ITEM(__pyx_t_2, __pyx_t_3); __Pyx_INCREF(__pyx_t_1); __pyx_t_3++; if (unlikely(0 < 0)) __PYX_ERR(0, 944, __pyx_L1_error)
         #else
-        __pyx_t_1 = PySequence_ITEM(__pyx_t_2, __pyx_t_3); __pyx_t_3++; if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 941, __pyx_L1_error)
+        __pyx_t_1 = PySequence_ITEM(__pyx_t_2, __pyx_t_3); __pyx_t_3++; if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 944, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_1);
         #endif
       }
@@ -14245,7 +14290,7 @@ static PyObject *__pyx_gb_9decimalfp_11_cdecimalfp_6generator(__pyx_CoroutineObj
         PyObject* exc_type = PyErr_Occurred();
         if (exc_type) {
           if (likely(__Pyx_PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
-          else __PYX_ERR(0, 941, __pyx_L1_error)
+          else __PYX_ERR(0, 944, __pyx_L1_error)
         }
         break;
       }
@@ -14256,7 +14301,7 @@ static PyObject *__pyx_gb_9decimalfp_11_cdecimalfp_6generator(__pyx_CoroutineObj
     __Pyx_GIVEREF(__pyx_t_1);
     __pyx_t_1 = 0;
 
-    /* "decimalfp/_cdecimalfp.pyx":942
+    /* "decimalfp/_cdecimalfp.pyx":945
  *     l = None
  *     for i in grouping[:-1]:
  *         yield i             # <<<<<<<<<<<<<<
@@ -14281,9 +14326,9 @@ static PyObject *__pyx_gb_9decimalfp_11_cdecimalfp_6generator(__pyx_CoroutineObj
     __Pyx_XGOTREF(__pyx_t_2);
     __pyx_t_3 = __pyx_cur_scope->__pyx_t_1;
     __pyx_t_4 = __pyx_cur_scope->__pyx_t_2;
-    if (unlikely(!__pyx_sent_value)) __PYX_ERR(0, 942, __pyx_L1_error)
+    if (unlikely(!__pyx_sent_value)) __PYX_ERR(0, 945, __pyx_L1_error)
 
-    /* "decimalfp/_cdecimalfp.pyx":943
+    /* "decimalfp/_cdecimalfp.pyx":946
  *     for i in grouping[:-1]:
  *         yield i
  *         l = i             # <<<<<<<<<<<<<<
@@ -14295,7 +14340,7 @@ static PyObject *__pyx_gb_9decimalfp_11_cdecimalfp_6generator(__pyx_CoroutineObj
     __Pyx_DECREF_SET(__pyx_cur_scope->__pyx_v_l, __pyx_cur_scope->__pyx_v_i);
     __Pyx_GIVEREF(__pyx_cur_scope->__pyx_v_i);
 
-    /* "decimalfp/_cdecimalfp.pyx":941
+    /* "decimalfp/_cdecimalfp.pyx":944
  * def _iterGrouping(grouping):
  *     l = None
  *     for i in grouping[:-1]:             # <<<<<<<<<<<<<<
@@ -14305,34 +14350,34 @@ static PyObject *__pyx_gb_9decimalfp_11_cdecimalfp_6generator(__pyx_CoroutineObj
   }
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "decimalfp/_cdecimalfp.pyx":944
+  /* "decimalfp/_cdecimalfp.pyx":947
  *         yield i
  *         l = i
  *     i = grouping[-1]             # <<<<<<<<<<<<<<
  *     if i == 0:
  *         while l:
  */
-  __pyx_t_2 = __Pyx_GetItemInt(__pyx_cur_scope->__pyx_v_grouping, -1L, long, 1, __Pyx_PyInt_From_long, 0, 1, 1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 944, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_GetItemInt(__pyx_cur_scope->__pyx_v_grouping, -1L, long, 1, __Pyx_PyInt_From_long, 0, 1, 1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 947, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_XGOTREF(__pyx_cur_scope->__pyx_v_i);
   __Pyx_XDECREF_SET(__pyx_cur_scope->__pyx_v_i, __pyx_t_2);
   __Pyx_GIVEREF(__pyx_t_2);
   __pyx_t_2 = 0;
 
-  /* "decimalfp/_cdecimalfp.pyx":945
+  /* "decimalfp/_cdecimalfp.pyx":948
  *         l = i
  *     i = grouping[-1]
  *     if i == 0:             # <<<<<<<<<<<<<<
  *         while l:
  *             yield l
  */
-  __pyx_t_2 = __Pyx_PyInt_EqObjC(__pyx_cur_scope->__pyx_v_i, __pyx_int_0, 0, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 945, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyInt_EqObjC(__pyx_cur_scope->__pyx_v_i, __pyx_int_0, 0, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 948, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_5 = __Pyx_PyObject_IsTrue(__pyx_t_2); if (unlikely(__pyx_t_5 < 0)) __PYX_ERR(0, 945, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyObject_IsTrue(__pyx_t_2); if (unlikely(__pyx_t_5 < 0)) __PYX_ERR(0, 948, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   if (__pyx_t_5) {
 
-    /* "decimalfp/_cdecimalfp.pyx":946
+    /* "decimalfp/_cdecimalfp.pyx":949
  *     i = grouping[-1]
  *     if i == 0:
  *         while l:             # <<<<<<<<<<<<<<
@@ -14340,10 +14385,10 @@ static PyObject *__pyx_gb_9decimalfp_11_cdecimalfp_6generator(__pyx_CoroutineObj
  *     elif i != locale.CHAR_MAX:
  */
     while (1) {
-      __pyx_t_5 = __Pyx_PyObject_IsTrue(__pyx_cur_scope->__pyx_v_l); if (unlikely(__pyx_t_5 < 0)) __PYX_ERR(0, 946, __pyx_L1_error)
+      __pyx_t_5 = __Pyx_PyObject_IsTrue(__pyx_cur_scope->__pyx_v_l); if (unlikely(__pyx_t_5 < 0)) __PYX_ERR(0, 949, __pyx_L1_error)
       if (!__pyx_t_5) break;
 
-      /* "decimalfp/_cdecimalfp.pyx":947
+      /* "decimalfp/_cdecimalfp.pyx":950
  *     if i == 0:
  *         while l:
  *             yield l             # <<<<<<<<<<<<<<
@@ -14359,10 +14404,10 @@ static PyObject *__pyx_gb_9decimalfp_11_cdecimalfp_6generator(__pyx_CoroutineObj
       __pyx_generator->resume_label = 2;
       return __pyx_r;
       __pyx_L10_resume_from_yield:;
-      if (unlikely(!__pyx_sent_value)) __PYX_ERR(0, 947, __pyx_L1_error)
+      if (unlikely(!__pyx_sent_value)) __PYX_ERR(0, 950, __pyx_L1_error)
     }
 
-    /* "decimalfp/_cdecimalfp.pyx":945
+    /* "decimalfp/_cdecimalfp.pyx":948
  *         l = i
  *     i = grouping[-1]
  *     if i == 0:             # <<<<<<<<<<<<<<
@@ -14372,25 +14417,25 @@ static PyObject *__pyx_gb_9decimalfp_11_cdecimalfp_6generator(__pyx_CoroutineObj
     goto __pyx_L7;
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":948
+  /* "decimalfp/_cdecimalfp.pyx":951
  *         while l:
  *             yield l
  *     elif i != locale.CHAR_MAX:             # <<<<<<<<<<<<<<
  *         yield i
  * 
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_locale); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 948, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_locale); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 951, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_CHAR_MAX); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 948, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_CHAR_MAX); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 951, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = PyObject_RichCompare(__pyx_cur_scope->__pyx_v_i, __pyx_t_1, Py_NE); __Pyx_XGOTREF(__pyx_t_2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 948, __pyx_L1_error)
+  __pyx_t_2 = PyObject_RichCompare(__pyx_cur_scope->__pyx_v_i, __pyx_t_1, Py_NE); __Pyx_XGOTREF(__pyx_t_2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 951, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_5 = __Pyx_PyObject_IsTrue(__pyx_t_2); if (unlikely(__pyx_t_5 < 0)) __PYX_ERR(0, 948, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyObject_IsTrue(__pyx_t_2); if (unlikely(__pyx_t_5 < 0)) __PYX_ERR(0, 951, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   if (__pyx_t_5) {
 
-    /* "decimalfp/_cdecimalfp.pyx":949
+    /* "decimalfp/_cdecimalfp.pyx":952
  *             yield l
  *     elif i != locale.CHAR_MAX:
  *         yield i             # <<<<<<<<<<<<<<
@@ -14406,9 +14451,9 @@ static PyObject *__pyx_gb_9decimalfp_11_cdecimalfp_6generator(__pyx_CoroutineObj
     __pyx_generator->resume_label = 3;
     return __pyx_r;
     __pyx_L11_resume_from_yield:;
-    if (unlikely(!__pyx_sent_value)) __PYX_ERR(0, 949, __pyx_L1_error)
+    if (unlikely(!__pyx_sent_value)) __PYX_ERR(0, 952, __pyx_L1_error)
 
-    /* "decimalfp/_cdecimalfp.pyx":948
+    /* "decimalfp/_cdecimalfp.pyx":951
  *         while l:
  *             yield l
  *     elif i != locale.CHAR_MAX:             # <<<<<<<<<<<<<<
@@ -14419,7 +14464,7 @@ static PyObject *__pyx_gb_9decimalfp_11_cdecimalfp_6generator(__pyx_CoroutineObj
   __pyx_L7:;
   CYTHON_MAYBE_UNUSED_VAR(__pyx_cur_scope);
 
-  /* "decimalfp/_cdecimalfp.pyx":939
+  /* "decimalfp/_cdecimalfp.pyx":942
  * 
  * 
  * def _iterGrouping(grouping):             # <<<<<<<<<<<<<<
@@ -14445,7 +14490,7 @@ static PyObject *__pyx_gb_9decimalfp_11_cdecimalfp_6generator(__pyx_CoroutineObj
   return __pyx_r;
 }
 
-/* "decimalfp/_cdecimalfp.pyx":955
+/* "decimalfp/_cdecimalfp.pyx":958
  * 
  * 
  * cdef void _adjust(Decimal dec, int prec, object rounding=None) except *:             # <<<<<<<<<<<<<<
@@ -14472,7 +14517,7 @@ static void __pyx_f_9decimalfp_11_cdecimalfp__adjust(struct __pyx_obj_9decimalfp
     }
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":959
+  /* "decimalfp/_cdecimalfp.pyx":962
  *     (or default mode if none is given)."""
  *     cdef int dp
  *     dp = prec - dec._precision             # <<<<<<<<<<<<<<
@@ -14481,7 +14526,7 @@ static void __pyx_f_9decimalfp_11_cdecimalfp__adjust(struct __pyx_obj_9decimalfp
  */
   __pyx_v_dp = (__pyx_v_prec - __pyx_v_dec->_precision);
 
-  /* "decimalfp/_cdecimalfp.pyx":960
+  /* "decimalfp/_cdecimalfp.pyx":963
  *     cdef int dp
  *     dp = prec - dec._precision
  *     if dp == 0:             # <<<<<<<<<<<<<<
@@ -14491,7 +14536,7 @@ static void __pyx_f_9decimalfp_11_cdecimalfp__adjust(struct __pyx_obj_9decimalfp
   __pyx_t_1 = ((__pyx_v_dp == 0) != 0);
   if (__pyx_t_1) {
 
-    /* "decimalfp/_cdecimalfp.pyx":961
+    /* "decimalfp/_cdecimalfp.pyx":964
  *     dp = prec - dec._precision
  *     if dp == 0:
  *         return             # <<<<<<<<<<<<<<
@@ -14500,7 +14545,7 @@ static void __pyx_f_9decimalfp_11_cdecimalfp__adjust(struct __pyx_obj_9decimalfp
  */
     goto __pyx_L0;
 
-    /* "decimalfp/_cdecimalfp.pyx":960
+    /* "decimalfp/_cdecimalfp.pyx":963
  *     cdef int dp
  *     dp = prec - dec._precision
  *     if dp == 0:             # <<<<<<<<<<<<<<
@@ -14509,7 +14554,7 @@ static void __pyx_f_9decimalfp_11_cdecimalfp__adjust(struct __pyx_obj_9decimalfp
  */
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":962
+  /* "decimalfp/_cdecimalfp.pyx":965
  *     if dp == 0:
  *         return
  *     elif dp > 0:             # <<<<<<<<<<<<<<
@@ -14519,16 +14564,16 @@ static void __pyx_f_9decimalfp_11_cdecimalfp__adjust(struct __pyx_obj_9decimalfp
   __pyx_t_1 = ((__pyx_v_dp > 0) != 0);
   if (__pyx_t_1) {
 
-    /* "decimalfp/_cdecimalfp.pyx":963
+    /* "decimalfp/_cdecimalfp.pyx":966
  *         return
  *     elif dp > 0:
  *         dec._value *= base10pow(dp)             # <<<<<<<<<<<<<<
  *     elif prec >= 0:
  *         dec._value =  _div_rounded(dec._value, base10pow(-dp), rounding)
  */
-    __pyx_t_2 = __pyx_f_9decimalfp_11_cdecimalfp_base10pow(__pyx_v_dp); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 963, __pyx_L1_error)
+    __pyx_t_2 = __pyx_f_9decimalfp_11_cdecimalfp_base10pow(__pyx_v_dp); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 966, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_3 = PyNumber_InPlaceMultiply(__pyx_v_dec->_value, __pyx_t_2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 963, __pyx_L1_error)
+    __pyx_t_3 = PyNumber_InPlaceMultiply(__pyx_v_dec->_value, __pyx_t_2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 966, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     __Pyx_GIVEREF(__pyx_t_3);
@@ -14537,7 +14582,7 @@ static void __pyx_f_9decimalfp_11_cdecimalfp__adjust(struct __pyx_obj_9decimalfp
     __pyx_v_dec->_value = __pyx_t_3;
     __pyx_t_3 = 0;
 
-    /* "decimalfp/_cdecimalfp.pyx":962
+    /* "decimalfp/_cdecimalfp.pyx":965
  *     if dp == 0:
  *         return
  *     elif dp > 0:             # <<<<<<<<<<<<<<
@@ -14547,7 +14592,7 @@ static void __pyx_f_9decimalfp_11_cdecimalfp__adjust(struct __pyx_obj_9decimalfp
     goto __pyx_L3;
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":964
+  /* "decimalfp/_cdecimalfp.pyx":967
  *     elif dp > 0:
  *         dec._value *= base10pow(dp)
  *     elif prec >= 0:             # <<<<<<<<<<<<<<
@@ -14557,7 +14602,7 @@ static void __pyx_f_9decimalfp_11_cdecimalfp__adjust(struct __pyx_obj_9decimalfp
   __pyx_t_1 = ((__pyx_v_prec >= 0) != 0);
   if (__pyx_t_1) {
 
-    /* "decimalfp/_cdecimalfp.pyx":965
+    /* "decimalfp/_cdecimalfp.pyx":968
  *         dec._value *= base10pow(dp)
  *     elif prec >= 0:
  *         dec._value =  _div_rounded(dec._value, base10pow(-dp), rounding)             # <<<<<<<<<<<<<<
@@ -14566,11 +14611,11 @@ static void __pyx_f_9decimalfp_11_cdecimalfp__adjust(struct __pyx_obj_9decimalfp
  */
     __pyx_t_3 = __pyx_v_dec->_value;
     __Pyx_INCREF(__pyx_t_3);
-    __pyx_t_2 = __pyx_f_9decimalfp_11_cdecimalfp_base10pow((-__pyx_v_dp)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 965, __pyx_L1_error)
+    __pyx_t_2 = __pyx_f_9decimalfp_11_cdecimalfp_base10pow((-__pyx_v_dp)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 968, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     __pyx_t_5.__pyx_n = 1;
     __pyx_t_5.rounding = __pyx_v_rounding;
-    __pyx_t_4 = __pyx_f_9decimalfp_11_cdecimalfp__div_rounded(__pyx_t_3, __pyx_t_2, &__pyx_t_5); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 965, __pyx_L1_error)
+    __pyx_t_4 = __pyx_f_9decimalfp_11_cdecimalfp__div_rounded(__pyx_t_3, __pyx_t_2, &__pyx_t_5); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 968, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
@@ -14580,7 +14625,7 @@ static void __pyx_f_9decimalfp_11_cdecimalfp__adjust(struct __pyx_obj_9decimalfp
     __pyx_v_dec->_value = __pyx_t_4;
     __pyx_t_4 = 0;
 
-    /* "decimalfp/_cdecimalfp.pyx":964
+    /* "decimalfp/_cdecimalfp.pyx":967
  *     elif dp > 0:
  *         dec._value *= base10pow(dp)
  *     elif prec >= 0:             # <<<<<<<<<<<<<<
@@ -14590,7 +14635,7 @@ static void __pyx_f_9decimalfp_11_cdecimalfp__adjust(struct __pyx_obj_9decimalfp
     goto __pyx_L3;
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":968
+  /* "decimalfp/_cdecimalfp.pyx":971
  *     else:
  *         dec._value = (_div_rounded(dec._value, base10pow(-dp), rounding)
  *                       * base10pow(-prec))             # <<<<<<<<<<<<<<
@@ -14599,7 +14644,7 @@ static void __pyx_f_9decimalfp_11_cdecimalfp__adjust(struct __pyx_obj_9decimalfp
  */
   /*else*/ {
 
-    /* "decimalfp/_cdecimalfp.pyx":967
+    /* "decimalfp/_cdecimalfp.pyx":970
  *         dec._value =  _div_rounded(dec._value, base10pow(-dp), rounding)
  *     else:
  *         dec._value = (_div_rounded(dec._value, base10pow(-dp), rounding)             # <<<<<<<<<<<<<<
@@ -14608,30 +14653,30 @@ static void __pyx_f_9decimalfp_11_cdecimalfp__adjust(struct __pyx_obj_9decimalfp
  */
     __pyx_t_4 = __pyx_v_dec->_value;
     __Pyx_INCREF(__pyx_t_4);
-    __pyx_t_2 = __pyx_f_9decimalfp_11_cdecimalfp_base10pow((-__pyx_v_dp)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 967, __pyx_L1_error)
+    __pyx_t_2 = __pyx_f_9decimalfp_11_cdecimalfp_base10pow((-__pyx_v_dp)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 970, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     __pyx_t_5.__pyx_n = 1;
     __pyx_t_5.rounding = __pyx_v_rounding;
-    __pyx_t_3 = __pyx_f_9decimalfp_11_cdecimalfp__div_rounded(__pyx_t_4, __pyx_t_2, &__pyx_t_5); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 967, __pyx_L1_error)
+    __pyx_t_3 = __pyx_f_9decimalfp_11_cdecimalfp__div_rounded(__pyx_t_4, __pyx_t_2, &__pyx_t_5); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 970, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-    /* "decimalfp/_cdecimalfp.pyx":968
+    /* "decimalfp/_cdecimalfp.pyx":971
  *     else:
  *         dec._value = (_div_rounded(dec._value, base10pow(-dp), rounding)
  *                       * base10pow(-prec))             # <<<<<<<<<<<<<<
  *     dec._precision = max(prec, 0)
  * 
  */
-    __pyx_t_2 = __pyx_f_9decimalfp_11_cdecimalfp_base10pow((-__pyx_v_prec)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 968, __pyx_L1_error)
+    __pyx_t_2 = __pyx_f_9decimalfp_11_cdecimalfp_base10pow((-__pyx_v_prec)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 971, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_4 = PyNumber_Multiply(__pyx_t_3, __pyx_t_2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 968, __pyx_L1_error)
+    __pyx_t_4 = PyNumber_Multiply(__pyx_t_3, __pyx_t_2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 971, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-    /* "decimalfp/_cdecimalfp.pyx":967
+    /* "decimalfp/_cdecimalfp.pyx":970
  *         dec._value =  _div_rounded(dec._value, base10pow(-dp), rounding)
  *     else:
  *         dec._value = (_div_rounded(dec._value, base10pow(-dp), rounding)             # <<<<<<<<<<<<<<
@@ -14646,7 +14691,7 @@ static void __pyx_f_9decimalfp_11_cdecimalfp__adjust(struct __pyx_obj_9decimalfp
   }
   __pyx_L3:;
 
-  /* "decimalfp/_cdecimalfp.pyx":969
+  /* "decimalfp/_cdecimalfp.pyx":972
  *         dec._value = (_div_rounded(dec._value, base10pow(-dp), rounding)
  *                       * base10pow(-prec))
  *     dec._precision = max(prec, 0)             # <<<<<<<<<<<<<<
@@ -14662,7 +14707,7 @@ static void __pyx_f_9decimalfp_11_cdecimalfp__adjust(struct __pyx_obj_9decimalfp
   }
   __pyx_v_dec->_precision = __pyx_t_8;
 
-  /* "decimalfp/_cdecimalfp.pyx":955
+  /* "decimalfp/_cdecimalfp.pyx":958
  * 
  * 
  * cdef void _adjust(Decimal dec, int prec, object rounding=None) except *:             # <<<<<<<<<<<<<<
@@ -14681,7 +14726,7 @@ static void __pyx_f_9decimalfp_11_cdecimalfp__adjust(struct __pyx_obj_9decimalfp
   __Pyx_RefNannyFinishContext();
 }
 
-/* "decimalfp/_cdecimalfp.pyx":972
+/* "decimalfp/_cdecimalfp.pyx":975
  * 
  * 
  * cdef object _get_adjusted_value(Decimal dec, int prec, object rounding=None):             # <<<<<<<<<<<<<<
@@ -14706,7 +14751,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp__get_adjusted_value(struct __p
     }
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":977
+  /* "decimalfp/_cdecimalfp.pyx":980
  *     is given)."""
  *     cdef int dp
  *     dp = prec - dec._precision             # <<<<<<<<<<<<<<
@@ -14715,7 +14760,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp__get_adjusted_value(struct __p
  */
   __pyx_v_dp = (__pyx_v_prec - __pyx_v_dec->_precision);
 
-  /* "decimalfp/_cdecimalfp.pyx":978
+  /* "decimalfp/_cdecimalfp.pyx":981
  *     cdef int dp
  *     dp = prec - dec._precision
  *     if dp == 0:             # <<<<<<<<<<<<<<
@@ -14725,7 +14770,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp__get_adjusted_value(struct __p
   __pyx_t_1 = ((__pyx_v_dp == 0) != 0);
   if (__pyx_t_1) {
 
-    /* "decimalfp/_cdecimalfp.pyx":979
+    /* "decimalfp/_cdecimalfp.pyx":982
  *     dp = prec - dec._precision
  *     if dp == 0:
  *         return dec._value             # <<<<<<<<<<<<<<
@@ -14737,7 +14782,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp__get_adjusted_value(struct __p
     __pyx_r = __pyx_v_dec->_value;
     goto __pyx_L0;
 
-    /* "decimalfp/_cdecimalfp.pyx":978
+    /* "decimalfp/_cdecimalfp.pyx":981
  *     cdef int dp
  *     dp = prec - dec._precision
  *     if dp == 0:             # <<<<<<<<<<<<<<
@@ -14746,7 +14791,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp__get_adjusted_value(struct __p
  */
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":980
+  /* "decimalfp/_cdecimalfp.pyx":983
  *     if dp == 0:
  *         return dec._value
  *     elif dp > 0:             # <<<<<<<<<<<<<<
@@ -14756,7 +14801,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp__get_adjusted_value(struct __p
   __pyx_t_1 = ((__pyx_v_dp > 0) != 0);
   if (__pyx_t_1) {
 
-    /* "decimalfp/_cdecimalfp.pyx":981
+    /* "decimalfp/_cdecimalfp.pyx":984
  *         return dec._value
  *     elif dp > 0:
  *         return dec._value * base10pow(dp)             # <<<<<<<<<<<<<<
@@ -14764,16 +14809,16 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp__get_adjusted_value(struct __p
  *         return _div_rounded(dec._value, base10pow(-dp), rounding)
  */
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_2 = __pyx_f_9decimalfp_11_cdecimalfp_base10pow(__pyx_v_dp); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 981, __pyx_L1_error)
+    __pyx_t_2 = __pyx_f_9decimalfp_11_cdecimalfp_base10pow(__pyx_v_dp); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 984, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_3 = PyNumber_Multiply(__pyx_v_dec->_value, __pyx_t_2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 981, __pyx_L1_error)
+    __pyx_t_3 = PyNumber_Multiply(__pyx_v_dec->_value, __pyx_t_2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 984, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     __pyx_r = __pyx_t_3;
     __pyx_t_3 = 0;
     goto __pyx_L0;
 
-    /* "decimalfp/_cdecimalfp.pyx":980
+    /* "decimalfp/_cdecimalfp.pyx":983
  *     if dp == 0:
  *         return dec._value
  *     elif dp > 0:             # <<<<<<<<<<<<<<
@@ -14782,7 +14827,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp__get_adjusted_value(struct __p
  */
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":982
+  /* "decimalfp/_cdecimalfp.pyx":985
  *     elif dp > 0:
  *         return dec._value * base10pow(dp)
  *     elif prec >= 0:             # <<<<<<<<<<<<<<
@@ -14792,7 +14837,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp__get_adjusted_value(struct __p
   __pyx_t_1 = ((__pyx_v_prec >= 0) != 0);
   if (__pyx_t_1) {
 
-    /* "decimalfp/_cdecimalfp.pyx":983
+    /* "decimalfp/_cdecimalfp.pyx":986
  *         return dec._value * base10pow(dp)
  *     elif prec >= 0:
  *         return _div_rounded(dec._value, base10pow(-dp), rounding)             # <<<<<<<<<<<<<<
@@ -14802,11 +14847,11 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp__get_adjusted_value(struct __p
     __Pyx_XDECREF(__pyx_r);
     __pyx_t_3 = __pyx_v_dec->_value;
     __Pyx_INCREF(__pyx_t_3);
-    __pyx_t_2 = __pyx_f_9decimalfp_11_cdecimalfp_base10pow((-__pyx_v_dp)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 983, __pyx_L1_error)
+    __pyx_t_2 = __pyx_f_9decimalfp_11_cdecimalfp_base10pow((-__pyx_v_dp)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 986, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     __pyx_t_5.__pyx_n = 1;
     __pyx_t_5.rounding = __pyx_v_rounding;
-    __pyx_t_4 = __pyx_f_9decimalfp_11_cdecimalfp__div_rounded(__pyx_t_3, __pyx_t_2, &__pyx_t_5); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 983, __pyx_L1_error)
+    __pyx_t_4 = __pyx_f_9decimalfp_11_cdecimalfp__div_rounded(__pyx_t_3, __pyx_t_2, &__pyx_t_5); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 986, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
@@ -14814,7 +14859,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp__get_adjusted_value(struct __p
     __pyx_t_4 = 0;
     goto __pyx_L0;
 
-    /* "decimalfp/_cdecimalfp.pyx":982
+    /* "decimalfp/_cdecimalfp.pyx":985
  *     elif dp > 0:
  *         return dec._value * base10pow(dp)
  *     elif prec >= 0:             # <<<<<<<<<<<<<<
@@ -14823,7 +14868,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp__get_adjusted_value(struct __p
  */
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":985
+  /* "decimalfp/_cdecimalfp.pyx":988
  *         return _div_rounded(dec._value, base10pow(-dp), rounding)
  *     else:
  *         return (_div_rounded(dec._value, base10pow(-dp), rounding)             # <<<<<<<<<<<<<<
@@ -14834,25 +14879,25 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp__get_adjusted_value(struct __p
     __Pyx_XDECREF(__pyx_r);
     __pyx_t_4 = __pyx_v_dec->_value;
     __Pyx_INCREF(__pyx_t_4);
-    __pyx_t_2 = __pyx_f_9decimalfp_11_cdecimalfp_base10pow((-__pyx_v_dp)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 985, __pyx_L1_error)
+    __pyx_t_2 = __pyx_f_9decimalfp_11_cdecimalfp_base10pow((-__pyx_v_dp)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 988, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     __pyx_t_5.__pyx_n = 1;
     __pyx_t_5.rounding = __pyx_v_rounding;
-    __pyx_t_3 = __pyx_f_9decimalfp_11_cdecimalfp__div_rounded(__pyx_t_4, __pyx_t_2, &__pyx_t_5); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 985, __pyx_L1_error)
+    __pyx_t_3 = __pyx_f_9decimalfp_11_cdecimalfp__div_rounded(__pyx_t_4, __pyx_t_2, &__pyx_t_5); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 988, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-    /* "decimalfp/_cdecimalfp.pyx":986
+    /* "decimalfp/_cdecimalfp.pyx":989
  *     else:
  *         return (_div_rounded(dec._value, base10pow(-dp), rounding)
  *                 * base10pow(-prec))             # <<<<<<<<<<<<<<
  * 
  * 
  */
-    __pyx_t_2 = __pyx_f_9decimalfp_11_cdecimalfp_base10pow((-__pyx_v_prec)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 986, __pyx_L1_error)
+    __pyx_t_2 = __pyx_f_9decimalfp_11_cdecimalfp_base10pow((-__pyx_v_prec)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 989, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_4 = PyNumber_Multiply(__pyx_t_3, __pyx_t_2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 986, __pyx_L1_error)
+    __pyx_t_4 = PyNumber_Multiply(__pyx_t_3, __pyx_t_2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 989, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
@@ -14861,7 +14906,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp__get_adjusted_value(struct __p
     goto __pyx_L0;
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":972
+  /* "decimalfp/_cdecimalfp.pyx":975
  * 
  * 
  * cdef object _get_adjusted_value(Decimal dec, int prec, object rounding=None):             # <<<<<<<<<<<<<<
@@ -14882,7 +14927,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp__get_adjusted_value(struct __p
   return __pyx_r;
 }
 
-/* "decimalfp/_cdecimalfp.pyx":989
+/* "decimalfp/_cdecimalfp.pyx":992
  * 
  * 
  * cdef tuple _reduce(Decimal dec):             # <<<<<<<<<<<<<<
@@ -14901,7 +14946,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp__reduce(struct __pyx_obj_9deci
   int __pyx_t_4;
   __Pyx_RefNannySetupContext("_reduce", 0);
 
-  /* "decimalfp/_cdecimalfp.pyx":992
+  /* "decimalfp/_cdecimalfp.pyx":995
  *     """Return rv, rp so that rv // 10 ** rp = dec and rv % 10 != 0
  *     """
  *     v, p = dec._value, dec._precision             # <<<<<<<<<<<<<<
@@ -14910,27 +14955,27 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp__reduce(struct __pyx_obj_9deci
  */
   __pyx_t_1 = __pyx_v_dec->_value;
   __Pyx_INCREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyInt_From_int(__pyx_v_dec->_precision); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 992, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyInt_From_int(__pyx_v_dec->_precision); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 995, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_v_v = __pyx_t_1;
   __pyx_t_1 = 0;
   __pyx_v_p = __pyx_t_2;
   __pyx_t_2 = 0;
 
-  /* "decimalfp/_cdecimalfp.pyx":993
+  /* "decimalfp/_cdecimalfp.pyx":996
  *     """
  *     v, p = dec._value, dec._precision
  *     if v == 0:             # <<<<<<<<<<<<<<
  *         return 0, 0
  *     while p > 0 and v % 10 == 0:
  */
-  __pyx_t_2 = __Pyx_PyInt_EqObjC(__pyx_v_v, __pyx_int_0, 0, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 993, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyInt_EqObjC(__pyx_v_v, __pyx_int_0, 0, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 996, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = __Pyx_PyObject_IsTrue(__pyx_t_2); if (unlikely(__pyx_t_3 < 0)) __PYX_ERR(0, 993, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_IsTrue(__pyx_t_2); if (unlikely(__pyx_t_3 < 0)) __PYX_ERR(0, 996, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   if (__pyx_t_3) {
 
-    /* "decimalfp/_cdecimalfp.pyx":994
+    /* "decimalfp/_cdecimalfp.pyx":997
  *     v, p = dec._value, dec._precision
  *     if v == 0:
  *         return 0, 0             # <<<<<<<<<<<<<<
@@ -14942,7 +14987,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp__reduce(struct __pyx_obj_9deci
     __pyx_r = __pyx_tuple__10;
     goto __pyx_L0;
 
-    /* "decimalfp/_cdecimalfp.pyx":993
+    /* "decimalfp/_cdecimalfp.pyx":996
  *     """
  *     v, p = dec._value, dec._precision
  *     if v == 0:             # <<<<<<<<<<<<<<
@@ -14951,7 +14996,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp__reduce(struct __pyx_obj_9deci
  */
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":995
+  /* "decimalfp/_cdecimalfp.pyx":998
  *     if v == 0:
  *         return 0, 0
  *     while p > 0 and v % 10 == 0:             # <<<<<<<<<<<<<<
@@ -14959,51 +15004,51 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp__reduce(struct __pyx_obj_9deci
  *         v = v // 10
  */
   while (1) {
-    __pyx_t_2 = PyObject_RichCompare(__pyx_v_p, __pyx_int_0, Py_GT); __Pyx_XGOTREF(__pyx_t_2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 995, __pyx_L1_error)
-    __pyx_t_4 = __Pyx_PyObject_IsTrue(__pyx_t_2); if (unlikely(__pyx_t_4 < 0)) __PYX_ERR(0, 995, __pyx_L1_error)
+    __pyx_t_2 = PyObject_RichCompare(__pyx_v_p, __pyx_int_0, Py_GT); __Pyx_XGOTREF(__pyx_t_2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 998, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_PyObject_IsTrue(__pyx_t_2); if (unlikely(__pyx_t_4 < 0)) __PYX_ERR(0, 998, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     if (__pyx_t_4) {
     } else {
       __pyx_t_3 = __pyx_t_4;
       goto __pyx_L6_bool_binop_done;
     }
-    __pyx_t_2 = __Pyx_PyInt_RemainderObjC(__pyx_v_v, __pyx_int_10, 10, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 995, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_PyInt_RemainderObjC(__pyx_v_v, __pyx_int_10, 10, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 998, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_1 = __Pyx_PyInt_EqObjC(__pyx_t_2, __pyx_int_0, 0, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 995, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyInt_EqObjC(__pyx_t_2, __pyx_int_0, 0, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 998, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    __pyx_t_4 = __Pyx_PyObject_IsTrue(__pyx_t_1); if (unlikely(__pyx_t_4 < 0)) __PYX_ERR(0, 995, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_PyObject_IsTrue(__pyx_t_1); if (unlikely(__pyx_t_4 < 0)) __PYX_ERR(0, 998, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
     __pyx_t_3 = __pyx_t_4;
     __pyx_L6_bool_binop_done:;
     if (!__pyx_t_3) break;
 
-    /* "decimalfp/_cdecimalfp.pyx":996
+    /* "decimalfp/_cdecimalfp.pyx":999
  *         return 0, 0
  *     while p > 0 and v % 10 == 0:
  *         p -= 1             # <<<<<<<<<<<<<<
  *         v = v // 10
  *     return v, p
  */
-    __pyx_t_1 = __Pyx_PyInt_SubtractObjC(__pyx_v_p, __pyx_int_1, 1, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 996, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyInt_SubtractObjC(__pyx_v_p, __pyx_int_1, 1, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 999, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF_SET(__pyx_v_p, __pyx_t_1);
     __pyx_t_1 = 0;
 
-    /* "decimalfp/_cdecimalfp.pyx":997
+    /* "decimalfp/_cdecimalfp.pyx":1000
  *     while p > 0 and v % 10 == 0:
  *         p -= 1
  *         v = v // 10             # <<<<<<<<<<<<<<
  *     return v, p
  * 
  */
-    __pyx_t_1 = __Pyx_PyInt_FloorDivideObjC(__pyx_v_v, __pyx_int_10, 10, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 997, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyInt_FloorDivideObjC(__pyx_v_v, __pyx_int_10, 10, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1000, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF_SET(__pyx_v_v, __pyx_t_1);
     __pyx_t_1 = 0;
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":998
+  /* "decimalfp/_cdecimalfp.pyx":1001
  *         p -= 1
  *         v = v // 10
  *     return v, p             # <<<<<<<<<<<<<<
@@ -15011,7 +15056,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp__reduce(struct __pyx_obj_9deci
  * 
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = PyTuple_New(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 998, __pyx_L1_error)
+  __pyx_t_1 = PyTuple_New(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1001, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_INCREF(__pyx_v_v);
   __Pyx_GIVEREF(__pyx_v_v);
@@ -15023,7 +15068,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp__reduce(struct __pyx_obj_9deci
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "decimalfp/_cdecimalfp.pyx":989
+  /* "decimalfp/_cdecimalfp.pyx":992
  * 
  * 
  * cdef tuple _reduce(Decimal dec):             # <<<<<<<<<<<<<<
@@ -15045,7 +15090,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp__reduce(struct __pyx_obj_9deci
   return __pyx_r;
 }
 
-/* "decimalfp/_cdecimalfp.pyx":1002
+/* "decimalfp/_cdecimalfp.pyx":1005
  * 
  * # divide x by y, return rounded result
  * cdef object _div_rounded(object x, object y, object rounding=None):             # <<<<<<<<<<<<<<
@@ -15074,14 +15119,14 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp__div_rounded(PyObject *__pyx_v
     }
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":1005
+  /* "decimalfp/_cdecimalfp.pyx":1008
  *     """Return x // y, rounded using given rounding mode (or default mode
  *     if none is given)."""
  *     quot, rem = divmod(x, y)             # <<<<<<<<<<<<<<
  *     if rem == 0:              # no need for rounding
  *         return quot
  */
-  __pyx_t_1 = PyNumber_Divmod(__pyx_v_x, __pyx_v_y); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1005, __pyx_L1_error)
+  __pyx_t_1 = PyNumber_Divmod(__pyx_v_x, __pyx_v_y); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1008, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   if ((likely(PyTuple_CheckExact(__pyx_t_1))) || (PyList_CheckExact(__pyx_t_1))) {
     PyObject* sequence = __pyx_t_1;
@@ -15089,7 +15134,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp__div_rounded(PyObject *__pyx_v
     if (unlikely(size != 2)) {
       if (size > 2) __Pyx_RaiseTooManyValuesError(2);
       else if (size >= 0) __Pyx_RaiseNeedMoreValuesError(size);
-      __PYX_ERR(0, 1005, __pyx_L1_error)
+      __PYX_ERR(0, 1008, __pyx_L1_error)
     }
     #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
     if (likely(PyTuple_CheckExact(sequence))) {
@@ -15102,15 +15147,15 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp__div_rounded(PyObject *__pyx_v
     __Pyx_INCREF(__pyx_t_2);
     __Pyx_INCREF(__pyx_t_3);
     #else
-    __pyx_t_2 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 1005, __pyx_L1_error)
+    __pyx_t_2 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 1008, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_3 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1005, __pyx_L1_error)
+    __pyx_t_3 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1008, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     #endif
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   } else {
     Py_ssize_t index = -1;
-    __pyx_t_4 = PyObject_GetIter(__pyx_t_1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1005, __pyx_L1_error)
+    __pyx_t_4 = PyObject_GetIter(__pyx_t_1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1008, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
     __pyx_t_5 = Py_TYPE(__pyx_t_4)->tp_iternext;
@@ -15118,7 +15163,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp__div_rounded(PyObject *__pyx_v
     __Pyx_GOTREF(__pyx_t_2);
     index = 1; __pyx_t_3 = __pyx_t_5(__pyx_t_4); if (unlikely(!__pyx_t_3)) goto __pyx_L3_unpacking_failed;
     __Pyx_GOTREF(__pyx_t_3);
-    if (__Pyx_IternextUnpackEndCheck(__pyx_t_5(__pyx_t_4), 2) < 0) __PYX_ERR(0, 1005, __pyx_L1_error)
+    if (__Pyx_IternextUnpackEndCheck(__pyx_t_5(__pyx_t_4), 2) < 0) __PYX_ERR(0, 1008, __pyx_L1_error)
     __pyx_t_5 = NULL;
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     goto __pyx_L4_unpacking_done;
@@ -15126,7 +15171,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp__div_rounded(PyObject *__pyx_v
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     __pyx_t_5 = NULL;
     if (__Pyx_IterFinish() == 0) __Pyx_RaiseNeedMoreValuesError(index);
-    __PYX_ERR(0, 1005, __pyx_L1_error)
+    __PYX_ERR(0, 1008, __pyx_L1_error)
     __pyx_L4_unpacking_done:;
   }
   __pyx_v_quot = __pyx_t_2;
@@ -15134,20 +15179,20 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp__div_rounded(PyObject *__pyx_v
   __pyx_v_rem = __pyx_t_3;
   __pyx_t_3 = 0;
 
-  /* "decimalfp/_cdecimalfp.pyx":1006
+  /* "decimalfp/_cdecimalfp.pyx":1009
  *     if none is given)."""
  *     quot, rem = divmod(x, y)
  *     if rem == 0:              # no need for rounding             # <<<<<<<<<<<<<<
  *         return quot
  *     return quot + _round(quot, rem, y, rounding)
  */
-  __pyx_t_1 = __Pyx_PyInt_EqObjC(__pyx_v_rem, __pyx_int_0, 0, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1006, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyInt_EqObjC(__pyx_v_rem, __pyx_int_0, 0, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1009, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_6 = __Pyx_PyObject_IsTrue(__pyx_t_1); if (unlikely(__pyx_t_6 < 0)) __PYX_ERR(0, 1006, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyObject_IsTrue(__pyx_t_1); if (unlikely(__pyx_t_6 < 0)) __PYX_ERR(0, 1009, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   if (__pyx_t_6) {
 
-    /* "decimalfp/_cdecimalfp.pyx":1007
+    /* "decimalfp/_cdecimalfp.pyx":1010
  *     quot, rem = divmod(x, y)
  *     if rem == 0:              # no need for rounding
  *         return quot             # <<<<<<<<<<<<<<
@@ -15159,7 +15204,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp__div_rounded(PyObject *__pyx_v
     __pyx_r = __pyx_v_quot;
     goto __pyx_L0;
 
-    /* "decimalfp/_cdecimalfp.pyx":1006
+    /* "decimalfp/_cdecimalfp.pyx":1009
  *     if none is given)."""
  *     quot, rem = divmod(x, y)
  *     if rem == 0:              # no need for rounding             # <<<<<<<<<<<<<<
@@ -15168,7 +15213,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp__div_rounded(PyObject *__pyx_v
  */
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":1008
+  /* "decimalfp/_cdecimalfp.pyx":1011
  *     if rem == 0:              # no need for rounding
  *         return quot
  *     return quot + _round(quot, rem, y, rounding)             # <<<<<<<<<<<<<<
@@ -15179,16 +15224,16 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp__div_rounded(PyObject *__pyx_v
   __pyx_t_8.__pyx_n = 1;
   __pyx_t_8.rounding = __pyx_v_rounding;
   __pyx_t_7 = __pyx_f_9decimalfp_11_cdecimalfp__round(__pyx_v_quot, __pyx_v_rem, __pyx_v_y, &__pyx_t_8); 
-  __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_t_7); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1008, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_t_7); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1011, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_3 = PyNumber_Add(__pyx_v_quot, __pyx_t_1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1008, __pyx_L1_error)
+  __pyx_t_3 = PyNumber_Add(__pyx_v_quot, __pyx_t_1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1011, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_r = __pyx_t_3;
   __pyx_t_3 = 0;
   goto __pyx_L0;
 
-  /* "decimalfp/_cdecimalfp.pyx":1002
+  /* "decimalfp/_cdecimalfp.pyx":1005
  * 
  * # divide x by y, return rounded result
  * cdef object _div_rounded(object x, object y, object rounding=None):             # <<<<<<<<<<<<<<
@@ -15212,7 +15257,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp__div_rounded(PyObject *__pyx_v
   return __pyx_r;
 }
 
-/* "decimalfp/_cdecimalfp.pyx":1011
+/* "decimalfp/_cdecimalfp.pyx":1014
  * 
  * 
  * cdef object _int(object v, int p):             # <<<<<<<<<<<<<<
@@ -15229,7 +15274,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp__int(PyObject *__pyx_v_v, int 
   PyObject *__pyx_t_4 = NULL;
   __Pyx_RefNannySetupContext("_int", 0);
 
-  /* "decimalfp/_cdecimalfp.pyx":1013
+  /* "decimalfp/_cdecimalfp.pyx":1016
  * cdef object _int(object v, int p):
  *     """Return integral part of shifted decimal"""
  *     if p == 0:             # <<<<<<<<<<<<<<
@@ -15239,7 +15284,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp__int(PyObject *__pyx_v_v, int 
   __pyx_t_1 = ((__pyx_v_p == 0) != 0);
   if (__pyx_t_1) {
 
-    /* "decimalfp/_cdecimalfp.pyx":1014
+    /* "decimalfp/_cdecimalfp.pyx":1017
  *     """Return integral part of shifted decimal"""
  *     if p == 0:
  *         return v             # <<<<<<<<<<<<<<
@@ -15251,7 +15296,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp__int(PyObject *__pyx_v_v, int 
     __pyx_r = __pyx_v_v;
     goto __pyx_L0;
 
-    /* "decimalfp/_cdecimalfp.pyx":1013
+    /* "decimalfp/_cdecimalfp.pyx":1016
  * cdef object _int(object v, int p):
  *     """Return integral part of shifted decimal"""
  *     if p == 0:             # <<<<<<<<<<<<<<
@@ -15260,20 +15305,20 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp__int(PyObject *__pyx_v_v, int 
  */
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":1015
+  /* "decimalfp/_cdecimalfp.pyx":1018
  *     if p == 0:
  *         return v
  *     if v == 0:             # <<<<<<<<<<<<<<
  *         return v
  *     if p > 0:
  */
-  __pyx_t_2 = __Pyx_PyInt_EqObjC(__pyx_v_v, __pyx_int_0, 0, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 1015, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyInt_EqObjC(__pyx_v_v, __pyx_int_0, 0, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 1018, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_1 = __Pyx_PyObject_IsTrue(__pyx_t_2); if (unlikely(__pyx_t_1 < 0)) __PYX_ERR(0, 1015, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_IsTrue(__pyx_t_2); if (unlikely(__pyx_t_1 < 0)) __PYX_ERR(0, 1018, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   if (__pyx_t_1) {
 
-    /* "decimalfp/_cdecimalfp.pyx":1016
+    /* "decimalfp/_cdecimalfp.pyx":1019
  *         return v
  *     if v == 0:
  *         return v             # <<<<<<<<<<<<<<
@@ -15285,7 +15330,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp__int(PyObject *__pyx_v_v, int 
     __pyx_r = __pyx_v_v;
     goto __pyx_L0;
 
-    /* "decimalfp/_cdecimalfp.pyx":1015
+    /* "decimalfp/_cdecimalfp.pyx":1018
  *     if p == 0:
  *         return v
  *     if v == 0:             # <<<<<<<<<<<<<<
@@ -15294,7 +15339,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp__int(PyObject *__pyx_v_v, int 
  */
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":1017
+  /* "decimalfp/_cdecimalfp.pyx":1020
  *     if v == 0:
  *         return v
  *     if p > 0:             # <<<<<<<<<<<<<<
@@ -15304,19 +15349,19 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp__int(PyObject *__pyx_v_v, int 
   __pyx_t_1 = ((__pyx_v_p > 0) != 0);
   if (__pyx_t_1) {
 
-    /* "decimalfp/_cdecimalfp.pyx":1018
+    /* "decimalfp/_cdecimalfp.pyx":1021
  *         return v
  *     if p > 0:
  *         if v > 0:             # <<<<<<<<<<<<<<
  *             return PyNumber_Long(v // base10pow(p))
  *         else:
  */
-    __pyx_t_2 = PyObject_RichCompare(__pyx_v_v, __pyx_int_0, Py_GT); __Pyx_XGOTREF(__pyx_t_2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 1018, __pyx_L1_error)
-    __pyx_t_1 = __Pyx_PyObject_IsTrue(__pyx_t_2); if (unlikely(__pyx_t_1 < 0)) __PYX_ERR(0, 1018, __pyx_L1_error)
+    __pyx_t_2 = PyObject_RichCompare(__pyx_v_v, __pyx_int_0, Py_GT); __Pyx_XGOTREF(__pyx_t_2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 1021, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_IsTrue(__pyx_t_2); if (unlikely(__pyx_t_1 < 0)) __PYX_ERR(0, 1021, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     if (__pyx_t_1) {
 
-      /* "decimalfp/_cdecimalfp.pyx":1019
+      /* "decimalfp/_cdecimalfp.pyx":1022
  *     if p > 0:
  *         if v > 0:
  *             return PyNumber_Long(v // base10pow(p))             # <<<<<<<<<<<<<<
@@ -15324,19 +15369,19 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp__int(PyObject *__pyx_v_v, int 
  *             return -PyNumber_Long(-v // base10pow(p))
  */
       __Pyx_XDECREF(__pyx_r);
-      __pyx_t_2 = __pyx_f_9decimalfp_11_cdecimalfp_base10pow(__pyx_v_p); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 1019, __pyx_L1_error)
+      __pyx_t_2 = __pyx_f_9decimalfp_11_cdecimalfp_base10pow(__pyx_v_p); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 1022, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_2);
-      __pyx_t_3 = PyNumber_FloorDivide(__pyx_v_v, __pyx_t_2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1019, __pyx_L1_error)
+      __pyx_t_3 = PyNumber_FloorDivide(__pyx_v_v, __pyx_t_2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1022, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-      __pyx_t_2 = PyNumber_Long(__pyx_t_3); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 1019, __pyx_L1_error)
+      __pyx_t_2 = PyNumber_Long(__pyx_t_3); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 1022, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_2);
       __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
       __pyx_r = __pyx_t_2;
       __pyx_t_2 = 0;
       goto __pyx_L0;
 
-      /* "decimalfp/_cdecimalfp.pyx":1018
+      /* "decimalfp/_cdecimalfp.pyx":1021
  *         return v
  *     if p > 0:
  *         if v > 0:             # <<<<<<<<<<<<<<
@@ -15345,7 +15390,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp__int(PyObject *__pyx_v_v, int 
  */
     }
 
-    /* "decimalfp/_cdecimalfp.pyx":1021
+    /* "decimalfp/_cdecimalfp.pyx":1024
  *             return PyNumber_Long(v // base10pow(p))
  *         else:
  *             return -PyNumber_Long(-v // base10pow(p))             # <<<<<<<<<<<<<<
@@ -15354,18 +15399,18 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp__int(PyObject *__pyx_v_v, int 
  */
     /*else*/ {
       __Pyx_XDECREF(__pyx_r);
-      __pyx_t_2 = PyNumber_Negative(__pyx_v_v); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 1021, __pyx_L1_error)
+      __pyx_t_2 = PyNumber_Negative(__pyx_v_v); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 1024, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_2);
-      __pyx_t_3 = __pyx_f_9decimalfp_11_cdecimalfp_base10pow(__pyx_v_p); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1021, __pyx_L1_error)
+      __pyx_t_3 = __pyx_f_9decimalfp_11_cdecimalfp_base10pow(__pyx_v_p); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1024, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
-      __pyx_t_4 = PyNumber_FloorDivide(__pyx_t_2, __pyx_t_3); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1021, __pyx_L1_error)
+      __pyx_t_4 = PyNumber_FloorDivide(__pyx_t_2, __pyx_t_3); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1024, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_4);
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
       __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-      __pyx_t_3 = PyNumber_Long(__pyx_t_4); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1021, __pyx_L1_error)
+      __pyx_t_3 = PyNumber_Long(__pyx_t_4); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1024, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-      __pyx_t_4 = PyNumber_Negative(__pyx_t_3); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1021, __pyx_L1_error)
+      __pyx_t_4 = PyNumber_Negative(__pyx_t_3); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1024, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_4);
       __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
       __pyx_r = __pyx_t_4;
@@ -15373,7 +15418,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp__int(PyObject *__pyx_v_v, int 
       goto __pyx_L0;
     }
 
-    /* "decimalfp/_cdecimalfp.pyx":1017
+    /* "decimalfp/_cdecimalfp.pyx":1020
  *     if v == 0:
  *         return v
  *     if p > 0:             # <<<<<<<<<<<<<<
@@ -15382,7 +15427,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp__int(PyObject *__pyx_v_v, int 
  */
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":1023
+  /* "decimalfp/_cdecimalfp.pyx":1026
  *             return -PyNumber_Long(-v // base10pow(p))
  *     else:
  *         return PyNumber_Long(v * base10pow(-p))             # <<<<<<<<<<<<<<
@@ -15391,12 +15436,12 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp__int(PyObject *__pyx_v_v, int 
  */
   /*else*/ {
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_4 = __pyx_f_9decimalfp_11_cdecimalfp_base10pow((-__pyx_v_p)); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1023, __pyx_L1_error)
+    __pyx_t_4 = __pyx_f_9decimalfp_11_cdecimalfp_base10pow((-__pyx_v_p)); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1026, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
-    __pyx_t_3 = PyNumber_Multiply(__pyx_v_v, __pyx_t_4); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1023, __pyx_L1_error)
+    __pyx_t_3 = PyNumber_Multiply(__pyx_v_v, __pyx_t_4); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1026, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-    __pyx_t_4 = PyNumber_Long(__pyx_t_3); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1023, __pyx_L1_error)
+    __pyx_t_4 = PyNumber_Long(__pyx_t_3); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1026, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     __pyx_r = __pyx_t_4;
@@ -15404,7 +15449,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp__int(PyObject *__pyx_v_v, int 
     goto __pyx_L0;
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":1011
+  /* "decimalfp/_cdecimalfp.pyx":1014
  * 
  * 
  * cdef object _int(object v, int p):             # <<<<<<<<<<<<<<
@@ -15425,7 +15470,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp__int(PyObject *__pyx_v_v, int 
   return __pyx_r;
 }
 
-/* "decimalfp/_cdecimalfp.pyx":1026
+/* "decimalfp/_cdecimalfp.pyx":1029
  * 
  * 
  * cdef object _div(object num, object den, int minPrec):             # <<<<<<<<<<<<<<
@@ -15447,19 +15492,19 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp__div(PyObject *__pyx_v_num, Py
   PyObject *__pyx_t_7 = NULL;
   __Pyx_RefNannySetupContext("_div", 0);
 
-  /* "decimalfp/_cdecimalfp.pyx":1030
+  /* "decimalfp/_cdecimalfp.pyx":1033
  *     max(minPrec, LIMIT_PREC), otherwise as Fraction"""
  *     cdef Decimal dec
  *     dec = Decimal()             # <<<<<<<<<<<<<<
  *     rem = _approx_rational(dec, num, den, minPrec)
  *     if rem == 0:
  */
-  __pyx_t_1 = __Pyx_PyObject_CallNoArg(((PyObject *)__pyx_ptype_9decimalfp_11_cdecimalfp_Decimal)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1030, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_CallNoArg(((PyObject *)__pyx_ptype_9decimalfp_11_cdecimalfp_Decimal)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1033, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_v_dec = ((struct __pyx_obj_9decimalfp_11_cdecimalfp_Decimal *)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "decimalfp/_cdecimalfp.pyx":1031
+  /* "decimalfp/_cdecimalfp.pyx":1034
  *     cdef Decimal dec
  *     dec = Decimal()
  *     rem = _approx_rational(dec, num, den, minPrec)             # <<<<<<<<<<<<<<
@@ -15468,10 +15513,10 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp__div(PyObject *__pyx_v_num, Py
  */
   __pyx_t_3.__pyx_n = 1;
   __pyx_t_3.minPrec = __pyx_v_minPrec;
-  __pyx_t_2 = __pyx_f_9decimalfp_11_cdecimalfp__approx_rational(__pyx_v_dec, __pyx_v_num, __pyx_v_den, &__pyx_t_3); if (unlikely(__pyx_t_2 == ((int)-1) && PyErr_Occurred())) __PYX_ERR(0, 1031, __pyx_L1_error)
+  __pyx_t_2 = __pyx_f_9decimalfp_11_cdecimalfp__approx_rational(__pyx_v_dec, __pyx_v_num, __pyx_v_den, &__pyx_t_3); if (unlikely(__pyx_t_2 == ((int)-1) && PyErr_Occurred())) __PYX_ERR(0, 1034, __pyx_L1_error)
   __pyx_v_rem = __pyx_t_2;
 
-  /* "decimalfp/_cdecimalfp.pyx":1032
+  /* "decimalfp/_cdecimalfp.pyx":1035
  *     dec = Decimal()
  *     rem = _approx_rational(dec, num, den, minPrec)
  *     if rem == 0:             # <<<<<<<<<<<<<<
@@ -15481,7 +15526,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp__div(PyObject *__pyx_v_num, Py
   __pyx_t_2 = ((__pyx_v_rem == 0) != 0);
   if (__pyx_t_2) {
 
-    /* "decimalfp/_cdecimalfp.pyx":1033
+    /* "decimalfp/_cdecimalfp.pyx":1036
  *     rem = _approx_rational(dec, num, den, minPrec)
  *     if rem == 0:
  *         return dec             # <<<<<<<<<<<<<<
@@ -15493,7 +15538,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp__div(PyObject *__pyx_v_num, Py
     __pyx_r = ((PyObject *)__pyx_v_dec);
     goto __pyx_L0;
 
-    /* "decimalfp/_cdecimalfp.pyx":1032
+    /* "decimalfp/_cdecimalfp.pyx":1035
  *     dec = Decimal()
  *     rem = _approx_rational(dec, num, den, minPrec)
  *     if rem == 0:             # <<<<<<<<<<<<<<
@@ -15502,7 +15547,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp__div(PyObject *__pyx_v_num, Py
  */
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":1035
+  /* "decimalfp/_cdecimalfp.pyx":1038
  *         return dec
  *     else:
  *         return Fraction(num, den)             # <<<<<<<<<<<<<<
@@ -15511,7 +15556,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp__div(PyObject *__pyx_v_num, Py
  */
   /*else*/ {
     __Pyx_XDECREF(__pyx_r);
-    __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_Fraction); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1035, __pyx_L1_error)
+    __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_Fraction); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1038, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     __pyx_t_5 = NULL;
     __pyx_t_6 = 0;
@@ -15528,7 +15573,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp__div(PyObject *__pyx_v_num, Py
     #if CYTHON_FAST_PYCALL
     if (PyFunction_Check(__pyx_t_4)) {
       PyObject *__pyx_temp[3] = {__pyx_t_5, __pyx_v_num, __pyx_v_den};
-      __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_4, __pyx_temp+1-__pyx_t_6, 2+__pyx_t_6); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1035, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_4, __pyx_temp+1-__pyx_t_6, 2+__pyx_t_6); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1038, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
       __Pyx_GOTREF(__pyx_t_1);
     } else
@@ -15536,13 +15581,13 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp__div(PyObject *__pyx_v_num, Py
     #if CYTHON_FAST_PYCCALL
     if (__Pyx_PyFastCFunction_Check(__pyx_t_4)) {
       PyObject *__pyx_temp[3] = {__pyx_t_5, __pyx_v_num, __pyx_v_den};
-      __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_4, __pyx_temp+1-__pyx_t_6, 2+__pyx_t_6); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1035, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_4, __pyx_temp+1-__pyx_t_6, 2+__pyx_t_6); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1038, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
       __Pyx_GOTREF(__pyx_t_1);
     } else
     #endif
     {
-      __pyx_t_7 = PyTuple_New(2+__pyx_t_6); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 1035, __pyx_L1_error)
+      __pyx_t_7 = PyTuple_New(2+__pyx_t_6); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 1038, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_7);
       if (__pyx_t_5) {
         __Pyx_GIVEREF(__pyx_t_5); PyTuple_SET_ITEM(__pyx_t_7, 0, __pyx_t_5); __pyx_t_5 = NULL;
@@ -15553,7 +15598,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp__div(PyObject *__pyx_v_num, Py
       __Pyx_INCREF(__pyx_v_den);
       __Pyx_GIVEREF(__pyx_v_den);
       PyTuple_SET_ITEM(__pyx_t_7, 1+__pyx_t_6, __pyx_v_den);
-      __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_7, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1035, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_7, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1038, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_1);
       __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
     }
@@ -15563,7 +15608,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp__div(PyObject *__pyx_v_num, Py
     goto __pyx_L0;
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":1026
+  /* "decimalfp/_cdecimalfp.pyx":1029
  * 
  * 
  * cdef object _div(object num, object den, int minPrec):             # <<<<<<<<<<<<<<
@@ -15586,7 +15631,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp__div(PyObject *__pyx_v_num, Py
   return __pyx_r;
 }
 
-/* "decimalfp/_cdecimalfp.pyx":1038
+/* "decimalfp/_cdecimalfp.pyx":1041
  * 
  * 
  * cdef object add(Decimal x, object y):             # <<<<<<<<<<<<<<
@@ -15619,7 +15664,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_add(struct __pyx_obj_9decimalf
   PyObject *__pyx_t_12 = NULL;
   __Pyx_RefNannySetupContext("add", 0);
 
-  /* "decimalfp/_cdecimalfp.pyx":1042
+  /* "decimalfp/_cdecimalfp.pyx":1045
  *     cdef int p
  *     cdef Decimal result
  *     if isinstance(y, Decimal):             # <<<<<<<<<<<<<<
@@ -15630,7 +15675,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_add(struct __pyx_obj_9decimalf
   __pyx_t_2 = (__pyx_t_1 != 0);
   if (__pyx_t_2) {
 
-    /* "decimalfp/_cdecimalfp.pyx":1043
+    /* "decimalfp/_cdecimalfp.pyx":1046
  *     cdef Decimal result
  *     if isinstance(y, Decimal):
  *         p = x._precision - (<Decimal>y)._precision             # <<<<<<<<<<<<<<
@@ -15639,7 +15684,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_add(struct __pyx_obj_9decimalf
  */
     __pyx_v_p = (__pyx_v_x->_precision - ((struct __pyx_obj_9decimalfp_11_cdecimalfp_Decimal *)__pyx_v_y)->_precision);
 
-    /* "decimalfp/_cdecimalfp.pyx":1044
+    /* "decimalfp/_cdecimalfp.pyx":1047
  *     if isinstance(y, Decimal):
  *         p = x._precision - (<Decimal>y)._precision
  *         if p == 0:             # <<<<<<<<<<<<<<
@@ -15649,26 +15694,26 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_add(struct __pyx_obj_9decimalf
     __pyx_t_2 = ((__pyx_v_p == 0) != 0);
     if (__pyx_t_2) {
 
-      /* "decimalfp/_cdecimalfp.pyx":1045
+      /* "decimalfp/_cdecimalfp.pyx":1048
  *         p = x._precision - (<Decimal>y)._precision
  *         if p == 0:
  *             result = Decimal(x)             # <<<<<<<<<<<<<<
  *             result._value += (<Decimal>y)._value
  *         elif p > 0:
  */
-      __pyx_t_3 = __Pyx_PyObject_CallOneArg(((PyObject *)__pyx_ptype_9decimalfp_11_cdecimalfp_Decimal), ((PyObject *)__pyx_v_x)); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1045, __pyx_L1_error)
+      __pyx_t_3 = __Pyx_PyObject_CallOneArg(((PyObject *)__pyx_ptype_9decimalfp_11_cdecimalfp_Decimal), ((PyObject *)__pyx_v_x)); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1048, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
       __pyx_v_result = ((struct __pyx_obj_9decimalfp_11_cdecimalfp_Decimal *)__pyx_t_3);
       __pyx_t_3 = 0;
 
-      /* "decimalfp/_cdecimalfp.pyx":1046
+      /* "decimalfp/_cdecimalfp.pyx":1049
  *         if p == 0:
  *             result = Decimal(x)
  *             result._value += (<Decimal>y)._value             # <<<<<<<<<<<<<<
  *         elif p > 0:
  *             result = Decimal(x)
  */
-      __pyx_t_3 = PyNumber_InPlaceAdd(__pyx_v_result->_value, ((struct __pyx_obj_9decimalfp_11_cdecimalfp_Decimal *)__pyx_v_y)->_value); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1046, __pyx_L1_error)
+      __pyx_t_3 = PyNumber_InPlaceAdd(__pyx_v_result->_value, ((struct __pyx_obj_9decimalfp_11_cdecimalfp_Decimal *)__pyx_v_y)->_value); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1049, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
       __Pyx_GIVEREF(__pyx_t_3);
       __Pyx_GOTREF(__pyx_v_result->_value);
@@ -15676,7 +15721,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_add(struct __pyx_obj_9decimalf
       __pyx_v_result->_value = __pyx_t_3;
       __pyx_t_3 = 0;
 
-      /* "decimalfp/_cdecimalfp.pyx":1044
+      /* "decimalfp/_cdecimalfp.pyx":1047
  *     if isinstance(y, Decimal):
  *         p = x._precision - (<Decimal>y)._precision
  *         if p == 0:             # <<<<<<<<<<<<<<
@@ -15686,7 +15731,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_add(struct __pyx_obj_9decimalf
       goto __pyx_L4;
     }
 
-    /* "decimalfp/_cdecimalfp.pyx":1047
+    /* "decimalfp/_cdecimalfp.pyx":1050
  *             result = Decimal(x)
  *             result._value += (<Decimal>y)._value
  *         elif p > 0:             # <<<<<<<<<<<<<<
@@ -15696,72 +15741,28 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_add(struct __pyx_obj_9decimalf
     __pyx_t_2 = ((__pyx_v_p > 0) != 0);
     if (__pyx_t_2) {
 
-      /* "decimalfp/_cdecimalfp.pyx":1048
+      /* "decimalfp/_cdecimalfp.pyx":1051
  *             result._value += (<Decimal>y)._value
  *         elif p > 0:
  *             result = Decimal(x)             # <<<<<<<<<<<<<<
  *             result._value += (<Decimal>y)._value * base10pow(p)
  *         else:
  */
-      __pyx_t_3 = __Pyx_PyObject_CallOneArg(((PyObject *)__pyx_ptype_9decimalfp_11_cdecimalfp_Decimal), ((PyObject *)__pyx_v_x)); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1048, __pyx_L1_error)
+      __pyx_t_3 = __Pyx_PyObject_CallOneArg(((PyObject *)__pyx_ptype_9decimalfp_11_cdecimalfp_Decimal), ((PyObject *)__pyx_v_x)); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1051, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
       __pyx_v_result = ((struct __pyx_obj_9decimalfp_11_cdecimalfp_Decimal *)__pyx_t_3);
       __pyx_t_3 = 0;
 
-      /* "decimalfp/_cdecimalfp.pyx":1049
+      /* "decimalfp/_cdecimalfp.pyx":1052
  *         elif p > 0:
  *             result = Decimal(x)
  *             result._value += (<Decimal>y)._value * base10pow(p)             # <<<<<<<<<<<<<<
  *         else:
  *             result = Decimal(y)
  */
-      __pyx_t_3 = __pyx_f_9decimalfp_11_cdecimalfp_base10pow(__pyx_v_p); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1049, __pyx_L1_error)
+      __pyx_t_3 = __pyx_f_9decimalfp_11_cdecimalfp_base10pow(__pyx_v_p); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1052, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
-      __pyx_t_4 = PyNumber_Multiply(((struct __pyx_obj_9decimalfp_11_cdecimalfp_Decimal *)__pyx_v_y)->_value, __pyx_t_3); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1049, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_4);
-      __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-      __pyx_t_3 = PyNumber_InPlaceAdd(__pyx_v_result->_value, __pyx_t_4); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1049, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_3);
-      __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-      __Pyx_GIVEREF(__pyx_t_3);
-      __Pyx_GOTREF(__pyx_v_result->_value);
-      __Pyx_DECREF(__pyx_v_result->_value);
-      __pyx_v_result->_value = __pyx_t_3;
-      __pyx_t_3 = 0;
-
-      /* "decimalfp/_cdecimalfp.pyx":1047
- *             result = Decimal(x)
- *             result._value += (<Decimal>y)._value
- *         elif p > 0:             # <<<<<<<<<<<<<<
- *             result = Decimal(x)
- *             result._value += (<Decimal>y)._value * base10pow(p)
- */
-      goto __pyx_L4;
-    }
-
-    /* "decimalfp/_cdecimalfp.pyx":1051
- *             result._value += (<Decimal>y)._value * base10pow(p)
- *         else:
- *             result = Decimal(y)             # <<<<<<<<<<<<<<
- *             result._value += x._value * base10pow(-p)
- *         return result
- */
-    /*else*/ {
-      __pyx_t_3 = __Pyx_PyObject_CallOneArg(((PyObject *)__pyx_ptype_9decimalfp_11_cdecimalfp_Decimal), __pyx_v_y); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1051, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_3);
-      __pyx_v_result = ((struct __pyx_obj_9decimalfp_11_cdecimalfp_Decimal *)__pyx_t_3);
-      __pyx_t_3 = 0;
-
-      /* "decimalfp/_cdecimalfp.pyx":1052
- *         else:
- *             result = Decimal(y)
- *             result._value += x._value * base10pow(-p)             # <<<<<<<<<<<<<<
- *         return result
- *     elif isinstance(y, Integral):
- */
-      __pyx_t_3 = __pyx_f_9decimalfp_11_cdecimalfp_base10pow((-__pyx_v_p)); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1052, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_3);
-      __pyx_t_4 = PyNumber_Multiply(__pyx_v_x->_value, __pyx_t_3); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1052, __pyx_L1_error)
+      __pyx_t_4 = PyNumber_Multiply(((struct __pyx_obj_9decimalfp_11_cdecimalfp_Decimal *)__pyx_v_y)->_value, __pyx_t_3); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1052, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_4);
       __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
       __pyx_t_3 = PyNumber_InPlaceAdd(__pyx_v_result->_value, __pyx_t_4); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1052, __pyx_L1_error)
@@ -15772,10 +15773,54 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_add(struct __pyx_obj_9decimalf
       __Pyx_DECREF(__pyx_v_result->_value);
       __pyx_v_result->_value = __pyx_t_3;
       __pyx_t_3 = 0;
+
+      /* "decimalfp/_cdecimalfp.pyx":1050
+ *             result = Decimal(x)
+ *             result._value += (<Decimal>y)._value
+ *         elif p > 0:             # <<<<<<<<<<<<<<
+ *             result = Decimal(x)
+ *             result._value += (<Decimal>y)._value * base10pow(p)
+ */
+      goto __pyx_L4;
+    }
+
+    /* "decimalfp/_cdecimalfp.pyx":1054
+ *             result._value += (<Decimal>y)._value * base10pow(p)
+ *         else:
+ *             result = Decimal(y)             # <<<<<<<<<<<<<<
+ *             result._value += x._value * base10pow(-p)
+ *         return result
+ */
+    /*else*/ {
+      __pyx_t_3 = __Pyx_PyObject_CallOneArg(((PyObject *)__pyx_ptype_9decimalfp_11_cdecimalfp_Decimal), __pyx_v_y); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1054, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_3);
+      __pyx_v_result = ((struct __pyx_obj_9decimalfp_11_cdecimalfp_Decimal *)__pyx_t_3);
+      __pyx_t_3 = 0;
+
+      /* "decimalfp/_cdecimalfp.pyx":1055
+ *         else:
+ *             result = Decimal(y)
+ *             result._value += x._value * base10pow(-p)             # <<<<<<<<<<<<<<
+ *         return result
+ *     elif isinstance(y, Integral):
+ */
+      __pyx_t_3 = __pyx_f_9decimalfp_11_cdecimalfp_base10pow((-__pyx_v_p)); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1055, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_3);
+      __pyx_t_4 = PyNumber_Multiply(__pyx_v_x->_value, __pyx_t_3); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1055, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_4);
+      __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+      __pyx_t_3 = PyNumber_InPlaceAdd(__pyx_v_result->_value, __pyx_t_4); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1055, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_3);
+      __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+      __Pyx_GIVEREF(__pyx_t_3);
+      __Pyx_GOTREF(__pyx_v_result->_value);
+      __Pyx_DECREF(__pyx_v_result->_value);
+      __pyx_v_result->_value = __pyx_t_3;
+      __pyx_t_3 = 0;
     }
     __pyx_L4:;
 
-    /* "decimalfp/_cdecimalfp.pyx":1053
+    /* "decimalfp/_cdecimalfp.pyx":1056
  *             result = Decimal(y)
  *             result._value += x._value * base10pow(-p)
  *         return result             # <<<<<<<<<<<<<<
@@ -15787,7 +15832,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_add(struct __pyx_obj_9decimalf
     __pyx_r = ((PyObject *)__pyx_v_result);
     goto __pyx_L0;
 
-    /* "decimalfp/_cdecimalfp.pyx":1042
+    /* "decimalfp/_cdecimalfp.pyx":1045
  *     cdef int p
  *     cdef Decimal result
  *     if isinstance(y, Decimal):             # <<<<<<<<<<<<<<
@@ -15796,21 +15841,21 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_add(struct __pyx_obj_9decimalf
  */
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":1054
+  /* "decimalfp/_cdecimalfp.pyx":1057
  *             result._value += x._value * base10pow(-p)
  *         return result
  *     elif isinstance(y, Integral):             # <<<<<<<<<<<<<<
  *         p = x._precision
  *         result = Decimal(x)
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_Integral); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1054, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_Integral); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1057, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = PyObject_IsInstance(__pyx_v_y, __pyx_t_3); if (unlikely(__pyx_t_2 == ((int)-1))) __PYX_ERR(0, 1054, __pyx_L1_error)
+  __pyx_t_2 = PyObject_IsInstance(__pyx_v_y, __pyx_t_3); if (unlikely(__pyx_t_2 == ((int)-1))) __PYX_ERR(0, 1057, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_1 = (__pyx_t_2 != 0);
   if (__pyx_t_1) {
 
-    /* "decimalfp/_cdecimalfp.pyx":1055
+    /* "decimalfp/_cdecimalfp.pyx":1058
  *         return result
  *     elif isinstance(y, Integral):
  *         p = x._precision             # <<<<<<<<<<<<<<
@@ -15820,31 +15865,31 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_add(struct __pyx_obj_9decimalf
     __pyx_t_5 = __pyx_v_x->_precision;
     __pyx_v_p = __pyx_t_5;
 
-    /* "decimalfp/_cdecimalfp.pyx":1056
+    /* "decimalfp/_cdecimalfp.pyx":1059
  *     elif isinstance(y, Integral):
  *         p = x._precision
  *         result = Decimal(x)             # <<<<<<<<<<<<<<
  *         result._value += y * base10pow(p)
  *         return result
  */
-    __pyx_t_3 = __Pyx_PyObject_CallOneArg(((PyObject *)__pyx_ptype_9decimalfp_11_cdecimalfp_Decimal), ((PyObject *)__pyx_v_x)); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1056, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyObject_CallOneArg(((PyObject *)__pyx_ptype_9decimalfp_11_cdecimalfp_Decimal), ((PyObject *)__pyx_v_x)); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1059, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __pyx_v_result = ((struct __pyx_obj_9decimalfp_11_cdecimalfp_Decimal *)__pyx_t_3);
     __pyx_t_3 = 0;
 
-    /* "decimalfp/_cdecimalfp.pyx":1057
+    /* "decimalfp/_cdecimalfp.pyx":1060
  *         p = x._precision
  *         result = Decimal(x)
  *         result._value += y * base10pow(p)             # <<<<<<<<<<<<<<
  *         return result
  *     elif isinstance(y, Rational):
  */
-    __pyx_t_3 = __pyx_f_9decimalfp_11_cdecimalfp_base10pow(__pyx_v_p); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1057, __pyx_L1_error)
+    __pyx_t_3 = __pyx_f_9decimalfp_11_cdecimalfp_base10pow(__pyx_v_p); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1060, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_4 = PyNumber_Multiply(__pyx_v_y, __pyx_t_3); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1057, __pyx_L1_error)
+    __pyx_t_4 = PyNumber_Multiply(__pyx_v_y, __pyx_t_3); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1060, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    __pyx_t_3 = PyNumber_InPlaceAdd(__pyx_v_result->_value, __pyx_t_4); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1057, __pyx_L1_error)
+    __pyx_t_3 = PyNumber_InPlaceAdd(__pyx_v_result->_value, __pyx_t_4); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1060, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     __Pyx_GIVEREF(__pyx_t_3);
@@ -15853,7 +15898,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_add(struct __pyx_obj_9decimalf
     __pyx_v_result->_value = __pyx_t_3;
     __pyx_t_3 = 0;
 
-    /* "decimalfp/_cdecimalfp.pyx":1058
+    /* "decimalfp/_cdecimalfp.pyx":1061
  *         result = Decimal(x)
  *         result._value += y * base10pow(p)
  *         return result             # <<<<<<<<<<<<<<
@@ -15865,7 +15910,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_add(struct __pyx_obj_9decimalf
     __pyx_r = ((PyObject *)__pyx_v_result);
     goto __pyx_L0;
 
-    /* "decimalfp/_cdecimalfp.pyx":1054
+    /* "decimalfp/_cdecimalfp.pyx":1057
  *             result._value += x._value * base10pow(-p)
  *         return result
  *     elif isinstance(y, Integral):             # <<<<<<<<<<<<<<
@@ -15874,37 +15919,37 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_add(struct __pyx_obj_9decimalf
  */
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":1059
+  /* "decimalfp/_cdecimalfp.pyx":1062
  *         result._value += y * base10pow(p)
  *         return result
  *     elif isinstance(y, Rational):             # <<<<<<<<<<<<<<
  *         y_numerator, y_denominator = (y.numerator, y.denominator)
  *     elif isinstance(y, Real):
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_Rational); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1059, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_Rational); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1062, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_1 = PyObject_IsInstance(__pyx_v_y, __pyx_t_3); if (unlikely(__pyx_t_1 == ((int)-1))) __PYX_ERR(0, 1059, __pyx_L1_error)
+  __pyx_t_1 = PyObject_IsInstance(__pyx_v_y, __pyx_t_3); if (unlikely(__pyx_t_1 == ((int)-1))) __PYX_ERR(0, 1062, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_2 = (__pyx_t_1 != 0);
   if (__pyx_t_2) {
 
-    /* "decimalfp/_cdecimalfp.pyx":1060
+    /* "decimalfp/_cdecimalfp.pyx":1063
  *         return result
  *     elif isinstance(y, Rational):
  *         y_numerator, y_denominator = (y.numerator, y.denominator)             # <<<<<<<<<<<<<<
  *     elif isinstance(y, Real):
  *         try:
  */
-    __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_y, __pyx_n_s_numerator); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1060, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_y, __pyx_n_s_numerator); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1063, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_y, __pyx_n_s_denominator); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1060, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_y, __pyx_n_s_denominator); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1063, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     __pyx_v_y_numerator = __pyx_t_3;
     __pyx_t_3 = 0;
     __pyx_v_y_denominator = __pyx_t_4;
     __pyx_t_4 = 0;
 
-    /* "decimalfp/_cdecimalfp.pyx":1059
+    /* "decimalfp/_cdecimalfp.pyx":1062
  *         result._value += y * base10pow(p)
  *         return result
  *     elif isinstance(y, Rational):             # <<<<<<<<<<<<<<
@@ -15914,21 +15959,21 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_add(struct __pyx_obj_9decimalf
     goto __pyx_L3;
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":1061
+  /* "decimalfp/_cdecimalfp.pyx":1064
  *     elif isinstance(y, Rational):
  *         y_numerator, y_denominator = (y.numerator, y.denominator)
  *     elif isinstance(y, Real):             # <<<<<<<<<<<<<<
  *         try:
  *             y_numerator, y_denominator = y.as_integer_ratio()
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_Real); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1061, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_Real); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1064, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_2 = PyObject_IsInstance(__pyx_v_y, __pyx_t_4); if (unlikely(__pyx_t_2 == ((int)-1))) __PYX_ERR(0, 1061, __pyx_L1_error)
+  __pyx_t_2 = PyObject_IsInstance(__pyx_v_y, __pyx_t_4); if (unlikely(__pyx_t_2 == ((int)-1))) __PYX_ERR(0, 1064, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __pyx_t_1 = (__pyx_t_2 != 0);
   if (__pyx_t_1) {
 
-    /* "decimalfp/_cdecimalfp.pyx":1062
+    /* "decimalfp/_cdecimalfp.pyx":1065
  *         y_numerator, y_denominator = (y.numerator, y.denominator)
  *     elif isinstance(y, Real):
  *         try:             # <<<<<<<<<<<<<<
@@ -15944,14 +15989,14 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_add(struct __pyx_obj_9decimalf
       __Pyx_XGOTREF(__pyx_t_8);
       /*try:*/ {
 
-        /* "decimalfp/_cdecimalfp.pyx":1063
+        /* "decimalfp/_cdecimalfp.pyx":1066
  *     elif isinstance(y, Real):
  *         try:
  *             y_numerator, y_denominator = y.as_integer_ratio()             # <<<<<<<<<<<<<<
  *         except (ValueError, OverflowError, AttributeError):
  *             raise ValueError("Unsupported operand: %s" % repr(y))
  */
-        __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_y, __pyx_n_s_as_integer_ratio); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1063, __pyx_L5_error)
+        __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_y, __pyx_n_s_as_integer_ratio); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1066, __pyx_L5_error)
         __Pyx_GOTREF(__pyx_t_3);
         __pyx_t_9 = NULL;
         if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_3))) {
@@ -15965,7 +16010,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_add(struct __pyx_obj_9decimalf
         }
         __pyx_t_4 = (__pyx_t_9) ? __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_9) : __Pyx_PyObject_CallNoArg(__pyx_t_3);
         __Pyx_XDECREF(__pyx_t_9); __pyx_t_9 = 0;
-        if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1063, __pyx_L5_error)
+        if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1066, __pyx_L5_error)
         __Pyx_GOTREF(__pyx_t_4);
         __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
         if ((likely(PyTuple_CheckExact(__pyx_t_4))) || (PyList_CheckExact(__pyx_t_4))) {
@@ -15974,7 +16019,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_add(struct __pyx_obj_9decimalf
           if (unlikely(size != 2)) {
             if (size > 2) __Pyx_RaiseTooManyValuesError(2);
             else if (size >= 0) __Pyx_RaiseNeedMoreValuesError(size);
-            __PYX_ERR(0, 1063, __pyx_L5_error)
+            __PYX_ERR(0, 1066, __pyx_L5_error)
           }
           #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
           if (likely(PyTuple_CheckExact(sequence))) {
@@ -15987,15 +16032,15 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_add(struct __pyx_obj_9decimalf
           __Pyx_INCREF(__pyx_t_3);
           __Pyx_INCREF(__pyx_t_9);
           #else
-          __pyx_t_3 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1063, __pyx_L5_error)
+          __pyx_t_3 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1066, __pyx_L5_error)
           __Pyx_GOTREF(__pyx_t_3);
-          __pyx_t_9 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 1063, __pyx_L5_error)
+          __pyx_t_9 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 1066, __pyx_L5_error)
           __Pyx_GOTREF(__pyx_t_9);
           #endif
           __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
         } else {
           Py_ssize_t index = -1;
-          __pyx_t_10 = PyObject_GetIter(__pyx_t_4); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 1063, __pyx_L5_error)
+          __pyx_t_10 = PyObject_GetIter(__pyx_t_4); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 1066, __pyx_L5_error)
           __Pyx_GOTREF(__pyx_t_10);
           __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
           __pyx_t_11 = Py_TYPE(__pyx_t_10)->tp_iternext;
@@ -16003,7 +16048,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_add(struct __pyx_obj_9decimalf
           __Pyx_GOTREF(__pyx_t_3);
           index = 1; __pyx_t_9 = __pyx_t_11(__pyx_t_10); if (unlikely(!__pyx_t_9)) goto __pyx_L11_unpacking_failed;
           __Pyx_GOTREF(__pyx_t_9);
-          if (__Pyx_IternextUnpackEndCheck(__pyx_t_11(__pyx_t_10), 2) < 0) __PYX_ERR(0, 1063, __pyx_L5_error)
+          if (__Pyx_IternextUnpackEndCheck(__pyx_t_11(__pyx_t_10), 2) < 0) __PYX_ERR(0, 1066, __pyx_L5_error)
           __pyx_t_11 = NULL;
           __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
           goto __pyx_L12_unpacking_done;
@@ -16011,7 +16056,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_add(struct __pyx_obj_9decimalf
           __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
           __pyx_t_11 = NULL;
           if (__Pyx_IterFinish() == 0) __Pyx_RaiseNeedMoreValuesError(index);
-          __PYX_ERR(0, 1063, __pyx_L5_error)
+          __PYX_ERR(0, 1066, __pyx_L5_error)
           __pyx_L12_unpacking_done:;
         }
         __pyx_v_y_numerator = __pyx_t_3;
@@ -16019,7 +16064,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_add(struct __pyx_obj_9decimalf
         __pyx_v_y_denominator = __pyx_t_9;
         __pyx_t_9 = 0;
 
-        /* "decimalfp/_cdecimalfp.pyx":1062
+        /* "decimalfp/_cdecimalfp.pyx":1065
  *         y_numerator, y_denominator = (y.numerator, y.denominator)
  *     elif isinstance(y, Real):
  *         try:             # <<<<<<<<<<<<<<
@@ -16037,7 +16082,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_add(struct __pyx_obj_9decimalf
       __Pyx_XDECREF(__pyx_t_9); __pyx_t_9 = 0;
       __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-      /* "decimalfp/_cdecimalfp.pyx":1064
+      /* "decimalfp/_cdecimalfp.pyx":1067
  *         try:
  *             y_numerator, y_denominator = y.as_integer_ratio()
  *         except (ValueError, OverflowError, AttributeError):             # <<<<<<<<<<<<<<
@@ -16047,34 +16092,34 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_add(struct __pyx_obj_9decimalf
       __pyx_t_5 = __Pyx_PyErr_ExceptionMatches(__pyx_builtin_ValueError) || __Pyx_PyErr_ExceptionMatches(__pyx_builtin_OverflowError) || __Pyx_PyErr_ExceptionMatches(__pyx_builtin_AttributeError);
       if (__pyx_t_5) {
         __Pyx_AddTraceback("decimalfp._cdecimalfp.add", __pyx_clineno, __pyx_lineno, __pyx_filename);
-        if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_9, &__pyx_t_3) < 0) __PYX_ERR(0, 1064, __pyx_L7_except_error)
+        if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_9, &__pyx_t_3) < 0) __PYX_ERR(0, 1067, __pyx_L7_except_error)
         __Pyx_GOTREF(__pyx_t_4);
         __Pyx_GOTREF(__pyx_t_9);
         __Pyx_GOTREF(__pyx_t_3);
 
-        /* "decimalfp/_cdecimalfp.pyx":1065
+        /* "decimalfp/_cdecimalfp.pyx":1068
  *             y_numerator, y_denominator = y.as_integer_ratio()
  *         except (ValueError, OverflowError, AttributeError):
  *             raise ValueError("Unsupported operand: %s" % repr(y))             # <<<<<<<<<<<<<<
  *     elif isinstance(y, _StdLibDecimal):
  *         return add(x, Decimal(y))
  */
-        __pyx_t_10 = PyObject_Repr(__pyx_v_y); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 1065, __pyx_L7_except_error)
+        __pyx_t_10 = PyObject_Repr(__pyx_v_y); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 1068, __pyx_L7_except_error)
         __Pyx_GOTREF(__pyx_t_10);
-        __pyx_t_12 = __Pyx_PyString_Format(__pyx_kp_s_Unsupported_operand_s, __pyx_t_10); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 1065, __pyx_L7_except_error)
+        __pyx_t_12 = __Pyx_PyString_Format(__pyx_kp_s_Unsupported_operand_s, __pyx_t_10); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 1068, __pyx_L7_except_error)
         __Pyx_GOTREF(__pyx_t_12);
         __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
-        __pyx_t_10 = __Pyx_PyObject_CallOneArg(__pyx_builtin_ValueError, __pyx_t_12); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 1065, __pyx_L7_except_error)
+        __pyx_t_10 = __Pyx_PyObject_CallOneArg(__pyx_builtin_ValueError, __pyx_t_12); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 1068, __pyx_L7_except_error)
         __Pyx_GOTREF(__pyx_t_10);
         __Pyx_DECREF(__pyx_t_12); __pyx_t_12 = 0;
         __Pyx_Raise(__pyx_t_10, 0, 0, 0);
         __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
-        __PYX_ERR(0, 1065, __pyx_L7_except_error)
+        __PYX_ERR(0, 1068, __pyx_L7_except_error)
       }
       goto __pyx_L7_except_error;
       __pyx_L7_except_error:;
 
-      /* "decimalfp/_cdecimalfp.pyx":1062
+      /* "decimalfp/_cdecimalfp.pyx":1065
  *         y_numerator, y_denominator = (y.numerator, y.denominator)
  *     elif isinstance(y, Real):
  *         try:             # <<<<<<<<<<<<<<
@@ -16089,7 +16134,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_add(struct __pyx_obj_9decimalf
       __pyx_L10_try_end:;
     }
 
-    /* "decimalfp/_cdecimalfp.pyx":1061
+    /* "decimalfp/_cdecimalfp.pyx":1064
  *     elif isinstance(y, Rational):
  *         y_numerator, y_denominator = (y.numerator, y.denominator)
  *     elif isinstance(y, Real):             # <<<<<<<<<<<<<<
@@ -16099,21 +16144,21 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_add(struct __pyx_obj_9decimalf
     goto __pyx_L3;
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":1066
+  /* "decimalfp/_cdecimalfp.pyx":1069
  *         except (ValueError, OverflowError, AttributeError):
  *             raise ValueError("Unsupported operand: %s" % repr(y))
  *     elif isinstance(y, _StdLibDecimal):             # <<<<<<<<<<<<<<
  *         return add(x, Decimal(y))
  *     else:
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_StdLibDecimal); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1066, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_StdLibDecimal); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1069, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_1 = PyObject_IsInstance(__pyx_v_y, __pyx_t_3); if (unlikely(__pyx_t_1 == ((int)-1))) __PYX_ERR(0, 1066, __pyx_L1_error)
+  __pyx_t_1 = PyObject_IsInstance(__pyx_v_y, __pyx_t_3); if (unlikely(__pyx_t_1 == ((int)-1))) __PYX_ERR(0, 1069, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_2 = (__pyx_t_1 != 0);
   if (__pyx_t_2) {
 
-    /* "decimalfp/_cdecimalfp.pyx":1067
+    /* "decimalfp/_cdecimalfp.pyx":1070
  *             raise ValueError("Unsupported operand: %s" % repr(y))
  *     elif isinstance(y, _StdLibDecimal):
  *         return add(x, Decimal(y))             # <<<<<<<<<<<<<<
@@ -16121,16 +16166,16 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_add(struct __pyx_obj_9decimalf
  *         return NotImplemented
  */
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_3 = __Pyx_PyObject_CallOneArg(((PyObject *)__pyx_ptype_9decimalfp_11_cdecimalfp_Decimal), __pyx_v_y); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1067, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyObject_CallOneArg(((PyObject *)__pyx_ptype_9decimalfp_11_cdecimalfp_Decimal), __pyx_v_y); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1070, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_9 = __pyx_f_9decimalfp_11_cdecimalfp_add(__pyx_v_x, __pyx_t_3); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 1067, __pyx_L1_error)
+    __pyx_t_9 = __pyx_f_9decimalfp_11_cdecimalfp_add(__pyx_v_x, __pyx_t_3); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 1070, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_9);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     __pyx_r = __pyx_t_9;
     __pyx_t_9 = 0;
     goto __pyx_L0;
 
-    /* "decimalfp/_cdecimalfp.pyx":1066
+    /* "decimalfp/_cdecimalfp.pyx":1069
  *         except (ValueError, OverflowError, AttributeError):
  *             raise ValueError("Unsupported operand: %s" % repr(y))
  *     elif isinstance(y, _StdLibDecimal):             # <<<<<<<<<<<<<<
@@ -16139,7 +16184,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_add(struct __pyx_obj_9decimalf
  */
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":1069
+  /* "decimalfp/_cdecimalfp.pyx":1072
  *         return add(x, Decimal(y))
  *     else:
  *         return NotImplemented             # <<<<<<<<<<<<<<
@@ -16154,49 +16199,49 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_add(struct __pyx_obj_9decimalf
   }
   __pyx_L3:;
 
-  /* "decimalfp/_cdecimalfp.pyx":1071
+  /* "decimalfp/_cdecimalfp.pyx":1074
  *         return NotImplemented
  *     # handle Rational and Real
  *     x_denominator = base10pow(x._precision)             # <<<<<<<<<<<<<<
  *     num = x._value * y_denominator + x_denominator * y_numerator
  *     den = y_denominator * x_denominator
  */
-  __pyx_t_9 = __pyx_f_9decimalfp_11_cdecimalfp_base10pow(__pyx_v_x->_precision); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 1071, __pyx_L1_error)
+  __pyx_t_9 = __pyx_f_9decimalfp_11_cdecimalfp_base10pow(__pyx_v_x->_precision); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 1074, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_9);
   __pyx_v_x_denominator = __pyx_t_9;
   __pyx_t_9 = 0;
 
-  /* "decimalfp/_cdecimalfp.pyx":1072
+  /* "decimalfp/_cdecimalfp.pyx":1075
  *     # handle Rational and Real
  *     x_denominator = base10pow(x._precision)
  *     num = x._value * y_denominator + x_denominator * y_numerator             # <<<<<<<<<<<<<<
  *     den = y_denominator * x_denominator
  *     minPrec = x._precision
  */
-  __pyx_t_9 = PyNumber_Multiply(__pyx_v_x->_value, __pyx_v_y_denominator); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 1072, __pyx_L1_error)
+  __pyx_t_9 = PyNumber_Multiply(__pyx_v_x->_value, __pyx_v_y_denominator); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 1075, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_9);
-  __pyx_t_3 = PyNumber_Multiply(__pyx_v_x_denominator, __pyx_v_y_numerator); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1072, __pyx_L1_error)
+  __pyx_t_3 = PyNumber_Multiply(__pyx_v_x_denominator, __pyx_v_y_numerator); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1075, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_4 = PyNumber_Add(__pyx_t_9, __pyx_t_3); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1072, __pyx_L1_error)
+  __pyx_t_4 = PyNumber_Add(__pyx_t_9, __pyx_t_3); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1075, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_v_num = __pyx_t_4;
   __pyx_t_4 = 0;
 
-  /* "decimalfp/_cdecimalfp.pyx":1073
+  /* "decimalfp/_cdecimalfp.pyx":1076
  *     x_denominator = base10pow(x._precision)
  *     num = x._value * y_denominator + x_denominator * y_numerator
  *     den = y_denominator * x_denominator             # <<<<<<<<<<<<<<
  *     minPrec = x._precision
  *     # return num / den as Decimal or as Fraction
  */
-  __pyx_t_4 = PyNumber_Multiply(__pyx_v_y_denominator, __pyx_v_x_denominator); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1073, __pyx_L1_error)
+  __pyx_t_4 = PyNumber_Multiply(__pyx_v_y_denominator, __pyx_v_x_denominator); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1076, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __pyx_v_den = __pyx_t_4;
   __pyx_t_4 = 0;
 
-  /* "decimalfp/_cdecimalfp.pyx":1074
+  /* "decimalfp/_cdecimalfp.pyx":1077
  *     num = x._value * y_denominator + x_denominator * y_numerator
  *     den = y_denominator * x_denominator
  *     minPrec = x._precision             # <<<<<<<<<<<<<<
@@ -16206,7 +16251,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_add(struct __pyx_obj_9decimalf
   __pyx_t_5 = __pyx_v_x->_precision;
   __pyx_v_minPrec = __pyx_t_5;
 
-  /* "decimalfp/_cdecimalfp.pyx":1076
+  /* "decimalfp/_cdecimalfp.pyx":1079
  *     minPrec = x._precision
  *     # return num / den as Decimal or as Fraction
  *     return _div(num, den, minPrec)             # <<<<<<<<<<<<<<
@@ -16214,13 +16259,13 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_add(struct __pyx_obj_9decimalf
  * 
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_4 = __pyx_f_9decimalfp_11_cdecimalfp__div(__pyx_v_num, __pyx_v_den, __pyx_v_minPrec); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1076, __pyx_L1_error)
+  __pyx_t_4 = __pyx_f_9decimalfp_11_cdecimalfp__div(__pyx_v_num, __pyx_v_den, __pyx_v_minPrec); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1079, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __pyx_r = __pyx_t_4;
   __pyx_t_4 = 0;
   goto __pyx_L0;
 
-  /* "decimalfp/_cdecimalfp.pyx":1038
+  /* "decimalfp/_cdecimalfp.pyx":1041
  * 
  * 
  * cdef object add(Decimal x, object y):             # <<<<<<<<<<<<<<
@@ -16249,7 +16294,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_add(struct __pyx_obj_9decimalf
   return __pyx_r;
 }
 
-/* "decimalfp/_cdecimalfp.pyx":1079
+/* "decimalfp/_cdecimalfp.pyx":1082
  * 
  * 
  * cdef object sub(Decimal x, object y):             # <<<<<<<<<<<<<<
@@ -16282,7 +16327,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_sub(struct __pyx_obj_9decimalf
   PyObject *__pyx_t_12 = NULL;
   __Pyx_RefNannySetupContext("sub", 0);
 
-  /* "decimalfp/_cdecimalfp.pyx":1083
+  /* "decimalfp/_cdecimalfp.pyx":1086
  *     cdef int p
  *     cdef Decimal result
  *     if isinstance(y, Decimal):             # <<<<<<<<<<<<<<
@@ -16293,7 +16338,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_sub(struct __pyx_obj_9decimalf
   __pyx_t_2 = (__pyx_t_1 != 0);
   if (__pyx_t_2) {
 
-    /* "decimalfp/_cdecimalfp.pyx":1084
+    /* "decimalfp/_cdecimalfp.pyx":1087
  *     cdef Decimal result
  *     if isinstance(y, Decimal):
  *         p = x._precision - (<Decimal>y)._precision             # <<<<<<<<<<<<<<
@@ -16302,7 +16347,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_sub(struct __pyx_obj_9decimalf
  */
     __pyx_v_p = (__pyx_v_x->_precision - ((struct __pyx_obj_9decimalfp_11_cdecimalfp_Decimal *)__pyx_v_y)->_precision);
 
-    /* "decimalfp/_cdecimalfp.pyx":1085
+    /* "decimalfp/_cdecimalfp.pyx":1088
  *     if isinstance(y, Decimal):
  *         p = x._precision - (<Decimal>y)._precision
  *         if p == 0:             # <<<<<<<<<<<<<<
@@ -16312,26 +16357,26 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_sub(struct __pyx_obj_9decimalf
     __pyx_t_2 = ((__pyx_v_p == 0) != 0);
     if (__pyx_t_2) {
 
-      /* "decimalfp/_cdecimalfp.pyx":1086
+      /* "decimalfp/_cdecimalfp.pyx":1089
  *         p = x._precision - (<Decimal>y)._precision
  *         if p == 0:
  *             result = Decimal(x)             # <<<<<<<<<<<<<<
  *             result._value -= (<Decimal>y)._value
  *         elif p > 0:
  */
-      __pyx_t_3 = __Pyx_PyObject_CallOneArg(((PyObject *)__pyx_ptype_9decimalfp_11_cdecimalfp_Decimal), ((PyObject *)__pyx_v_x)); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1086, __pyx_L1_error)
+      __pyx_t_3 = __Pyx_PyObject_CallOneArg(((PyObject *)__pyx_ptype_9decimalfp_11_cdecimalfp_Decimal), ((PyObject *)__pyx_v_x)); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1089, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
       __pyx_v_result = ((struct __pyx_obj_9decimalfp_11_cdecimalfp_Decimal *)__pyx_t_3);
       __pyx_t_3 = 0;
 
-      /* "decimalfp/_cdecimalfp.pyx":1087
+      /* "decimalfp/_cdecimalfp.pyx":1090
  *         if p == 0:
  *             result = Decimal(x)
  *             result._value -= (<Decimal>y)._value             # <<<<<<<<<<<<<<
  *         elif p > 0:
  *             result = Decimal(x)
  */
-      __pyx_t_3 = PyNumber_InPlaceSubtract(__pyx_v_result->_value, ((struct __pyx_obj_9decimalfp_11_cdecimalfp_Decimal *)__pyx_v_y)->_value); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1087, __pyx_L1_error)
+      __pyx_t_3 = PyNumber_InPlaceSubtract(__pyx_v_result->_value, ((struct __pyx_obj_9decimalfp_11_cdecimalfp_Decimal *)__pyx_v_y)->_value); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1090, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
       __Pyx_GIVEREF(__pyx_t_3);
       __Pyx_GOTREF(__pyx_v_result->_value);
@@ -16339,7 +16384,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_sub(struct __pyx_obj_9decimalf
       __pyx_v_result->_value = __pyx_t_3;
       __pyx_t_3 = 0;
 
-      /* "decimalfp/_cdecimalfp.pyx":1085
+      /* "decimalfp/_cdecimalfp.pyx":1088
  *     if isinstance(y, Decimal):
  *         p = x._precision - (<Decimal>y)._precision
  *         if p == 0:             # <<<<<<<<<<<<<<
@@ -16349,7 +16394,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_sub(struct __pyx_obj_9decimalf
       goto __pyx_L4;
     }
 
-    /* "decimalfp/_cdecimalfp.pyx":1088
+    /* "decimalfp/_cdecimalfp.pyx":1091
  *             result = Decimal(x)
  *             result._value -= (<Decimal>y)._value
  *         elif p > 0:             # <<<<<<<<<<<<<<
@@ -16359,31 +16404,31 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_sub(struct __pyx_obj_9decimalf
     __pyx_t_2 = ((__pyx_v_p > 0) != 0);
     if (__pyx_t_2) {
 
-      /* "decimalfp/_cdecimalfp.pyx":1089
+      /* "decimalfp/_cdecimalfp.pyx":1092
  *             result._value -= (<Decimal>y)._value
  *         elif p > 0:
  *             result = Decimal(x)             # <<<<<<<<<<<<<<
  *             result._value -= (<Decimal>y)._value * base10pow(p)
  *         else:
  */
-      __pyx_t_3 = __Pyx_PyObject_CallOneArg(((PyObject *)__pyx_ptype_9decimalfp_11_cdecimalfp_Decimal), ((PyObject *)__pyx_v_x)); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1089, __pyx_L1_error)
+      __pyx_t_3 = __Pyx_PyObject_CallOneArg(((PyObject *)__pyx_ptype_9decimalfp_11_cdecimalfp_Decimal), ((PyObject *)__pyx_v_x)); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1092, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
       __pyx_v_result = ((struct __pyx_obj_9decimalfp_11_cdecimalfp_Decimal *)__pyx_t_3);
       __pyx_t_3 = 0;
 
-      /* "decimalfp/_cdecimalfp.pyx":1090
+      /* "decimalfp/_cdecimalfp.pyx":1093
  *         elif p > 0:
  *             result = Decimal(x)
  *             result._value -= (<Decimal>y)._value * base10pow(p)             # <<<<<<<<<<<<<<
  *         else:
  *             result = Decimal(y)
  */
-      __pyx_t_3 = __pyx_f_9decimalfp_11_cdecimalfp_base10pow(__pyx_v_p); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1090, __pyx_L1_error)
+      __pyx_t_3 = __pyx_f_9decimalfp_11_cdecimalfp_base10pow(__pyx_v_p); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1093, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
-      __pyx_t_4 = PyNumber_Multiply(((struct __pyx_obj_9decimalfp_11_cdecimalfp_Decimal *)__pyx_v_y)->_value, __pyx_t_3); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1090, __pyx_L1_error)
+      __pyx_t_4 = PyNumber_Multiply(((struct __pyx_obj_9decimalfp_11_cdecimalfp_Decimal *)__pyx_v_y)->_value, __pyx_t_3); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1093, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_4);
       __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-      __pyx_t_3 = PyNumber_InPlaceSubtract(__pyx_v_result->_value, __pyx_t_4); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1090, __pyx_L1_error)
+      __pyx_t_3 = PyNumber_InPlaceSubtract(__pyx_v_result->_value, __pyx_t_4); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1093, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
       __Pyx_GIVEREF(__pyx_t_3);
@@ -16392,7 +16437,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_sub(struct __pyx_obj_9decimalf
       __pyx_v_result->_value = __pyx_t_3;
       __pyx_t_3 = 0;
 
-      /* "decimalfp/_cdecimalfp.pyx":1088
+      /* "decimalfp/_cdecimalfp.pyx":1091
  *             result = Decimal(x)
  *             result._value -= (<Decimal>y)._value
  *         elif p > 0:             # <<<<<<<<<<<<<<
@@ -16402,7 +16447,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_sub(struct __pyx_obj_9decimalf
       goto __pyx_L4;
     }
 
-    /* "decimalfp/_cdecimalfp.pyx":1092
+    /* "decimalfp/_cdecimalfp.pyx":1095
  *             result._value -= (<Decimal>y)._value * base10pow(p)
  *         else:
  *             result = Decimal(y)             # <<<<<<<<<<<<<<
@@ -16410,24 +16455,24 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_sub(struct __pyx_obj_9decimalf
  *         return result
  */
     /*else*/ {
-      __pyx_t_3 = __Pyx_PyObject_CallOneArg(((PyObject *)__pyx_ptype_9decimalfp_11_cdecimalfp_Decimal), __pyx_v_y); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1092, __pyx_L1_error)
+      __pyx_t_3 = __Pyx_PyObject_CallOneArg(((PyObject *)__pyx_ptype_9decimalfp_11_cdecimalfp_Decimal), __pyx_v_y); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1095, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
       __pyx_v_result = ((struct __pyx_obj_9decimalfp_11_cdecimalfp_Decimal *)__pyx_t_3);
       __pyx_t_3 = 0;
 
-      /* "decimalfp/_cdecimalfp.pyx":1093
+      /* "decimalfp/_cdecimalfp.pyx":1096
  *         else:
  *             result = Decimal(y)
  *             result._value = x._value * base10pow(-p) - (<Decimal>y)._value             # <<<<<<<<<<<<<<
  *         return result
  *     elif isinstance(y, Integral):
  */
-      __pyx_t_3 = __pyx_f_9decimalfp_11_cdecimalfp_base10pow((-__pyx_v_p)); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1093, __pyx_L1_error)
+      __pyx_t_3 = __pyx_f_9decimalfp_11_cdecimalfp_base10pow((-__pyx_v_p)); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1096, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
-      __pyx_t_4 = PyNumber_Multiply(__pyx_v_x->_value, __pyx_t_3); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1093, __pyx_L1_error)
+      __pyx_t_4 = PyNumber_Multiply(__pyx_v_x->_value, __pyx_t_3); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1096, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_4);
       __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-      __pyx_t_3 = PyNumber_Subtract(__pyx_t_4, ((struct __pyx_obj_9decimalfp_11_cdecimalfp_Decimal *)__pyx_v_y)->_value); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1093, __pyx_L1_error)
+      __pyx_t_3 = PyNumber_Subtract(__pyx_t_4, ((struct __pyx_obj_9decimalfp_11_cdecimalfp_Decimal *)__pyx_v_y)->_value); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1096, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
       __Pyx_GIVEREF(__pyx_t_3);
@@ -16438,7 +16483,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_sub(struct __pyx_obj_9decimalf
     }
     __pyx_L4:;
 
-    /* "decimalfp/_cdecimalfp.pyx":1094
+    /* "decimalfp/_cdecimalfp.pyx":1097
  *             result = Decimal(y)
  *             result._value = x._value * base10pow(-p) - (<Decimal>y)._value
  *         return result             # <<<<<<<<<<<<<<
@@ -16450,7 +16495,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_sub(struct __pyx_obj_9decimalf
     __pyx_r = ((PyObject *)__pyx_v_result);
     goto __pyx_L0;
 
-    /* "decimalfp/_cdecimalfp.pyx":1083
+    /* "decimalfp/_cdecimalfp.pyx":1086
  *     cdef int p
  *     cdef Decimal result
  *     if isinstance(y, Decimal):             # <<<<<<<<<<<<<<
@@ -16459,21 +16504,21 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_sub(struct __pyx_obj_9decimalf
  */
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":1095
+  /* "decimalfp/_cdecimalfp.pyx":1098
  *             result._value = x._value * base10pow(-p) - (<Decimal>y)._value
  *         return result
  *     elif isinstance(y, Integral):             # <<<<<<<<<<<<<<
  *         p = x._precision
  *         result = Decimal(x)
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_Integral); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1095, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_Integral); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1098, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = PyObject_IsInstance(__pyx_v_y, __pyx_t_3); if (unlikely(__pyx_t_2 == ((int)-1))) __PYX_ERR(0, 1095, __pyx_L1_error)
+  __pyx_t_2 = PyObject_IsInstance(__pyx_v_y, __pyx_t_3); if (unlikely(__pyx_t_2 == ((int)-1))) __PYX_ERR(0, 1098, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_1 = (__pyx_t_2 != 0);
   if (__pyx_t_1) {
 
-    /* "decimalfp/_cdecimalfp.pyx":1096
+    /* "decimalfp/_cdecimalfp.pyx":1099
  *         return result
  *     elif isinstance(y, Integral):
  *         p = x._precision             # <<<<<<<<<<<<<<
@@ -16483,31 +16528,31 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_sub(struct __pyx_obj_9decimalf
     __pyx_t_5 = __pyx_v_x->_precision;
     __pyx_v_p = __pyx_t_5;
 
-    /* "decimalfp/_cdecimalfp.pyx":1097
+    /* "decimalfp/_cdecimalfp.pyx":1100
  *     elif isinstance(y, Integral):
  *         p = x._precision
  *         result = Decimal(x)             # <<<<<<<<<<<<<<
  *         result._value -= y * base10pow(p)
  *         return result
  */
-    __pyx_t_3 = __Pyx_PyObject_CallOneArg(((PyObject *)__pyx_ptype_9decimalfp_11_cdecimalfp_Decimal), ((PyObject *)__pyx_v_x)); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1097, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyObject_CallOneArg(((PyObject *)__pyx_ptype_9decimalfp_11_cdecimalfp_Decimal), ((PyObject *)__pyx_v_x)); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1100, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __pyx_v_result = ((struct __pyx_obj_9decimalfp_11_cdecimalfp_Decimal *)__pyx_t_3);
     __pyx_t_3 = 0;
 
-    /* "decimalfp/_cdecimalfp.pyx":1098
+    /* "decimalfp/_cdecimalfp.pyx":1101
  *         p = x._precision
  *         result = Decimal(x)
  *         result._value -= y * base10pow(p)             # <<<<<<<<<<<<<<
  *         return result
  *     elif isinstance(y, Rational):
  */
-    __pyx_t_3 = __pyx_f_9decimalfp_11_cdecimalfp_base10pow(__pyx_v_p); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1098, __pyx_L1_error)
+    __pyx_t_3 = __pyx_f_9decimalfp_11_cdecimalfp_base10pow(__pyx_v_p); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1101, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_4 = PyNumber_Multiply(__pyx_v_y, __pyx_t_3); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1098, __pyx_L1_error)
+    __pyx_t_4 = PyNumber_Multiply(__pyx_v_y, __pyx_t_3); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1101, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    __pyx_t_3 = PyNumber_InPlaceSubtract(__pyx_v_result->_value, __pyx_t_4); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1098, __pyx_L1_error)
+    __pyx_t_3 = PyNumber_InPlaceSubtract(__pyx_v_result->_value, __pyx_t_4); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1101, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     __Pyx_GIVEREF(__pyx_t_3);
@@ -16516,7 +16561,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_sub(struct __pyx_obj_9decimalf
     __pyx_v_result->_value = __pyx_t_3;
     __pyx_t_3 = 0;
 
-    /* "decimalfp/_cdecimalfp.pyx":1099
+    /* "decimalfp/_cdecimalfp.pyx":1102
  *         result = Decimal(x)
  *         result._value -= y * base10pow(p)
  *         return result             # <<<<<<<<<<<<<<
@@ -16528,7 +16573,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_sub(struct __pyx_obj_9decimalf
     __pyx_r = ((PyObject *)__pyx_v_result);
     goto __pyx_L0;
 
-    /* "decimalfp/_cdecimalfp.pyx":1095
+    /* "decimalfp/_cdecimalfp.pyx":1098
  *             result._value = x._value * base10pow(-p) - (<Decimal>y)._value
  *         return result
  *     elif isinstance(y, Integral):             # <<<<<<<<<<<<<<
@@ -16537,37 +16582,37 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_sub(struct __pyx_obj_9decimalf
  */
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":1100
+  /* "decimalfp/_cdecimalfp.pyx":1103
  *         result._value -= y * base10pow(p)
  *         return result
  *     elif isinstance(y, Rational):             # <<<<<<<<<<<<<<
  *         y_numerator, y_denominator = (y.numerator, y.denominator)
  *     elif isinstance(y, Real):
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_Rational); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1100, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_Rational); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1103, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_1 = PyObject_IsInstance(__pyx_v_y, __pyx_t_3); if (unlikely(__pyx_t_1 == ((int)-1))) __PYX_ERR(0, 1100, __pyx_L1_error)
+  __pyx_t_1 = PyObject_IsInstance(__pyx_v_y, __pyx_t_3); if (unlikely(__pyx_t_1 == ((int)-1))) __PYX_ERR(0, 1103, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_2 = (__pyx_t_1 != 0);
   if (__pyx_t_2) {
 
-    /* "decimalfp/_cdecimalfp.pyx":1101
+    /* "decimalfp/_cdecimalfp.pyx":1104
  *         return result
  *     elif isinstance(y, Rational):
  *         y_numerator, y_denominator = (y.numerator, y.denominator)             # <<<<<<<<<<<<<<
  *     elif isinstance(y, Real):
  *         try:
  */
-    __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_y, __pyx_n_s_numerator); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1101, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_y, __pyx_n_s_numerator); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1104, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_y, __pyx_n_s_denominator); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1101, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_y, __pyx_n_s_denominator); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1104, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     __pyx_v_y_numerator = __pyx_t_3;
     __pyx_t_3 = 0;
     __pyx_v_y_denominator = __pyx_t_4;
     __pyx_t_4 = 0;
 
-    /* "decimalfp/_cdecimalfp.pyx":1100
+    /* "decimalfp/_cdecimalfp.pyx":1103
  *         result._value -= y * base10pow(p)
  *         return result
  *     elif isinstance(y, Rational):             # <<<<<<<<<<<<<<
@@ -16577,21 +16622,21 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_sub(struct __pyx_obj_9decimalf
     goto __pyx_L3;
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":1102
+  /* "decimalfp/_cdecimalfp.pyx":1105
  *     elif isinstance(y, Rational):
  *         y_numerator, y_denominator = (y.numerator, y.denominator)
  *     elif isinstance(y, Real):             # <<<<<<<<<<<<<<
  *         try:
  *             y_numerator, y_denominator = y.as_integer_ratio()
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_Real); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1102, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_Real); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1105, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_2 = PyObject_IsInstance(__pyx_v_y, __pyx_t_4); if (unlikely(__pyx_t_2 == ((int)-1))) __PYX_ERR(0, 1102, __pyx_L1_error)
+  __pyx_t_2 = PyObject_IsInstance(__pyx_v_y, __pyx_t_4); if (unlikely(__pyx_t_2 == ((int)-1))) __PYX_ERR(0, 1105, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __pyx_t_1 = (__pyx_t_2 != 0);
   if (__pyx_t_1) {
 
-    /* "decimalfp/_cdecimalfp.pyx":1103
+    /* "decimalfp/_cdecimalfp.pyx":1106
  *         y_numerator, y_denominator = (y.numerator, y.denominator)
  *     elif isinstance(y, Real):
  *         try:             # <<<<<<<<<<<<<<
@@ -16607,14 +16652,14 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_sub(struct __pyx_obj_9decimalf
       __Pyx_XGOTREF(__pyx_t_8);
       /*try:*/ {
 
-        /* "decimalfp/_cdecimalfp.pyx":1104
+        /* "decimalfp/_cdecimalfp.pyx":1107
  *     elif isinstance(y, Real):
  *         try:
  *             y_numerator, y_denominator = y.as_integer_ratio()             # <<<<<<<<<<<<<<
  *         except (ValueError, OverflowError, AttributeError):
  *             raise ValueError("Unsupported operand: %s" % repr(y))
  */
-        __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_y, __pyx_n_s_as_integer_ratio); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1104, __pyx_L5_error)
+        __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_y, __pyx_n_s_as_integer_ratio); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1107, __pyx_L5_error)
         __Pyx_GOTREF(__pyx_t_3);
         __pyx_t_9 = NULL;
         if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_3))) {
@@ -16628,7 +16673,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_sub(struct __pyx_obj_9decimalf
         }
         __pyx_t_4 = (__pyx_t_9) ? __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_9) : __Pyx_PyObject_CallNoArg(__pyx_t_3);
         __Pyx_XDECREF(__pyx_t_9); __pyx_t_9 = 0;
-        if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1104, __pyx_L5_error)
+        if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1107, __pyx_L5_error)
         __Pyx_GOTREF(__pyx_t_4);
         __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
         if ((likely(PyTuple_CheckExact(__pyx_t_4))) || (PyList_CheckExact(__pyx_t_4))) {
@@ -16637,7 +16682,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_sub(struct __pyx_obj_9decimalf
           if (unlikely(size != 2)) {
             if (size > 2) __Pyx_RaiseTooManyValuesError(2);
             else if (size >= 0) __Pyx_RaiseNeedMoreValuesError(size);
-            __PYX_ERR(0, 1104, __pyx_L5_error)
+            __PYX_ERR(0, 1107, __pyx_L5_error)
           }
           #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
           if (likely(PyTuple_CheckExact(sequence))) {
@@ -16650,15 +16695,15 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_sub(struct __pyx_obj_9decimalf
           __Pyx_INCREF(__pyx_t_3);
           __Pyx_INCREF(__pyx_t_9);
           #else
-          __pyx_t_3 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1104, __pyx_L5_error)
+          __pyx_t_3 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1107, __pyx_L5_error)
           __Pyx_GOTREF(__pyx_t_3);
-          __pyx_t_9 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 1104, __pyx_L5_error)
+          __pyx_t_9 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 1107, __pyx_L5_error)
           __Pyx_GOTREF(__pyx_t_9);
           #endif
           __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
         } else {
           Py_ssize_t index = -1;
-          __pyx_t_10 = PyObject_GetIter(__pyx_t_4); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 1104, __pyx_L5_error)
+          __pyx_t_10 = PyObject_GetIter(__pyx_t_4); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 1107, __pyx_L5_error)
           __Pyx_GOTREF(__pyx_t_10);
           __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
           __pyx_t_11 = Py_TYPE(__pyx_t_10)->tp_iternext;
@@ -16666,7 +16711,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_sub(struct __pyx_obj_9decimalf
           __Pyx_GOTREF(__pyx_t_3);
           index = 1; __pyx_t_9 = __pyx_t_11(__pyx_t_10); if (unlikely(!__pyx_t_9)) goto __pyx_L11_unpacking_failed;
           __Pyx_GOTREF(__pyx_t_9);
-          if (__Pyx_IternextUnpackEndCheck(__pyx_t_11(__pyx_t_10), 2) < 0) __PYX_ERR(0, 1104, __pyx_L5_error)
+          if (__Pyx_IternextUnpackEndCheck(__pyx_t_11(__pyx_t_10), 2) < 0) __PYX_ERR(0, 1107, __pyx_L5_error)
           __pyx_t_11 = NULL;
           __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
           goto __pyx_L12_unpacking_done;
@@ -16674,7 +16719,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_sub(struct __pyx_obj_9decimalf
           __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
           __pyx_t_11 = NULL;
           if (__Pyx_IterFinish() == 0) __Pyx_RaiseNeedMoreValuesError(index);
-          __PYX_ERR(0, 1104, __pyx_L5_error)
+          __PYX_ERR(0, 1107, __pyx_L5_error)
           __pyx_L12_unpacking_done:;
         }
         __pyx_v_y_numerator = __pyx_t_3;
@@ -16682,7 +16727,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_sub(struct __pyx_obj_9decimalf
         __pyx_v_y_denominator = __pyx_t_9;
         __pyx_t_9 = 0;
 
-        /* "decimalfp/_cdecimalfp.pyx":1103
+        /* "decimalfp/_cdecimalfp.pyx":1106
  *         y_numerator, y_denominator = (y.numerator, y.denominator)
  *     elif isinstance(y, Real):
  *         try:             # <<<<<<<<<<<<<<
@@ -16700,7 +16745,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_sub(struct __pyx_obj_9decimalf
       __Pyx_XDECREF(__pyx_t_9); __pyx_t_9 = 0;
       __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-      /* "decimalfp/_cdecimalfp.pyx":1105
+      /* "decimalfp/_cdecimalfp.pyx":1108
  *         try:
  *             y_numerator, y_denominator = y.as_integer_ratio()
  *         except (ValueError, OverflowError, AttributeError):             # <<<<<<<<<<<<<<
@@ -16710,34 +16755,34 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_sub(struct __pyx_obj_9decimalf
       __pyx_t_5 = __Pyx_PyErr_ExceptionMatches(__pyx_builtin_ValueError) || __Pyx_PyErr_ExceptionMatches(__pyx_builtin_OverflowError) || __Pyx_PyErr_ExceptionMatches(__pyx_builtin_AttributeError);
       if (__pyx_t_5) {
         __Pyx_AddTraceback("decimalfp._cdecimalfp.sub", __pyx_clineno, __pyx_lineno, __pyx_filename);
-        if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_9, &__pyx_t_3) < 0) __PYX_ERR(0, 1105, __pyx_L7_except_error)
+        if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_9, &__pyx_t_3) < 0) __PYX_ERR(0, 1108, __pyx_L7_except_error)
         __Pyx_GOTREF(__pyx_t_4);
         __Pyx_GOTREF(__pyx_t_9);
         __Pyx_GOTREF(__pyx_t_3);
 
-        /* "decimalfp/_cdecimalfp.pyx":1106
+        /* "decimalfp/_cdecimalfp.pyx":1109
  *             y_numerator, y_denominator = y.as_integer_ratio()
  *         except (ValueError, OverflowError, AttributeError):
  *             raise ValueError("Unsupported operand: %s" % repr(y))             # <<<<<<<<<<<<<<
  *     elif isinstance(y, _StdLibDecimal):
  *         return sub(x, Decimal(y))
  */
-        __pyx_t_10 = PyObject_Repr(__pyx_v_y); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 1106, __pyx_L7_except_error)
+        __pyx_t_10 = PyObject_Repr(__pyx_v_y); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 1109, __pyx_L7_except_error)
         __Pyx_GOTREF(__pyx_t_10);
-        __pyx_t_12 = __Pyx_PyString_Format(__pyx_kp_s_Unsupported_operand_s, __pyx_t_10); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 1106, __pyx_L7_except_error)
+        __pyx_t_12 = __Pyx_PyString_Format(__pyx_kp_s_Unsupported_operand_s, __pyx_t_10); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 1109, __pyx_L7_except_error)
         __Pyx_GOTREF(__pyx_t_12);
         __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
-        __pyx_t_10 = __Pyx_PyObject_CallOneArg(__pyx_builtin_ValueError, __pyx_t_12); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 1106, __pyx_L7_except_error)
+        __pyx_t_10 = __Pyx_PyObject_CallOneArg(__pyx_builtin_ValueError, __pyx_t_12); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 1109, __pyx_L7_except_error)
         __Pyx_GOTREF(__pyx_t_10);
         __Pyx_DECREF(__pyx_t_12); __pyx_t_12 = 0;
         __Pyx_Raise(__pyx_t_10, 0, 0, 0);
         __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
-        __PYX_ERR(0, 1106, __pyx_L7_except_error)
+        __PYX_ERR(0, 1109, __pyx_L7_except_error)
       }
       goto __pyx_L7_except_error;
       __pyx_L7_except_error:;
 
-      /* "decimalfp/_cdecimalfp.pyx":1103
+      /* "decimalfp/_cdecimalfp.pyx":1106
  *         y_numerator, y_denominator = (y.numerator, y.denominator)
  *     elif isinstance(y, Real):
  *         try:             # <<<<<<<<<<<<<<
@@ -16752,7 +16797,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_sub(struct __pyx_obj_9decimalf
       __pyx_L10_try_end:;
     }
 
-    /* "decimalfp/_cdecimalfp.pyx":1102
+    /* "decimalfp/_cdecimalfp.pyx":1105
  *     elif isinstance(y, Rational):
  *         y_numerator, y_denominator = (y.numerator, y.denominator)
  *     elif isinstance(y, Real):             # <<<<<<<<<<<<<<
@@ -16762,21 +16807,21 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_sub(struct __pyx_obj_9decimalf
     goto __pyx_L3;
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":1107
+  /* "decimalfp/_cdecimalfp.pyx":1110
  *         except (ValueError, OverflowError, AttributeError):
  *             raise ValueError("Unsupported operand: %s" % repr(y))
  *     elif isinstance(y, _StdLibDecimal):             # <<<<<<<<<<<<<<
  *         return sub(x, Decimal(y))
  *     else:
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_StdLibDecimal); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1107, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_StdLibDecimal); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1110, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_1 = PyObject_IsInstance(__pyx_v_y, __pyx_t_3); if (unlikely(__pyx_t_1 == ((int)-1))) __PYX_ERR(0, 1107, __pyx_L1_error)
+  __pyx_t_1 = PyObject_IsInstance(__pyx_v_y, __pyx_t_3); if (unlikely(__pyx_t_1 == ((int)-1))) __PYX_ERR(0, 1110, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_2 = (__pyx_t_1 != 0);
   if (__pyx_t_2) {
 
-    /* "decimalfp/_cdecimalfp.pyx":1108
+    /* "decimalfp/_cdecimalfp.pyx":1111
  *             raise ValueError("Unsupported operand: %s" % repr(y))
  *     elif isinstance(y, _StdLibDecimal):
  *         return sub(x, Decimal(y))             # <<<<<<<<<<<<<<
@@ -16784,16 +16829,16 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_sub(struct __pyx_obj_9decimalf
  *         return NotImplemented
  */
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_3 = __Pyx_PyObject_CallOneArg(((PyObject *)__pyx_ptype_9decimalfp_11_cdecimalfp_Decimal), __pyx_v_y); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1108, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyObject_CallOneArg(((PyObject *)__pyx_ptype_9decimalfp_11_cdecimalfp_Decimal), __pyx_v_y); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1111, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_9 = __pyx_f_9decimalfp_11_cdecimalfp_sub(__pyx_v_x, __pyx_t_3); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 1108, __pyx_L1_error)
+    __pyx_t_9 = __pyx_f_9decimalfp_11_cdecimalfp_sub(__pyx_v_x, __pyx_t_3); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 1111, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_9);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     __pyx_r = __pyx_t_9;
     __pyx_t_9 = 0;
     goto __pyx_L0;
 
-    /* "decimalfp/_cdecimalfp.pyx":1107
+    /* "decimalfp/_cdecimalfp.pyx":1110
  *         except (ValueError, OverflowError, AttributeError):
  *             raise ValueError("Unsupported operand: %s" % repr(y))
  *     elif isinstance(y, _StdLibDecimal):             # <<<<<<<<<<<<<<
@@ -16802,7 +16847,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_sub(struct __pyx_obj_9decimalf
  */
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":1110
+  /* "decimalfp/_cdecimalfp.pyx":1113
  *         return sub(x, Decimal(y))
  *     else:
  *         return NotImplemented             # <<<<<<<<<<<<<<
@@ -16817,49 +16862,49 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_sub(struct __pyx_obj_9decimalf
   }
   __pyx_L3:;
 
-  /* "decimalfp/_cdecimalfp.pyx":1112
+  /* "decimalfp/_cdecimalfp.pyx":1115
  *         return NotImplemented
  *     # handle Rational and Real
  *     x_denominator = base10pow(x._precision)             # <<<<<<<<<<<<<<
  *     num = x._value * y_denominator - x_denominator * y_numerator
  *     den = y_denominator * x_denominator
  */
-  __pyx_t_9 = __pyx_f_9decimalfp_11_cdecimalfp_base10pow(__pyx_v_x->_precision); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 1112, __pyx_L1_error)
+  __pyx_t_9 = __pyx_f_9decimalfp_11_cdecimalfp_base10pow(__pyx_v_x->_precision); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 1115, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_9);
   __pyx_v_x_denominator = __pyx_t_9;
   __pyx_t_9 = 0;
 
-  /* "decimalfp/_cdecimalfp.pyx":1113
+  /* "decimalfp/_cdecimalfp.pyx":1116
  *     # handle Rational and Real
  *     x_denominator = base10pow(x._precision)
  *     num = x._value * y_denominator - x_denominator * y_numerator             # <<<<<<<<<<<<<<
  *     den = y_denominator * x_denominator
  *     minPrec = x._precision
  */
-  __pyx_t_9 = PyNumber_Multiply(__pyx_v_x->_value, __pyx_v_y_denominator); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 1113, __pyx_L1_error)
+  __pyx_t_9 = PyNumber_Multiply(__pyx_v_x->_value, __pyx_v_y_denominator); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 1116, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_9);
-  __pyx_t_3 = PyNumber_Multiply(__pyx_v_x_denominator, __pyx_v_y_numerator); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1113, __pyx_L1_error)
+  __pyx_t_3 = PyNumber_Multiply(__pyx_v_x_denominator, __pyx_v_y_numerator); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1116, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_4 = PyNumber_Subtract(__pyx_t_9, __pyx_t_3); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1113, __pyx_L1_error)
+  __pyx_t_4 = PyNumber_Subtract(__pyx_t_9, __pyx_t_3); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1116, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_v_num = __pyx_t_4;
   __pyx_t_4 = 0;
 
-  /* "decimalfp/_cdecimalfp.pyx":1114
+  /* "decimalfp/_cdecimalfp.pyx":1117
  *     x_denominator = base10pow(x._precision)
  *     num = x._value * y_denominator - x_denominator * y_numerator
  *     den = y_denominator * x_denominator             # <<<<<<<<<<<<<<
  *     minPrec = x._precision
  *     # return num / den as Decimal or as Fraction
  */
-  __pyx_t_4 = PyNumber_Multiply(__pyx_v_y_denominator, __pyx_v_x_denominator); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1114, __pyx_L1_error)
+  __pyx_t_4 = PyNumber_Multiply(__pyx_v_y_denominator, __pyx_v_x_denominator); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1117, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __pyx_v_den = __pyx_t_4;
   __pyx_t_4 = 0;
 
-  /* "decimalfp/_cdecimalfp.pyx":1115
+  /* "decimalfp/_cdecimalfp.pyx":1118
  *     num = x._value * y_denominator - x_denominator * y_numerator
  *     den = y_denominator * x_denominator
  *     minPrec = x._precision             # <<<<<<<<<<<<<<
@@ -16869,7 +16914,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_sub(struct __pyx_obj_9decimalf
   __pyx_t_5 = __pyx_v_x->_precision;
   __pyx_v_minPrec = __pyx_t_5;
 
-  /* "decimalfp/_cdecimalfp.pyx":1117
+  /* "decimalfp/_cdecimalfp.pyx":1120
  *     minPrec = x._precision
  *     # return num / den as Decimal or as Fraction
  *     return _div(num, den, minPrec)             # <<<<<<<<<<<<<<
@@ -16877,13 +16922,13 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_sub(struct __pyx_obj_9decimalf
  * 
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_4 = __pyx_f_9decimalfp_11_cdecimalfp__div(__pyx_v_num, __pyx_v_den, __pyx_v_minPrec); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1117, __pyx_L1_error)
+  __pyx_t_4 = __pyx_f_9decimalfp_11_cdecimalfp__div(__pyx_v_num, __pyx_v_den, __pyx_v_minPrec); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1120, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __pyx_r = __pyx_t_4;
   __pyx_t_4 = 0;
   goto __pyx_L0;
 
-  /* "decimalfp/_cdecimalfp.pyx":1079
+  /* "decimalfp/_cdecimalfp.pyx":1082
  * 
  * 
  * cdef object sub(Decimal x, object y):             # <<<<<<<<<<<<<<
@@ -16912,7 +16957,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_sub(struct __pyx_obj_9decimalf
   return __pyx_r;
 }
 
-/* "decimalfp/_cdecimalfp.pyx":1120
+/* "decimalfp/_cdecimalfp.pyx":1123
  * 
  * 
  * cdef object mul(Decimal x, object y):             # <<<<<<<<<<<<<<
@@ -16944,7 +16989,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_mul(struct __pyx_obj_9decimalf
   PyObject *__pyx_t_13 = NULL;
   __Pyx_RefNannySetupContext("mul", 0);
 
-  /* "decimalfp/_cdecimalfp.pyx":1122
+  /* "decimalfp/_cdecimalfp.pyx":1125
  * cdef object mul(Decimal x, object y):
  *     """x * y"""
  *     if isinstance(y, Decimal):             # <<<<<<<<<<<<<<
@@ -16955,19 +17000,19 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_mul(struct __pyx_obj_9decimalf
   __pyx_t_2 = (__pyx_t_1 != 0);
   if (__pyx_t_2) {
 
-    /* "decimalfp/_cdecimalfp.pyx":1123
+    /* "decimalfp/_cdecimalfp.pyx":1126
  *     """x * y"""
  *     if isinstance(y, Decimal):
  *         result = Decimal(x)             # <<<<<<<<<<<<<<
  *         (<Decimal>result)._value *= (<Decimal>y)._value
  *         (<Decimal>result)._precision += (<Decimal>y)._precision
  */
-    __pyx_t_3 = __Pyx_PyObject_CallOneArg(((PyObject *)__pyx_ptype_9decimalfp_11_cdecimalfp_Decimal), ((PyObject *)__pyx_v_x)); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1123, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyObject_CallOneArg(((PyObject *)__pyx_ptype_9decimalfp_11_cdecimalfp_Decimal), ((PyObject *)__pyx_v_x)); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1126, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __pyx_v_result = ((struct __pyx_obj_9decimalfp_11_cdecimalfp_Decimal *)__pyx_t_3);
     __pyx_t_3 = 0;
 
-    /* "decimalfp/_cdecimalfp.pyx":1124
+    /* "decimalfp/_cdecimalfp.pyx":1127
  *     if isinstance(y, Decimal):
  *         result = Decimal(x)
  *         (<Decimal>result)._value *= (<Decimal>y)._value             # <<<<<<<<<<<<<<
@@ -16976,7 +17021,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_mul(struct __pyx_obj_9decimalf
  */
     __Pyx_INCREF(((PyObject *)((struct __pyx_obj_9decimalfp_11_cdecimalfp_Decimal *)__pyx_v_result)));
     __pyx_t_4 = ((struct __pyx_obj_9decimalfp_11_cdecimalfp_Decimal *)__pyx_v_result);
-    __pyx_t_3 = PyNumber_InPlaceMultiply(__pyx_t_4->_value, ((struct __pyx_obj_9decimalfp_11_cdecimalfp_Decimal *)__pyx_v_y)->_value); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1124, __pyx_L1_error)
+    __pyx_t_3 = PyNumber_InPlaceMultiply(__pyx_t_4->_value, ((struct __pyx_obj_9decimalfp_11_cdecimalfp_Decimal *)__pyx_v_y)->_value); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1127, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_GIVEREF(__pyx_t_3);
     __Pyx_GOTREF(__pyx_t_4->_value);
@@ -16985,7 +17030,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_mul(struct __pyx_obj_9decimalf
     __pyx_t_3 = 0;
     __Pyx_DECREF(((PyObject *)__pyx_t_4)); __pyx_t_4 = 0;
 
-    /* "decimalfp/_cdecimalfp.pyx":1125
+    /* "decimalfp/_cdecimalfp.pyx":1128
  *         result = Decimal(x)
  *         (<Decimal>result)._value *= (<Decimal>y)._value
  *         (<Decimal>result)._precision += (<Decimal>y)._precision             # <<<<<<<<<<<<<<
@@ -16997,7 +17042,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_mul(struct __pyx_obj_9decimalf
     __pyx_t_4->_precision = (__pyx_t_4->_precision + ((struct __pyx_obj_9decimalfp_11_cdecimalfp_Decimal *)__pyx_v_y)->_precision);
     __Pyx_DECREF(((PyObject *)__pyx_t_4)); __pyx_t_4 = 0;
 
-    /* "decimalfp/_cdecimalfp.pyx":1126
+    /* "decimalfp/_cdecimalfp.pyx":1129
  *         (<Decimal>result)._value *= (<Decimal>y)._value
  *         (<Decimal>result)._precision += (<Decimal>y)._precision
  *         return result             # <<<<<<<<<<<<<<
@@ -17009,7 +17054,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_mul(struct __pyx_obj_9decimalf
     __pyx_r = ((PyObject *)__pyx_v_result);
     goto __pyx_L0;
 
-    /* "decimalfp/_cdecimalfp.pyx":1122
+    /* "decimalfp/_cdecimalfp.pyx":1125
  * cdef object mul(Decimal x, object y):
  *     """x * y"""
  *     if isinstance(y, Decimal):             # <<<<<<<<<<<<<<
@@ -17018,33 +17063,33 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_mul(struct __pyx_obj_9decimalf
  */
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":1127
+  /* "decimalfp/_cdecimalfp.pyx":1130
  *         (<Decimal>result)._precision += (<Decimal>y)._precision
  *         return result
  *     elif isinstance(y, Integral):             # <<<<<<<<<<<<<<
  *         result = Decimal(x)
  *         (<Decimal>result)._value *= y
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_Integral); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1127, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_Integral); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1130, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = PyObject_IsInstance(__pyx_v_y, __pyx_t_3); if (unlikely(__pyx_t_2 == ((int)-1))) __PYX_ERR(0, 1127, __pyx_L1_error)
+  __pyx_t_2 = PyObject_IsInstance(__pyx_v_y, __pyx_t_3); if (unlikely(__pyx_t_2 == ((int)-1))) __PYX_ERR(0, 1130, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_1 = (__pyx_t_2 != 0);
   if (__pyx_t_1) {
 
-    /* "decimalfp/_cdecimalfp.pyx":1128
+    /* "decimalfp/_cdecimalfp.pyx":1131
  *         return result
  *     elif isinstance(y, Integral):
  *         result = Decimal(x)             # <<<<<<<<<<<<<<
  *         (<Decimal>result)._value *= y
  *         return result
  */
-    __pyx_t_3 = __Pyx_PyObject_CallOneArg(((PyObject *)__pyx_ptype_9decimalfp_11_cdecimalfp_Decimal), ((PyObject *)__pyx_v_x)); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1128, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyObject_CallOneArg(((PyObject *)__pyx_ptype_9decimalfp_11_cdecimalfp_Decimal), ((PyObject *)__pyx_v_x)); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1131, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __pyx_v_result = ((struct __pyx_obj_9decimalfp_11_cdecimalfp_Decimal *)__pyx_t_3);
     __pyx_t_3 = 0;
 
-    /* "decimalfp/_cdecimalfp.pyx":1129
+    /* "decimalfp/_cdecimalfp.pyx":1132
  *     elif isinstance(y, Integral):
  *         result = Decimal(x)
  *         (<Decimal>result)._value *= y             # <<<<<<<<<<<<<<
@@ -17053,7 +17098,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_mul(struct __pyx_obj_9decimalf
  */
     __Pyx_INCREF(((PyObject *)((struct __pyx_obj_9decimalfp_11_cdecimalfp_Decimal *)__pyx_v_result)));
     __pyx_t_4 = ((struct __pyx_obj_9decimalfp_11_cdecimalfp_Decimal *)__pyx_v_result);
-    __pyx_t_3 = PyNumber_InPlaceMultiply(__pyx_t_4->_value, __pyx_v_y); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1129, __pyx_L1_error)
+    __pyx_t_3 = PyNumber_InPlaceMultiply(__pyx_t_4->_value, __pyx_v_y); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1132, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_GIVEREF(__pyx_t_3);
     __Pyx_GOTREF(__pyx_t_4->_value);
@@ -17062,7 +17107,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_mul(struct __pyx_obj_9decimalf
     __pyx_t_3 = 0;
     __Pyx_DECREF(((PyObject *)__pyx_t_4)); __pyx_t_4 = 0;
 
-    /* "decimalfp/_cdecimalfp.pyx":1130
+    /* "decimalfp/_cdecimalfp.pyx":1133
  *         result = Decimal(x)
  *         (<Decimal>result)._value *= y
  *         return result             # <<<<<<<<<<<<<<
@@ -17074,7 +17119,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_mul(struct __pyx_obj_9decimalf
     __pyx_r = ((PyObject *)__pyx_v_result);
     goto __pyx_L0;
 
-    /* "decimalfp/_cdecimalfp.pyx":1127
+    /* "decimalfp/_cdecimalfp.pyx":1130
  *         (<Decimal>result)._precision += (<Decimal>y)._precision
  *         return result
  *     elif isinstance(y, Integral):             # <<<<<<<<<<<<<<
@@ -17083,37 +17128,37 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_mul(struct __pyx_obj_9decimalf
  */
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":1131
+  /* "decimalfp/_cdecimalfp.pyx":1134
  *         (<Decimal>result)._value *= y
  *         return result
  *     elif isinstance(y, Rational):             # <<<<<<<<<<<<<<
  *         y_numerator, y_denominator = (y.numerator, y.denominator)
  *     elif isinstance(y, Real):
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_Rational); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1131, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_Rational); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1134, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_1 = PyObject_IsInstance(__pyx_v_y, __pyx_t_3); if (unlikely(__pyx_t_1 == ((int)-1))) __PYX_ERR(0, 1131, __pyx_L1_error)
+  __pyx_t_1 = PyObject_IsInstance(__pyx_v_y, __pyx_t_3); if (unlikely(__pyx_t_1 == ((int)-1))) __PYX_ERR(0, 1134, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_2 = (__pyx_t_1 != 0);
   if (__pyx_t_2) {
 
-    /* "decimalfp/_cdecimalfp.pyx":1132
+    /* "decimalfp/_cdecimalfp.pyx":1135
  *         return result
  *     elif isinstance(y, Rational):
  *         y_numerator, y_denominator = (y.numerator, y.denominator)             # <<<<<<<<<<<<<<
  *     elif isinstance(y, Real):
  *         try:
  */
-    __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_y, __pyx_n_s_numerator); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1132, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_y, __pyx_n_s_numerator); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1135, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_v_y, __pyx_n_s_denominator); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1132, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_v_y, __pyx_n_s_denominator); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1135, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     __pyx_v_y_numerator = __pyx_t_3;
     __pyx_t_3 = 0;
     __pyx_v_y_denominator = __pyx_t_5;
     __pyx_t_5 = 0;
 
-    /* "decimalfp/_cdecimalfp.pyx":1131
+    /* "decimalfp/_cdecimalfp.pyx":1134
  *         (<Decimal>result)._value *= y
  *         return result
  *     elif isinstance(y, Rational):             # <<<<<<<<<<<<<<
@@ -17123,21 +17168,21 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_mul(struct __pyx_obj_9decimalf
     goto __pyx_L3;
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":1133
+  /* "decimalfp/_cdecimalfp.pyx":1136
  *     elif isinstance(y, Rational):
  *         y_numerator, y_denominator = (y.numerator, y.denominator)
  *     elif isinstance(y, Real):             # <<<<<<<<<<<<<<
  *         try:
  *             y_numerator, y_denominator = y.as_integer_ratio()
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_5, __pyx_n_s_Real); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1133, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_5, __pyx_n_s_Real); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1136, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_2 = PyObject_IsInstance(__pyx_v_y, __pyx_t_5); if (unlikely(__pyx_t_2 == ((int)-1))) __PYX_ERR(0, 1133, __pyx_L1_error)
+  __pyx_t_2 = PyObject_IsInstance(__pyx_v_y, __pyx_t_5); if (unlikely(__pyx_t_2 == ((int)-1))) __PYX_ERR(0, 1136, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   __pyx_t_1 = (__pyx_t_2 != 0);
   if (__pyx_t_1) {
 
-    /* "decimalfp/_cdecimalfp.pyx":1134
+    /* "decimalfp/_cdecimalfp.pyx":1137
  *         y_numerator, y_denominator = (y.numerator, y.denominator)
  *     elif isinstance(y, Real):
  *         try:             # <<<<<<<<<<<<<<
@@ -17153,14 +17198,14 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_mul(struct __pyx_obj_9decimalf
       __Pyx_XGOTREF(__pyx_t_8);
       /*try:*/ {
 
-        /* "decimalfp/_cdecimalfp.pyx":1135
+        /* "decimalfp/_cdecimalfp.pyx":1138
  *     elif isinstance(y, Real):
  *         try:
  *             y_numerator, y_denominator = y.as_integer_ratio()             # <<<<<<<<<<<<<<
  *         except (ValueError, OverflowError, AttributeError):
  *             raise ValueError("Unsupported operand: %s" % repr(y))
  */
-        __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_y, __pyx_n_s_as_integer_ratio); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1135, __pyx_L4_error)
+        __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_y, __pyx_n_s_as_integer_ratio); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1138, __pyx_L4_error)
         __Pyx_GOTREF(__pyx_t_3);
         __pyx_t_9 = NULL;
         if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_3))) {
@@ -17174,7 +17219,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_mul(struct __pyx_obj_9decimalf
         }
         __pyx_t_5 = (__pyx_t_9) ? __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_9) : __Pyx_PyObject_CallNoArg(__pyx_t_3);
         __Pyx_XDECREF(__pyx_t_9); __pyx_t_9 = 0;
-        if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1135, __pyx_L4_error)
+        if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1138, __pyx_L4_error)
         __Pyx_GOTREF(__pyx_t_5);
         __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
         if ((likely(PyTuple_CheckExact(__pyx_t_5))) || (PyList_CheckExact(__pyx_t_5))) {
@@ -17183,7 +17228,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_mul(struct __pyx_obj_9decimalf
           if (unlikely(size != 2)) {
             if (size > 2) __Pyx_RaiseTooManyValuesError(2);
             else if (size >= 0) __Pyx_RaiseNeedMoreValuesError(size);
-            __PYX_ERR(0, 1135, __pyx_L4_error)
+            __PYX_ERR(0, 1138, __pyx_L4_error)
           }
           #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
           if (likely(PyTuple_CheckExact(sequence))) {
@@ -17196,15 +17241,15 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_mul(struct __pyx_obj_9decimalf
           __Pyx_INCREF(__pyx_t_3);
           __Pyx_INCREF(__pyx_t_9);
           #else
-          __pyx_t_3 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1135, __pyx_L4_error)
+          __pyx_t_3 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1138, __pyx_L4_error)
           __Pyx_GOTREF(__pyx_t_3);
-          __pyx_t_9 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 1135, __pyx_L4_error)
+          __pyx_t_9 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 1138, __pyx_L4_error)
           __Pyx_GOTREF(__pyx_t_9);
           #endif
           __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
         } else {
           Py_ssize_t index = -1;
-          __pyx_t_10 = PyObject_GetIter(__pyx_t_5); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 1135, __pyx_L4_error)
+          __pyx_t_10 = PyObject_GetIter(__pyx_t_5); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 1138, __pyx_L4_error)
           __Pyx_GOTREF(__pyx_t_10);
           __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
           __pyx_t_11 = Py_TYPE(__pyx_t_10)->tp_iternext;
@@ -17212,7 +17257,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_mul(struct __pyx_obj_9decimalf
           __Pyx_GOTREF(__pyx_t_3);
           index = 1; __pyx_t_9 = __pyx_t_11(__pyx_t_10); if (unlikely(!__pyx_t_9)) goto __pyx_L10_unpacking_failed;
           __Pyx_GOTREF(__pyx_t_9);
-          if (__Pyx_IternextUnpackEndCheck(__pyx_t_11(__pyx_t_10), 2) < 0) __PYX_ERR(0, 1135, __pyx_L4_error)
+          if (__Pyx_IternextUnpackEndCheck(__pyx_t_11(__pyx_t_10), 2) < 0) __PYX_ERR(0, 1138, __pyx_L4_error)
           __pyx_t_11 = NULL;
           __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
           goto __pyx_L11_unpacking_done;
@@ -17220,7 +17265,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_mul(struct __pyx_obj_9decimalf
           __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
           __pyx_t_11 = NULL;
           if (__Pyx_IterFinish() == 0) __Pyx_RaiseNeedMoreValuesError(index);
-          __PYX_ERR(0, 1135, __pyx_L4_error)
+          __PYX_ERR(0, 1138, __pyx_L4_error)
           __pyx_L11_unpacking_done:;
         }
         __pyx_v_y_numerator = __pyx_t_3;
@@ -17228,7 +17273,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_mul(struct __pyx_obj_9decimalf
         __pyx_v_y_denominator = __pyx_t_9;
         __pyx_t_9 = 0;
 
-        /* "decimalfp/_cdecimalfp.pyx":1134
+        /* "decimalfp/_cdecimalfp.pyx":1137
  *         y_numerator, y_denominator = (y.numerator, y.denominator)
  *     elif isinstance(y, Real):
  *         try:             # <<<<<<<<<<<<<<
@@ -17247,7 +17292,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_mul(struct __pyx_obj_9decimalf
       __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
       __Pyx_XDECREF(((PyObject *)__pyx_t_4)); __pyx_t_4 = 0;
 
-      /* "decimalfp/_cdecimalfp.pyx":1136
+      /* "decimalfp/_cdecimalfp.pyx":1139
  *         try:
  *             y_numerator, y_denominator = y.as_integer_ratio()
  *         except (ValueError, OverflowError, AttributeError):             # <<<<<<<<<<<<<<
@@ -17257,34 +17302,34 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_mul(struct __pyx_obj_9decimalf
       __pyx_t_12 = __Pyx_PyErr_ExceptionMatches(__pyx_builtin_ValueError) || __Pyx_PyErr_ExceptionMatches(__pyx_builtin_OverflowError) || __Pyx_PyErr_ExceptionMatches(__pyx_builtin_AttributeError);
       if (__pyx_t_12) {
         __Pyx_AddTraceback("decimalfp._cdecimalfp.mul", __pyx_clineno, __pyx_lineno, __pyx_filename);
-        if (__Pyx_GetException(&__pyx_t_5, &__pyx_t_9, &__pyx_t_3) < 0) __PYX_ERR(0, 1136, __pyx_L6_except_error)
+        if (__Pyx_GetException(&__pyx_t_5, &__pyx_t_9, &__pyx_t_3) < 0) __PYX_ERR(0, 1139, __pyx_L6_except_error)
         __Pyx_GOTREF(__pyx_t_5);
         __Pyx_GOTREF(__pyx_t_9);
         __Pyx_GOTREF(__pyx_t_3);
 
-        /* "decimalfp/_cdecimalfp.pyx":1137
+        /* "decimalfp/_cdecimalfp.pyx":1140
  *             y_numerator, y_denominator = y.as_integer_ratio()
  *         except (ValueError, OverflowError, AttributeError):
  *             raise ValueError("Unsupported operand: %s" % repr(y))             # <<<<<<<<<<<<<<
  *     elif isinstance(y, _StdLibDecimal):
  *         return x.__mul__(Decimal(y))
  */
-        __pyx_t_10 = PyObject_Repr(__pyx_v_y); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 1137, __pyx_L6_except_error)
+        __pyx_t_10 = PyObject_Repr(__pyx_v_y); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 1140, __pyx_L6_except_error)
         __Pyx_GOTREF(__pyx_t_10);
-        __pyx_t_13 = __Pyx_PyString_Format(__pyx_kp_s_Unsupported_operand_s, __pyx_t_10); if (unlikely(!__pyx_t_13)) __PYX_ERR(0, 1137, __pyx_L6_except_error)
+        __pyx_t_13 = __Pyx_PyString_Format(__pyx_kp_s_Unsupported_operand_s, __pyx_t_10); if (unlikely(!__pyx_t_13)) __PYX_ERR(0, 1140, __pyx_L6_except_error)
         __Pyx_GOTREF(__pyx_t_13);
         __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
-        __pyx_t_10 = __Pyx_PyObject_CallOneArg(__pyx_builtin_ValueError, __pyx_t_13); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 1137, __pyx_L6_except_error)
+        __pyx_t_10 = __Pyx_PyObject_CallOneArg(__pyx_builtin_ValueError, __pyx_t_13); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 1140, __pyx_L6_except_error)
         __Pyx_GOTREF(__pyx_t_10);
         __Pyx_DECREF(__pyx_t_13); __pyx_t_13 = 0;
         __Pyx_Raise(__pyx_t_10, 0, 0, 0);
         __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
-        __PYX_ERR(0, 1137, __pyx_L6_except_error)
+        __PYX_ERR(0, 1140, __pyx_L6_except_error)
       }
       goto __pyx_L6_except_error;
       __pyx_L6_except_error:;
 
-      /* "decimalfp/_cdecimalfp.pyx":1134
+      /* "decimalfp/_cdecimalfp.pyx":1137
  *         y_numerator, y_denominator = (y.numerator, y.denominator)
  *     elif isinstance(y, Real):
  *         try:             # <<<<<<<<<<<<<<
@@ -17299,7 +17344,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_mul(struct __pyx_obj_9decimalf
       __pyx_L9_try_end:;
     }
 
-    /* "decimalfp/_cdecimalfp.pyx":1133
+    /* "decimalfp/_cdecimalfp.pyx":1136
  *     elif isinstance(y, Rational):
  *         y_numerator, y_denominator = (y.numerator, y.denominator)
  *     elif isinstance(y, Real):             # <<<<<<<<<<<<<<
@@ -17309,21 +17354,21 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_mul(struct __pyx_obj_9decimalf
     goto __pyx_L3;
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":1138
+  /* "decimalfp/_cdecimalfp.pyx":1141
  *         except (ValueError, OverflowError, AttributeError):
  *             raise ValueError("Unsupported operand: %s" % repr(y))
  *     elif isinstance(y, _StdLibDecimal):             # <<<<<<<<<<<<<<
  *         return x.__mul__(Decimal(y))
  *     else:
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_StdLibDecimal); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1138, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_StdLibDecimal); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1141, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_1 = PyObject_IsInstance(__pyx_v_y, __pyx_t_3); if (unlikely(__pyx_t_1 == ((int)-1))) __PYX_ERR(0, 1138, __pyx_L1_error)
+  __pyx_t_1 = PyObject_IsInstance(__pyx_v_y, __pyx_t_3); if (unlikely(__pyx_t_1 == ((int)-1))) __PYX_ERR(0, 1141, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_2 = (__pyx_t_1 != 0);
   if (__pyx_t_2) {
 
-    /* "decimalfp/_cdecimalfp.pyx":1139
+    /* "decimalfp/_cdecimalfp.pyx":1142
  *             raise ValueError("Unsupported operand: %s" % repr(y))
  *     elif isinstance(y, _StdLibDecimal):
  *         return x.__mul__(Decimal(y))             # <<<<<<<<<<<<<<
@@ -17331,9 +17376,9 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_mul(struct __pyx_obj_9decimalf
  *         return NotImplemented
  */
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_9 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_x), __pyx_n_s_mul); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 1139, __pyx_L1_error)
+    __pyx_t_9 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_x), __pyx_n_s_mul); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 1142, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_9);
-    __pyx_t_5 = __Pyx_PyObject_CallOneArg(((PyObject *)__pyx_ptype_9decimalfp_11_cdecimalfp_Decimal), __pyx_v_y); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1139, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_PyObject_CallOneArg(((PyObject *)__pyx_ptype_9decimalfp_11_cdecimalfp_Decimal), __pyx_v_y); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1142, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     __pyx_t_10 = NULL;
     if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_9))) {
@@ -17348,14 +17393,14 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_mul(struct __pyx_obj_9decimalf
     __pyx_t_3 = (__pyx_t_10) ? __Pyx_PyObject_Call2Args(__pyx_t_9, __pyx_t_10, __pyx_t_5) : __Pyx_PyObject_CallOneArg(__pyx_t_9, __pyx_t_5);
     __Pyx_XDECREF(__pyx_t_10); __pyx_t_10 = 0;
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-    if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1139, __pyx_L1_error)
+    if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1142, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
     __pyx_r = __pyx_t_3;
     __pyx_t_3 = 0;
     goto __pyx_L0;
 
-    /* "decimalfp/_cdecimalfp.pyx":1138
+    /* "decimalfp/_cdecimalfp.pyx":1141
  *         except (ValueError, OverflowError, AttributeError):
  *             raise ValueError("Unsupported operand: %s" % repr(y))
  *     elif isinstance(y, _StdLibDecimal):             # <<<<<<<<<<<<<<
@@ -17364,7 +17409,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_mul(struct __pyx_obj_9decimalf
  */
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":1141
+  /* "decimalfp/_cdecimalfp.pyx":1144
  *         return x.__mul__(Decimal(y))
  *     else:
  *         return NotImplemented             # <<<<<<<<<<<<<<
@@ -17379,34 +17424,34 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_mul(struct __pyx_obj_9decimalf
   }
   __pyx_L3:;
 
-  /* "decimalfp/_cdecimalfp.pyx":1143
+  /* "decimalfp/_cdecimalfp.pyx":1146
  *         return NotImplemented
  *     # handle Rational and Real
  *     num = x._value * y_numerator             # <<<<<<<<<<<<<<
  *     den = y_denominator * base10pow(x._precision)
  *     minPrec = x._precision
  */
-  __pyx_t_3 = PyNumber_Multiply(__pyx_v_x->_value, __pyx_v_y_numerator); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1143, __pyx_L1_error)
+  __pyx_t_3 = PyNumber_Multiply(__pyx_v_x->_value, __pyx_v_y_numerator); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1146, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __pyx_v_num = __pyx_t_3;
   __pyx_t_3 = 0;
 
-  /* "decimalfp/_cdecimalfp.pyx":1144
+  /* "decimalfp/_cdecimalfp.pyx":1147
  *     # handle Rational and Real
  *     num = x._value * y_numerator
  *     den = y_denominator * base10pow(x._precision)             # <<<<<<<<<<<<<<
  *     minPrec = x._precision
  *     # return num / den as Decimal or as Fraction
  */
-  __pyx_t_3 = __pyx_f_9decimalfp_11_cdecimalfp_base10pow(__pyx_v_x->_precision); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1144, __pyx_L1_error)
+  __pyx_t_3 = __pyx_f_9decimalfp_11_cdecimalfp_base10pow(__pyx_v_x->_precision); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1147, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_9 = PyNumber_Multiply(__pyx_v_y_denominator, __pyx_t_3); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 1144, __pyx_L1_error)
+  __pyx_t_9 = PyNumber_Multiply(__pyx_v_y_denominator, __pyx_t_3); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 1147, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_9);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_v_den = __pyx_t_9;
   __pyx_t_9 = 0;
 
-  /* "decimalfp/_cdecimalfp.pyx":1145
+  /* "decimalfp/_cdecimalfp.pyx":1148
  *     num = x._value * y_numerator
  *     den = y_denominator * base10pow(x._precision)
  *     minPrec = x._precision             # <<<<<<<<<<<<<<
@@ -17416,7 +17461,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_mul(struct __pyx_obj_9decimalf
   __pyx_t_12 = __pyx_v_x->_precision;
   __pyx_v_minPrec = __pyx_t_12;
 
-  /* "decimalfp/_cdecimalfp.pyx":1147
+  /* "decimalfp/_cdecimalfp.pyx":1150
  *     minPrec = x._precision
  *     # return num / den as Decimal or as Fraction
  *     return _div(num, den, minPrec)             # <<<<<<<<<<<<<<
@@ -17424,13 +17469,13 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_mul(struct __pyx_obj_9decimalf
  * 
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_9 = __pyx_f_9decimalfp_11_cdecimalfp__div(__pyx_v_num, __pyx_v_den, __pyx_v_minPrec); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 1147, __pyx_L1_error)
+  __pyx_t_9 = __pyx_f_9decimalfp_11_cdecimalfp__div(__pyx_v_num, __pyx_v_den, __pyx_v_minPrec); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 1150, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_9);
   __pyx_r = __pyx_t_9;
   __pyx_t_9 = 0;
   goto __pyx_L0;
 
-  /* "decimalfp/_cdecimalfp.pyx":1120
+  /* "decimalfp/_cdecimalfp.pyx":1123
  * 
  * 
  * cdef object mul(Decimal x, object y):             # <<<<<<<<<<<<<<
@@ -17459,7 +17504,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_mul(struct __pyx_obj_9decimalf
   return __pyx_r;
 }
 
-/* "decimalfp/_cdecimalfp.pyx":1150
+/* "decimalfp/_cdecimalfp.pyx":1153
  * 
  * 
  * cdef object div1(Decimal x, object y):             # <<<<<<<<<<<<<<
@@ -17494,7 +17539,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_div1(struct __pyx_obj_9decimal
   PyObject *__pyx_t_15 = NULL;
   __Pyx_RefNannySetupContext("div1", 0);
 
-  /* "decimalfp/_cdecimalfp.pyx":1153
+  /* "decimalfp/_cdecimalfp.pyx":1156
  *     """x / y"""
  *     cdef int xp, yp
  *     if isinstance(y, Decimal):             # <<<<<<<<<<<<<<
@@ -17505,7 +17550,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_div1(struct __pyx_obj_9decimal
   __pyx_t_2 = (__pyx_t_1 != 0);
   if (__pyx_t_2) {
 
-    /* "decimalfp/_cdecimalfp.pyx":1154
+    /* "decimalfp/_cdecimalfp.pyx":1157
  *     cdef int xp, yp
  *     if isinstance(y, Decimal):
  *         xp, yp = x._precision, (<Decimal>y)._precision             # <<<<<<<<<<<<<<
@@ -17517,37 +17562,37 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_div1(struct __pyx_obj_9decimal
     __pyx_v_xp = __pyx_t_3;
     __pyx_v_yp = __pyx_t_4;
 
-    /* "decimalfp/_cdecimalfp.pyx":1155
+    /* "decimalfp/_cdecimalfp.pyx":1158
  *     if isinstance(y, Decimal):
  *         xp, yp = x._precision, (<Decimal>y)._precision
  *         num = x._value * base10pow(yp)             # <<<<<<<<<<<<<<
  *         den = (<Decimal>y)._value * base10pow(xp)
  *         minPrec = max(0, xp - yp)
  */
-    __pyx_t_5 = __pyx_f_9decimalfp_11_cdecimalfp_base10pow(__pyx_v_yp); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1155, __pyx_L1_error)
+    __pyx_t_5 = __pyx_f_9decimalfp_11_cdecimalfp_base10pow(__pyx_v_yp); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1158, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
-    __pyx_t_6 = PyNumber_Multiply(__pyx_v_x->_value, __pyx_t_5); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1155, __pyx_L1_error)
+    __pyx_t_6 = PyNumber_Multiply(__pyx_v_x->_value, __pyx_t_5); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1158, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     __pyx_v_num = __pyx_t_6;
     __pyx_t_6 = 0;
 
-    /* "decimalfp/_cdecimalfp.pyx":1156
+    /* "decimalfp/_cdecimalfp.pyx":1159
  *         xp, yp = x._precision, (<Decimal>y)._precision
  *         num = x._value * base10pow(yp)
  *         den = (<Decimal>y)._value * base10pow(xp)             # <<<<<<<<<<<<<<
  *         minPrec = max(0, xp - yp)
  *         # return num / den as Decimal or as Fraction
  */
-    __pyx_t_6 = __pyx_f_9decimalfp_11_cdecimalfp_base10pow(__pyx_v_xp); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1156, __pyx_L1_error)
+    __pyx_t_6 = __pyx_f_9decimalfp_11_cdecimalfp_base10pow(__pyx_v_xp); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1159, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
-    __pyx_t_5 = PyNumber_Multiply(((struct __pyx_obj_9decimalfp_11_cdecimalfp_Decimal *)__pyx_v_y)->_value, __pyx_t_6); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1156, __pyx_L1_error)
+    __pyx_t_5 = PyNumber_Multiply(((struct __pyx_obj_9decimalfp_11_cdecimalfp_Decimal *)__pyx_v_y)->_value, __pyx_t_6); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1159, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
     __pyx_v_den = __pyx_t_5;
     __pyx_t_5 = 0;
 
-    /* "decimalfp/_cdecimalfp.pyx":1157
+    /* "decimalfp/_cdecimalfp.pyx":1160
  *         num = x._value * base10pow(yp)
  *         den = (<Decimal>y)._value * base10pow(xp)
  *         minPrec = max(0, xp - yp)             # <<<<<<<<<<<<<<
@@ -17563,7 +17608,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_div1(struct __pyx_obj_9decimal
     }
     __pyx_v_minPrec = __pyx_t_8;
 
-    /* "decimalfp/_cdecimalfp.pyx":1159
+    /* "decimalfp/_cdecimalfp.pyx":1162
  *         minPrec = max(0, xp - yp)
  *         # return num / den as Decimal or as Fraction
  *         return _div(num, den, minPrec)             # <<<<<<<<<<<<<<
@@ -17571,13 +17616,13 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_div1(struct __pyx_obj_9decimal
  *         y_numerator, y_denominator = (y.numerator, y.denominator)
  */
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_5 = __pyx_f_9decimalfp_11_cdecimalfp__div(__pyx_v_num, __pyx_v_den, __pyx_v_minPrec); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1159, __pyx_L1_error)
+    __pyx_t_5 = __pyx_f_9decimalfp_11_cdecimalfp__div(__pyx_v_num, __pyx_v_den, __pyx_v_minPrec); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1162, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     __pyx_r = __pyx_t_5;
     __pyx_t_5 = 0;
     goto __pyx_L0;
 
-    /* "decimalfp/_cdecimalfp.pyx":1153
+    /* "decimalfp/_cdecimalfp.pyx":1156
  *     """x / y"""
  *     cdef int xp, yp
  *     if isinstance(y, Decimal):             # <<<<<<<<<<<<<<
@@ -17586,37 +17631,37 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_div1(struct __pyx_obj_9decimal
  */
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":1160
+  /* "decimalfp/_cdecimalfp.pyx":1163
  *         # return num / den as Decimal or as Fraction
  *         return _div(num, den, minPrec)
  *     elif isinstance(y, Rational):       # includes Integral             # <<<<<<<<<<<<<<
  *         y_numerator, y_denominator = (y.numerator, y.denominator)
  *     elif isinstance(y, Real):
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_5, __pyx_n_s_Rational); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1160, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_5, __pyx_n_s_Rational); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1163, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_2 = PyObject_IsInstance(__pyx_v_y, __pyx_t_5); if (unlikely(__pyx_t_2 == ((int)-1))) __PYX_ERR(0, 1160, __pyx_L1_error)
+  __pyx_t_2 = PyObject_IsInstance(__pyx_v_y, __pyx_t_5); if (unlikely(__pyx_t_2 == ((int)-1))) __PYX_ERR(0, 1163, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   __pyx_t_1 = (__pyx_t_2 != 0);
   if (__pyx_t_1) {
 
-    /* "decimalfp/_cdecimalfp.pyx":1161
+    /* "decimalfp/_cdecimalfp.pyx":1164
  *         return _div(num, den, minPrec)
  *     elif isinstance(y, Rational):       # includes Integral
  *         y_numerator, y_denominator = (y.numerator, y.denominator)             # <<<<<<<<<<<<<<
  *     elif isinstance(y, Real):
  *         try:
  */
-    __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_v_y, __pyx_n_s_numerator); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1161, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_v_y, __pyx_n_s_numerator); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1164, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
-    __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_v_y, __pyx_n_s_denominator); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1161, __pyx_L1_error)
+    __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_v_y, __pyx_n_s_denominator); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1164, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
     __pyx_v_y_numerator = __pyx_t_5;
     __pyx_t_5 = 0;
     __pyx_v_y_denominator = __pyx_t_6;
     __pyx_t_6 = 0;
 
-    /* "decimalfp/_cdecimalfp.pyx":1160
+    /* "decimalfp/_cdecimalfp.pyx":1163
  *         # return num / den as Decimal or as Fraction
  *         return _div(num, den, minPrec)
  *     elif isinstance(y, Rational):       # includes Integral             # <<<<<<<<<<<<<<
@@ -17626,21 +17671,21 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_div1(struct __pyx_obj_9decimal
     goto __pyx_L3;
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":1162
+  /* "decimalfp/_cdecimalfp.pyx":1165
  *     elif isinstance(y, Rational):       # includes Integral
  *         y_numerator, y_denominator = (y.numerator, y.denominator)
  *     elif isinstance(y, Real):             # <<<<<<<<<<<<<<
  *         try:
  *             y_numerator, y_denominator = y.as_integer_ratio()
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_6, __pyx_n_s_Real); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1162, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_6, __pyx_n_s_Real); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1165, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
-  __pyx_t_1 = PyObject_IsInstance(__pyx_v_y, __pyx_t_6); if (unlikely(__pyx_t_1 == ((int)-1))) __PYX_ERR(0, 1162, __pyx_L1_error)
+  __pyx_t_1 = PyObject_IsInstance(__pyx_v_y, __pyx_t_6); if (unlikely(__pyx_t_1 == ((int)-1))) __PYX_ERR(0, 1165, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
   __pyx_t_2 = (__pyx_t_1 != 0);
   if (__pyx_t_2) {
 
-    /* "decimalfp/_cdecimalfp.pyx":1163
+    /* "decimalfp/_cdecimalfp.pyx":1166
  *         y_numerator, y_denominator = (y.numerator, y.denominator)
  *     elif isinstance(y, Real):
  *         try:             # <<<<<<<<<<<<<<
@@ -17656,14 +17701,14 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_div1(struct __pyx_obj_9decimal
       __Pyx_XGOTREF(__pyx_t_11);
       /*try:*/ {
 
-        /* "decimalfp/_cdecimalfp.pyx":1164
+        /* "decimalfp/_cdecimalfp.pyx":1167
  *     elif isinstance(y, Real):
  *         try:
  *             y_numerator, y_denominator = y.as_integer_ratio()             # <<<<<<<<<<<<<<
  *         except (ValueError, OverflowError, AttributeError):
  *             raise ValueError("Unsupported operand: %s" % repr(y))
  */
-        __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_v_y, __pyx_n_s_as_integer_ratio); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1164, __pyx_L4_error)
+        __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_v_y, __pyx_n_s_as_integer_ratio); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1167, __pyx_L4_error)
         __Pyx_GOTREF(__pyx_t_5);
         __pyx_t_12 = NULL;
         if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_5))) {
@@ -17677,7 +17722,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_div1(struct __pyx_obj_9decimal
         }
         __pyx_t_6 = (__pyx_t_12) ? __Pyx_PyObject_CallOneArg(__pyx_t_5, __pyx_t_12) : __Pyx_PyObject_CallNoArg(__pyx_t_5);
         __Pyx_XDECREF(__pyx_t_12); __pyx_t_12 = 0;
-        if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1164, __pyx_L4_error)
+        if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1167, __pyx_L4_error)
         __Pyx_GOTREF(__pyx_t_6);
         __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
         if ((likely(PyTuple_CheckExact(__pyx_t_6))) || (PyList_CheckExact(__pyx_t_6))) {
@@ -17686,7 +17731,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_div1(struct __pyx_obj_9decimal
           if (unlikely(size != 2)) {
             if (size > 2) __Pyx_RaiseTooManyValuesError(2);
             else if (size >= 0) __Pyx_RaiseNeedMoreValuesError(size);
-            __PYX_ERR(0, 1164, __pyx_L4_error)
+            __PYX_ERR(0, 1167, __pyx_L4_error)
           }
           #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
           if (likely(PyTuple_CheckExact(sequence))) {
@@ -17699,15 +17744,15 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_div1(struct __pyx_obj_9decimal
           __Pyx_INCREF(__pyx_t_5);
           __Pyx_INCREF(__pyx_t_12);
           #else
-          __pyx_t_5 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1164, __pyx_L4_error)
+          __pyx_t_5 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1167, __pyx_L4_error)
           __Pyx_GOTREF(__pyx_t_5);
-          __pyx_t_12 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 1164, __pyx_L4_error)
+          __pyx_t_12 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 1167, __pyx_L4_error)
           __Pyx_GOTREF(__pyx_t_12);
           #endif
           __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
         } else {
           Py_ssize_t index = -1;
-          __pyx_t_13 = PyObject_GetIter(__pyx_t_6); if (unlikely(!__pyx_t_13)) __PYX_ERR(0, 1164, __pyx_L4_error)
+          __pyx_t_13 = PyObject_GetIter(__pyx_t_6); if (unlikely(!__pyx_t_13)) __PYX_ERR(0, 1167, __pyx_L4_error)
           __Pyx_GOTREF(__pyx_t_13);
           __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
           __pyx_t_14 = Py_TYPE(__pyx_t_13)->tp_iternext;
@@ -17715,7 +17760,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_div1(struct __pyx_obj_9decimal
           __Pyx_GOTREF(__pyx_t_5);
           index = 1; __pyx_t_12 = __pyx_t_14(__pyx_t_13); if (unlikely(!__pyx_t_12)) goto __pyx_L10_unpacking_failed;
           __Pyx_GOTREF(__pyx_t_12);
-          if (__Pyx_IternextUnpackEndCheck(__pyx_t_14(__pyx_t_13), 2) < 0) __PYX_ERR(0, 1164, __pyx_L4_error)
+          if (__Pyx_IternextUnpackEndCheck(__pyx_t_14(__pyx_t_13), 2) < 0) __PYX_ERR(0, 1167, __pyx_L4_error)
           __pyx_t_14 = NULL;
           __Pyx_DECREF(__pyx_t_13); __pyx_t_13 = 0;
           goto __pyx_L11_unpacking_done;
@@ -17723,7 +17768,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_div1(struct __pyx_obj_9decimal
           __Pyx_DECREF(__pyx_t_13); __pyx_t_13 = 0;
           __pyx_t_14 = NULL;
           if (__Pyx_IterFinish() == 0) __Pyx_RaiseNeedMoreValuesError(index);
-          __PYX_ERR(0, 1164, __pyx_L4_error)
+          __PYX_ERR(0, 1167, __pyx_L4_error)
           __pyx_L11_unpacking_done:;
         }
         __pyx_v_y_numerator = __pyx_t_5;
@@ -17731,7 +17776,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_div1(struct __pyx_obj_9decimal
         __pyx_v_y_denominator = __pyx_t_12;
         __pyx_t_12 = 0;
 
-        /* "decimalfp/_cdecimalfp.pyx":1163
+        /* "decimalfp/_cdecimalfp.pyx":1166
  *         y_numerator, y_denominator = (y.numerator, y.denominator)
  *     elif isinstance(y, Real):
  *         try:             # <<<<<<<<<<<<<<
@@ -17749,7 +17794,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_div1(struct __pyx_obj_9decimal
       __Pyx_XDECREF(__pyx_t_12); __pyx_t_12 = 0;
       __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
 
-      /* "decimalfp/_cdecimalfp.pyx":1165
+      /* "decimalfp/_cdecimalfp.pyx":1168
  *         try:
  *             y_numerator, y_denominator = y.as_integer_ratio()
  *         except (ValueError, OverflowError, AttributeError):             # <<<<<<<<<<<<<<
@@ -17759,34 +17804,34 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_div1(struct __pyx_obj_9decimal
       __pyx_t_4 = __Pyx_PyErr_ExceptionMatches(__pyx_builtin_ValueError) || __Pyx_PyErr_ExceptionMatches(__pyx_builtin_OverflowError) || __Pyx_PyErr_ExceptionMatches(__pyx_builtin_AttributeError);
       if (__pyx_t_4) {
         __Pyx_AddTraceback("decimalfp._cdecimalfp.div1", __pyx_clineno, __pyx_lineno, __pyx_filename);
-        if (__Pyx_GetException(&__pyx_t_6, &__pyx_t_12, &__pyx_t_5) < 0) __PYX_ERR(0, 1165, __pyx_L6_except_error)
+        if (__Pyx_GetException(&__pyx_t_6, &__pyx_t_12, &__pyx_t_5) < 0) __PYX_ERR(0, 1168, __pyx_L6_except_error)
         __Pyx_GOTREF(__pyx_t_6);
         __Pyx_GOTREF(__pyx_t_12);
         __Pyx_GOTREF(__pyx_t_5);
 
-        /* "decimalfp/_cdecimalfp.pyx":1166
+        /* "decimalfp/_cdecimalfp.pyx":1169
  *             y_numerator, y_denominator = y.as_integer_ratio()
  *         except (ValueError, OverflowError, AttributeError):
  *             raise ValueError("Unsupported operand: %s" % repr(y))             # <<<<<<<<<<<<<<
  *     elif isinstance(y, _StdLibDecimal):
  *         return div1(x, Decimal(y))
  */
-        __pyx_t_13 = PyObject_Repr(__pyx_v_y); if (unlikely(!__pyx_t_13)) __PYX_ERR(0, 1166, __pyx_L6_except_error)
+        __pyx_t_13 = PyObject_Repr(__pyx_v_y); if (unlikely(!__pyx_t_13)) __PYX_ERR(0, 1169, __pyx_L6_except_error)
         __Pyx_GOTREF(__pyx_t_13);
-        __pyx_t_15 = __Pyx_PyString_Format(__pyx_kp_s_Unsupported_operand_s, __pyx_t_13); if (unlikely(!__pyx_t_15)) __PYX_ERR(0, 1166, __pyx_L6_except_error)
+        __pyx_t_15 = __Pyx_PyString_Format(__pyx_kp_s_Unsupported_operand_s, __pyx_t_13); if (unlikely(!__pyx_t_15)) __PYX_ERR(0, 1169, __pyx_L6_except_error)
         __Pyx_GOTREF(__pyx_t_15);
         __Pyx_DECREF(__pyx_t_13); __pyx_t_13 = 0;
-        __pyx_t_13 = __Pyx_PyObject_CallOneArg(__pyx_builtin_ValueError, __pyx_t_15); if (unlikely(!__pyx_t_13)) __PYX_ERR(0, 1166, __pyx_L6_except_error)
+        __pyx_t_13 = __Pyx_PyObject_CallOneArg(__pyx_builtin_ValueError, __pyx_t_15); if (unlikely(!__pyx_t_13)) __PYX_ERR(0, 1169, __pyx_L6_except_error)
         __Pyx_GOTREF(__pyx_t_13);
         __Pyx_DECREF(__pyx_t_15); __pyx_t_15 = 0;
         __Pyx_Raise(__pyx_t_13, 0, 0, 0);
         __Pyx_DECREF(__pyx_t_13); __pyx_t_13 = 0;
-        __PYX_ERR(0, 1166, __pyx_L6_except_error)
+        __PYX_ERR(0, 1169, __pyx_L6_except_error)
       }
       goto __pyx_L6_except_error;
       __pyx_L6_except_error:;
 
-      /* "decimalfp/_cdecimalfp.pyx":1163
+      /* "decimalfp/_cdecimalfp.pyx":1166
  *         y_numerator, y_denominator = (y.numerator, y.denominator)
  *     elif isinstance(y, Real):
  *         try:             # <<<<<<<<<<<<<<
@@ -17801,7 +17846,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_div1(struct __pyx_obj_9decimal
       __pyx_L9_try_end:;
     }
 
-    /* "decimalfp/_cdecimalfp.pyx":1162
+    /* "decimalfp/_cdecimalfp.pyx":1165
  *     elif isinstance(y, Rational):       # includes Integral
  *         y_numerator, y_denominator = (y.numerator, y.denominator)
  *     elif isinstance(y, Real):             # <<<<<<<<<<<<<<
@@ -17811,21 +17856,21 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_div1(struct __pyx_obj_9decimal
     goto __pyx_L3;
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":1167
+  /* "decimalfp/_cdecimalfp.pyx":1170
  *         except (ValueError, OverflowError, AttributeError):
  *             raise ValueError("Unsupported operand: %s" % repr(y))
  *     elif isinstance(y, _StdLibDecimal):             # <<<<<<<<<<<<<<
  *         return div1(x, Decimal(y))
  *     else:
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_5, __pyx_n_s_StdLibDecimal); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1167, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_5, __pyx_n_s_StdLibDecimal); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1170, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_2 = PyObject_IsInstance(__pyx_v_y, __pyx_t_5); if (unlikely(__pyx_t_2 == ((int)-1))) __PYX_ERR(0, 1167, __pyx_L1_error)
+  __pyx_t_2 = PyObject_IsInstance(__pyx_v_y, __pyx_t_5); if (unlikely(__pyx_t_2 == ((int)-1))) __PYX_ERR(0, 1170, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   __pyx_t_1 = (__pyx_t_2 != 0);
   if (__pyx_t_1) {
 
-    /* "decimalfp/_cdecimalfp.pyx":1168
+    /* "decimalfp/_cdecimalfp.pyx":1171
  *             raise ValueError("Unsupported operand: %s" % repr(y))
  *     elif isinstance(y, _StdLibDecimal):
  *         return div1(x, Decimal(y))             # <<<<<<<<<<<<<<
@@ -17833,16 +17878,16 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_div1(struct __pyx_obj_9decimal
  *         return NotImplemented
  */
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_5 = __Pyx_PyObject_CallOneArg(((PyObject *)__pyx_ptype_9decimalfp_11_cdecimalfp_Decimal), __pyx_v_y); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1168, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_PyObject_CallOneArg(((PyObject *)__pyx_ptype_9decimalfp_11_cdecimalfp_Decimal), __pyx_v_y); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1171, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
-    __pyx_t_12 = __pyx_f_9decimalfp_11_cdecimalfp_div1(__pyx_v_x, __pyx_t_5); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 1168, __pyx_L1_error)
+    __pyx_t_12 = __pyx_f_9decimalfp_11_cdecimalfp_div1(__pyx_v_x, __pyx_t_5); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 1171, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_12);
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     __pyx_r = __pyx_t_12;
     __pyx_t_12 = 0;
     goto __pyx_L0;
 
-    /* "decimalfp/_cdecimalfp.pyx":1167
+    /* "decimalfp/_cdecimalfp.pyx":1170
  *         except (ValueError, OverflowError, AttributeError):
  *             raise ValueError("Unsupported operand: %s" % repr(y))
  *     elif isinstance(y, _StdLibDecimal):             # <<<<<<<<<<<<<<
@@ -17851,7 +17896,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_div1(struct __pyx_obj_9decimal
  */
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":1170
+  /* "decimalfp/_cdecimalfp.pyx":1173
  *         return div1(x, Decimal(y))
  *     else:
  *         return NotImplemented             # <<<<<<<<<<<<<<
@@ -17866,34 +17911,34 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_div1(struct __pyx_obj_9decimal
   }
   __pyx_L3:;
 
-  /* "decimalfp/_cdecimalfp.pyx":1172
+  /* "decimalfp/_cdecimalfp.pyx":1175
  *         return NotImplemented
  *     # handle Rational and Real
  *     num = x._value * y_denominator             # <<<<<<<<<<<<<<
  *     den = y_numerator * base10pow(x._precision)
  *     minPrec = x._precision
  */
-  __pyx_t_12 = PyNumber_Multiply(__pyx_v_x->_value, __pyx_v_y_denominator); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 1172, __pyx_L1_error)
+  __pyx_t_12 = PyNumber_Multiply(__pyx_v_x->_value, __pyx_v_y_denominator); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 1175, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_12);
   __pyx_v_num = __pyx_t_12;
   __pyx_t_12 = 0;
 
-  /* "decimalfp/_cdecimalfp.pyx":1173
+  /* "decimalfp/_cdecimalfp.pyx":1176
  *     # handle Rational and Real
  *     num = x._value * y_denominator
  *     den = y_numerator * base10pow(x._precision)             # <<<<<<<<<<<<<<
  *     minPrec = x._precision
  *     # return num / den as Decimal or as Fraction
  */
-  __pyx_t_12 = __pyx_f_9decimalfp_11_cdecimalfp_base10pow(__pyx_v_x->_precision); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 1173, __pyx_L1_error)
+  __pyx_t_12 = __pyx_f_9decimalfp_11_cdecimalfp_base10pow(__pyx_v_x->_precision); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 1176, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_12);
-  __pyx_t_5 = PyNumber_Multiply(__pyx_v_y_numerator, __pyx_t_12); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1173, __pyx_L1_error)
+  __pyx_t_5 = PyNumber_Multiply(__pyx_v_y_numerator, __pyx_t_12); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1176, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_DECREF(__pyx_t_12); __pyx_t_12 = 0;
   __pyx_v_den = __pyx_t_5;
   __pyx_t_5 = 0;
 
-  /* "decimalfp/_cdecimalfp.pyx":1174
+  /* "decimalfp/_cdecimalfp.pyx":1177
  *     num = x._value * y_denominator
  *     den = y_numerator * base10pow(x._precision)
  *     minPrec = x._precision             # <<<<<<<<<<<<<<
@@ -17903,7 +17948,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_div1(struct __pyx_obj_9decimal
   __pyx_t_4 = __pyx_v_x->_precision;
   __pyx_v_minPrec = __pyx_t_4;
 
-  /* "decimalfp/_cdecimalfp.pyx":1176
+  /* "decimalfp/_cdecimalfp.pyx":1179
  *     minPrec = x._precision
  *     # return num / den as Decimal or as Fraction
  *     return _div(num, den, minPrec)             # <<<<<<<<<<<<<<
@@ -17911,13 +17956,13 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_div1(struct __pyx_obj_9decimal
  * 
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_5 = __pyx_f_9decimalfp_11_cdecimalfp__div(__pyx_v_num, __pyx_v_den, __pyx_v_minPrec); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1176, __pyx_L1_error)
+  __pyx_t_5 = __pyx_f_9decimalfp_11_cdecimalfp__div(__pyx_v_num, __pyx_v_den, __pyx_v_minPrec); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1179, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __pyx_r = __pyx_t_5;
   __pyx_t_5 = 0;
   goto __pyx_L0;
 
-  /* "decimalfp/_cdecimalfp.pyx":1150
+  /* "decimalfp/_cdecimalfp.pyx":1153
  * 
  * 
  * cdef object div1(Decimal x, object y):             # <<<<<<<<<<<<<<
@@ -17944,7 +17989,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_div1(struct __pyx_obj_9decimal
   return __pyx_r;
 }
 
-/* "decimalfp/_cdecimalfp.pyx":1179
+/* "decimalfp/_cdecimalfp.pyx":1182
  * 
  * 
  * cdef object div2(object x, Decimal y):             # <<<<<<<<<<<<<<
@@ -17979,7 +18024,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_div2(PyObject *__pyx_v_x, stru
   PyObject *__pyx_t_15 = NULL;
   __Pyx_RefNannySetupContext("div2", 0);
 
-  /* "decimalfp/_cdecimalfp.pyx":1182
+  /* "decimalfp/_cdecimalfp.pyx":1185
  *     """x / y"""
  *     cdef int xp, yp
  *     if isinstance(x, Decimal):             # <<<<<<<<<<<<<<
@@ -17990,7 +18035,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_div2(PyObject *__pyx_v_x, stru
   __pyx_t_2 = (__pyx_t_1 != 0);
   if (__pyx_t_2) {
 
-    /* "decimalfp/_cdecimalfp.pyx":1183
+    /* "decimalfp/_cdecimalfp.pyx":1186
  *     cdef int xp, yp
  *     if isinstance(x, Decimal):
  *         xp, yp = (<Decimal>x)._precision, y._precision             # <<<<<<<<<<<<<<
@@ -18002,37 +18047,37 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_div2(PyObject *__pyx_v_x, stru
     __pyx_v_xp = __pyx_t_3;
     __pyx_v_yp = __pyx_t_4;
 
-    /* "decimalfp/_cdecimalfp.pyx":1184
+    /* "decimalfp/_cdecimalfp.pyx":1187
  *     if isinstance(x, Decimal):
  *         xp, yp = (<Decimal>x)._precision, y._precision
  *         num = (<Decimal>x)._value * base10pow(yp)             # <<<<<<<<<<<<<<
  *         den = y._value * base10pow(xp)
  *         minPrec = max(0, xp - yp)
  */
-    __pyx_t_5 = __pyx_f_9decimalfp_11_cdecimalfp_base10pow(__pyx_v_yp); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1184, __pyx_L1_error)
+    __pyx_t_5 = __pyx_f_9decimalfp_11_cdecimalfp_base10pow(__pyx_v_yp); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1187, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
-    __pyx_t_6 = PyNumber_Multiply(((struct __pyx_obj_9decimalfp_11_cdecimalfp_Decimal *)__pyx_v_x)->_value, __pyx_t_5); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1184, __pyx_L1_error)
+    __pyx_t_6 = PyNumber_Multiply(((struct __pyx_obj_9decimalfp_11_cdecimalfp_Decimal *)__pyx_v_x)->_value, __pyx_t_5); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1187, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     __pyx_v_num = __pyx_t_6;
     __pyx_t_6 = 0;
 
-    /* "decimalfp/_cdecimalfp.pyx":1185
+    /* "decimalfp/_cdecimalfp.pyx":1188
  *         xp, yp = (<Decimal>x)._precision, y._precision
  *         num = (<Decimal>x)._value * base10pow(yp)
  *         den = y._value * base10pow(xp)             # <<<<<<<<<<<<<<
  *         minPrec = max(0, xp - yp)
  *         # return num / den as Decimal or as Fraction
  */
-    __pyx_t_6 = __pyx_f_9decimalfp_11_cdecimalfp_base10pow(__pyx_v_xp); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1185, __pyx_L1_error)
+    __pyx_t_6 = __pyx_f_9decimalfp_11_cdecimalfp_base10pow(__pyx_v_xp); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1188, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
-    __pyx_t_5 = PyNumber_Multiply(__pyx_v_y->_value, __pyx_t_6); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1185, __pyx_L1_error)
+    __pyx_t_5 = PyNumber_Multiply(__pyx_v_y->_value, __pyx_t_6); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1188, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
     __pyx_v_den = __pyx_t_5;
     __pyx_t_5 = 0;
 
-    /* "decimalfp/_cdecimalfp.pyx":1186
+    /* "decimalfp/_cdecimalfp.pyx":1189
  *         num = (<Decimal>x)._value * base10pow(yp)
  *         den = y._value * base10pow(xp)
  *         minPrec = max(0, xp - yp)             # <<<<<<<<<<<<<<
@@ -18048,7 +18093,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_div2(PyObject *__pyx_v_x, stru
     }
     __pyx_v_minPrec = __pyx_t_8;
 
-    /* "decimalfp/_cdecimalfp.pyx":1188
+    /* "decimalfp/_cdecimalfp.pyx":1191
  *         minPrec = max(0, xp - yp)
  *         # return num / den as Decimal or as Fraction
  *         return _div(num, den, minPrec)             # <<<<<<<<<<<<<<
@@ -18056,13 +18101,13 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_div2(PyObject *__pyx_v_x, stru
  *         x_numerator, x_denominator = (x.numerator, x.denominator)
  */
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_5 = __pyx_f_9decimalfp_11_cdecimalfp__div(__pyx_v_num, __pyx_v_den, __pyx_v_minPrec); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1188, __pyx_L1_error)
+    __pyx_t_5 = __pyx_f_9decimalfp_11_cdecimalfp__div(__pyx_v_num, __pyx_v_den, __pyx_v_minPrec); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1191, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     __pyx_r = __pyx_t_5;
     __pyx_t_5 = 0;
     goto __pyx_L0;
 
-    /* "decimalfp/_cdecimalfp.pyx":1182
+    /* "decimalfp/_cdecimalfp.pyx":1185
  *     """x / y"""
  *     cdef int xp, yp
  *     if isinstance(x, Decimal):             # <<<<<<<<<<<<<<
@@ -18071,37 +18116,37 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_div2(PyObject *__pyx_v_x, stru
  */
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":1189
+  /* "decimalfp/_cdecimalfp.pyx":1192
  *         # return num / den as Decimal or as Fraction
  *         return _div(num, den, minPrec)
  *     if isinstance(x, Rational):             # <<<<<<<<<<<<<<
  *         x_numerator, x_denominator = (x.numerator, x.denominator)
  *     elif isinstance(x, Real):
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_5, __pyx_n_s_Rational); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1189, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_5, __pyx_n_s_Rational); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1192, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_2 = PyObject_IsInstance(__pyx_v_x, __pyx_t_5); if (unlikely(__pyx_t_2 == ((int)-1))) __PYX_ERR(0, 1189, __pyx_L1_error)
+  __pyx_t_2 = PyObject_IsInstance(__pyx_v_x, __pyx_t_5); if (unlikely(__pyx_t_2 == ((int)-1))) __PYX_ERR(0, 1192, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   __pyx_t_1 = (__pyx_t_2 != 0);
   if (__pyx_t_1) {
 
-    /* "decimalfp/_cdecimalfp.pyx":1190
+    /* "decimalfp/_cdecimalfp.pyx":1193
  *         return _div(num, den, minPrec)
  *     if isinstance(x, Rational):
  *         x_numerator, x_denominator = (x.numerator, x.denominator)             # <<<<<<<<<<<<<<
  *     elif isinstance(x, Real):
  *         try:
  */
-    __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_numerator); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1190, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_numerator); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1193, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
-    __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_denominator); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1190, __pyx_L1_error)
+    __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_denominator); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1193, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
     __pyx_v_x_numerator = __pyx_t_5;
     __pyx_t_5 = 0;
     __pyx_v_x_denominator = __pyx_t_6;
     __pyx_t_6 = 0;
 
-    /* "decimalfp/_cdecimalfp.pyx":1189
+    /* "decimalfp/_cdecimalfp.pyx":1192
  *         # return num / den as Decimal or as Fraction
  *         return _div(num, den, minPrec)
  *     if isinstance(x, Rational):             # <<<<<<<<<<<<<<
@@ -18111,21 +18156,21 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_div2(PyObject *__pyx_v_x, stru
     goto __pyx_L4;
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":1191
+  /* "decimalfp/_cdecimalfp.pyx":1194
  *     if isinstance(x, Rational):
  *         x_numerator, x_denominator = (x.numerator, x.denominator)
  *     elif isinstance(x, Real):             # <<<<<<<<<<<<<<
  *         try:
  *             x_numerator, x_denominator = x.as_integer_ratio()
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_6, __pyx_n_s_Real); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1191, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_6, __pyx_n_s_Real); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1194, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
-  __pyx_t_1 = PyObject_IsInstance(__pyx_v_x, __pyx_t_6); if (unlikely(__pyx_t_1 == ((int)-1))) __PYX_ERR(0, 1191, __pyx_L1_error)
+  __pyx_t_1 = PyObject_IsInstance(__pyx_v_x, __pyx_t_6); if (unlikely(__pyx_t_1 == ((int)-1))) __PYX_ERR(0, 1194, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
   __pyx_t_2 = (__pyx_t_1 != 0);
   if (__pyx_t_2) {
 
-    /* "decimalfp/_cdecimalfp.pyx":1192
+    /* "decimalfp/_cdecimalfp.pyx":1195
  *         x_numerator, x_denominator = (x.numerator, x.denominator)
  *     elif isinstance(x, Real):
  *         try:             # <<<<<<<<<<<<<<
@@ -18141,14 +18186,14 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_div2(PyObject *__pyx_v_x, stru
       __Pyx_XGOTREF(__pyx_t_11);
       /*try:*/ {
 
-        /* "decimalfp/_cdecimalfp.pyx":1193
+        /* "decimalfp/_cdecimalfp.pyx":1196
  *     elif isinstance(x, Real):
  *         try:
  *             x_numerator, x_denominator = x.as_integer_ratio()             # <<<<<<<<<<<<<<
  *         except (ValueError, OverflowError, AttributeError):
  *             raise ValueError("Unsupported operand: %s" % repr(x))
  */
-        __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_as_integer_ratio); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1193, __pyx_L5_error)
+        __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_as_integer_ratio); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1196, __pyx_L5_error)
         __Pyx_GOTREF(__pyx_t_5);
         __pyx_t_12 = NULL;
         if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_5))) {
@@ -18162,7 +18207,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_div2(PyObject *__pyx_v_x, stru
         }
         __pyx_t_6 = (__pyx_t_12) ? __Pyx_PyObject_CallOneArg(__pyx_t_5, __pyx_t_12) : __Pyx_PyObject_CallNoArg(__pyx_t_5);
         __Pyx_XDECREF(__pyx_t_12); __pyx_t_12 = 0;
-        if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1193, __pyx_L5_error)
+        if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1196, __pyx_L5_error)
         __Pyx_GOTREF(__pyx_t_6);
         __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
         if ((likely(PyTuple_CheckExact(__pyx_t_6))) || (PyList_CheckExact(__pyx_t_6))) {
@@ -18171,7 +18216,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_div2(PyObject *__pyx_v_x, stru
           if (unlikely(size != 2)) {
             if (size > 2) __Pyx_RaiseTooManyValuesError(2);
             else if (size >= 0) __Pyx_RaiseNeedMoreValuesError(size);
-            __PYX_ERR(0, 1193, __pyx_L5_error)
+            __PYX_ERR(0, 1196, __pyx_L5_error)
           }
           #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
           if (likely(PyTuple_CheckExact(sequence))) {
@@ -18184,15 +18229,15 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_div2(PyObject *__pyx_v_x, stru
           __Pyx_INCREF(__pyx_t_5);
           __Pyx_INCREF(__pyx_t_12);
           #else
-          __pyx_t_5 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1193, __pyx_L5_error)
+          __pyx_t_5 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1196, __pyx_L5_error)
           __Pyx_GOTREF(__pyx_t_5);
-          __pyx_t_12 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 1193, __pyx_L5_error)
+          __pyx_t_12 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 1196, __pyx_L5_error)
           __Pyx_GOTREF(__pyx_t_12);
           #endif
           __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
         } else {
           Py_ssize_t index = -1;
-          __pyx_t_13 = PyObject_GetIter(__pyx_t_6); if (unlikely(!__pyx_t_13)) __PYX_ERR(0, 1193, __pyx_L5_error)
+          __pyx_t_13 = PyObject_GetIter(__pyx_t_6); if (unlikely(!__pyx_t_13)) __PYX_ERR(0, 1196, __pyx_L5_error)
           __Pyx_GOTREF(__pyx_t_13);
           __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
           __pyx_t_14 = Py_TYPE(__pyx_t_13)->tp_iternext;
@@ -18200,7 +18245,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_div2(PyObject *__pyx_v_x, stru
           __Pyx_GOTREF(__pyx_t_5);
           index = 1; __pyx_t_12 = __pyx_t_14(__pyx_t_13); if (unlikely(!__pyx_t_12)) goto __pyx_L11_unpacking_failed;
           __Pyx_GOTREF(__pyx_t_12);
-          if (__Pyx_IternextUnpackEndCheck(__pyx_t_14(__pyx_t_13), 2) < 0) __PYX_ERR(0, 1193, __pyx_L5_error)
+          if (__Pyx_IternextUnpackEndCheck(__pyx_t_14(__pyx_t_13), 2) < 0) __PYX_ERR(0, 1196, __pyx_L5_error)
           __pyx_t_14 = NULL;
           __Pyx_DECREF(__pyx_t_13); __pyx_t_13 = 0;
           goto __pyx_L12_unpacking_done;
@@ -18208,7 +18253,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_div2(PyObject *__pyx_v_x, stru
           __Pyx_DECREF(__pyx_t_13); __pyx_t_13 = 0;
           __pyx_t_14 = NULL;
           if (__Pyx_IterFinish() == 0) __Pyx_RaiseNeedMoreValuesError(index);
-          __PYX_ERR(0, 1193, __pyx_L5_error)
+          __PYX_ERR(0, 1196, __pyx_L5_error)
           __pyx_L12_unpacking_done:;
         }
         __pyx_v_x_numerator = __pyx_t_5;
@@ -18216,7 +18261,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_div2(PyObject *__pyx_v_x, stru
         __pyx_v_x_denominator = __pyx_t_12;
         __pyx_t_12 = 0;
 
-        /* "decimalfp/_cdecimalfp.pyx":1192
+        /* "decimalfp/_cdecimalfp.pyx":1195
  *         x_numerator, x_denominator = (x.numerator, x.denominator)
  *     elif isinstance(x, Real):
  *         try:             # <<<<<<<<<<<<<<
@@ -18234,7 +18279,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_div2(PyObject *__pyx_v_x, stru
       __Pyx_XDECREF(__pyx_t_12); __pyx_t_12 = 0;
       __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
 
-      /* "decimalfp/_cdecimalfp.pyx":1194
+      /* "decimalfp/_cdecimalfp.pyx":1197
  *         try:
  *             x_numerator, x_denominator = x.as_integer_ratio()
  *         except (ValueError, OverflowError, AttributeError):             # <<<<<<<<<<<<<<
@@ -18244,34 +18289,34 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_div2(PyObject *__pyx_v_x, stru
       __pyx_t_4 = __Pyx_PyErr_ExceptionMatches(__pyx_builtin_ValueError) || __Pyx_PyErr_ExceptionMatches(__pyx_builtin_OverflowError) || __Pyx_PyErr_ExceptionMatches(__pyx_builtin_AttributeError);
       if (__pyx_t_4) {
         __Pyx_AddTraceback("decimalfp._cdecimalfp.div2", __pyx_clineno, __pyx_lineno, __pyx_filename);
-        if (__Pyx_GetException(&__pyx_t_6, &__pyx_t_12, &__pyx_t_5) < 0) __PYX_ERR(0, 1194, __pyx_L7_except_error)
+        if (__Pyx_GetException(&__pyx_t_6, &__pyx_t_12, &__pyx_t_5) < 0) __PYX_ERR(0, 1197, __pyx_L7_except_error)
         __Pyx_GOTREF(__pyx_t_6);
         __Pyx_GOTREF(__pyx_t_12);
         __Pyx_GOTREF(__pyx_t_5);
 
-        /* "decimalfp/_cdecimalfp.pyx":1195
+        /* "decimalfp/_cdecimalfp.pyx":1198
  *             x_numerator, x_denominator = x.as_integer_ratio()
  *         except (ValueError, OverflowError, AttributeError):
  *             raise ValueError("Unsupported operand: %s" % repr(x))             # <<<<<<<<<<<<<<
  *     elif isinstance(x, _StdLibDecimal):
  *         return div1(Decimal(x), y)
  */
-        __pyx_t_13 = PyObject_Repr(__pyx_v_x); if (unlikely(!__pyx_t_13)) __PYX_ERR(0, 1195, __pyx_L7_except_error)
+        __pyx_t_13 = PyObject_Repr(__pyx_v_x); if (unlikely(!__pyx_t_13)) __PYX_ERR(0, 1198, __pyx_L7_except_error)
         __Pyx_GOTREF(__pyx_t_13);
-        __pyx_t_15 = __Pyx_PyString_Format(__pyx_kp_s_Unsupported_operand_s, __pyx_t_13); if (unlikely(!__pyx_t_15)) __PYX_ERR(0, 1195, __pyx_L7_except_error)
+        __pyx_t_15 = __Pyx_PyString_Format(__pyx_kp_s_Unsupported_operand_s, __pyx_t_13); if (unlikely(!__pyx_t_15)) __PYX_ERR(0, 1198, __pyx_L7_except_error)
         __Pyx_GOTREF(__pyx_t_15);
         __Pyx_DECREF(__pyx_t_13); __pyx_t_13 = 0;
-        __pyx_t_13 = __Pyx_PyObject_CallOneArg(__pyx_builtin_ValueError, __pyx_t_15); if (unlikely(!__pyx_t_13)) __PYX_ERR(0, 1195, __pyx_L7_except_error)
+        __pyx_t_13 = __Pyx_PyObject_CallOneArg(__pyx_builtin_ValueError, __pyx_t_15); if (unlikely(!__pyx_t_13)) __PYX_ERR(0, 1198, __pyx_L7_except_error)
         __Pyx_GOTREF(__pyx_t_13);
         __Pyx_DECREF(__pyx_t_15); __pyx_t_15 = 0;
         __Pyx_Raise(__pyx_t_13, 0, 0, 0);
         __Pyx_DECREF(__pyx_t_13); __pyx_t_13 = 0;
-        __PYX_ERR(0, 1195, __pyx_L7_except_error)
+        __PYX_ERR(0, 1198, __pyx_L7_except_error)
       }
       goto __pyx_L7_except_error;
       __pyx_L7_except_error:;
 
-      /* "decimalfp/_cdecimalfp.pyx":1192
+      /* "decimalfp/_cdecimalfp.pyx":1195
  *         x_numerator, x_denominator = (x.numerator, x.denominator)
  *     elif isinstance(x, Real):
  *         try:             # <<<<<<<<<<<<<<
@@ -18286,7 +18331,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_div2(PyObject *__pyx_v_x, stru
       __pyx_L10_try_end:;
     }
 
-    /* "decimalfp/_cdecimalfp.pyx":1191
+    /* "decimalfp/_cdecimalfp.pyx":1194
  *     if isinstance(x, Rational):
  *         x_numerator, x_denominator = (x.numerator, x.denominator)
  *     elif isinstance(x, Real):             # <<<<<<<<<<<<<<
@@ -18296,21 +18341,21 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_div2(PyObject *__pyx_v_x, stru
     goto __pyx_L4;
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":1196
+  /* "decimalfp/_cdecimalfp.pyx":1199
  *         except (ValueError, OverflowError, AttributeError):
  *             raise ValueError("Unsupported operand: %s" % repr(x))
  *     elif isinstance(x, _StdLibDecimal):             # <<<<<<<<<<<<<<
  *         return div1(Decimal(x), y)
  *     else:
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_5, __pyx_n_s_StdLibDecimal); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1196, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_5, __pyx_n_s_StdLibDecimal); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1199, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_2 = PyObject_IsInstance(__pyx_v_x, __pyx_t_5); if (unlikely(__pyx_t_2 == ((int)-1))) __PYX_ERR(0, 1196, __pyx_L1_error)
+  __pyx_t_2 = PyObject_IsInstance(__pyx_v_x, __pyx_t_5); if (unlikely(__pyx_t_2 == ((int)-1))) __PYX_ERR(0, 1199, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   __pyx_t_1 = (__pyx_t_2 != 0);
   if (__pyx_t_1) {
 
-    /* "decimalfp/_cdecimalfp.pyx":1197
+    /* "decimalfp/_cdecimalfp.pyx":1200
  *             raise ValueError("Unsupported operand: %s" % repr(x))
  *     elif isinstance(x, _StdLibDecimal):
  *         return div1(Decimal(x), y)             # <<<<<<<<<<<<<<
@@ -18318,16 +18363,16 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_div2(PyObject *__pyx_v_x, stru
  *         return NotImplemented
  */
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_5 = __Pyx_PyObject_CallOneArg(((PyObject *)__pyx_ptype_9decimalfp_11_cdecimalfp_Decimal), __pyx_v_x); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1197, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_PyObject_CallOneArg(((PyObject *)__pyx_ptype_9decimalfp_11_cdecimalfp_Decimal), __pyx_v_x); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1200, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
-    __pyx_t_12 = __pyx_f_9decimalfp_11_cdecimalfp_div1(((struct __pyx_obj_9decimalfp_11_cdecimalfp_Decimal *)__pyx_t_5), ((PyObject *)__pyx_v_y)); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 1197, __pyx_L1_error)
+    __pyx_t_12 = __pyx_f_9decimalfp_11_cdecimalfp_div1(((struct __pyx_obj_9decimalfp_11_cdecimalfp_Decimal *)__pyx_t_5), ((PyObject *)__pyx_v_y)); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 1200, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_12);
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     __pyx_r = __pyx_t_12;
     __pyx_t_12 = 0;
     goto __pyx_L0;
 
-    /* "decimalfp/_cdecimalfp.pyx":1196
+    /* "decimalfp/_cdecimalfp.pyx":1199
  *         except (ValueError, OverflowError, AttributeError):
  *             raise ValueError("Unsupported operand: %s" % repr(x))
  *     elif isinstance(x, _StdLibDecimal):             # <<<<<<<<<<<<<<
@@ -18336,7 +18381,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_div2(PyObject *__pyx_v_x, stru
  */
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":1199
+  /* "decimalfp/_cdecimalfp.pyx":1202
  *         return div1(Decimal(x), y)
  *     else:
  *         return NotImplemented             # <<<<<<<<<<<<<<
@@ -18351,34 +18396,34 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_div2(PyObject *__pyx_v_x, stru
   }
   __pyx_L4:;
 
-  /* "decimalfp/_cdecimalfp.pyx":1201
+  /* "decimalfp/_cdecimalfp.pyx":1204
  *         return NotImplemented
  *     # handle Rational and float
  *     num = x_numerator * base10pow(y._precision)             # <<<<<<<<<<<<<<
  *     den = y._value * x_denominator
  *     minPrec = y._precision
  */
-  __pyx_t_12 = __pyx_f_9decimalfp_11_cdecimalfp_base10pow(__pyx_v_y->_precision); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 1201, __pyx_L1_error)
+  __pyx_t_12 = __pyx_f_9decimalfp_11_cdecimalfp_base10pow(__pyx_v_y->_precision); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 1204, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_12);
-  __pyx_t_5 = PyNumber_Multiply(__pyx_v_x_numerator, __pyx_t_12); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1201, __pyx_L1_error)
+  __pyx_t_5 = PyNumber_Multiply(__pyx_v_x_numerator, __pyx_t_12); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1204, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_DECREF(__pyx_t_12); __pyx_t_12 = 0;
   __pyx_v_num = __pyx_t_5;
   __pyx_t_5 = 0;
 
-  /* "decimalfp/_cdecimalfp.pyx":1202
+  /* "decimalfp/_cdecimalfp.pyx":1205
  *     # handle Rational and float
  *     num = x_numerator * base10pow(y._precision)
  *     den = y._value * x_denominator             # <<<<<<<<<<<<<<
  *     minPrec = y._precision
  *     # return num / den as Decimal or as Fraction
  */
-  __pyx_t_5 = PyNumber_Multiply(__pyx_v_y->_value, __pyx_v_x_denominator); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1202, __pyx_L1_error)
+  __pyx_t_5 = PyNumber_Multiply(__pyx_v_y->_value, __pyx_v_x_denominator); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1205, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __pyx_v_den = __pyx_t_5;
   __pyx_t_5 = 0;
 
-  /* "decimalfp/_cdecimalfp.pyx":1203
+  /* "decimalfp/_cdecimalfp.pyx":1206
  *     num = x_numerator * base10pow(y._precision)
  *     den = y._value * x_denominator
  *     minPrec = y._precision             # <<<<<<<<<<<<<<
@@ -18388,7 +18433,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_div2(PyObject *__pyx_v_x, stru
   __pyx_t_4 = __pyx_v_y->_precision;
   __pyx_v_minPrec = __pyx_t_4;
 
-  /* "decimalfp/_cdecimalfp.pyx":1205
+  /* "decimalfp/_cdecimalfp.pyx":1208
  *     minPrec = y._precision
  *     # return num / den as Decimal or as Fraction
  *     return _div(num, den, minPrec)             # <<<<<<<<<<<<<<
@@ -18396,13 +18441,13 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_div2(PyObject *__pyx_v_x, stru
  * 
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_5 = __pyx_f_9decimalfp_11_cdecimalfp__div(__pyx_v_num, __pyx_v_den, __pyx_v_minPrec); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1205, __pyx_L1_error)
+  __pyx_t_5 = __pyx_f_9decimalfp_11_cdecimalfp__div(__pyx_v_num, __pyx_v_den, __pyx_v_minPrec); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1208, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __pyx_r = __pyx_t_5;
   __pyx_t_5 = 0;
   goto __pyx_L0;
 
-  /* "decimalfp/_cdecimalfp.pyx":1179
+  /* "decimalfp/_cdecimalfp.pyx":1182
  * 
  * 
  * cdef object div2(object x, Decimal y):             # <<<<<<<<<<<<<<
@@ -18429,7 +18474,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_div2(PyObject *__pyx_v_x, stru
   return __pyx_r;
 }
 
-/* "decimalfp/_cdecimalfp.pyx":1208
+/* "decimalfp/_cdecimalfp.pyx":1211
  * 
  * 
  * cdef tuple divmod1(Decimal x, object y):             # <<<<<<<<<<<<<<
@@ -18456,7 +18501,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_divmod1(struct __pyx_obj_9deci
   PyObject *__pyx_t_8 = NULL;
   __Pyx_RefNannySetupContext("divmod1", 0);
 
-  /* "decimalfp/_cdecimalfp.pyx":1212
+  /* "decimalfp/_cdecimalfp.pyx":1215
  *     cdef int xp, yp
  *     cdef Decimal r
  *     if isinstance(y, Decimal):             # <<<<<<<<<<<<<<
@@ -18467,7 +18512,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_divmod1(struct __pyx_obj_9deci
   __pyx_t_2 = (__pyx_t_1 != 0);
   if (__pyx_t_2) {
 
-    /* "decimalfp/_cdecimalfp.pyx":1213
+    /* "decimalfp/_cdecimalfp.pyx":1216
  *     cdef Decimal r
  *     if isinstance(y, Decimal):
  *         xp, yp = x._precision, (<Decimal>y)._precision             # <<<<<<<<<<<<<<
@@ -18479,7 +18524,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_divmod1(struct __pyx_obj_9deci
     __pyx_v_xp = __pyx_t_3;
     __pyx_v_yp = __pyx_t_4;
 
-    /* "decimalfp/_cdecimalfp.pyx":1214
+    /* "decimalfp/_cdecimalfp.pyx":1217
  *     if isinstance(y, Decimal):
  *         xp, yp = x._precision, (<Decimal>y)._precision
  *         if xp >= yp:             # <<<<<<<<<<<<<<
@@ -18489,19 +18534,19 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_divmod1(struct __pyx_obj_9deci
     __pyx_t_2 = ((__pyx_v_xp >= __pyx_v_yp) != 0);
     if (__pyx_t_2) {
 
-      /* "decimalfp/_cdecimalfp.pyx":1215
+      /* "decimalfp/_cdecimalfp.pyx":1218
  *         xp, yp = x._precision, (<Decimal>y)._precision
  *         if xp >= yp:
  *             r = Decimal(x)             # <<<<<<<<<<<<<<
  *             xv = x._value
  *             yv = (<Decimal>y)._value * base10pow(xp - yp)
  */
-      __pyx_t_5 = __Pyx_PyObject_CallOneArg(((PyObject *)__pyx_ptype_9decimalfp_11_cdecimalfp_Decimal), ((PyObject *)__pyx_v_x)); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1215, __pyx_L1_error)
+      __pyx_t_5 = __Pyx_PyObject_CallOneArg(((PyObject *)__pyx_ptype_9decimalfp_11_cdecimalfp_Decimal), ((PyObject *)__pyx_v_x)); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1218, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_5);
       __pyx_v_r = ((struct __pyx_obj_9decimalfp_11_cdecimalfp_Decimal *)__pyx_t_5);
       __pyx_t_5 = 0;
 
-      /* "decimalfp/_cdecimalfp.pyx":1216
+      /* "decimalfp/_cdecimalfp.pyx":1219
  *         if xp >= yp:
  *             r = Decimal(x)
  *             xv = x._value             # <<<<<<<<<<<<<<
@@ -18513,22 +18558,22 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_divmod1(struct __pyx_obj_9deci
       __pyx_v_xv = __pyx_t_5;
       __pyx_t_5 = 0;
 
-      /* "decimalfp/_cdecimalfp.pyx":1217
+      /* "decimalfp/_cdecimalfp.pyx":1220
  *             r = Decimal(x)
  *             xv = x._value
  *             yv = (<Decimal>y)._value * base10pow(xp - yp)             # <<<<<<<<<<<<<<
  *         else:
  *             r = Decimal(y)
  */
-      __pyx_t_5 = __pyx_f_9decimalfp_11_cdecimalfp_base10pow((__pyx_v_xp - __pyx_v_yp)); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1217, __pyx_L1_error)
+      __pyx_t_5 = __pyx_f_9decimalfp_11_cdecimalfp_base10pow((__pyx_v_xp - __pyx_v_yp)); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1220, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_5);
-      __pyx_t_6 = PyNumber_Multiply(((struct __pyx_obj_9decimalfp_11_cdecimalfp_Decimal *)__pyx_v_y)->_value, __pyx_t_5); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1217, __pyx_L1_error)
+      __pyx_t_6 = PyNumber_Multiply(((struct __pyx_obj_9decimalfp_11_cdecimalfp_Decimal *)__pyx_v_y)->_value, __pyx_t_5); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1220, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
       __pyx_v_yv = __pyx_t_6;
       __pyx_t_6 = 0;
 
-      /* "decimalfp/_cdecimalfp.pyx":1214
+      /* "decimalfp/_cdecimalfp.pyx":1217
  *     if isinstance(y, Decimal):
  *         xp, yp = x._precision, (<Decimal>y)._precision
  *         if xp >= yp:             # <<<<<<<<<<<<<<
@@ -18538,7 +18583,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_divmod1(struct __pyx_obj_9deci
       goto __pyx_L4;
     }
 
-    /* "decimalfp/_cdecimalfp.pyx":1219
+    /* "decimalfp/_cdecimalfp.pyx":1222
  *             yv = (<Decimal>y)._value * base10pow(xp - yp)
  *         else:
  *             r = Decimal(y)             # <<<<<<<<<<<<<<
@@ -18546,27 +18591,27 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_divmod1(struct __pyx_obj_9deci
  *             yv = (<Decimal>y)._value
  */
     /*else*/ {
-      __pyx_t_6 = __Pyx_PyObject_CallOneArg(((PyObject *)__pyx_ptype_9decimalfp_11_cdecimalfp_Decimal), __pyx_v_y); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1219, __pyx_L1_error)
+      __pyx_t_6 = __Pyx_PyObject_CallOneArg(((PyObject *)__pyx_ptype_9decimalfp_11_cdecimalfp_Decimal), __pyx_v_y); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1222, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_6);
       __pyx_v_r = ((struct __pyx_obj_9decimalfp_11_cdecimalfp_Decimal *)__pyx_t_6);
       __pyx_t_6 = 0;
 
-      /* "decimalfp/_cdecimalfp.pyx":1220
+      /* "decimalfp/_cdecimalfp.pyx":1223
  *         else:
  *             r = Decimal(y)
  *             xv = x._value * base10pow(yp - xp)             # <<<<<<<<<<<<<<
  *             yv = (<Decimal>y)._value
  *         q = xv // yv
  */
-      __pyx_t_6 = __pyx_f_9decimalfp_11_cdecimalfp_base10pow((__pyx_v_yp - __pyx_v_xp)); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1220, __pyx_L1_error)
+      __pyx_t_6 = __pyx_f_9decimalfp_11_cdecimalfp_base10pow((__pyx_v_yp - __pyx_v_xp)); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1223, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_6);
-      __pyx_t_5 = PyNumber_Multiply(__pyx_v_x->_value, __pyx_t_6); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1220, __pyx_L1_error)
+      __pyx_t_5 = PyNumber_Multiply(__pyx_v_x->_value, __pyx_t_6); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1223, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_5);
       __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
       __pyx_v_xv = __pyx_t_5;
       __pyx_t_5 = 0;
 
-      /* "decimalfp/_cdecimalfp.pyx":1221
+      /* "decimalfp/_cdecimalfp.pyx":1224
  *             r = Decimal(y)
  *             xv = x._value * base10pow(yp - xp)
  *             yv = (<Decimal>y)._value             # <<<<<<<<<<<<<<
@@ -18580,28 +18625,28 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_divmod1(struct __pyx_obj_9deci
     }
     __pyx_L4:;
 
-    /* "decimalfp/_cdecimalfp.pyx":1222
+    /* "decimalfp/_cdecimalfp.pyx":1225
  *             xv = x._value * base10pow(yp - xp)
  *             yv = (<Decimal>y)._value
  *         q = xv // yv             # <<<<<<<<<<<<<<
  *         r._value = xv - q * yv
  *         return Decimal(q, r._precision), r
  */
-    __pyx_t_5 = PyNumber_FloorDivide(__pyx_v_xv, __pyx_v_yv); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1222, __pyx_L1_error)
+    __pyx_t_5 = PyNumber_FloorDivide(__pyx_v_xv, __pyx_v_yv); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1225, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     __pyx_v_q = __pyx_t_5;
     __pyx_t_5 = 0;
 
-    /* "decimalfp/_cdecimalfp.pyx":1223
+    /* "decimalfp/_cdecimalfp.pyx":1226
  *             yv = (<Decimal>y)._value
  *         q = xv // yv
  *         r._value = xv - q * yv             # <<<<<<<<<<<<<<
  *         return Decimal(q, r._precision), r
  *     elif isinstance(y, Integral):
  */
-    __pyx_t_5 = PyNumber_Multiply(__pyx_v_q, __pyx_v_yv); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1223, __pyx_L1_error)
+    __pyx_t_5 = PyNumber_Multiply(__pyx_v_q, __pyx_v_yv); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1226, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
-    __pyx_t_6 = PyNumber_Subtract(__pyx_v_xv, __pyx_t_5); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1223, __pyx_L1_error)
+    __pyx_t_6 = PyNumber_Subtract(__pyx_v_xv, __pyx_t_5); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1226, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     __Pyx_GIVEREF(__pyx_t_6);
@@ -18610,7 +18655,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_divmod1(struct __pyx_obj_9deci
     __pyx_v_r->_value = __pyx_t_6;
     __pyx_t_6 = 0;
 
-    /* "decimalfp/_cdecimalfp.pyx":1224
+    /* "decimalfp/_cdecimalfp.pyx":1227
  *         q = xv // yv
  *         r._value = xv - q * yv
  *         return Decimal(q, r._precision), r             # <<<<<<<<<<<<<<
@@ -18618,9 +18663,9 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_divmod1(struct __pyx_obj_9deci
  *         r = Decimal(x)
  */
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_6 = __Pyx_PyInt_From_int(__pyx_v_r->_precision); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1224, __pyx_L1_error)
+    __pyx_t_6 = __Pyx_PyInt_From_int(__pyx_v_r->_precision); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1227, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
-    __pyx_t_5 = PyTuple_New(2); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1224, __pyx_L1_error)
+    __pyx_t_5 = PyTuple_New(2); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1227, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     __Pyx_INCREF(__pyx_v_q);
     __Pyx_GIVEREF(__pyx_v_q);
@@ -18628,10 +18673,10 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_divmod1(struct __pyx_obj_9deci
     __Pyx_GIVEREF(__pyx_t_6);
     PyTuple_SET_ITEM(__pyx_t_5, 1, __pyx_t_6);
     __pyx_t_6 = 0;
-    __pyx_t_6 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_9decimalfp_11_cdecimalfp_Decimal), __pyx_t_5, NULL); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1224, __pyx_L1_error)
+    __pyx_t_6 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_9decimalfp_11_cdecimalfp_Decimal), __pyx_t_5, NULL); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1227, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-    __pyx_t_5 = PyTuple_New(2); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1224, __pyx_L1_error)
+    __pyx_t_5 = PyTuple_New(2); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1227, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     __Pyx_GIVEREF(__pyx_t_6);
     PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_t_6);
@@ -18643,7 +18688,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_divmod1(struct __pyx_obj_9deci
     __pyx_t_5 = 0;
     goto __pyx_L0;
 
-    /* "decimalfp/_cdecimalfp.pyx":1212
+    /* "decimalfp/_cdecimalfp.pyx":1215
  *     cdef int xp, yp
  *     cdef Decimal r
  *     if isinstance(y, Decimal):             # <<<<<<<<<<<<<<
@@ -18652,33 +18697,33 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_divmod1(struct __pyx_obj_9deci
  */
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":1225
+  /* "decimalfp/_cdecimalfp.pyx":1228
  *         r._value = xv - q * yv
  *         return Decimal(q, r._precision), r
  *     elif isinstance(y, Integral):             # <<<<<<<<<<<<<<
  *         r = Decimal(x)
  *         xv = x._value
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_5, __pyx_n_s_Integral); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1225, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_5, __pyx_n_s_Integral); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1228, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_2 = PyObject_IsInstance(__pyx_v_y, __pyx_t_5); if (unlikely(__pyx_t_2 == ((int)-1))) __PYX_ERR(0, 1225, __pyx_L1_error)
+  __pyx_t_2 = PyObject_IsInstance(__pyx_v_y, __pyx_t_5); if (unlikely(__pyx_t_2 == ((int)-1))) __PYX_ERR(0, 1228, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   __pyx_t_1 = (__pyx_t_2 != 0);
   if (__pyx_t_1) {
 
-    /* "decimalfp/_cdecimalfp.pyx":1226
+    /* "decimalfp/_cdecimalfp.pyx":1229
  *         return Decimal(q, r._precision), r
  *     elif isinstance(y, Integral):
  *         r = Decimal(x)             # <<<<<<<<<<<<<<
  *         xv = x._value
  *         xp = x._precision
  */
-    __pyx_t_5 = __Pyx_PyObject_CallOneArg(((PyObject *)__pyx_ptype_9decimalfp_11_cdecimalfp_Decimal), ((PyObject *)__pyx_v_x)); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1226, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_PyObject_CallOneArg(((PyObject *)__pyx_ptype_9decimalfp_11_cdecimalfp_Decimal), ((PyObject *)__pyx_v_x)); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1229, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     __pyx_v_r = ((struct __pyx_obj_9decimalfp_11_cdecimalfp_Decimal *)__pyx_t_5);
     __pyx_t_5 = 0;
 
-    /* "decimalfp/_cdecimalfp.pyx":1227
+    /* "decimalfp/_cdecimalfp.pyx":1230
  *     elif isinstance(y, Integral):
  *         r = Decimal(x)
  *         xv = x._value             # <<<<<<<<<<<<<<
@@ -18690,7 +18735,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_divmod1(struct __pyx_obj_9deci
     __pyx_v_xv = __pyx_t_5;
     __pyx_t_5 = 0;
 
-    /* "decimalfp/_cdecimalfp.pyx":1228
+    /* "decimalfp/_cdecimalfp.pyx":1231
  *         r = Decimal(x)
  *         xv = x._value
  *         xp = x._precision             # <<<<<<<<<<<<<<
@@ -18700,43 +18745,43 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_divmod1(struct __pyx_obj_9deci
     __pyx_t_4 = __pyx_v_x->_precision;
     __pyx_v_xp = __pyx_t_4;
 
-    /* "decimalfp/_cdecimalfp.pyx":1229
+    /* "decimalfp/_cdecimalfp.pyx":1232
  *         xv = x._value
  *         xp = x._precision
  *         yv = y * base10pow(xp)             # <<<<<<<<<<<<<<
  *         q = xv // yv
  *         r._value = xv - q * yv
  */
-    __pyx_t_5 = __pyx_f_9decimalfp_11_cdecimalfp_base10pow(__pyx_v_xp); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1229, __pyx_L1_error)
+    __pyx_t_5 = __pyx_f_9decimalfp_11_cdecimalfp_base10pow(__pyx_v_xp); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1232, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
-    __pyx_t_6 = PyNumber_Multiply(__pyx_v_y, __pyx_t_5); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1229, __pyx_L1_error)
+    __pyx_t_6 = PyNumber_Multiply(__pyx_v_y, __pyx_t_5); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1232, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     __pyx_v_yv = __pyx_t_6;
     __pyx_t_6 = 0;
 
-    /* "decimalfp/_cdecimalfp.pyx":1230
+    /* "decimalfp/_cdecimalfp.pyx":1233
  *         xp = x._precision
  *         yv = y * base10pow(xp)
  *         q = xv // yv             # <<<<<<<<<<<<<<
  *         r._value = xv - q * yv
  *         return Decimal(q, xp), r
  */
-    __pyx_t_6 = PyNumber_FloorDivide(__pyx_v_xv, __pyx_v_yv); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1230, __pyx_L1_error)
+    __pyx_t_6 = PyNumber_FloorDivide(__pyx_v_xv, __pyx_v_yv); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1233, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
     __pyx_v_q = __pyx_t_6;
     __pyx_t_6 = 0;
 
-    /* "decimalfp/_cdecimalfp.pyx":1231
+    /* "decimalfp/_cdecimalfp.pyx":1234
  *         yv = y * base10pow(xp)
  *         q = xv // yv
  *         r._value = xv - q * yv             # <<<<<<<<<<<<<<
  *         return Decimal(q, xp), r
  *     elif isinstance(y, _StdLibDecimal):
  */
-    __pyx_t_6 = PyNumber_Multiply(__pyx_v_q, __pyx_v_yv); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1231, __pyx_L1_error)
+    __pyx_t_6 = PyNumber_Multiply(__pyx_v_q, __pyx_v_yv); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1234, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
-    __pyx_t_5 = PyNumber_Subtract(__pyx_v_xv, __pyx_t_6); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1231, __pyx_L1_error)
+    __pyx_t_5 = PyNumber_Subtract(__pyx_v_xv, __pyx_t_6); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1234, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
     __Pyx_GIVEREF(__pyx_t_5);
@@ -18745,7 +18790,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_divmod1(struct __pyx_obj_9deci
     __pyx_v_r->_value = __pyx_t_5;
     __pyx_t_5 = 0;
 
-    /* "decimalfp/_cdecimalfp.pyx":1232
+    /* "decimalfp/_cdecimalfp.pyx":1235
  *         q = xv // yv
  *         r._value = xv - q * yv
  *         return Decimal(q, xp), r             # <<<<<<<<<<<<<<
@@ -18753,9 +18798,9 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_divmod1(struct __pyx_obj_9deci
  *         return x.__divmod__(Decimal(y))
  */
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_5 = __Pyx_PyInt_From_int(__pyx_v_xp); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1232, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_PyInt_From_int(__pyx_v_xp); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1235, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
-    __pyx_t_6 = PyTuple_New(2); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1232, __pyx_L1_error)
+    __pyx_t_6 = PyTuple_New(2); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1235, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
     __Pyx_INCREF(__pyx_v_q);
     __Pyx_GIVEREF(__pyx_v_q);
@@ -18763,10 +18808,10 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_divmod1(struct __pyx_obj_9deci
     __Pyx_GIVEREF(__pyx_t_5);
     PyTuple_SET_ITEM(__pyx_t_6, 1, __pyx_t_5);
     __pyx_t_5 = 0;
-    __pyx_t_5 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_9decimalfp_11_cdecimalfp_Decimal), __pyx_t_6, NULL); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1232, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_9decimalfp_11_cdecimalfp_Decimal), __pyx_t_6, NULL); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1235, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-    __pyx_t_6 = PyTuple_New(2); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1232, __pyx_L1_error)
+    __pyx_t_6 = PyTuple_New(2); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1235, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
     __Pyx_GIVEREF(__pyx_t_5);
     PyTuple_SET_ITEM(__pyx_t_6, 0, __pyx_t_5);
@@ -18778,7 +18823,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_divmod1(struct __pyx_obj_9deci
     __pyx_t_6 = 0;
     goto __pyx_L0;
 
-    /* "decimalfp/_cdecimalfp.pyx":1225
+    /* "decimalfp/_cdecimalfp.pyx":1228
  *         r._value = xv - q * yv
  *         return Decimal(q, r._precision), r
  *     elif isinstance(y, Integral):             # <<<<<<<<<<<<<<
@@ -18787,21 +18832,21 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_divmod1(struct __pyx_obj_9deci
  */
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":1233
+  /* "decimalfp/_cdecimalfp.pyx":1236
  *         r._value = xv - q * yv
  *         return Decimal(q, xp), r
  *     elif isinstance(y, _StdLibDecimal):             # <<<<<<<<<<<<<<
  *         return x.__divmod__(Decimal(y))
  *     else:
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_6, __pyx_n_s_StdLibDecimal); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1233, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_6, __pyx_n_s_StdLibDecimal); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1236, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
-  __pyx_t_1 = PyObject_IsInstance(__pyx_v_y, __pyx_t_6); if (unlikely(__pyx_t_1 == ((int)-1))) __PYX_ERR(0, 1233, __pyx_L1_error)
+  __pyx_t_1 = PyObject_IsInstance(__pyx_v_y, __pyx_t_6); if (unlikely(__pyx_t_1 == ((int)-1))) __PYX_ERR(0, 1236, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
   __pyx_t_2 = (__pyx_t_1 != 0);
   if (__pyx_t_2) {
 
-    /* "decimalfp/_cdecimalfp.pyx":1234
+    /* "decimalfp/_cdecimalfp.pyx":1237
  *         return Decimal(q, xp), r
  *     elif isinstance(y, _StdLibDecimal):
  *         return x.__divmod__(Decimal(y))             # <<<<<<<<<<<<<<
@@ -18809,9 +18854,9 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_divmod1(struct __pyx_obj_9deci
  *         return x // y, x % y
  */
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_5 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_x), __pyx_n_s_divmod); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1234, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_x), __pyx_n_s_divmod); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1237, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
-    __pyx_t_7 = __Pyx_PyObject_CallOneArg(((PyObject *)__pyx_ptype_9decimalfp_11_cdecimalfp_Decimal), __pyx_v_y); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 1234, __pyx_L1_error)
+    __pyx_t_7 = __Pyx_PyObject_CallOneArg(((PyObject *)__pyx_ptype_9decimalfp_11_cdecimalfp_Decimal), __pyx_v_y); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 1237, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_7);
     __pyx_t_8 = NULL;
     if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_5))) {
@@ -18826,15 +18871,15 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_divmod1(struct __pyx_obj_9deci
     __pyx_t_6 = (__pyx_t_8) ? __Pyx_PyObject_Call2Args(__pyx_t_5, __pyx_t_8, __pyx_t_7) : __Pyx_PyObject_CallOneArg(__pyx_t_5, __pyx_t_7);
     __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
     __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-    if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1234, __pyx_L1_error)
+    if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1237, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-    if (!(likely(PyTuple_CheckExact(__pyx_t_6))||((__pyx_t_6) == Py_None)||(PyErr_Format(PyExc_TypeError, "Expected %.16s, got %.200s", "tuple", Py_TYPE(__pyx_t_6)->tp_name), 0))) __PYX_ERR(0, 1234, __pyx_L1_error)
+    if (!(likely(PyTuple_CheckExact(__pyx_t_6))||((__pyx_t_6) == Py_None)||(PyErr_Format(PyExc_TypeError, "Expected %.16s, got %.200s", "tuple", Py_TYPE(__pyx_t_6)->tp_name), 0))) __PYX_ERR(0, 1237, __pyx_L1_error)
     __pyx_r = ((PyObject*)__pyx_t_6);
     __pyx_t_6 = 0;
     goto __pyx_L0;
 
-    /* "decimalfp/_cdecimalfp.pyx":1233
+    /* "decimalfp/_cdecimalfp.pyx":1236
  *         r._value = xv - q * yv
  *         return Decimal(q, xp), r
  *     elif isinstance(y, _StdLibDecimal):             # <<<<<<<<<<<<<<
@@ -18843,7 +18888,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_divmod1(struct __pyx_obj_9deci
  */
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":1236
+  /* "decimalfp/_cdecimalfp.pyx":1239
  *         return x.__divmod__(Decimal(y))
  *     else:
  *         return x // y, x % y             # <<<<<<<<<<<<<<
@@ -18852,11 +18897,11 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_divmod1(struct __pyx_obj_9deci
  */
   /*else*/ {
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_6 = PyNumber_FloorDivide(((PyObject *)__pyx_v_x), __pyx_v_y); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1236, __pyx_L1_error)
+    __pyx_t_6 = PyNumber_FloorDivide(((PyObject *)__pyx_v_x), __pyx_v_y); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1239, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
-    __pyx_t_5 = PyNumber_Remainder(((PyObject *)__pyx_v_x), __pyx_v_y); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1236, __pyx_L1_error)
+    __pyx_t_5 = PyNumber_Remainder(((PyObject *)__pyx_v_x), __pyx_v_y); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1239, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
-    __pyx_t_7 = PyTuple_New(2); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 1236, __pyx_L1_error)
+    __pyx_t_7 = PyTuple_New(2); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 1239, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_7);
     __Pyx_GIVEREF(__pyx_t_6);
     PyTuple_SET_ITEM(__pyx_t_7, 0, __pyx_t_6);
@@ -18869,7 +18914,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_divmod1(struct __pyx_obj_9deci
     goto __pyx_L0;
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":1208
+  /* "decimalfp/_cdecimalfp.pyx":1211
  * 
  * 
  * cdef tuple divmod1(Decimal x, object y):             # <<<<<<<<<<<<<<
@@ -18895,7 +18940,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_divmod1(struct __pyx_obj_9deci
   return __pyx_r;
 }
 
-/* "decimalfp/_cdecimalfp.pyx":1239
+/* "decimalfp/_cdecimalfp.pyx":1242
  * 
  * 
  * cdef tuple divmod2(object x, Decimal y):             # <<<<<<<<<<<<<<
@@ -18921,7 +18966,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_divmod2(PyObject *__pyx_v_x, s
   PyObject *__pyx_t_7 = NULL;
   __Pyx_RefNannySetupContext("divmod2", 0);
 
-  /* "decimalfp/_cdecimalfp.pyx":1243
+  /* "decimalfp/_cdecimalfp.pyx":1246
  *     cdef int xp, yp
  *     cdef Decimal r
  *     if isinstance(x, Decimal):             # <<<<<<<<<<<<<<
@@ -18932,7 +18977,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_divmod2(PyObject *__pyx_v_x, s
   __pyx_t_2 = (__pyx_t_1 != 0);
   if (__pyx_t_2) {
 
-    /* "decimalfp/_cdecimalfp.pyx":1244
+    /* "decimalfp/_cdecimalfp.pyx":1247
  *     cdef Decimal r
  *     if isinstance(x, Decimal):
  *         xp, yp = (<Decimal>x)._precision, y._precision             # <<<<<<<<<<<<<<
@@ -18944,7 +18989,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_divmod2(PyObject *__pyx_v_x, s
     __pyx_v_xp = __pyx_t_3;
     __pyx_v_yp = __pyx_t_4;
 
-    /* "decimalfp/_cdecimalfp.pyx":1245
+    /* "decimalfp/_cdecimalfp.pyx":1248
  *     if isinstance(x, Decimal):
  *         xp, yp = (<Decimal>x)._precision, y._precision
  *         if xp >= yp:             # <<<<<<<<<<<<<<
@@ -18954,19 +18999,19 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_divmod2(PyObject *__pyx_v_x, s
     __pyx_t_2 = ((__pyx_v_xp >= __pyx_v_yp) != 0);
     if (__pyx_t_2) {
 
-      /* "decimalfp/_cdecimalfp.pyx":1246
+      /* "decimalfp/_cdecimalfp.pyx":1249
  *         xp, yp = (<Decimal>x)._precision, y._precision
  *         if xp >= yp:
  *             r = Decimal(x)             # <<<<<<<<<<<<<<
  *             xv = (<Decimal>x)._value
  *             yv = y._value * base10pow(xp - yp)
  */
-      __pyx_t_5 = __Pyx_PyObject_CallOneArg(((PyObject *)__pyx_ptype_9decimalfp_11_cdecimalfp_Decimal), __pyx_v_x); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1246, __pyx_L1_error)
+      __pyx_t_5 = __Pyx_PyObject_CallOneArg(((PyObject *)__pyx_ptype_9decimalfp_11_cdecimalfp_Decimal), __pyx_v_x); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1249, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_5);
       __pyx_v_r = ((struct __pyx_obj_9decimalfp_11_cdecimalfp_Decimal *)__pyx_t_5);
       __pyx_t_5 = 0;
 
-      /* "decimalfp/_cdecimalfp.pyx":1247
+      /* "decimalfp/_cdecimalfp.pyx":1250
  *         if xp >= yp:
  *             r = Decimal(x)
  *             xv = (<Decimal>x)._value             # <<<<<<<<<<<<<<
@@ -18978,22 +19023,22 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_divmod2(PyObject *__pyx_v_x, s
       __pyx_v_xv = __pyx_t_5;
       __pyx_t_5 = 0;
 
-      /* "decimalfp/_cdecimalfp.pyx":1248
+      /* "decimalfp/_cdecimalfp.pyx":1251
  *             r = Decimal(x)
  *             xv = (<Decimal>x)._value
  *             yv = y._value * base10pow(xp - yp)             # <<<<<<<<<<<<<<
  *         else:
  *             r = Decimal(y)
  */
-      __pyx_t_5 = __pyx_f_9decimalfp_11_cdecimalfp_base10pow((__pyx_v_xp - __pyx_v_yp)); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1248, __pyx_L1_error)
+      __pyx_t_5 = __pyx_f_9decimalfp_11_cdecimalfp_base10pow((__pyx_v_xp - __pyx_v_yp)); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1251, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_5);
-      __pyx_t_6 = PyNumber_Multiply(__pyx_v_y->_value, __pyx_t_5); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1248, __pyx_L1_error)
+      __pyx_t_6 = PyNumber_Multiply(__pyx_v_y->_value, __pyx_t_5); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1251, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
       __pyx_v_yv = __pyx_t_6;
       __pyx_t_6 = 0;
 
-      /* "decimalfp/_cdecimalfp.pyx":1245
+      /* "decimalfp/_cdecimalfp.pyx":1248
  *     if isinstance(x, Decimal):
  *         xp, yp = (<Decimal>x)._precision, y._precision
  *         if xp >= yp:             # <<<<<<<<<<<<<<
@@ -19003,7 +19048,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_divmod2(PyObject *__pyx_v_x, s
       goto __pyx_L4;
     }
 
-    /* "decimalfp/_cdecimalfp.pyx":1250
+    /* "decimalfp/_cdecimalfp.pyx":1253
  *             yv = y._value * base10pow(xp - yp)
  *         else:
  *             r = Decimal(y)             # <<<<<<<<<<<<<<
@@ -19011,27 +19056,27 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_divmod2(PyObject *__pyx_v_x, s
  *             yv = y._value
  */
     /*else*/ {
-      __pyx_t_6 = __Pyx_PyObject_CallOneArg(((PyObject *)__pyx_ptype_9decimalfp_11_cdecimalfp_Decimal), ((PyObject *)__pyx_v_y)); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1250, __pyx_L1_error)
+      __pyx_t_6 = __Pyx_PyObject_CallOneArg(((PyObject *)__pyx_ptype_9decimalfp_11_cdecimalfp_Decimal), ((PyObject *)__pyx_v_y)); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1253, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_6);
       __pyx_v_r = ((struct __pyx_obj_9decimalfp_11_cdecimalfp_Decimal *)__pyx_t_6);
       __pyx_t_6 = 0;
 
-      /* "decimalfp/_cdecimalfp.pyx":1251
+      /* "decimalfp/_cdecimalfp.pyx":1254
  *         else:
  *             r = Decimal(y)
  *             xv = (<Decimal>x)._value * base10pow(yp - xp)             # <<<<<<<<<<<<<<
  *             yv = y._value
  *         q = xv // yv
  */
-      __pyx_t_6 = __pyx_f_9decimalfp_11_cdecimalfp_base10pow((__pyx_v_yp - __pyx_v_xp)); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1251, __pyx_L1_error)
+      __pyx_t_6 = __pyx_f_9decimalfp_11_cdecimalfp_base10pow((__pyx_v_yp - __pyx_v_xp)); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1254, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_6);
-      __pyx_t_5 = PyNumber_Multiply(((struct __pyx_obj_9decimalfp_11_cdecimalfp_Decimal *)__pyx_v_x)->_value, __pyx_t_6); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1251, __pyx_L1_error)
+      __pyx_t_5 = PyNumber_Multiply(((struct __pyx_obj_9decimalfp_11_cdecimalfp_Decimal *)__pyx_v_x)->_value, __pyx_t_6); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1254, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_5);
       __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
       __pyx_v_xv = __pyx_t_5;
       __pyx_t_5 = 0;
 
-      /* "decimalfp/_cdecimalfp.pyx":1252
+      /* "decimalfp/_cdecimalfp.pyx":1255
  *             r = Decimal(y)
  *             xv = (<Decimal>x)._value * base10pow(yp - xp)
  *             yv = y._value             # <<<<<<<<<<<<<<
@@ -19045,28 +19090,28 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_divmod2(PyObject *__pyx_v_x, s
     }
     __pyx_L4:;
 
-    /* "decimalfp/_cdecimalfp.pyx":1253
+    /* "decimalfp/_cdecimalfp.pyx":1256
  *             xv = (<Decimal>x)._value * base10pow(yp - xp)
  *             yv = y._value
  *         q = xv // yv             # <<<<<<<<<<<<<<
  *         r._value = xv - q * yv
  *         return Decimal(q, r._precision), r
  */
-    __pyx_t_5 = PyNumber_FloorDivide(__pyx_v_xv, __pyx_v_yv); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1253, __pyx_L1_error)
+    __pyx_t_5 = PyNumber_FloorDivide(__pyx_v_xv, __pyx_v_yv); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1256, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     __pyx_v_q = __pyx_t_5;
     __pyx_t_5 = 0;
 
-    /* "decimalfp/_cdecimalfp.pyx":1254
+    /* "decimalfp/_cdecimalfp.pyx":1257
  *             yv = y._value
  *         q = xv // yv
  *         r._value = xv - q * yv             # <<<<<<<<<<<<<<
  *         return Decimal(q, r._precision), r
  *     elif isinstance(x, Integral):
  */
-    __pyx_t_5 = PyNumber_Multiply(__pyx_v_q, __pyx_v_yv); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1254, __pyx_L1_error)
+    __pyx_t_5 = PyNumber_Multiply(__pyx_v_q, __pyx_v_yv); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1257, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
-    __pyx_t_6 = PyNumber_Subtract(__pyx_v_xv, __pyx_t_5); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1254, __pyx_L1_error)
+    __pyx_t_6 = PyNumber_Subtract(__pyx_v_xv, __pyx_t_5); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1257, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     __Pyx_GIVEREF(__pyx_t_6);
@@ -19075,7 +19120,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_divmod2(PyObject *__pyx_v_x, s
     __pyx_v_r->_value = __pyx_t_6;
     __pyx_t_6 = 0;
 
-    /* "decimalfp/_cdecimalfp.pyx":1255
+    /* "decimalfp/_cdecimalfp.pyx":1258
  *         q = xv // yv
  *         r._value = xv - q * yv
  *         return Decimal(q, r._precision), r             # <<<<<<<<<<<<<<
@@ -19083,9 +19128,9 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_divmod2(PyObject *__pyx_v_x, s
  *         r = Decimal(y)
  */
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_6 = __Pyx_PyInt_From_int(__pyx_v_r->_precision); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1255, __pyx_L1_error)
+    __pyx_t_6 = __Pyx_PyInt_From_int(__pyx_v_r->_precision); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1258, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
-    __pyx_t_5 = PyTuple_New(2); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1255, __pyx_L1_error)
+    __pyx_t_5 = PyTuple_New(2); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1258, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     __Pyx_INCREF(__pyx_v_q);
     __Pyx_GIVEREF(__pyx_v_q);
@@ -19093,10 +19138,10 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_divmod2(PyObject *__pyx_v_x, s
     __Pyx_GIVEREF(__pyx_t_6);
     PyTuple_SET_ITEM(__pyx_t_5, 1, __pyx_t_6);
     __pyx_t_6 = 0;
-    __pyx_t_6 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_9decimalfp_11_cdecimalfp_Decimal), __pyx_t_5, NULL); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1255, __pyx_L1_error)
+    __pyx_t_6 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_9decimalfp_11_cdecimalfp_Decimal), __pyx_t_5, NULL); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1258, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-    __pyx_t_5 = PyTuple_New(2); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1255, __pyx_L1_error)
+    __pyx_t_5 = PyTuple_New(2); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1258, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     __Pyx_GIVEREF(__pyx_t_6);
     PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_t_6);
@@ -19108,7 +19153,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_divmod2(PyObject *__pyx_v_x, s
     __pyx_t_5 = 0;
     goto __pyx_L0;
 
-    /* "decimalfp/_cdecimalfp.pyx":1243
+    /* "decimalfp/_cdecimalfp.pyx":1246
  *     cdef int xp, yp
  *     cdef Decimal r
  *     if isinstance(x, Decimal):             # <<<<<<<<<<<<<<
@@ -19117,33 +19162,33 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_divmod2(PyObject *__pyx_v_x, s
  */
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":1256
+  /* "decimalfp/_cdecimalfp.pyx":1259
  *         r._value = xv - q * yv
  *         return Decimal(q, r._precision), r
  *     elif isinstance(x, Integral):             # <<<<<<<<<<<<<<
  *         r = Decimal(y)
  *         yv = y._value
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_5, __pyx_n_s_Integral); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1256, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_5, __pyx_n_s_Integral); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1259, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_2 = PyObject_IsInstance(__pyx_v_x, __pyx_t_5); if (unlikely(__pyx_t_2 == ((int)-1))) __PYX_ERR(0, 1256, __pyx_L1_error)
+  __pyx_t_2 = PyObject_IsInstance(__pyx_v_x, __pyx_t_5); if (unlikely(__pyx_t_2 == ((int)-1))) __PYX_ERR(0, 1259, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   __pyx_t_1 = (__pyx_t_2 != 0);
   if (__pyx_t_1) {
 
-    /* "decimalfp/_cdecimalfp.pyx":1257
+    /* "decimalfp/_cdecimalfp.pyx":1260
  *         return Decimal(q, r._precision), r
  *     elif isinstance(x, Integral):
  *         r = Decimal(y)             # <<<<<<<<<<<<<<
  *         yv = y._value
  *         yp = y._precision
  */
-    __pyx_t_5 = __Pyx_PyObject_CallOneArg(((PyObject *)__pyx_ptype_9decimalfp_11_cdecimalfp_Decimal), ((PyObject *)__pyx_v_y)); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1257, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_PyObject_CallOneArg(((PyObject *)__pyx_ptype_9decimalfp_11_cdecimalfp_Decimal), ((PyObject *)__pyx_v_y)); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1260, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     __pyx_v_r = ((struct __pyx_obj_9decimalfp_11_cdecimalfp_Decimal *)__pyx_t_5);
     __pyx_t_5 = 0;
 
-    /* "decimalfp/_cdecimalfp.pyx":1258
+    /* "decimalfp/_cdecimalfp.pyx":1261
  *     elif isinstance(x, Integral):
  *         r = Decimal(y)
  *         yv = y._value             # <<<<<<<<<<<<<<
@@ -19155,7 +19200,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_divmod2(PyObject *__pyx_v_x, s
     __pyx_v_yv = __pyx_t_5;
     __pyx_t_5 = 0;
 
-    /* "decimalfp/_cdecimalfp.pyx":1259
+    /* "decimalfp/_cdecimalfp.pyx":1262
  *         r = Decimal(y)
  *         yv = y._value
  *         yp = y._precision             # <<<<<<<<<<<<<<
@@ -19165,43 +19210,43 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_divmod2(PyObject *__pyx_v_x, s
     __pyx_t_4 = __pyx_v_y->_precision;
     __pyx_v_yp = __pyx_t_4;
 
-    /* "decimalfp/_cdecimalfp.pyx":1260
+    /* "decimalfp/_cdecimalfp.pyx":1263
  *         yv = y._value
  *         yp = y._precision
  *         xv = x * base10pow(yp)             # <<<<<<<<<<<<<<
  *         q = xv // yv
  *         r._value = xv - q * yv
  */
-    __pyx_t_5 = __pyx_f_9decimalfp_11_cdecimalfp_base10pow(__pyx_v_yp); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1260, __pyx_L1_error)
+    __pyx_t_5 = __pyx_f_9decimalfp_11_cdecimalfp_base10pow(__pyx_v_yp); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1263, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
-    __pyx_t_6 = PyNumber_Multiply(__pyx_v_x, __pyx_t_5); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1260, __pyx_L1_error)
+    __pyx_t_6 = PyNumber_Multiply(__pyx_v_x, __pyx_t_5); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1263, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     __pyx_v_xv = __pyx_t_6;
     __pyx_t_6 = 0;
 
-    /* "decimalfp/_cdecimalfp.pyx":1261
+    /* "decimalfp/_cdecimalfp.pyx":1264
  *         yp = y._precision
  *         xv = x * base10pow(yp)
  *         q = xv // yv             # <<<<<<<<<<<<<<
  *         r._value = xv - q * yv
  *         return Decimal(q, yp), r
  */
-    __pyx_t_6 = PyNumber_FloorDivide(__pyx_v_xv, __pyx_v_yv); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1261, __pyx_L1_error)
+    __pyx_t_6 = PyNumber_FloorDivide(__pyx_v_xv, __pyx_v_yv); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1264, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
     __pyx_v_q = __pyx_t_6;
     __pyx_t_6 = 0;
 
-    /* "decimalfp/_cdecimalfp.pyx":1262
+    /* "decimalfp/_cdecimalfp.pyx":1265
  *         xv = x * base10pow(yp)
  *         q = xv // yv
  *         r._value = xv - q * yv             # <<<<<<<<<<<<<<
  *         return Decimal(q, yp), r
  *     elif isinstance(x, _StdLibDecimal):
  */
-    __pyx_t_6 = PyNumber_Multiply(__pyx_v_q, __pyx_v_yv); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1262, __pyx_L1_error)
+    __pyx_t_6 = PyNumber_Multiply(__pyx_v_q, __pyx_v_yv); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1265, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
-    __pyx_t_5 = PyNumber_Subtract(__pyx_v_xv, __pyx_t_6); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1262, __pyx_L1_error)
+    __pyx_t_5 = PyNumber_Subtract(__pyx_v_xv, __pyx_t_6); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1265, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
     __Pyx_GIVEREF(__pyx_t_5);
@@ -19210,7 +19255,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_divmod2(PyObject *__pyx_v_x, s
     __pyx_v_r->_value = __pyx_t_5;
     __pyx_t_5 = 0;
 
-    /* "decimalfp/_cdecimalfp.pyx":1263
+    /* "decimalfp/_cdecimalfp.pyx":1266
  *         q = xv // yv
  *         r._value = xv - q * yv
  *         return Decimal(q, yp), r             # <<<<<<<<<<<<<<
@@ -19218,9 +19263,9 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_divmod2(PyObject *__pyx_v_x, s
  *         return Decimal(x).__divmod__(y)
  */
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_5 = __Pyx_PyInt_From_int(__pyx_v_yp); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1263, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_PyInt_From_int(__pyx_v_yp); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1266, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
-    __pyx_t_6 = PyTuple_New(2); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1263, __pyx_L1_error)
+    __pyx_t_6 = PyTuple_New(2); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1266, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
     __Pyx_INCREF(__pyx_v_q);
     __Pyx_GIVEREF(__pyx_v_q);
@@ -19228,10 +19273,10 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_divmod2(PyObject *__pyx_v_x, s
     __Pyx_GIVEREF(__pyx_t_5);
     PyTuple_SET_ITEM(__pyx_t_6, 1, __pyx_t_5);
     __pyx_t_5 = 0;
-    __pyx_t_5 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_9decimalfp_11_cdecimalfp_Decimal), __pyx_t_6, NULL); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1263, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_9decimalfp_11_cdecimalfp_Decimal), __pyx_t_6, NULL); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1266, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-    __pyx_t_6 = PyTuple_New(2); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1263, __pyx_L1_error)
+    __pyx_t_6 = PyTuple_New(2); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1266, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
     __Pyx_GIVEREF(__pyx_t_5);
     PyTuple_SET_ITEM(__pyx_t_6, 0, __pyx_t_5);
@@ -19243,7 +19288,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_divmod2(PyObject *__pyx_v_x, s
     __pyx_t_6 = 0;
     goto __pyx_L0;
 
-    /* "decimalfp/_cdecimalfp.pyx":1256
+    /* "decimalfp/_cdecimalfp.pyx":1259
  *         r._value = xv - q * yv
  *         return Decimal(q, r._precision), r
  *     elif isinstance(x, Integral):             # <<<<<<<<<<<<<<
@@ -19252,21 +19297,21 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_divmod2(PyObject *__pyx_v_x, s
  */
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":1264
+  /* "decimalfp/_cdecimalfp.pyx":1267
  *         r._value = xv - q * yv
  *         return Decimal(q, yp), r
  *     elif isinstance(x, _StdLibDecimal):             # <<<<<<<<<<<<<<
  *         return Decimal(x).__divmod__(y)
  *     else:
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_6, __pyx_n_s_StdLibDecimal); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1264, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_6, __pyx_n_s_StdLibDecimal); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1267, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
-  __pyx_t_1 = PyObject_IsInstance(__pyx_v_x, __pyx_t_6); if (unlikely(__pyx_t_1 == ((int)-1))) __PYX_ERR(0, 1264, __pyx_L1_error)
+  __pyx_t_1 = PyObject_IsInstance(__pyx_v_x, __pyx_t_6); if (unlikely(__pyx_t_1 == ((int)-1))) __PYX_ERR(0, 1267, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
   __pyx_t_2 = (__pyx_t_1 != 0);
   if (__pyx_t_2) {
 
-    /* "decimalfp/_cdecimalfp.pyx":1265
+    /* "decimalfp/_cdecimalfp.pyx":1268
  *         return Decimal(q, yp), r
  *     elif isinstance(x, _StdLibDecimal):
  *         return Decimal(x).__divmod__(y)             # <<<<<<<<<<<<<<
@@ -19274,9 +19319,9 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_divmod2(PyObject *__pyx_v_x, s
  *         return x // y, x % y
  */
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_5 = __Pyx_PyObject_CallOneArg(((PyObject *)__pyx_ptype_9decimalfp_11_cdecimalfp_Decimal), __pyx_v_x); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1265, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_PyObject_CallOneArg(((PyObject *)__pyx_ptype_9decimalfp_11_cdecimalfp_Decimal), __pyx_v_x); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1268, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
-    __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_divmod); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 1265, __pyx_L1_error)
+    __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_divmod); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 1268, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_7);
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     __pyx_t_5 = NULL;
@@ -19291,15 +19336,15 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_divmod2(PyObject *__pyx_v_x, s
     }
     __pyx_t_6 = (__pyx_t_5) ? __Pyx_PyObject_Call2Args(__pyx_t_7, __pyx_t_5, ((PyObject *)__pyx_v_y)) : __Pyx_PyObject_CallOneArg(__pyx_t_7, ((PyObject *)__pyx_v_y));
     __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
-    if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1265, __pyx_L1_error)
+    if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1268, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
     __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-    if (!(likely(PyTuple_CheckExact(__pyx_t_6))||((__pyx_t_6) == Py_None)||(PyErr_Format(PyExc_TypeError, "Expected %.16s, got %.200s", "tuple", Py_TYPE(__pyx_t_6)->tp_name), 0))) __PYX_ERR(0, 1265, __pyx_L1_error)
+    if (!(likely(PyTuple_CheckExact(__pyx_t_6))||((__pyx_t_6) == Py_None)||(PyErr_Format(PyExc_TypeError, "Expected %.16s, got %.200s", "tuple", Py_TYPE(__pyx_t_6)->tp_name), 0))) __PYX_ERR(0, 1268, __pyx_L1_error)
     __pyx_r = ((PyObject*)__pyx_t_6);
     __pyx_t_6 = 0;
     goto __pyx_L0;
 
-    /* "decimalfp/_cdecimalfp.pyx":1264
+    /* "decimalfp/_cdecimalfp.pyx":1267
  *         r._value = xv - q * yv
  *         return Decimal(q, yp), r
  *     elif isinstance(x, _StdLibDecimal):             # <<<<<<<<<<<<<<
@@ -19308,7 +19353,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_divmod2(PyObject *__pyx_v_x, s
  */
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":1267
+  /* "decimalfp/_cdecimalfp.pyx":1270
  *         return Decimal(x).__divmod__(y)
  *     else:
  *         return x // y, x % y             # <<<<<<<<<<<<<<
@@ -19317,11 +19362,11 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_divmod2(PyObject *__pyx_v_x, s
  */
   /*else*/ {
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_6 = PyNumber_FloorDivide(__pyx_v_x, ((PyObject *)__pyx_v_y)); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1267, __pyx_L1_error)
+    __pyx_t_6 = PyNumber_FloorDivide(__pyx_v_x, ((PyObject *)__pyx_v_y)); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1270, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
-    __pyx_t_7 = PyNumber_Remainder(__pyx_v_x, ((PyObject *)__pyx_v_y)); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 1267, __pyx_L1_error)
+    __pyx_t_7 = PyNumber_Remainder(__pyx_v_x, ((PyObject *)__pyx_v_y)); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 1270, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_7);
-    __pyx_t_5 = PyTuple_New(2); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1267, __pyx_L1_error)
+    __pyx_t_5 = PyTuple_New(2); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1270, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     __Pyx_GIVEREF(__pyx_t_6);
     PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_t_6);
@@ -19334,7 +19379,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_divmod2(PyObject *__pyx_v_x, s
     goto __pyx_L0;
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":1239
+  /* "decimalfp/_cdecimalfp.pyx":1242
  * 
  * 
  * cdef tuple divmod2(object x, Decimal y):             # <<<<<<<<<<<<<<
@@ -19359,7 +19404,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_divmod2(PyObject *__pyx_v_x, s
   return __pyx_r;
 }
 
-/* "decimalfp/_cdecimalfp.pyx":1270
+/* "decimalfp/_cdecimalfp.pyx":1273
  * 
  * 
  * cdef object floordiv1(Decimal x, object y):             # <<<<<<<<<<<<<<
@@ -19379,16 +19424,16 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_floordiv1(struct __pyx_obj_9de
   PyObject *__pyx_t_7 = NULL;
   __Pyx_RefNannySetupContext("floordiv1", 0);
 
-  /* "decimalfp/_cdecimalfp.pyx":1272
+  /* "decimalfp/_cdecimalfp.pyx":1275
  * cdef object floordiv1(Decimal x, object y):
  *     """x // y"""
  *     if isinstance(y, (Decimal, Integral, _StdLibDecimal)):             # <<<<<<<<<<<<<<
  *         return divmod1(x, y)[0]
  *     else:
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_Integral); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1272, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_Integral); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1275, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_StdLibDecimal); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 1272, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_StdLibDecimal); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 1275, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_t_4 = __Pyx_TypeCheck(__pyx_v_y, __pyx_ptype_9decimalfp_11_cdecimalfp_Decimal); 
   __pyx_t_5 = (__pyx_t_4 != 0);
@@ -19413,7 +19458,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_floordiv1(struct __pyx_obj_9de
   __pyx_t_5 = (__pyx_t_3 != 0);
   if (__pyx_t_5) {
 
-    /* "decimalfp/_cdecimalfp.pyx":1273
+    /* "decimalfp/_cdecimalfp.pyx":1276
  *     """x // y"""
  *     if isinstance(y, (Decimal, Integral, _StdLibDecimal)):
  *         return divmod1(x, y)[0]             # <<<<<<<<<<<<<<
@@ -19421,20 +19466,20 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_floordiv1(struct __pyx_obj_9de
  *         return Decimal(floor(x / y), x._precision)
  */
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_1 = __pyx_f_9decimalfp_11_cdecimalfp_divmod1(__pyx_v_x, __pyx_v_y); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1273, __pyx_L1_error)
+    __pyx_t_1 = __pyx_f_9decimalfp_11_cdecimalfp_divmod1(__pyx_v_x, __pyx_v_y); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1276, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     if (unlikely(__pyx_t_1 == Py_None)) {
       PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
-      __PYX_ERR(0, 1273, __pyx_L1_error)
+      __PYX_ERR(0, 1276, __pyx_L1_error)
     }
-    __pyx_t_2 = __Pyx_GetItemInt_Tuple(__pyx_t_1, 0, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 1273, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_GetItemInt_Tuple(__pyx_t_1, 0, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 1276, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
     __pyx_r = __pyx_t_2;
     __pyx_t_2 = 0;
     goto __pyx_L0;
 
-    /* "decimalfp/_cdecimalfp.pyx":1272
+    /* "decimalfp/_cdecimalfp.pyx":1275
  * cdef object floordiv1(Decimal x, object y):
  *     """x // y"""
  *     if isinstance(y, (Decimal, Integral, _StdLibDecimal)):             # <<<<<<<<<<<<<<
@@ -19443,7 +19488,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_floordiv1(struct __pyx_obj_9de
  */
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":1275
+  /* "decimalfp/_cdecimalfp.pyx":1278
  *         return divmod1(x, y)[0]
  *     else:
  *         return Decimal(floor(x / y), x._precision)             # <<<<<<<<<<<<<<
@@ -19452,9 +19497,9 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_floordiv1(struct __pyx_obj_9de
  */
   /*else*/ {
     __Pyx_XDECREF(__pyx_r);
-    __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_floor); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1275, __pyx_L1_error)
+    __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_floor); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1278, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_6 = __Pyx_PyNumber_Divide(((PyObject *)__pyx_v_x), __pyx_v_y); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1275, __pyx_L1_error)
+    __pyx_t_6 = __Pyx_PyNumber_Divide(((PyObject *)__pyx_v_x), __pyx_v_y); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1278, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
     __pyx_t_7 = NULL;
     if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_1))) {
@@ -19469,12 +19514,12 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_floordiv1(struct __pyx_obj_9de
     __pyx_t_2 = (__pyx_t_7) ? __Pyx_PyObject_Call2Args(__pyx_t_1, __pyx_t_7, __pyx_t_6) : __Pyx_PyObject_CallOneArg(__pyx_t_1, __pyx_t_6);
     __Pyx_XDECREF(__pyx_t_7); __pyx_t_7 = 0;
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-    if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 1275, __pyx_L1_error)
+    if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 1278, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_x->_precision); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1275, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_x->_precision); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1278, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_6 = PyTuple_New(2); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1275, __pyx_L1_error)
+    __pyx_t_6 = PyTuple_New(2); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1278, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
     __Pyx_GIVEREF(__pyx_t_2);
     PyTuple_SET_ITEM(__pyx_t_6, 0, __pyx_t_2);
@@ -19482,7 +19527,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_floordiv1(struct __pyx_obj_9de
     PyTuple_SET_ITEM(__pyx_t_6, 1, __pyx_t_1);
     __pyx_t_2 = 0;
     __pyx_t_1 = 0;
-    __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_9decimalfp_11_cdecimalfp_Decimal), __pyx_t_6, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1275, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_9decimalfp_11_cdecimalfp_Decimal), __pyx_t_6, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1278, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
     __pyx_r = __pyx_t_1;
@@ -19490,7 +19535,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_floordiv1(struct __pyx_obj_9de
     goto __pyx_L0;
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":1270
+  /* "decimalfp/_cdecimalfp.pyx":1273
  * 
  * 
  * cdef object floordiv1(Decimal x, object y):             # <<<<<<<<<<<<<<
@@ -19512,7 +19557,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_floordiv1(struct __pyx_obj_9de
   return __pyx_r;
 }
 
-/* "decimalfp/_cdecimalfp.pyx":1278
+/* "decimalfp/_cdecimalfp.pyx":1281
  * 
  * 
  * cdef object floordiv2(object x, Decimal y):             # <<<<<<<<<<<<<<
@@ -19532,16 +19577,16 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_floordiv2(PyObject *__pyx_v_x,
   PyObject *__pyx_t_7 = NULL;
   __Pyx_RefNannySetupContext("floordiv2", 0);
 
-  /* "decimalfp/_cdecimalfp.pyx":1280
+  /* "decimalfp/_cdecimalfp.pyx":1283
  * cdef object floordiv2(object x, Decimal y):
  *     """x // y"""
  *     if isinstance(x, (Decimal, Integral, _StdLibDecimal)):             # <<<<<<<<<<<<<<
  *         return divmod2(x, y)[0]
  *     else:
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_Integral); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1280, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_Integral); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1283, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_StdLibDecimal); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 1280, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_StdLibDecimal); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 1283, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_t_4 = __Pyx_TypeCheck(__pyx_v_x, __pyx_ptype_9decimalfp_11_cdecimalfp_Decimal); 
   __pyx_t_5 = (__pyx_t_4 != 0);
@@ -19566,7 +19611,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_floordiv2(PyObject *__pyx_v_x,
   __pyx_t_5 = (__pyx_t_3 != 0);
   if (__pyx_t_5) {
 
-    /* "decimalfp/_cdecimalfp.pyx":1281
+    /* "decimalfp/_cdecimalfp.pyx":1284
  *     """x // y"""
  *     if isinstance(x, (Decimal, Integral, _StdLibDecimal)):
  *         return divmod2(x, y)[0]             # <<<<<<<<<<<<<<
@@ -19574,20 +19619,20 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_floordiv2(PyObject *__pyx_v_x,
  *         return Decimal(floor(x / y), y._precision)
  */
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_1 = __pyx_f_9decimalfp_11_cdecimalfp_divmod2(__pyx_v_x, __pyx_v_y); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1281, __pyx_L1_error)
+    __pyx_t_1 = __pyx_f_9decimalfp_11_cdecimalfp_divmod2(__pyx_v_x, __pyx_v_y); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1284, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     if (unlikely(__pyx_t_1 == Py_None)) {
       PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
-      __PYX_ERR(0, 1281, __pyx_L1_error)
+      __PYX_ERR(0, 1284, __pyx_L1_error)
     }
-    __pyx_t_2 = __Pyx_GetItemInt_Tuple(__pyx_t_1, 0, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 1281, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_GetItemInt_Tuple(__pyx_t_1, 0, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 1284, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
     __pyx_r = __pyx_t_2;
     __pyx_t_2 = 0;
     goto __pyx_L0;
 
-    /* "decimalfp/_cdecimalfp.pyx":1280
+    /* "decimalfp/_cdecimalfp.pyx":1283
  * cdef object floordiv2(object x, Decimal y):
  *     """x // y"""
  *     if isinstance(x, (Decimal, Integral, _StdLibDecimal)):             # <<<<<<<<<<<<<<
@@ -19596,7 +19641,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_floordiv2(PyObject *__pyx_v_x,
  */
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":1283
+  /* "decimalfp/_cdecimalfp.pyx":1286
  *         return divmod2(x, y)[0]
  *     else:
  *         return Decimal(floor(x / y), y._precision)             # <<<<<<<<<<<<<<
@@ -19605,9 +19650,9 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_floordiv2(PyObject *__pyx_v_x,
  */
   /*else*/ {
     __Pyx_XDECREF(__pyx_r);
-    __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_floor); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1283, __pyx_L1_error)
+    __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_floor); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1286, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_6 = __Pyx_PyNumber_Divide(__pyx_v_x, ((PyObject *)__pyx_v_y)); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1283, __pyx_L1_error)
+    __pyx_t_6 = __Pyx_PyNumber_Divide(__pyx_v_x, ((PyObject *)__pyx_v_y)); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1286, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
     __pyx_t_7 = NULL;
     if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_1))) {
@@ -19622,12 +19667,12 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_floordiv2(PyObject *__pyx_v_x,
     __pyx_t_2 = (__pyx_t_7) ? __Pyx_PyObject_Call2Args(__pyx_t_1, __pyx_t_7, __pyx_t_6) : __Pyx_PyObject_CallOneArg(__pyx_t_1, __pyx_t_6);
     __Pyx_XDECREF(__pyx_t_7); __pyx_t_7 = 0;
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-    if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 1283, __pyx_L1_error)
+    if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 1286, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_y->_precision); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1283, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_y->_precision); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1286, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_6 = PyTuple_New(2); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1283, __pyx_L1_error)
+    __pyx_t_6 = PyTuple_New(2); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 1286, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
     __Pyx_GIVEREF(__pyx_t_2);
     PyTuple_SET_ITEM(__pyx_t_6, 0, __pyx_t_2);
@@ -19635,7 +19680,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_floordiv2(PyObject *__pyx_v_x,
     PyTuple_SET_ITEM(__pyx_t_6, 1, __pyx_t_1);
     __pyx_t_2 = 0;
     __pyx_t_1 = 0;
-    __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_9decimalfp_11_cdecimalfp_Decimal), __pyx_t_6, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1283, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_9decimalfp_11_cdecimalfp_Decimal), __pyx_t_6, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1286, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
     __pyx_r = __pyx_t_1;
@@ -19643,7 +19688,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_floordiv2(PyObject *__pyx_v_x,
     goto __pyx_L0;
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":1278
+  /* "decimalfp/_cdecimalfp.pyx":1281
  * 
  * 
  * cdef object floordiv2(object x, Decimal y):             # <<<<<<<<<<<<<<
@@ -19665,7 +19710,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_floordiv2(PyObject *__pyx_v_x,
   return __pyx_r;
 }
 
-/* "decimalfp/_cdecimalfp.pyx":1286
+/* "decimalfp/_cdecimalfp.pyx":1289
  * 
  * 
  * cdef object mod1(Decimal x, object y):             # <<<<<<<<<<<<<<
@@ -19683,16 +19728,16 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_mod1(struct __pyx_obj_9decimal
   int __pyx_t_5;
   __Pyx_RefNannySetupContext("mod1", 0);
 
-  /* "decimalfp/_cdecimalfp.pyx":1288
+  /* "decimalfp/_cdecimalfp.pyx":1291
  * cdef object mod1(Decimal x, object y):
  *     """x % y"""
  *     if isinstance(y, (Decimal, Integral, _StdLibDecimal)):             # <<<<<<<<<<<<<<
  *         return divmod1(x, y)[1]
  *     else:
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_Integral); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1288, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_Integral); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1291, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_StdLibDecimal); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 1288, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_StdLibDecimal); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 1291, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_t_4 = __Pyx_TypeCheck(__pyx_v_y, __pyx_ptype_9decimalfp_11_cdecimalfp_Decimal); 
   __pyx_t_5 = (__pyx_t_4 != 0);
@@ -19717,7 +19762,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_mod1(struct __pyx_obj_9decimal
   __pyx_t_5 = (__pyx_t_3 != 0);
   if (__pyx_t_5) {
 
-    /* "decimalfp/_cdecimalfp.pyx":1289
+    /* "decimalfp/_cdecimalfp.pyx":1292
  *     """x % y"""
  *     if isinstance(y, (Decimal, Integral, _StdLibDecimal)):
  *         return divmod1(x, y)[1]             # <<<<<<<<<<<<<<
@@ -19725,20 +19770,20 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_mod1(struct __pyx_obj_9decimal
  *         return x - y * (x // y)
  */
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_1 = __pyx_f_9decimalfp_11_cdecimalfp_divmod1(__pyx_v_x, __pyx_v_y); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1289, __pyx_L1_error)
+    __pyx_t_1 = __pyx_f_9decimalfp_11_cdecimalfp_divmod1(__pyx_v_x, __pyx_v_y); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1292, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     if (unlikely(__pyx_t_1 == Py_None)) {
       PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
-      __PYX_ERR(0, 1289, __pyx_L1_error)
+      __PYX_ERR(0, 1292, __pyx_L1_error)
     }
-    __pyx_t_2 = __Pyx_GetItemInt_Tuple(__pyx_t_1, 1, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 1289, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_GetItemInt_Tuple(__pyx_t_1, 1, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 1292, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
     __pyx_r = __pyx_t_2;
     __pyx_t_2 = 0;
     goto __pyx_L0;
 
-    /* "decimalfp/_cdecimalfp.pyx":1288
+    /* "decimalfp/_cdecimalfp.pyx":1291
  * cdef object mod1(Decimal x, object y):
  *     """x % y"""
  *     if isinstance(y, (Decimal, Integral, _StdLibDecimal)):             # <<<<<<<<<<<<<<
@@ -19747,7 +19792,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_mod1(struct __pyx_obj_9decimal
  */
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":1291
+  /* "decimalfp/_cdecimalfp.pyx":1294
  *         return divmod1(x, y)[1]
  *     else:
  *         return x - y * (x // y)             # <<<<<<<<<<<<<<
@@ -19756,12 +19801,12 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_mod1(struct __pyx_obj_9decimal
  */
   /*else*/ {
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_2 = PyNumber_FloorDivide(((PyObject *)__pyx_v_x), __pyx_v_y); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 1291, __pyx_L1_error)
+    __pyx_t_2 = PyNumber_FloorDivide(((PyObject *)__pyx_v_x), __pyx_v_y); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 1294, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_1 = PyNumber_Multiply(__pyx_v_y, __pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1291, __pyx_L1_error)
+    __pyx_t_1 = PyNumber_Multiply(__pyx_v_y, __pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1294, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    __pyx_t_2 = PyNumber_Subtract(((PyObject *)__pyx_v_x), __pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 1291, __pyx_L1_error)
+    __pyx_t_2 = PyNumber_Subtract(((PyObject *)__pyx_v_x), __pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 1294, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
     __pyx_r = __pyx_t_2;
@@ -19769,7 +19814,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_mod1(struct __pyx_obj_9decimal
     goto __pyx_L0;
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":1286
+  /* "decimalfp/_cdecimalfp.pyx":1289
  * 
  * 
  * cdef object mod1(Decimal x, object y):             # <<<<<<<<<<<<<<
@@ -19789,7 +19834,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_mod1(struct __pyx_obj_9decimal
   return __pyx_r;
 }
 
-/* "decimalfp/_cdecimalfp.pyx":1294
+/* "decimalfp/_cdecimalfp.pyx":1297
  * 
  * 
  * cdef object mod2(object x, Decimal y):             # <<<<<<<<<<<<<<
@@ -19807,16 +19852,16 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_mod2(PyObject *__pyx_v_x, stru
   int __pyx_t_5;
   __Pyx_RefNannySetupContext("mod2", 0);
 
-  /* "decimalfp/_cdecimalfp.pyx":1296
+  /* "decimalfp/_cdecimalfp.pyx":1299
  * cdef object mod2(object x, Decimal y):
  *     """x % y"""
  *     if isinstance(x, (Decimal, Integral, _StdLibDecimal)):             # <<<<<<<<<<<<<<
  *         return divmod2(x, y)[1]
  *     else:
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_Integral); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1296, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_Integral); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1299, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_StdLibDecimal); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 1296, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_StdLibDecimal); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 1299, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_t_4 = __Pyx_TypeCheck(__pyx_v_x, __pyx_ptype_9decimalfp_11_cdecimalfp_Decimal); 
   __pyx_t_5 = (__pyx_t_4 != 0);
@@ -19841,7 +19886,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_mod2(PyObject *__pyx_v_x, stru
   __pyx_t_5 = (__pyx_t_3 != 0);
   if (__pyx_t_5) {
 
-    /* "decimalfp/_cdecimalfp.pyx":1297
+    /* "decimalfp/_cdecimalfp.pyx":1300
  *     """x % y"""
  *     if isinstance(x, (Decimal, Integral, _StdLibDecimal)):
  *         return divmod2(x, y)[1]             # <<<<<<<<<<<<<<
@@ -19849,20 +19894,20 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_mod2(PyObject *__pyx_v_x, stru
  *         return x - y * (x // y)
  */
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_1 = __pyx_f_9decimalfp_11_cdecimalfp_divmod2(__pyx_v_x, __pyx_v_y); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1297, __pyx_L1_error)
+    __pyx_t_1 = __pyx_f_9decimalfp_11_cdecimalfp_divmod2(__pyx_v_x, __pyx_v_y); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1300, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     if (unlikely(__pyx_t_1 == Py_None)) {
       PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
-      __PYX_ERR(0, 1297, __pyx_L1_error)
+      __PYX_ERR(0, 1300, __pyx_L1_error)
     }
-    __pyx_t_2 = __Pyx_GetItemInt_Tuple(__pyx_t_1, 1, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 1297, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_GetItemInt_Tuple(__pyx_t_1, 1, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 1300, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
     __pyx_r = __pyx_t_2;
     __pyx_t_2 = 0;
     goto __pyx_L0;
 
-    /* "decimalfp/_cdecimalfp.pyx":1296
+    /* "decimalfp/_cdecimalfp.pyx":1299
  * cdef object mod2(object x, Decimal y):
  *     """x % y"""
  *     if isinstance(x, (Decimal, Integral, _StdLibDecimal)):             # <<<<<<<<<<<<<<
@@ -19871,7 +19916,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_mod2(PyObject *__pyx_v_x, stru
  */
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":1299
+  /* "decimalfp/_cdecimalfp.pyx":1302
  *         return divmod2(x, y)[1]
  *     else:
  *         return x - y * (x // y)             # <<<<<<<<<<<<<<
@@ -19880,12 +19925,12 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_mod2(PyObject *__pyx_v_x, stru
  */
   /*else*/ {
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_2 = PyNumber_FloorDivide(__pyx_v_x, ((PyObject *)__pyx_v_y)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 1299, __pyx_L1_error)
+    __pyx_t_2 = PyNumber_FloorDivide(__pyx_v_x, ((PyObject *)__pyx_v_y)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 1302, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_1 = PyNumber_Multiply(((PyObject *)__pyx_v_y), __pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1299, __pyx_L1_error)
+    __pyx_t_1 = PyNumber_Multiply(((PyObject *)__pyx_v_y), __pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1302, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    __pyx_t_2 = PyNumber_Subtract(__pyx_v_x, __pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 1299, __pyx_L1_error)
+    __pyx_t_2 = PyNumber_Subtract(__pyx_v_x, __pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 1302, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
     __pyx_r = __pyx_t_2;
@@ -19893,7 +19938,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_mod2(PyObject *__pyx_v_x, stru
     goto __pyx_L0;
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":1294
+  /* "decimalfp/_cdecimalfp.pyx":1297
  * 
  * 
  * cdef object mod2(object x, Decimal y):             # <<<<<<<<<<<<<<
@@ -19913,7 +19958,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_mod2(PyObject *__pyx_v_x, stru
   return __pyx_r;
 }
 
-/* "decimalfp/_cdecimalfp.pyx":1302
+/* "decimalfp/_cdecimalfp.pyx":1305
  * 
  * 
  * cdef object pow1(Decimal x, object y):             # <<<<<<<<<<<<<<
@@ -19935,34 +19980,34 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_pow1(struct __pyx_obj_9decimal
   double __pyx_t_7;
   __Pyx_RefNannySetupContext("pow1", 0);
 
-  /* "decimalfp/_cdecimalfp.pyx":1306
+  /* "decimalfp/_cdecimalfp.pyx":1309
  *     cdef int exp
  *     cdef Decimal result
  *     if isinstance(y, Integral):             # <<<<<<<<<<<<<<
  *         exp = int(y)
  *         if exp >= 0:
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_Integral); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1306, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_Integral); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1309, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = PyObject_IsInstance(__pyx_v_y, __pyx_t_1); if (unlikely(__pyx_t_2 == ((int)-1))) __PYX_ERR(0, 1306, __pyx_L1_error)
+  __pyx_t_2 = PyObject_IsInstance(__pyx_v_y, __pyx_t_1); if (unlikely(__pyx_t_2 == ((int)-1))) __PYX_ERR(0, 1309, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_t_3 = (__pyx_t_2 != 0);
   if (__pyx_t_3) {
 
-    /* "decimalfp/_cdecimalfp.pyx":1307
+    /* "decimalfp/_cdecimalfp.pyx":1310
  *     cdef Decimal result
  *     if isinstance(y, Integral):
  *         exp = int(y)             # <<<<<<<<<<<<<<
  *         if exp >= 0:
  *             result = Decimal()
  */
-    __pyx_t_1 = __Pyx_PyNumber_Int(__pyx_v_y); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1307, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyNumber_Int(__pyx_v_y); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1310, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_4 = __Pyx_PyInt_As_int(__pyx_t_1); if (unlikely((__pyx_t_4 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 1307, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_PyInt_As_int(__pyx_t_1); if (unlikely((__pyx_t_4 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 1310, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
     __pyx_v_exp = __pyx_t_4;
 
-    /* "decimalfp/_cdecimalfp.pyx":1308
+    /* "decimalfp/_cdecimalfp.pyx":1311
  *     if isinstance(y, Integral):
  *         exp = int(y)
  *         if exp >= 0:             # <<<<<<<<<<<<<<
@@ -19972,28 +20017,28 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_pow1(struct __pyx_obj_9decimal
     __pyx_t_3 = ((__pyx_v_exp >= 0) != 0);
     if (__pyx_t_3) {
 
-      /* "decimalfp/_cdecimalfp.pyx":1309
+      /* "decimalfp/_cdecimalfp.pyx":1312
  *         exp = int(y)
  *         if exp >= 0:
  *             result = Decimal()             # <<<<<<<<<<<<<<
  *             result._value = x._value ** exp
  *             result._precision = x._precision * exp
  */
-      __pyx_t_1 = __Pyx_PyObject_CallNoArg(((PyObject *)__pyx_ptype_9decimalfp_11_cdecimalfp_Decimal)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1309, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyObject_CallNoArg(((PyObject *)__pyx_ptype_9decimalfp_11_cdecimalfp_Decimal)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1312, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_1);
       __pyx_v_result = ((struct __pyx_obj_9decimalfp_11_cdecimalfp_Decimal *)__pyx_t_1);
       __pyx_t_1 = 0;
 
-      /* "decimalfp/_cdecimalfp.pyx":1310
+      /* "decimalfp/_cdecimalfp.pyx":1313
  *         if exp >= 0:
  *             result = Decimal()
  *             result._value = x._value ** exp             # <<<<<<<<<<<<<<
  *             result._precision = x._precision * exp
  *             return result
  */
-      __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_exp); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1310, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_exp); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1313, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_1);
-      __pyx_t_5 = PyNumber_Power(__pyx_v_x->_value, __pyx_t_1, Py_None); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1310, __pyx_L1_error)
+      __pyx_t_5 = PyNumber_Power(__pyx_v_x->_value, __pyx_t_1, Py_None); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1313, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_5);
       __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
       __Pyx_GIVEREF(__pyx_t_5);
@@ -20002,7 +20047,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_pow1(struct __pyx_obj_9decimal
       __pyx_v_result->_value = __pyx_t_5;
       __pyx_t_5 = 0;
 
-      /* "decimalfp/_cdecimalfp.pyx":1311
+      /* "decimalfp/_cdecimalfp.pyx":1314
  *             result = Decimal()
  *             result._value = x._value ** exp
  *             result._precision = x._precision * exp             # <<<<<<<<<<<<<<
@@ -20011,7 +20056,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_pow1(struct __pyx_obj_9decimal
  */
       __pyx_v_result->_precision = (__pyx_v_x->_precision * __pyx_v_exp);
 
-      /* "decimalfp/_cdecimalfp.pyx":1312
+      /* "decimalfp/_cdecimalfp.pyx":1315
  *             result._value = x._value ** exp
  *             result._precision = x._precision * exp
  *             return result             # <<<<<<<<<<<<<<
@@ -20023,7 +20068,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_pow1(struct __pyx_obj_9decimal
       __pyx_r = ((PyObject *)__pyx_v_result);
       goto __pyx_L0;
 
-      /* "decimalfp/_cdecimalfp.pyx":1308
+      /* "decimalfp/_cdecimalfp.pyx":1311
  *     if isinstance(y, Integral):
  *         exp = int(y)
  *         if exp >= 0:             # <<<<<<<<<<<<<<
@@ -20032,7 +20077,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_pow1(struct __pyx_obj_9decimal
  */
     }
 
-    /* "decimalfp/_cdecimalfp.pyx":1314
+    /* "decimalfp/_cdecimalfp.pyx":1317
  *             return result
  *         else:
  *             return 1 / pow1(x, -y)             # <<<<<<<<<<<<<<
@@ -20041,12 +20086,12 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_pow1(struct __pyx_obj_9decimal
  */
     /*else*/ {
       __Pyx_XDECREF(__pyx_r);
-      __pyx_t_5 = PyNumber_Negative(__pyx_v_y); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1314, __pyx_L1_error)
+      __pyx_t_5 = PyNumber_Negative(__pyx_v_y); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1317, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_5);
-      __pyx_t_1 = __pyx_f_9decimalfp_11_cdecimalfp_pow1(__pyx_v_x, __pyx_t_5); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1314, __pyx_L1_error)
+      __pyx_t_1 = __pyx_f_9decimalfp_11_cdecimalfp_pow1(__pyx_v_x, __pyx_t_5); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1317, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_1);
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-      __pyx_t_5 = __Pyx_PyNumber_Divide(__pyx_int_1, __pyx_t_1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1314, __pyx_L1_error)
+      __pyx_t_5 = __Pyx_PyNumber_Divide(__pyx_int_1, __pyx_t_1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1317, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_5);
       __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
       __pyx_r = __pyx_t_5;
@@ -20054,7 +20099,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_pow1(struct __pyx_obj_9decimal
       goto __pyx_L0;
     }
 
-    /* "decimalfp/_cdecimalfp.pyx":1306
+    /* "decimalfp/_cdecimalfp.pyx":1309
  *     cdef int exp
  *     cdef Decimal result
  *     if isinstance(y, Integral):             # <<<<<<<<<<<<<<
@@ -20063,37 +20108,37 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_pow1(struct __pyx_obj_9decimal
  */
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":1315
+  /* "decimalfp/_cdecimalfp.pyx":1318
  *         else:
  *             return 1 / pow1(x, -y)
  *     elif isinstance(y, Rational):             # <<<<<<<<<<<<<<
  *         if y.denominator == 1:
  *             return x ** y.numerator
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_5, __pyx_n_s_Rational); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1315, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_5, __pyx_n_s_Rational); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1318, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_3 = PyObject_IsInstance(__pyx_v_y, __pyx_t_5); if (unlikely(__pyx_t_3 == ((int)-1))) __PYX_ERR(0, 1315, __pyx_L1_error)
+  __pyx_t_3 = PyObject_IsInstance(__pyx_v_y, __pyx_t_5); if (unlikely(__pyx_t_3 == ((int)-1))) __PYX_ERR(0, 1318, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   __pyx_t_2 = (__pyx_t_3 != 0);
   if (__pyx_t_2) {
 
-    /* "decimalfp/_cdecimalfp.pyx":1316
+    /* "decimalfp/_cdecimalfp.pyx":1319
  *             return 1 / pow1(x, -y)
  *     elif isinstance(y, Rational):
  *         if y.denominator == 1:             # <<<<<<<<<<<<<<
  *             return x ** y.numerator
  *         else:
  */
-    __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_v_y, __pyx_n_s_denominator); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1316, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_v_y, __pyx_n_s_denominator); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1319, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
-    __pyx_t_1 = __Pyx_PyInt_EqObjC(__pyx_t_5, __pyx_int_1, 1, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1316, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyInt_EqObjC(__pyx_t_5, __pyx_int_1, 1, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1319, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-    __pyx_t_2 = __Pyx_PyObject_IsTrue(__pyx_t_1); if (unlikely(__pyx_t_2 < 0)) __PYX_ERR(0, 1316, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_PyObject_IsTrue(__pyx_t_1); if (unlikely(__pyx_t_2 < 0)) __PYX_ERR(0, 1319, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
     if (__pyx_t_2) {
 
-      /* "decimalfp/_cdecimalfp.pyx":1317
+      /* "decimalfp/_cdecimalfp.pyx":1320
  *     elif isinstance(y, Rational):
  *         if y.denominator == 1:
  *             return x ** y.numerator             # <<<<<<<<<<<<<<
@@ -20101,16 +20146,16 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_pow1(struct __pyx_obj_9decimal
  *             return float(x) ** float(y)
  */
       __Pyx_XDECREF(__pyx_r);
-      __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_y, __pyx_n_s_numerator); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1317, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_y, __pyx_n_s_numerator); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1320, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_1);
-      __pyx_t_5 = PyNumber_Power(((PyObject *)__pyx_v_x), __pyx_t_1, Py_None); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1317, __pyx_L1_error)
+      __pyx_t_5 = PyNumber_Power(((PyObject *)__pyx_v_x), __pyx_t_1, Py_None); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1320, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_5);
       __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
       __pyx_r = __pyx_t_5;
       __pyx_t_5 = 0;
       goto __pyx_L0;
 
-      /* "decimalfp/_cdecimalfp.pyx":1316
+      /* "decimalfp/_cdecimalfp.pyx":1319
  *             return 1 / pow1(x, -y)
  *     elif isinstance(y, Rational):
  *         if y.denominator == 1:             # <<<<<<<<<<<<<<
@@ -20119,7 +20164,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_pow1(struct __pyx_obj_9decimal
  */
     }
 
-    /* "decimalfp/_cdecimalfp.pyx":1319
+    /* "decimalfp/_cdecimalfp.pyx":1322
  *             return x ** y.numerator
  *         else:
  *             return float(x) ** float(y)             # <<<<<<<<<<<<<<
@@ -20128,16 +20173,16 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_pow1(struct __pyx_obj_9decimal
  */
     /*else*/ {
       __Pyx_XDECREF(__pyx_r);
-      __pyx_t_6 = __Pyx_PyObject_AsDouble(((PyObject *)__pyx_v_x)); if (unlikely(__pyx_t_6 == ((double)((double)-1)) && PyErr_Occurred())) __PYX_ERR(0, 1319, __pyx_L1_error)
-      __pyx_t_7 = __Pyx_PyObject_AsDouble(__pyx_v_y); if (unlikely(__pyx_t_7 == ((double)((double)-1)) && PyErr_Occurred())) __PYX_ERR(0, 1319, __pyx_L1_error)
-      __pyx_t_5 = PyFloat_FromDouble(pow(__pyx_t_6, __pyx_t_7)); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1319, __pyx_L1_error)
+      __pyx_t_6 = __Pyx_PyObject_AsDouble(((PyObject *)__pyx_v_x)); if (unlikely(__pyx_t_6 == ((double)((double)-1)) && PyErr_Occurred())) __PYX_ERR(0, 1322, __pyx_L1_error)
+      __pyx_t_7 = __Pyx_PyObject_AsDouble(__pyx_v_y); if (unlikely(__pyx_t_7 == ((double)((double)-1)) && PyErr_Occurred())) __PYX_ERR(0, 1322, __pyx_L1_error)
+      __pyx_t_5 = PyFloat_FromDouble(pow(__pyx_t_6, __pyx_t_7)); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1322, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_5);
       __pyx_r = __pyx_t_5;
       __pyx_t_5 = 0;
       goto __pyx_L0;
     }
 
-    /* "decimalfp/_cdecimalfp.pyx":1315
+    /* "decimalfp/_cdecimalfp.pyx":1318
  *         else:
  *             return 1 / pow1(x, -y)
  *     elif isinstance(y, Rational):             # <<<<<<<<<<<<<<
@@ -20146,7 +20191,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_pow1(struct __pyx_obj_9decimal
  */
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":1321
+  /* "decimalfp/_cdecimalfp.pyx":1324
  *             return float(x) ** float(y)
  *     else:
  *         return float(x) ** y             # <<<<<<<<<<<<<<
@@ -20155,9 +20200,9 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_pow1(struct __pyx_obj_9decimal
  */
   /*else*/ {
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_5 = __Pyx_PyNumber_Float(((PyObject *)__pyx_v_x)); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1321, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_PyNumber_Float(((PyObject *)__pyx_v_x)); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 1324, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
-    __pyx_t_1 = PyNumber_Power(__pyx_t_5, __pyx_v_y, Py_None); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1321, __pyx_L1_error)
+    __pyx_t_1 = PyNumber_Power(__pyx_t_5, __pyx_v_y, Py_None); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1324, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     __pyx_r = __pyx_t_1;
@@ -20165,7 +20210,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_pow1(struct __pyx_obj_9decimal
     goto __pyx_L0;
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":1302
+  /* "decimalfp/_cdecimalfp.pyx":1305
  * 
  * 
  * cdef object pow1(Decimal x, object y):             # <<<<<<<<<<<<<<
@@ -20186,7 +20231,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_pow1(struct __pyx_obj_9decimal
   return __pyx_r;
 }
 
-/* "decimalfp/_cdecimalfp.pyx":1324
+/* "decimalfp/_cdecimalfp.pyx":1327
  * 
  * 
  * cdef object pow2(object x, Decimal y):             # <<<<<<<<<<<<<<
@@ -20202,23 +20247,23 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_pow2(PyObject *__pyx_v_x, stru
   int __pyx_t_3;
   __Pyx_RefNannySetupContext("pow2", 0);
 
-  /* "decimalfp/_cdecimalfp.pyx":1326
+  /* "decimalfp/_cdecimalfp.pyx":1329
  * cdef object pow2(object x, Decimal y):
  *     """x ** y"""
  *     if y.denominator == 1:             # <<<<<<<<<<<<<<
  *         return x ** y.numerator
  *     return x ** float(y)
  */
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_y), __pyx_n_s_denominator); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1326, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_y), __pyx_n_s_denominator); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1329, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyInt_EqObjC(__pyx_t_1, __pyx_int_1, 1, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 1326, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyInt_EqObjC(__pyx_t_1, __pyx_int_1, 1, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 1329, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_3 = __Pyx_PyObject_IsTrue(__pyx_t_2); if (unlikely(__pyx_t_3 < 0)) __PYX_ERR(0, 1326, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_IsTrue(__pyx_t_2); if (unlikely(__pyx_t_3 < 0)) __PYX_ERR(0, 1329, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   if (__pyx_t_3) {
 
-    /* "decimalfp/_cdecimalfp.pyx":1327
+    /* "decimalfp/_cdecimalfp.pyx":1330
  *     """x ** y"""
  *     if y.denominator == 1:
  *         return x ** y.numerator             # <<<<<<<<<<<<<<
@@ -20226,16 +20271,16 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_pow2(PyObject *__pyx_v_x, stru
  * 
  */
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_2 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_y), __pyx_n_s_numerator); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 1327, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_y), __pyx_n_s_numerator); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 1330, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_1 = PyNumber_Power(__pyx_v_x, __pyx_t_2, Py_None); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1327, __pyx_L1_error)
+    __pyx_t_1 = PyNumber_Power(__pyx_v_x, __pyx_t_2, Py_None); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1330, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     __pyx_r = __pyx_t_1;
     __pyx_t_1 = 0;
     goto __pyx_L0;
 
-    /* "decimalfp/_cdecimalfp.pyx":1326
+    /* "decimalfp/_cdecimalfp.pyx":1329
  * cdef object pow2(object x, Decimal y):
  *     """x ** y"""
  *     if y.denominator == 1:             # <<<<<<<<<<<<<<
@@ -20244,7 +20289,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_pow2(PyObject *__pyx_v_x, stru
  */
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":1328
+  /* "decimalfp/_cdecimalfp.pyx":1331
  *     if y.denominator == 1:
  *         return x ** y.numerator
  *     return x ** float(y)             # <<<<<<<<<<<<<<
@@ -20252,16 +20297,16 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_pow2(PyObject *__pyx_v_x, stru
  * 
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __Pyx_PyNumber_Float(((PyObject *)__pyx_v_y)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1328, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyNumber_Float(((PyObject *)__pyx_v_y)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1331, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = PyNumber_Power(__pyx_v_x, __pyx_t_1, Py_None); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 1328, __pyx_L1_error)
+  __pyx_t_2 = PyNumber_Power(__pyx_v_x, __pyx_t_1, Py_None); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 1331, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_r = __pyx_t_2;
   __pyx_t_2 = 0;
   goto __pyx_L0;
 
-  /* "decimalfp/_cdecimalfp.pyx":1324
+  /* "decimalfp/_cdecimalfp.pyx":1327
  * 
  * 
  * cdef object pow2(object x, Decimal y):             # <<<<<<<<<<<<<<
@@ -20281,7 +20326,7 @@ static PyObject *__pyx_f_9decimalfp_11_cdecimalfp_pow2(PyObject *__pyx_v_x, stru
   return __pyx_r;
 }
 
-/* "decimalfp/_cdecimalfp.pyx":1333
+/* "decimalfp/_cdecimalfp.pyx":1336
  * # helper for different rounding modes
  * 
  * cdef int _round(q, r, y, rounding=None):             # <<<<<<<<<<<<<<
@@ -20308,7 +20353,7 @@ static int __pyx_f_9decimalfp_11_cdecimalfp__round(PyObject *__pyx_v_q, PyObject
   }
   __Pyx_INCREF(__pyx_v_rounding);
 
-  /* "decimalfp/_cdecimalfp.pyx":1334
+  /* "decimalfp/_cdecimalfp.pyx":1337
  * 
  * cdef int _round(q, r, y, rounding=None):
  *     if rounding is None:             # <<<<<<<<<<<<<<
@@ -20319,14 +20364,14 @@ static int __pyx_f_9decimalfp_11_cdecimalfp__round(PyObject *__pyx_v_q, PyObject
   __pyx_t_2 = (__pyx_t_1 != 0);
   if (__pyx_t_2) {
 
-    /* "decimalfp/_cdecimalfp.pyx":1335
+    /* "decimalfp/_cdecimalfp.pyx":1338
  * cdef int _round(q, r, y, rounding=None):
  *     if rounding is None:
  *         rounding = get_rounding()             # <<<<<<<<<<<<<<
  *     if rounding == ROUNDING.ROUND_HALF_UP:
  *         # Round 5 up (away from 0)
  */
-    __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_get_rounding); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1335, __pyx_L1_error)
+    __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_get_rounding); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1338, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     __pyx_t_5 = NULL;
     if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_4))) {
@@ -20340,13 +20385,13 @@ static int __pyx_f_9decimalfp_11_cdecimalfp__round(PyObject *__pyx_v_q, PyObject
     }
     __pyx_t_3 = (__pyx_t_5) ? __Pyx_PyObject_CallOneArg(__pyx_t_4, __pyx_t_5) : __Pyx_PyObject_CallNoArg(__pyx_t_4);
     __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
-    if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1335, __pyx_L1_error)
+    if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1338, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     __Pyx_DECREF_SET(__pyx_v_rounding, __pyx_t_3);
     __pyx_t_3 = 0;
 
-    /* "decimalfp/_cdecimalfp.pyx":1334
+    /* "decimalfp/_cdecimalfp.pyx":1337
  * 
  * cdef int _round(q, r, y, rounding=None):
  *     if rounding is None:             # <<<<<<<<<<<<<<
@@ -20355,74 +20400,74 @@ static int __pyx_f_9decimalfp_11_cdecimalfp__round(PyObject *__pyx_v_q, PyObject
  */
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":1336
+  /* "decimalfp/_cdecimalfp.pyx":1339
  *     if rounding is None:
  *         rounding = get_rounding()
  *     if rounding == ROUNDING.ROUND_HALF_UP:             # <<<<<<<<<<<<<<
  *         # Round 5 up (away from 0)
  *         # |remainder| > |divisor|/2 or
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_ROUNDING); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1336, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_ROUNDING); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1339, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_ROUND_HALF_UP); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1336, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_ROUND_HALF_UP); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1339, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_3 = PyObject_RichCompare(__pyx_v_rounding, __pyx_t_4, Py_EQ); __Pyx_XGOTREF(__pyx_t_3); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1336, __pyx_L1_error)
+  __pyx_t_3 = PyObject_RichCompare(__pyx_v_rounding, __pyx_t_4, Py_EQ); __Pyx_XGOTREF(__pyx_t_3); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1339, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_2 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely(__pyx_t_2 < 0)) __PYX_ERR(0, 1336, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely(__pyx_t_2 < 0)) __PYX_ERR(0, 1339, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   if (__pyx_t_2) {
 
-    /* "decimalfp/_cdecimalfp.pyx":1341
+    /* "decimalfp/_cdecimalfp.pyx":1344
  *         # |remainder| = |divisor|/2 and quotient >= 0
  *         # => add 1
  *         ar, ay = abs(2 * r), abs(y)             # <<<<<<<<<<<<<<
  *         if ar > ay or (ar == ay and q >= 0):
  *             return 1
  */
-    __pyx_t_3 = PyNumber_Multiply(__pyx_int_2, __pyx_v_r); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1341, __pyx_L1_error)
+    __pyx_t_3 = PyNumber_Multiply(__pyx_int_2, __pyx_v_r); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1344, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_4 = __Pyx_PyNumber_Absolute(__pyx_t_3); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1341, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_PyNumber_Absolute(__pyx_t_3); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1344, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    __pyx_t_3 = __Pyx_PyNumber_Absolute(__pyx_v_y); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1341, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyNumber_Absolute(__pyx_v_y); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1344, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __pyx_v_ar = __pyx_t_4;
     __pyx_t_4 = 0;
     __pyx_v_ay = __pyx_t_3;
     __pyx_t_3 = 0;
 
-    /* "decimalfp/_cdecimalfp.pyx":1342
+    /* "decimalfp/_cdecimalfp.pyx":1345
  *         # => add 1
  *         ar, ay = abs(2 * r), abs(y)
  *         if ar > ay or (ar == ay and q >= 0):             # <<<<<<<<<<<<<<
  *             return 1
  *         else:
  */
-    __pyx_t_3 = PyObject_RichCompare(__pyx_v_ar, __pyx_v_ay, Py_GT); __Pyx_XGOTREF(__pyx_t_3); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1342, __pyx_L1_error)
-    __pyx_t_1 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely(__pyx_t_1 < 0)) __PYX_ERR(0, 1342, __pyx_L1_error)
+    __pyx_t_3 = PyObject_RichCompare(__pyx_v_ar, __pyx_v_ay, Py_GT); __Pyx_XGOTREF(__pyx_t_3); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1345, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely(__pyx_t_1 < 0)) __PYX_ERR(0, 1345, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     if (!__pyx_t_1) {
     } else {
       __pyx_t_2 = __pyx_t_1;
       goto __pyx_L6_bool_binop_done;
     }
-    __pyx_t_3 = PyObject_RichCompare(__pyx_v_ar, __pyx_v_ay, Py_EQ); __Pyx_XGOTREF(__pyx_t_3); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1342, __pyx_L1_error)
-    __pyx_t_1 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely(__pyx_t_1 < 0)) __PYX_ERR(0, 1342, __pyx_L1_error)
+    __pyx_t_3 = PyObject_RichCompare(__pyx_v_ar, __pyx_v_ay, Py_EQ); __Pyx_XGOTREF(__pyx_t_3); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1345, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely(__pyx_t_1 < 0)) __PYX_ERR(0, 1345, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     if (__pyx_t_1) {
     } else {
       __pyx_t_2 = __pyx_t_1;
       goto __pyx_L6_bool_binop_done;
     }
-    __pyx_t_3 = PyObject_RichCompare(__pyx_v_q, __pyx_int_0, Py_GE); __Pyx_XGOTREF(__pyx_t_3); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1342, __pyx_L1_error)
-    __pyx_t_1 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely(__pyx_t_1 < 0)) __PYX_ERR(0, 1342, __pyx_L1_error)
+    __pyx_t_3 = PyObject_RichCompare(__pyx_v_q, __pyx_int_0, Py_GE); __Pyx_XGOTREF(__pyx_t_3); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1345, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely(__pyx_t_1 < 0)) __PYX_ERR(0, 1345, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     __pyx_t_2 = __pyx_t_1;
     __pyx_L6_bool_binop_done:;
     if (__pyx_t_2) {
 
-      /* "decimalfp/_cdecimalfp.pyx":1343
+      /* "decimalfp/_cdecimalfp.pyx":1346
  *         ar, ay = abs(2 * r), abs(y)
  *         if ar > ay or (ar == ay and q >= 0):
  *             return 1             # <<<<<<<<<<<<<<
@@ -20432,7 +20477,7 @@ static int __pyx_f_9decimalfp_11_cdecimalfp__round(PyObject *__pyx_v_q, PyObject
       __pyx_r = 1;
       goto __pyx_L0;
 
-      /* "decimalfp/_cdecimalfp.pyx":1342
+      /* "decimalfp/_cdecimalfp.pyx":1345
  *         # => add 1
  *         ar, ay = abs(2 * r), abs(y)
  *         if ar > ay or (ar == ay and q >= 0):             # <<<<<<<<<<<<<<
@@ -20441,7 +20486,7 @@ static int __pyx_f_9decimalfp_11_cdecimalfp__round(PyObject *__pyx_v_q, PyObject
  */
     }
 
-    /* "decimalfp/_cdecimalfp.pyx":1345
+    /* "decimalfp/_cdecimalfp.pyx":1348
  *             return 1
  *         else:
  *             return 0             # <<<<<<<<<<<<<<
@@ -20453,7 +20498,7 @@ static int __pyx_f_9decimalfp_11_cdecimalfp__round(PyObject *__pyx_v_q, PyObject
       goto __pyx_L0;
     }
 
-    /* "decimalfp/_cdecimalfp.pyx":1336
+    /* "decimalfp/_cdecimalfp.pyx":1339
  *     if rounding is None:
  *         rounding = get_rounding()
  *     if rounding == ROUNDING.ROUND_HALF_UP:             # <<<<<<<<<<<<<<
@@ -20462,78 +20507,78 @@ static int __pyx_f_9decimalfp_11_cdecimalfp__round(PyObject *__pyx_v_q, PyObject
  */
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":1346
+  /* "decimalfp/_cdecimalfp.pyx":1349
  *         else:
  *             return 0
  *     if rounding == ROUNDING.ROUND_HALF_EVEN:             # <<<<<<<<<<<<<<
  *         # Round 5 to even, rest to nearest
  *         # |remainder| > |divisor|/2 or
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_ROUNDING); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1346, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_ROUNDING); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1349, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_ROUND_HALF_EVEN); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1346, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_ROUND_HALF_EVEN); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1349, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_3 = PyObject_RichCompare(__pyx_v_rounding, __pyx_t_4, Py_EQ); __Pyx_XGOTREF(__pyx_t_3); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1346, __pyx_L1_error)
+  __pyx_t_3 = PyObject_RichCompare(__pyx_v_rounding, __pyx_t_4, Py_EQ); __Pyx_XGOTREF(__pyx_t_3); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1349, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_2 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely(__pyx_t_2 < 0)) __PYX_ERR(0, 1346, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely(__pyx_t_2 < 0)) __PYX_ERR(0, 1349, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   if (__pyx_t_2) {
 
-    /* "decimalfp/_cdecimalfp.pyx":1351
+    /* "decimalfp/_cdecimalfp.pyx":1354
  *         # |remainder| = |divisor|/2 and quotient not even
  *         # => add 1
  *         ar, ay = abs(2 * r), abs(y)             # <<<<<<<<<<<<<<
  *         if ar > ay or (ar == ay and q % 2 != 0):
  *             return 1
  */
-    __pyx_t_3 = PyNumber_Multiply(__pyx_int_2, __pyx_v_r); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1351, __pyx_L1_error)
+    __pyx_t_3 = PyNumber_Multiply(__pyx_int_2, __pyx_v_r); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1354, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_4 = __Pyx_PyNumber_Absolute(__pyx_t_3); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1351, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_PyNumber_Absolute(__pyx_t_3); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1354, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    __pyx_t_3 = __Pyx_PyNumber_Absolute(__pyx_v_y); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1351, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyNumber_Absolute(__pyx_v_y); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1354, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __pyx_v_ar = __pyx_t_4;
     __pyx_t_4 = 0;
     __pyx_v_ay = __pyx_t_3;
     __pyx_t_3 = 0;
 
-    /* "decimalfp/_cdecimalfp.pyx":1352
+    /* "decimalfp/_cdecimalfp.pyx":1355
  *         # => add 1
  *         ar, ay = abs(2 * r), abs(y)
  *         if ar > ay or (ar == ay and q % 2 != 0):             # <<<<<<<<<<<<<<
  *             return 1
  *         else:
  */
-    __pyx_t_3 = PyObject_RichCompare(__pyx_v_ar, __pyx_v_ay, Py_GT); __Pyx_XGOTREF(__pyx_t_3); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1352, __pyx_L1_error)
-    __pyx_t_1 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely(__pyx_t_1 < 0)) __PYX_ERR(0, 1352, __pyx_L1_error)
+    __pyx_t_3 = PyObject_RichCompare(__pyx_v_ar, __pyx_v_ay, Py_GT); __Pyx_XGOTREF(__pyx_t_3); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1355, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely(__pyx_t_1 < 0)) __PYX_ERR(0, 1355, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     if (!__pyx_t_1) {
     } else {
       __pyx_t_2 = __pyx_t_1;
       goto __pyx_L11_bool_binop_done;
     }
-    __pyx_t_3 = PyObject_RichCompare(__pyx_v_ar, __pyx_v_ay, Py_EQ); __Pyx_XGOTREF(__pyx_t_3); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1352, __pyx_L1_error)
-    __pyx_t_1 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely(__pyx_t_1 < 0)) __PYX_ERR(0, 1352, __pyx_L1_error)
+    __pyx_t_3 = PyObject_RichCompare(__pyx_v_ar, __pyx_v_ay, Py_EQ); __Pyx_XGOTREF(__pyx_t_3); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1355, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely(__pyx_t_1 < 0)) __PYX_ERR(0, 1355, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     if (__pyx_t_1) {
     } else {
       __pyx_t_2 = __pyx_t_1;
       goto __pyx_L11_bool_binop_done;
     }
-    __pyx_t_3 = __Pyx_PyInt_RemainderObjC(__pyx_v_q, __pyx_int_2, 2, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1352, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyInt_RemainderObjC(__pyx_v_q, __pyx_int_2, 2, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1355, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_4 = __Pyx_PyInt_NeObjC(__pyx_t_3, __pyx_int_0, 0, 0); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1352, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_PyInt_NeObjC(__pyx_t_3, __pyx_int_0, 0, 0); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1355, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    __pyx_t_1 = __Pyx_PyObject_IsTrue(__pyx_t_4); if (unlikely(__pyx_t_1 < 0)) __PYX_ERR(0, 1352, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_IsTrue(__pyx_t_4); if (unlikely(__pyx_t_1 < 0)) __PYX_ERR(0, 1355, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     __pyx_t_2 = __pyx_t_1;
     __pyx_L11_bool_binop_done:;
     if (__pyx_t_2) {
 
-      /* "decimalfp/_cdecimalfp.pyx":1353
+      /* "decimalfp/_cdecimalfp.pyx":1356
  *         ar, ay = abs(2 * r), abs(y)
  *         if ar > ay or (ar == ay and q % 2 != 0):
  *             return 1             # <<<<<<<<<<<<<<
@@ -20543,7 +20588,7 @@ static int __pyx_f_9decimalfp_11_cdecimalfp__round(PyObject *__pyx_v_q, PyObject
       __pyx_r = 1;
       goto __pyx_L0;
 
-      /* "decimalfp/_cdecimalfp.pyx":1352
+      /* "decimalfp/_cdecimalfp.pyx":1355
  *         # => add 1
  *         ar, ay = abs(2 * r), abs(y)
  *         if ar > ay or (ar == ay and q % 2 != 0):             # <<<<<<<<<<<<<<
@@ -20552,7 +20597,7 @@ static int __pyx_f_9decimalfp_11_cdecimalfp__round(PyObject *__pyx_v_q, PyObject
  */
     }
 
-    /* "decimalfp/_cdecimalfp.pyx":1355
+    /* "decimalfp/_cdecimalfp.pyx":1358
  *             return 1
  *         else:
  *             return 0             # <<<<<<<<<<<<<<
@@ -20564,7 +20609,7 @@ static int __pyx_f_9decimalfp_11_cdecimalfp__round(PyObject *__pyx_v_q, PyObject
       goto __pyx_L0;
     }
 
-    /* "decimalfp/_cdecimalfp.pyx":1346
+    /* "decimalfp/_cdecimalfp.pyx":1349
  *         else:
  *             return 0
  *     if rounding == ROUNDING.ROUND_HALF_EVEN:             # <<<<<<<<<<<<<<
@@ -20573,74 +20618,74 @@ static int __pyx_f_9decimalfp_11_cdecimalfp__round(PyObject *__pyx_v_q, PyObject
  */
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":1356
+  /* "decimalfp/_cdecimalfp.pyx":1359
  *         else:
  *             return 0
  *     if rounding == ROUNDING.ROUND_HALF_DOWN:             # <<<<<<<<<<<<<<
  *         # Round 5 down
  *         # |remainder| > |divisor|/2 or
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_ROUNDING); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1356, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_ROUNDING); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1359, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_ROUND_HALF_DOWN); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1356, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_ROUND_HALF_DOWN); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1359, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_4 = PyObject_RichCompare(__pyx_v_rounding, __pyx_t_3, Py_EQ); __Pyx_XGOTREF(__pyx_t_4); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1356, __pyx_L1_error)
+  __pyx_t_4 = PyObject_RichCompare(__pyx_v_rounding, __pyx_t_3, Py_EQ); __Pyx_XGOTREF(__pyx_t_4); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1359, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_2 = __Pyx_PyObject_IsTrue(__pyx_t_4); if (unlikely(__pyx_t_2 < 0)) __PYX_ERR(0, 1356, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_IsTrue(__pyx_t_4); if (unlikely(__pyx_t_2 < 0)) __PYX_ERR(0, 1359, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   if (__pyx_t_2) {
 
-    /* "decimalfp/_cdecimalfp.pyx":1361
+    /* "decimalfp/_cdecimalfp.pyx":1364
  *         # |remainder| = |divisor|/2 and quotient < 0
  *         # => add 1
  *         ar, ay = abs(2 * r), abs(y)             # <<<<<<<<<<<<<<
  *         if ar > ay or (ar == ay and q < 0):
  *             return 1
  */
-    __pyx_t_4 = PyNumber_Multiply(__pyx_int_2, __pyx_v_r); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1361, __pyx_L1_error)
+    __pyx_t_4 = PyNumber_Multiply(__pyx_int_2, __pyx_v_r); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1364, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
-    __pyx_t_3 = __Pyx_PyNumber_Absolute(__pyx_t_4); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1361, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyNumber_Absolute(__pyx_t_4); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1364, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-    __pyx_t_4 = __Pyx_PyNumber_Absolute(__pyx_v_y); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1361, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_PyNumber_Absolute(__pyx_v_y); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1364, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     __pyx_v_ar = __pyx_t_3;
     __pyx_t_3 = 0;
     __pyx_v_ay = __pyx_t_4;
     __pyx_t_4 = 0;
 
-    /* "decimalfp/_cdecimalfp.pyx":1362
+    /* "decimalfp/_cdecimalfp.pyx":1365
  *         # => add 1
  *         ar, ay = abs(2 * r), abs(y)
  *         if ar > ay or (ar == ay and q < 0):             # <<<<<<<<<<<<<<
  *             return 1
  *         else:
  */
-    __pyx_t_4 = PyObject_RichCompare(__pyx_v_ar, __pyx_v_ay, Py_GT); __Pyx_XGOTREF(__pyx_t_4); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1362, __pyx_L1_error)
-    __pyx_t_1 = __Pyx_PyObject_IsTrue(__pyx_t_4); if (unlikely(__pyx_t_1 < 0)) __PYX_ERR(0, 1362, __pyx_L1_error)
+    __pyx_t_4 = PyObject_RichCompare(__pyx_v_ar, __pyx_v_ay, Py_GT); __Pyx_XGOTREF(__pyx_t_4); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1365, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_IsTrue(__pyx_t_4); if (unlikely(__pyx_t_1 < 0)) __PYX_ERR(0, 1365, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     if (!__pyx_t_1) {
     } else {
       __pyx_t_2 = __pyx_t_1;
       goto __pyx_L16_bool_binop_done;
     }
-    __pyx_t_4 = PyObject_RichCompare(__pyx_v_ar, __pyx_v_ay, Py_EQ); __Pyx_XGOTREF(__pyx_t_4); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1362, __pyx_L1_error)
-    __pyx_t_1 = __Pyx_PyObject_IsTrue(__pyx_t_4); if (unlikely(__pyx_t_1 < 0)) __PYX_ERR(0, 1362, __pyx_L1_error)
+    __pyx_t_4 = PyObject_RichCompare(__pyx_v_ar, __pyx_v_ay, Py_EQ); __Pyx_XGOTREF(__pyx_t_4); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1365, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_IsTrue(__pyx_t_4); if (unlikely(__pyx_t_1 < 0)) __PYX_ERR(0, 1365, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     if (__pyx_t_1) {
     } else {
       __pyx_t_2 = __pyx_t_1;
       goto __pyx_L16_bool_binop_done;
     }
-    __pyx_t_4 = PyObject_RichCompare(__pyx_v_q, __pyx_int_0, Py_LT); __Pyx_XGOTREF(__pyx_t_4); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1362, __pyx_L1_error)
-    __pyx_t_1 = __Pyx_PyObject_IsTrue(__pyx_t_4); if (unlikely(__pyx_t_1 < 0)) __PYX_ERR(0, 1362, __pyx_L1_error)
+    __pyx_t_4 = PyObject_RichCompare(__pyx_v_q, __pyx_int_0, Py_LT); __Pyx_XGOTREF(__pyx_t_4); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1365, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_IsTrue(__pyx_t_4); if (unlikely(__pyx_t_1 < 0)) __PYX_ERR(0, 1365, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     __pyx_t_2 = __pyx_t_1;
     __pyx_L16_bool_binop_done:;
     if (__pyx_t_2) {
 
-      /* "decimalfp/_cdecimalfp.pyx":1363
+      /* "decimalfp/_cdecimalfp.pyx":1366
  *         ar, ay = abs(2 * r), abs(y)
  *         if ar > ay or (ar == ay and q < 0):
  *             return 1             # <<<<<<<<<<<<<<
@@ -20650,7 +20695,7 @@ static int __pyx_f_9decimalfp_11_cdecimalfp__round(PyObject *__pyx_v_q, PyObject
       __pyx_r = 1;
       goto __pyx_L0;
 
-      /* "decimalfp/_cdecimalfp.pyx":1362
+      /* "decimalfp/_cdecimalfp.pyx":1365
  *         # => add 1
  *         ar, ay = abs(2 * r), abs(y)
  *         if ar > ay or (ar == ay and q < 0):             # <<<<<<<<<<<<<<
@@ -20659,7 +20704,7 @@ static int __pyx_f_9decimalfp_11_cdecimalfp__round(PyObject *__pyx_v_q, PyObject
  */
     }
 
-    /* "decimalfp/_cdecimalfp.pyx":1365
+    /* "decimalfp/_cdecimalfp.pyx":1368
  *             return 1
  *         else:
  *             return 0             # <<<<<<<<<<<<<<
@@ -20671,7 +20716,7 @@ static int __pyx_f_9decimalfp_11_cdecimalfp__round(PyObject *__pyx_v_q, PyObject
       goto __pyx_L0;
     }
 
-    /* "decimalfp/_cdecimalfp.pyx":1356
+    /* "decimalfp/_cdecimalfp.pyx":1359
  *         else:
  *             return 0
  *     if rounding == ROUNDING.ROUND_HALF_DOWN:             # <<<<<<<<<<<<<<
@@ -20680,37 +20725,37 @@ static int __pyx_f_9decimalfp_11_cdecimalfp__round(PyObject *__pyx_v_q, PyObject
  */
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":1366
+  /* "decimalfp/_cdecimalfp.pyx":1369
  *         else:
  *             return 0
  *     if rounding == ROUNDING.ROUND_DOWN:             # <<<<<<<<<<<<<<
  *         # Round towards 0 (aka truncate)
  *         # quotient negativ => add 1
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_ROUNDING); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1366, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_ROUNDING); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1369, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_ROUND_DOWN); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1366, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_ROUND_DOWN); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1369, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_4 = PyObject_RichCompare(__pyx_v_rounding, __pyx_t_3, Py_EQ); __Pyx_XGOTREF(__pyx_t_4); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1366, __pyx_L1_error)
+  __pyx_t_4 = PyObject_RichCompare(__pyx_v_rounding, __pyx_t_3, Py_EQ); __Pyx_XGOTREF(__pyx_t_4); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1369, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_2 = __Pyx_PyObject_IsTrue(__pyx_t_4); if (unlikely(__pyx_t_2 < 0)) __PYX_ERR(0, 1366, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_IsTrue(__pyx_t_4); if (unlikely(__pyx_t_2 < 0)) __PYX_ERR(0, 1369, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   if (__pyx_t_2) {
 
-    /* "decimalfp/_cdecimalfp.pyx":1369
+    /* "decimalfp/_cdecimalfp.pyx":1372
  *         # Round towards 0 (aka truncate)
  *         # quotient negativ => add 1
  *         if q < 0:             # <<<<<<<<<<<<<<
  *             return 1
  *         else:
  */
-    __pyx_t_4 = PyObject_RichCompare(__pyx_v_q, __pyx_int_0, Py_LT); __Pyx_XGOTREF(__pyx_t_4); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1369, __pyx_L1_error)
-    __pyx_t_2 = __Pyx_PyObject_IsTrue(__pyx_t_4); if (unlikely(__pyx_t_2 < 0)) __PYX_ERR(0, 1369, __pyx_L1_error)
+    __pyx_t_4 = PyObject_RichCompare(__pyx_v_q, __pyx_int_0, Py_LT); __Pyx_XGOTREF(__pyx_t_4); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1372, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_PyObject_IsTrue(__pyx_t_4); if (unlikely(__pyx_t_2 < 0)) __PYX_ERR(0, 1372, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     if (__pyx_t_2) {
 
-      /* "decimalfp/_cdecimalfp.pyx":1370
+      /* "decimalfp/_cdecimalfp.pyx":1373
  *         # quotient negativ => add 1
  *         if q < 0:
  *             return 1             # <<<<<<<<<<<<<<
@@ -20720,7 +20765,7 @@ static int __pyx_f_9decimalfp_11_cdecimalfp__round(PyObject *__pyx_v_q, PyObject
       __pyx_r = 1;
       goto __pyx_L0;
 
-      /* "decimalfp/_cdecimalfp.pyx":1369
+      /* "decimalfp/_cdecimalfp.pyx":1372
  *         # Round towards 0 (aka truncate)
  *         # quotient negativ => add 1
  *         if q < 0:             # <<<<<<<<<<<<<<
@@ -20729,7 +20774,7 @@ static int __pyx_f_9decimalfp_11_cdecimalfp__round(PyObject *__pyx_v_q, PyObject
  */
     }
 
-    /* "decimalfp/_cdecimalfp.pyx":1372
+    /* "decimalfp/_cdecimalfp.pyx":1375
  *             return 1
  *         else:
  *             return 0             # <<<<<<<<<<<<<<
@@ -20741,7 +20786,7 @@ static int __pyx_f_9decimalfp_11_cdecimalfp__round(PyObject *__pyx_v_q, PyObject
       goto __pyx_L0;
     }
 
-    /* "decimalfp/_cdecimalfp.pyx":1366
+    /* "decimalfp/_cdecimalfp.pyx":1369
  *         else:
  *             return 0
  *     if rounding == ROUNDING.ROUND_DOWN:             # <<<<<<<<<<<<<<
@@ -20750,37 +20795,37 @@ static int __pyx_f_9decimalfp_11_cdecimalfp__round(PyObject *__pyx_v_q, PyObject
  */
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":1373
+  /* "decimalfp/_cdecimalfp.pyx":1376
  *         else:
  *             return 0
  *     if rounding == ROUNDING.ROUND_UP:             # <<<<<<<<<<<<<<
  *         # Round away from 0
  *         # quotient not negativ => add 1
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_ROUNDING); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1373, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_ROUNDING); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1376, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_ROUND_UP); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1373, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_ROUND_UP); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1376, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_4 = PyObject_RichCompare(__pyx_v_rounding, __pyx_t_3, Py_EQ); __Pyx_XGOTREF(__pyx_t_4); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1373, __pyx_L1_error)
+  __pyx_t_4 = PyObject_RichCompare(__pyx_v_rounding, __pyx_t_3, Py_EQ); __Pyx_XGOTREF(__pyx_t_4); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1376, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_2 = __Pyx_PyObject_IsTrue(__pyx_t_4); if (unlikely(__pyx_t_2 < 0)) __PYX_ERR(0, 1373, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_IsTrue(__pyx_t_4); if (unlikely(__pyx_t_2 < 0)) __PYX_ERR(0, 1376, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   if (__pyx_t_2) {
 
-    /* "decimalfp/_cdecimalfp.pyx":1376
+    /* "decimalfp/_cdecimalfp.pyx":1379
  *         # Round away from 0
  *         # quotient not negativ => add 1
  *         if q >= 0:             # <<<<<<<<<<<<<<
  *             return 1
  *         else:
  */
-    __pyx_t_4 = PyObject_RichCompare(__pyx_v_q, __pyx_int_0, Py_GE); __Pyx_XGOTREF(__pyx_t_4); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1376, __pyx_L1_error)
-    __pyx_t_2 = __Pyx_PyObject_IsTrue(__pyx_t_4); if (unlikely(__pyx_t_2 < 0)) __PYX_ERR(0, 1376, __pyx_L1_error)
+    __pyx_t_4 = PyObject_RichCompare(__pyx_v_q, __pyx_int_0, Py_GE); __Pyx_XGOTREF(__pyx_t_4); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1379, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_PyObject_IsTrue(__pyx_t_4); if (unlikely(__pyx_t_2 < 0)) __PYX_ERR(0, 1379, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     if (__pyx_t_2) {
 
-      /* "decimalfp/_cdecimalfp.pyx":1377
+      /* "decimalfp/_cdecimalfp.pyx":1380
  *         # quotient not negativ => add 1
  *         if q >= 0:
  *             return 1             # <<<<<<<<<<<<<<
@@ -20790,7 +20835,7 @@ static int __pyx_f_9decimalfp_11_cdecimalfp__round(PyObject *__pyx_v_q, PyObject
       __pyx_r = 1;
       goto __pyx_L0;
 
-      /* "decimalfp/_cdecimalfp.pyx":1376
+      /* "decimalfp/_cdecimalfp.pyx":1379
  *         # Round away from 0
  *         # quotient not negativ => add 1
  *         if q >= 0:             # <<<<<<<<<<<<<<
@@ -20799,7 +20844,7 @@ static int __pyx_f_9decimalfp_11_cdecimalfp__round(PyObject *__pyx_v_q, PyObject
  */
     }
 
-    /* "decimalfp/_cdecimalfp.pyx":1379
+    /* "decimalfp/_cdecimalfp.pyx":1382
  *             return 1
  *         else:
  *             return 0             # <<<<<<<<<<<<<<
@@ -20811,7 +20856,7 @@ static int __pyx_f_9decimalfp_11_cdecimalfp__round(PyObject *__pyx_v_q, PyObject
       goto __pyx_L0;
     }
 
-    /* "decimalfp/_cdecimalfp.pyx":1373
+    /* "decimalfp/_cdecimalfp.pyx":1376
  *         else:
  *             return 0
  *     if rounding == ROUNDING.ROUND_UP:             # <<<<<<<<<<<<<<
@@ -20820,25 +20865,25 @@ static int __pyx_f_9decimalfp_11_cdecimalfp__round(PyObject *__pyx_v_q, PyObject
  */
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":1380
+  /* "decimalfp/_cdecimalfp.pyx":1383
  *         else:
  *             return 0
  *     if rounding == ROUNDING.ROUND_CEILING:             # <<<<<<<<<<<<<<
  *         # Round up (not away from 0 if negative)
  *         # => always add 1
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_ROUNDING); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1380, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_ROUNDING); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1383, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_ROUND_CEILING); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1380, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_ROUND_CEILING); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1383, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_4 = PyObject_RichCompare(__pyx_v_rounding, __pyx_t_3, Py_EQ); __Pyx_XGOTREF(__pyx_t_4); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1380, __pyx_L1_error)
+  __pyx_t_4 = PyObject_RichCompare(__pyx_v_rounding, __pyx_t_3, Py_EQ); __Pyx_XGOTREF(__pyx_t_4); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1383, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_2 = __Pyx_PyObject_IsTrue(__pyx_t_4); if (unlikely(__pyx_t_2 < 0)) __PYX_ERR(0, 1380, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_IsTrue(__pyx_t_4); if (unlikely(__pyx_t_2 < 0)) __PYX_ERR(0, 1383, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   if (__pyx_t_2) {
 
-    /* "decimalfp/_cdecimalfp.pyx":1383
+    /* "decimalfp/_cdecimalfp.pyx":1386
  *         # Round up (not away from 0 if negative)
  *         # => always add 1
  *         return 1             # <<<<<<<<<<<<<<
@@ -20848,7 +20893,7 @@ static int __pyx_f_9decimalfp_11_cdecimalfp__round(PyObject *__pyx_v_q, PyObject
     __pyx_r = 1;
     goto __pyx_L0;
 
-    /* "decimalfp/_cdecimalfp.pyx":1380
+    /* "decimalfp/_cdecimalfp.pyx":1383
  *         else:
  *             return 0
  *     if rounding == ROUNDING.ROUND_CEILING:             # <<<<<<<<<<<<<<
@@ -20857,25 +20902,25 @@ static int __pyx_f_9decimalfp_11_cdecimalfp__round(PyObject *__pyx_v_q, PyObject
  */
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":1384
+  /* "decimalfp/_cdecimalfp.pyx":1387
  *         # => always add 1
  *         return 1
  *     if rounding == ROUNDING.ROUND_FLOOR:             # <<<<<<<<<<<<<<
  *         # Round down (not towards 0 if negative)
  *         # => never add 1
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_ROUNDING); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1384, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_ROUNDING); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1387, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_ROUND_FLOOR); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1384, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_ROUND_FLOOR); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1387, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_4 = PyObject_RichCompare(__pyx_v_rounding, __pyx_t_3, Py_EQ); __Pyx_XGOTREF(__pyx_t_4); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1384, __pyx_L1_error)
+  __pyx_t_4 = PyObject_RichCompare(__pyx_v_rounding, __pyx_t_3, Py_EQ); __Pyx_XGOTREF(__pyx_t_4); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1387, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_2 = __Pyx_PyObject_IsTrue(__pyx_t_4); if (unlikely(__pyx_t_2 < 0)) __PYX_ERR(0, 1384, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_IsTrue(__pyx_t_4); if (unlikely(__pyx_t_2 < 0)) __PYX_ERR(0, 1387, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   if (__pyx_t_2) {
 
-    /* "decimalfp/_cdecimalfp.pyx":1387
+    /* "decimalfp/_cdecimalfp.pyx":1390
  *         # Round down (not towards 0 if negative)
  *         # => never add 1
  *         return 0             # <<<<<<<<<<<<<<
@@ -20885,7 +20930,7 @@ static int __pyx_f_9decimalfp_11_cdecimalfp__round(PyObject *__pyx_v_q, PyObject
     __pyx_r = 0;
     goto __pyx_L0;
 
-    /* "decimalfp/_cdecimalfp.pyx":1384
+    /* "decimalfp/_cdecimalfp.pyx":1387
  *         # => always add 1
  *         return 1
  *     if rounding == ROUNDING.ROUND_FLOOR:             # <<<<<<<<<<<<<<
@@ -20894,44 +20939,44 @@ static int __pyx_f_9decimalfp_11_cdecimalfp__round(PyObject *__pyx_v_q, PyObject
  */
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":1388
+  /* "decimalfp/_cdecimalfp.pyx":1391
  *         # => never add 1
  *         return 0
  *     if rounding == ROUNDING.ROUND_05UP:             # <<<<<<<<<<<<<<
  *         # Round down unless last digit is 0 or 5
  *         # quotient not negativ and quotient divisible by 5 without remainder
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_ROUNDING); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1388, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_ROUNDING); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1391, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_ROUND_05UP); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1388, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_ROUND_05UP); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1391, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_4 = PyObject_RichCompare(__pyx_v_rounding, __pyx_t_3, Py_EQ); __Pyx_XGOTREF(__pyx_t_4); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1388, __pyx_L1_error)
+  __pyx_t_4 = PyObject_RichCompare(__pyx_v_rounding, __pyx_t_3, Py_EQ); __Pyx_XGOTREF(__pyx_t_4); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1391, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_2 = __Pyx_PyObject_IsTrue(__pyx_t_4); if (unlikely(__pyx_t_2 < 0)) __PYX_ERR(0, 1388, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_IsTrue(__pyx_t_4); if (unlikely(__pyx_t_2 < 0)) __PYX_ERR(0, 1391, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   if (__pyx_t_2) {
 
-    /* "decimalfp/_cdecimalfp.pyx":1393
+    /* "decimalfp/_cdecimalfp.pyx":1396
  *         # or quotient negativ and (quotient + 1) not divisible by 5 without
  *         # remainder => add 1
  *         if q >= 0 and q % 5 == 0 or q < 0 and (q + 1) % 5 != 0:             # <<<<<<<<<<<<<<
  *             return 1
  *         else:
  */
-    __pyx_t_4 = PyObject_RichCompare(__pyx_v_q, __pyx_int_0, Py_GE); __Pyx_XGOTREF(__pyx_t_4); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1393, __pyx_L1_error)
-    __pyx_t_1 = __Pyx_PyObject_IsTrue(__pyx_t_4); if (unlikely(__pyx_t_1 < 0)) __PYX_ERR(0, 1393, __pyx_L1_error)
+    __pyx_t_4 = PyObject_RichCompare(__pyx_v_q, __pyx_int_0, Py_GE); __Pyx_XGOTREF(__pyx_t_4); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1396, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_IsTrue(__pyx_t_4); if (unlikely(__pyx_t_1 < 0)) __PYX_ERR(0, 1396, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     if (!__pyx_t_1) {
       goto __pyx_L28_next_or;
     } else {
     }
-    __pyx_t_4 = __Pyx_PyInt_RemainderObjC(__pyx_v_q, __pyx_int_5, 5, 0); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1393, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_PyInt_RemainderObjC(__pyx_v_q, __pyx_int_5, 5, 0); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1396, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
-    __pyx_t_3 = __Pyx_PyInt_EqObjC(__pyx_t_4, __pyx_int_0, 0, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1393, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyInt_EqObjC(__pyx_t_4, __pyx_int_0, 0, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1396, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-    __pyx_t_1 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely(__pyx_t_1 < 0)) __PYX_ERR(0, 1393, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely(__pyx_t_1 < 0)) __PYX_ERR(0, 1396, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     if (!__pyx_t_1) {
     } else {
@@ -20939,29 +20984,29 @@ static int __pyx_f_9decimalfp_11_cdecimalfp__round(PyObject *__pyx_v_q, PyObject
       goto __pyx_L27_bool_binop_done;
     }
     __pyx_L28_next_or:;
-    __pyx_t_3 = PyObject_RichCompare(__pyx_v_q, __pyx_int_0, Py_LT); __Pyx_XGOTREF(__pyx_t_3); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1393, __pyx_L1_error)
-    __pyx_t_1 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely(__pyx_t_1 < 0)) __PYX_ERR(0, 1393, __pyx_L1_error)
+    __pyx_t_3 = PyObject_RichCompare(__pyx_v_q, __pyx_int_0, Py_LT); __Pyx_XGOTREF(__pyx_t_3); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1396, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely(__pyx_t_1 < 0)) __PYX_ERR(0, 1396, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     if (__pyx_t_1) {
     } else {
       __pyx_t_2 = __pyx_t_1;
       goto __pyx_L27_bool_binop_done;
     }
-    __pyx_t_3 = __Pyx_PyInt_AddObjC(__pyx_v_q, __pyx_int_1, 1, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1393, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyInt_AddObjC(__pyx_v_q, __pyx_int_1, 1, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1396, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_4 = __Pyx_PyInt_RemainderObjC(__pyx_t_3, __pyx_int_5, 5, 0); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1393, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_PyInt_RemainderObjC(__pyx_t_3, __pyx_int_5, 5, 0); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 1396, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    __pyx_t_3 = __Pyx_PyInt_NeObjC(__pyx_t_4, __pyx_int_0, 0, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1393, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyInt_NeObjC(__pyx_t_4, __pyx_int_0, 0, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1396, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-    __pyx_t_1 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely(__pyx_t_1 < 0)) __PYX_ERR(0, 1393, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely(__pyx_t_1 < 0)) __PYX_ERR(0, 1396, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     __pyx_t_2 = __pyx_t_1;
     __pyx_L27_bool_binop_done:;
     if (__pyx_t_2) {
 
-      /* "decimalfp/_cdecimalfp.pyx":1394
+      /* "decimalfp/_cdecimalfp.pyx":1397
  *         # remainder => add 1
  *         if q >= 0 and q % 5 == 0 or q < 0 and (q + 1) % 5 != 0:
  *             return 1             # <<<<<<<<<<<<<<
@@ -20971,7 +21016,7 @@ static int __pyx_f_9decimalfp_11_cdecimalfp__round(PyObject *__pyx_v_q, PyObject
       __pyx_r = 1;
       goto __pyx_L0;
 
-      /* "decimalfp/_cdecimalfp.pyx":1393
+      /* "decimalfp/_cdecimalfp.pyx":1396
  *         # or quotient negativ and (quotient + 1) not divisible by 5 without
  *         # remainder => add 1
  *         if q >= 0 and q % 5 == 0 or q < 0 and (q + 1) % 5 != 0:             # <<<<<<<<<<<<<<
@@ -20980,7 +21025,7 @@ static int __pyx_f_9decimalfp_11_cdecimalfp__round(PyObject *__pyx_v_q, PyObject
  */
     }
 
-    /* "decimalfp/_cdecimalfp.pyx":1396
+    /* "decimalfp/_cdecimalfp.pyx":1399
  *             return 1
  *         else:
  *             return 0             # <<<<<<<<<<<<<<
@@ -20990,7 +21035,7 @@ static int __pyx_f_9decimalfp_11_cdecimalfp__round(PyObject *__pyx_v_q, PyObject
       goto __pyx_L0;
     }
 
-    /* "decimalfp/_cdecimalfp.pyx":1388
+    /* "decimalfp/_cdecimalfp.pyx":1391
  *         # => never add 1
  *         return 0
  *     if rounding == ROUNDING.ROUND_05UP:             # <<<<<<<<<<<<<<
@@ -20999,7 +21044,7 @@ static int __pyx_f_9decimalfp_11_cdecimalfp__round(PyObject *__pyx_v_q, PyObject
  */
   }
 
-  /* "decimalfp/_cdecimalfp.pyx":1333
+  /* "decimalfp/_cdecimalfp.pyx":1336
  * # helper for different rounding modes
  * 
  * cdef int _round(q, r, y, rounding=None):             # <<<<<<<<<<<<<<
@@ -21574,8 +21619,8 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedBuiltins(void) {
   __pyx_builtin_OverflowError = __Pyx_GetBuiltinName(__pyx_n_s_OverflowError); if (!__pyx_builtin_OverflowError) __PYX_ERR(0, 188, __pyx_L1_error)
   __pyx_builtin_format = __Pyx_GetBuiltinName(__pyx_n_s_format); if (!__pyx_builtin_format) __PYX_ERR(0, 503, __pyx_L1_error)
   __pyx_builtin_NotImplementedError = __Pyx_GetBuiltinName(__pyx_n_s_NotImplementedError); if (!__pyx_builtin_NotImplementedError) __PYX_ERR(0, 549, __pyx_L1_error)
-  __pyx_builtin_NotImplemented = __Pyx_GetBuiltinName(__pyx_n_s_NotImplemented); if (!__pyx_builtin_NotImplemented) __PYX_ERR(0, 563, __pyx_L1_error)
-  __pyx_builtin_reversed = __Pyx_GetBuiltinName(__pyx_n_s_reversed); if (!__pyx_builtin_reversed) __PYX_ERR(0, 933, __pyx_L1_error)
+  __pyx_builtin_NotImplemented = __Pyx_GetBuiltinName(__pyx_n_s_NotImplemented); if (!__pyx_builtin_NotImplemented) __PYX_ERR(0, 566, __pyx_L1_error)
+  __pyx_builtin_reversed = __Pyx_GetBuiltinName(__pyx_n_s_reversed); if (!__pyx_builtin_reversed) __PYX_ERR(0, 936, __pyx_L1_error)
   return 0;
   __pyx_L1_error:;
   return -1;
@@ -21618,74 +21663,74 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_tuple_);
   __Pyx_GIVEREF(__pyx_tuple_);
 
-  /* "decimalfp/_cdecimalfp.pyx":685
+  /* "decimalfp/_cdecimalfp.pyx":688
  *         """
  *         if mod is not None:
  *             raise TypeError("3rd argument not allowed unless all arguments "             # <<<<<<<<<<<<<<
  *                             "are integers")
  *         if isinstance(x, Decimal):
  */
-  __pyx_tuple__7 = PyTuple_Pack(1, __pyx_kp_s_3rd_argument_not_allowed_unless); if (unlikely(!__pyx_tuple__7)) __PYX_ERR(0, 685, __pyx_L1_error)
+  __pyx_tuple__7 = PyTuple_Pack(1, __pyx_kp_s_3rd_argument_not_allowed_unless); if (unlikely(!__pyx_tuple__7)) __PYX_ERR(0, 688, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__7);
   __Pyx_GIVEREF(__pyx_tuple__7);
 
-  /* "decimalfp/_cdecimalfp.pyx":941
+  /* "decimalfp/_cdecimalfp.pyx":944
  * def _iterGrouping(grouping):
  *     l = None
  *     for i in grouping[:-1]:             # <<<<<<<<<<<<<<
  *         yield i
  *         l = i
  */
-  __pyx_slice__9 = PySlice_New(Py_None, __pyx_int_neg_1, Py_None); if (unlikely(!__pyx_slice__9)) __PYX_ERR(0, 941, __pyx_L1_error)
+  __pyx_slice__9 = PySlice_New(Py_None, __pyx_int_neg_1, Py_None); if (unlikely(!__pyx_slice__9)) __PYX_ERR(0, 944, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_slice__9);
   __Pyx_GIVEREF(__pyx_slice__9);
 
-  /* "decimalfp/_cdecimalfp.pyx":994
+  /* "decimalfp/_cdecimalfp.pyx":997
  *     v, p = dec._value, dec._precision
  *     if v == 0:
  *         return 0, 0             # <<<<<<<<<<<<<<
  *     while p > 0 and v % 10 == 0:
  *         p -= 1
  */
-  __pyx_tuple__10 = PyTuple_Pack(2, __pyx_int_0, __pyx_int_0); if (unlikely(!__pyx_tuple__10)) __PYX_ERR(0, 994, __pyx_L1_error)
+  __pyx_tuple__10 = PyTuple_Pack(2, __pyx_int_0, __pyx_int_0); if (unlikely(!__pyx_tuple__10)) __PYX_ERR(0, 997, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__10);
   __Pyx_GIVEREF(__pyx_tuple__10);
 
-  /* "decimalfp/_cdecimalfp.pyx":875
+  /* "decimalfp/_cdecimalfp.pyx":878
  * 
  * 
  * def _getFormatParams(formatSpec):             # <<<<<<<<<<<<<<
  *     m = _parseFormatSpec(formatSpec)
  *     if m is None:
  */
-  __pyx_tuple__14 = PyTuple_Pack(16, __pyx_n_s_formatSpec, __pyx_n_s_m, __pyx_n_s_fill, __pyx_n_s_zeropad, __pyx_n_s_fmtFill, __pyx_n_s_fmtAlign, __pyx_n_s_fmtSign, __pyx_n_s_minimumwidth, __pyx_n_s_fmtMinWidth, __pyx_n_s_fmtType, __pyx_n_s_lconv, __pyx_n_s_fmtThousandsSep, __pyx_n_s_fmtGrouping, __pyx_n_s_fmtDecimalPoint, __pyx_n_s_precision, __pyx_n_s_fmtPrecision); if (unlikely(!__pyx_tuple__14)) __PYX_ERR(0, 875, __pyx_L1_error)
+  __pyx_tuple__14 = PyTuple_Pack(16, __pyx_n_s_formatSpec, __pyx_n_s_m, __pyx_n_s_fill, __pyx_n_s_zeropad, __pyx_n_s_fmtFill, __pyx_n_s_fmtAlign, __pyx_n_s_fmtSign, __pyx_n_s_minimumwidth, __pyx_n_s_fmtMinWidth, __pyx_n_s_fmtType, __pyx_n_s_lconv, __pyx_n_s_fmtThousandsSep, __pyx_n_s_fmtGrouping, __pyx_n_s_fmtDecimalPoint, __pyx_n_s_precision, __pyx_n_s_fmtPrecision); if (unlikely(!__pyx_tuple__14)) __PYX_ERR(0, 878, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__14);
   __Pyx_GIVEREF(__pyx_tuple__14);
-  __pyx_codeobj__15 = (PyObject*)__Pyx_PyCode_New(1, 0, 16, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__14, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_cdecimalfp_pyx, __pyx_n_s_getFormatParams, 875, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__15)) __PYX_ERR(0, 875, __pyx_L1_error)
+  __pyx_codeobj__15 = (PyObject*)__Pyx_PyCode_New(1, 0, 16, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__14, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_cdecimalfp_pyx, __pyx_n_s_getFormatParams, 878, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__15)) __PYX_ERR(0, 878, __pyx_L1_error)
 
-  /* "decimalfp/_cdecimalfp.pyx":916
+  /* "decimalfp/_cdecimalfp.pyx":919
  * 
  * 
  * def _padDigits(digits, minWidth, fill, sep=None, grouping=None):             # <<<<<<<<<<<<<<
  *     nDigits = len(digits)
  *     if sep and grouping:
  */
-  __pyx_tuple__16 = PyTuple_Pack(12, __pyx_n_s_digits, __pyx_n_s_minWidth, __pyx_n_s_fill, __pyx_n_s_sep, __pyx_n_s_grouping, __pyx_n_s_nDigits, __pyx_n_s_slices, __pyx_n_s_i_2, __pyx_n_s_j, __pyx_n_s_limit, __pyx_n_s_l, __pyx_n_s_raw); if (unlikely(!__pyx_tuple__16)) __PYX_ERR(0, 916, __pyx_L1_error)
+  __pyx_tuple__16 = PyTuple_Pack(12, __pyx_n_s_digits, __pyx_n_s_minWidth, __pyx_n_s_fill, __pyx_n_s_sep, __pyx_n_s_grouping, __pyx_n_s_nDigits, __pyx_n_s_slices, __pyx_n_s_i_2, __pyx_n_s_j, __pyx_n_s_limit, __pyx_n_s_l, __pyx_n_s_raw); if (unlikely(!__pyx_tuple__16)) __PYX_ERR(0, 919, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__16);
   __Pyx_GIVEREF(__pyx_tuple__16);
-  __pyx_codeobj__17 = (PyObject*)__Pyx_PyCode_New(5, 0, 12, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__16, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_cdecimalfp_pyx, __pyx_n_s_padDigits, 916, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__17)) __PYX_ERR(0, 916, __pyx_L1_error)
+  __pyx_codeobj__17 = (PyObject*)__Pyx_PyCode_New(5, 0, 12, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__16, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_cdecimalfp_pyx, __pyx_n_s_padDigits, 919, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__17)) __PYX_ERR(0, 919, __pyx_L1_error)
 
-  /* "decimalfp/_cdecimalfp.pyx":939
+  /* "decimalfp/_cdecimalfp.pyx":942
  * 
  * 
  * def _iterGrouping(grouping):             # <<<<<<<<<<<<<<
  *     l = None
  *     for i in grouping[:-1]:
  */
-  __pyx_tuple__18 = PyTuple_Pack(3, __pyx_n_s_grouping, __pyx_n_s_l, __pyx_n_s_i_2); if (unlikely(!__pyx_tuple__18)) __PYX_ERR(0, 939, __pyx_L1_error)
+  __pyx_tuple__18 = PyTuple_Pack(3, __pyx_n_s_grouping, __pyx_n_s_l, __pyx_n_s_i_2); if (unlikely(!__pyx_tuple__18)) __PYX_ERR(0, 942, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__18);
   __Pyx_GIVEREF(__pyx_tuple__18);
-  __pyx_codeobj__8 = (PyObject*)__Pyx_PyCode_New(1, 0, 3, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__18, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_cdecimalfp_pyx, __pyx_n_s_iterGrouping, 939, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__8)) __PYX_ERR(0, 939, __pyx_L1_error)
+  __pyx_codeobj__8 = (PyObject*)__Pyx_PyCode_New(1, 0, 3, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__18, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_cdecimalfp_pyx, __pyx_n_s_iterGrouping, 942, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__8)) __PYX_ERR(0, 942, __pyx_L1_error)
   __Pyx_RefNannyFinishContext();
   return 0;
   __pyx_L1_error:;
@@ -21924,7 +21969,7 @@ static int __Pyx_modinit_type_init_code(void) {
   #endif
   if (PyObject_SetAttr(__pyx_m, __pyx_n_s_Decimal, (PyObject *)&__pyx_type_9decimalfp_11_cdecimalfp_Decimal) < 0) __PYX_ERR(0, 60, __pyx_L1_error)
   __pyx_ptype_9decimalfp_11_cdecimalfp_Decimal = &__pyx_type_9decimalfp_11_cdecimalfp_Decimal;
-  if (PyType_Ready(&__pyx_type_9decimalfp_11_cdecimalfp___pyx_scope_struct___iterGrouping) < 0) __PYX_ERR(0, 939, __pyx_L1_error)
+  if (PyType_Ready(&__pyx_type_9decimalfp_11_cdecimalfp___pyx_scope_struct___iterGrouping) < 0) __PYX_ERR(0, 942, __pyx_L1_error)
   __pyx_type_9decimalfp_11_cdecimalfp___pyx_scope_struct___iterGrouping.tp_print = 0;
   if ((CYTHON_USE_TYPE_SLOTS && CYTHON_USE_PYTYPE_LOOKUP) && likely(!__pyx_type_9decimalfp_11_cdecimalfp___pyx_scope_struct___iterGrouping.tp_dictoffset && __pyx_type_9decimalfp_11_cdecimalfp___pyx_scope_struct___iterGrouping.tp_getattro == PyObject_GenericGetAttr)) {
     __pyx_type_9decimalfp_11_cdecimalfp___pyx_scope_struct___iterGrouping.tp_getattro = __Pyx_PyObject_GenericGetAttrNoDict;
@@ -22628,83 +22673,83 @@ if (!__Pyx_RefNanny) {
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   PyType_Modified(__pyx_ptype_9decimalfp_11_cdecimalfp_Decimal);
 
-  /* "decimalfp/_cdecimalfp.pyx":585
+  /* "decimalfp/_cdecimalfp.pyx":588
  *         """math.trunc(self)"""
  *         return _int(self._value, self._precision)
  *     __trunc__ = __int__             # <<<<<<<<<<<<<<
  * 
  *     # convert to float (may loose precision!)
  */
-  __Pyx_GetNameInClass(__pyx_t_2, (PyObject *)__pyx_ptype_9decimalfp_11_cdecimalfp_Decimal, __pyx_n_s_int_2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 585, __pyx_L1_error)
+  __Pyx_GetNameInClass(__pyx_t_2, (PyObject *)__pyx_ptype_9decimalfp_11_cdecimalfp_Decimal, __pyx_n_s_int_2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 588, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem((PyObject *)__pyx_ptype_9decimalfp_11_cdecimalfp_Decimal->tp_dict, __pyx_n_s_trunc, __pyx_t_2) < 0) __PYX_ERR(0, 585, __pyx_L1_error)
+  if (PyDict_SetItem((PyObject *)__pyx_ptype_9decimalfp_11_cdecimalfp_Decimal->tp_dict, __pyx_n_s_trunc, __pyx_t_2) < 0) __PYX_ERR(0, 588, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   PyType_Modified(__pyx_ptype_9decimalfp_11_cdecimalfp_Decimal);
 
-  /* "decimalfp/_cdecimalfp.pyx":721
+  /* "decimalfp/_cdecimalfp.pyx":724
  * 
  * # register Decimal as Rational
  * Rational.register(Decimal)             # <<<<<<<<<<<<<<
  * 
  * 
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_Rational); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 721, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_Rational); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 724, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_register); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 721, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_register); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 724, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_t_7, ((PyObject *)__pyx_ptype_9decimalfp_11_cdecimalfp_Decimal)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 721, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_t_7, ((PyObject *)__pyx_ptype_9decimalfp_11_cdecimalfp_Decimal)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 724, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "decimalfp/_cdecimalfp.pyx":734
+  /* "decimalfp/_cdecimalfp.pyx":737
  * 
  * # parse string
  * import re             # <<<<<<<<<<<<<<
  * _pattern = r"""
  *             \s*
  */
-  __pyx_t_2 = __Pyx_Import(__pyx_n_s_re, 0, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 734, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_Import(__pyx_n_s_re, 0, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 737, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_re, __pyx_t_2) < 0) __PYX_ERR(0, 734, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_re, __pyx_t_2) < 0) __PYX_ERR(0, 737, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "decimalfp/_cdecimalfp.pyx":745
+  /* "decimalfp/_cdecimalfp.pyx":748
  *             ([eE](?P<exp>[+|-]?\d+))?
  *             \s*$
  *             """.encode()             # <<<<<<<<<<<<<<
  * _parseString = re.compile(_pattern, re.VERBOSE).match
  * 
  */
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_kp_s_s_P_sign_P_int_d_P_frac_d_P_onl, __pyx_n_s_encode); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 745, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_kp_s_s_P_sign_P_int_d_P_frac_d_P_onl, __pyx_n_s_encode); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 748, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_7 = __Pyx_PyObject_CallNoArg(__pyx_t_2); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 745, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_PyObject_CallNoArg(__pyx_t_2); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 748, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_pattern, __pyx_t_7) < 0) __PYX_ERR(0, 735, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_pattern, __pyx_t_7) < 0) __PYX_ERR(0, 738, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
 
-  /* "decimalfp/_cdecimalfp.pyx":746
+  /* "decimalfp/_cdecimalfp.pyx":749
  *             \s*$
  *             """.encode()
  * _parseString = re.compile(_pattern, re.VERBOSE).match             # <<<<<<<<<<<<<<
  * 
  * # parse a format specifier
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_7, __pyx_n_s_re); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 746, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_7, __pyx_n_s_re); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 749, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_7, __pyx_n_s_compile); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 746, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_7, __pyx_n_s_compile); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 749, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-  __Pyx_GetModuleGlobalName(__pyx_t_7, __pyx_n_s_pattern); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 746, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_7, __pyx_n_s_pattern); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 749, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
-  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_re); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 746, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_re); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 749, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_9 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_VERBOSE); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 746, __pyx_L1_error)
+  __pyx_t_9 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_VERBOSE); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 749, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_9);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = PyTuple_New(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 746, __pyx_L1_error)
+  __pyx_t_1 = PyTuple_New(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 749, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_GIVEREF(__pyx_t_7);
   PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_t_7);
@@ -22712,45 +22757,45 @@ if (!__Pyx_RefNanny) {
   PyTuple_SET_ITEM(__pyx_t_1, 1, __pyx_t_9);
   __pyx_t_7 = 0;
   __pyx_t_9 = 0;
-  __pyx_t_9 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_1, NULL); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 746, __pyx_L1_error)
+  __pyx_t_9 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_1, NULL); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 749, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_9);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_9, __pyx_n_s_match); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 746, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_9, __pyx_n_s_match); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 749, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_parseString, __pyx_t_1) < 0) __PYX_ERR(0, 746, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_parseString, __pyx_t_1) < 0) __PYX_ERR(0, 749, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "decimalfp/_cdecimalfp.pyx":751
+  /* "decimalfp/_cdecimalfp.pyx":754
  * # [[fill]align][sign][0][minimumwidth][,][.precision][type]
  * 
  * _pattern = r"""             # <<<<<<<<<<<<<<
  *             \A
  *             (?:
  */
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_pattern, __pyx_kp_s_A_P_fill_P_align_P_sign_P_zerop) < 0) __PYX_ERR(0, 751, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_pattern, __pyx_kp_s_A_P_fill_P_align_P_sign_P_zerop) < 0) __PYX_ERR(0, 754, __pyx_L1_error)
 
-  /* "decimalfp/_cdecimalfp.pyx":765
+  /* "decimalfp/_cdecimalfp.pyx":768
  *             \Z
  *             """
  * _parseFormatSpec = re.compile(_pattern, re.VERBOSE).match             # <<<<<<<<<<<<<<
  * del re, _pattern
  * 
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_re); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 765, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_re); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 768, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_9 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_compile); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 765, __pyx_L1_error)
+  __pyx_t_9 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_compile); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 768, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_9);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_pattern); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 765, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_pattern); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 768, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_re); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 765, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_re); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 768, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_VERBOSE); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 765, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_VERBOSE); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 768, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 765, __pyx_L1_error)
+  __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 768, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_GIVEREF(__pyx_t_1);
   PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_1);
@@ -22758,49 +22803,49 @@ if (!__Pyx_RefNanny) {
   PyTuple_SET_ITEM(__pyx_t_2, 1, __pyx_t_7);
   __pyx_t_1 = 0;
   __pyx_t_7 = 0;
-  __pyx_t_7 = __Pyx_PyObject_Call(__pyx_t_9, __pyx_t_2, NULL); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 765, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_PyObject_Call(__pyx_t_9, __pyx_t_2, NULL); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 768, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
   __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_7, __pyx_n_s_match); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 765, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_7, __pyx_n_s_match); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 768, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_parseFormatSpec, __pyx_t_2) < 0) __PYX_ERR(0, 765, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_parseFormatSpec, __pyx_t_2) < 0) __PYX_ERR(0, 768, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "decimalfp/_cdecimalfp.pyx":766
+  /* "decimalfp/_cdecimalfp.pyx":769
  *             """
  * _parseFormatSpec = re.compile(_pattern, re.VERBOSE).match
  * del re, _pattern             # <<<<<<<<<<<<<<
  * 
  * 
  */
-  if (__Pyx_PyObject_DelAttrStr(__pyx_m, __pyx_n_s_re) < 0) __PYX_ERR(0, 766, __pyx_L1_error)
-  if (__Pyx_PyObject_DelAttrStr(__pyx_m, __pyx_n_s_pattern) < 0) __PYX_ERR(0, 766, __pyx_L1_error)
+  if (__Pyx_PyObject_DelAttrStr(__pyx_m, __pyx_n_s_re) < 0) __PYX_ERR(0, 769, __pyx_L1_error)
+  if (__Pyx_PyObject_DelAttrStr(__pyx_m, __pyx_n_s_pattern) < 0) __PYX_ERR(0, 769, __pyx_L1_error)
 
-  /* "decimalfp/_cdecimalfp.pyx":863
+  /* "decimalfp/_cdecimalfp.pyx":866
  * 
  * 
  * _dfltFormatParams = {'fill': ' ',             # <<<<<<<<<<<<<<
  *                      'align': '<',
  *                      'sign': '-',
  */
-  __pyx_t_2 = __Pyx_PyDict_NewPresized(9); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 863, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyDict_NewPresized(9); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 866, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_fill, __pyx_kp_s__11) < 0) __PYX_ERR(0, 863, __pyx_L1_error)
-  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_align, __pyx_kp_s__12) < 0) __PYX_ERR(0, 863, __pyx_L1_error)
-  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_sign, __pyx_kp_s__3) < 0) __PYX_ERR(0, 863, __pyx_L1_error)
-  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_minimumwidth, __pyx_int_0) < 0) __PYX_ERR(0, 863, __pyx_L1_error)
-  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_thousands_sep, __pyx_kp_s__5) < 0) __PYX_ERR(0, 863, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_fill, __pyx_kp_s__11) < 0) __PYX_ERR(0, 866, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_align, __pyx_kp_s__12) < 0) __PYX_ERR(0, 866, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_sign, __pyx_kp_s__3) < 0) __PYX_ERR(0, 866, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_minimumwidth, __pyx_int_0) < 0) __PYX_ERR(0, 866, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_thousands_sep, __pyx_kp_s__5) < 0) __PYX_ERR(0, 866, __pyx_L1_error)
 
-  /* "decimalfp/_cdecimalfp.pyx":869
+  /* "decimalfp/_cdecimalfp.pyx":872
  *                      'minimumwidth': 0,
  *                      'thousands_sep': '',
  *                      'grouping': [3, 0],             # <<<<<<<<<<<<<<
  *                      'decimal_point': '.',
  *                      'precision': None,
  */
-  __pyx_t_7 = PyList_New(2); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 869, __pyx_L1_error)
+  __pyx_t_7 = PyList_New(2); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 872, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
   __Pyx_INCREF(__pyx_int_3);
   __Pyx_GIVEREF(__pyx_int_3);
@@ -22808,56 +22853,56 @@ if (!__Pyx_RefNanny) {
   __Pyx_INCREF(__pyx_int_0);
   __Pyx_GIVEREF(__pyx_int_0);
   PyList_SET_ITEM(__pyx_t_7, 1, __pyx_int_0);
-  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_grouping, __pyx_t_7) < 0) __PYX_ERR(0, 863, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_grouping, __pyx_t_7) < 0) __PYX_ERR(0, 866, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_decimal_point, __pyx_kp_s__13) < 0) __PYX_ERR(0, 863, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_decimal_point, __pyx_kp_s__13) < 0) __PYX_ERR(0, 866, __pyx_L1_error)
 
-  /* "decimalfp/_cdecimalfp.pyx":871
+  /* "decimalfp/_cdecimalfp.pyx":874
  *                      'grouping': [3, 0],
  *                      'decimal_point': '.',
  *                      'precision': None,             # <<<<<<<<<<<<<<
  *                      'type': 'f'}
  * 
  */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_precision, Py_None) < 0) __PYX_ERR(0, 863, __pyx_L1_error)
-  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_type, __pyx_n_s_f) < 0) __PYX_ERR(0, 863, __pyx_L1_error)
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_dfltFormatParams, __pyx_t_2) < 0) __PYX_ERR(0, 863, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_precision, Py_None) < 0) __PYX_ERR(0, 866, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_type, __pyx_n_s_f) < 0) __PYX_ERR(0, 866, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_dfltFormatParams, __pyx_t_2) < 0) __PYX_ERR(0, 866, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "decimalfp/_cdecimalfp.pyx":875
+  /* "decimalfp/_cdecimalfp.pyx":878
  * 
  * 
  * def _getFormatParams(formatSpec):             # <<<<<<<<<<<<<<
  *     m = _parseFormatSpec(formatSpec)
  *     if m is None:
  */
-  __pyx_t_2 = PyCFunction_NewEx(&__pyx_mdef_9decimalfp_11_cdecimalfp_1_getFormatParams, NULL, __pyx_n_s_decimalfp__cdecimalfp); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 875, __pyx_L1_error)
+  __pyx_t_2 = PyCFunction_NewEx(&__pyx_mdef_9decimalfp_11_cdecimalfp_1_getFormatParams, NULL, __pyx_n_s_decimalfp__cdecimalfp); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 878, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_getFormatParams, __pyx_t_2) < 0) __PYX_ERR(0, 875, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_getFormatParams, __pyx_t_2) < 0) __PYX_ERR(0, 878, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "decimalfp/_cdecimalfp.pyx":916
+  /* "decimalfp/_cdecimalfp.pyx":919
  * 
  * 
  * def _padDigits(digits, minWidth, fill, sep=None, grouping=None):             # <<<<<<<<<<<<<<
  *     nDigits = len(digits)
  *     if sep and grouping:
  */
-  __pyx_t_2 = PyCFunction_NewEx(&__pyx_mdef_9decimalfp_11_cdecimalfp_3_padDigits, NULL, __pyx_n_s_decimalfp__cdecimalfp); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 916, __pyx_L1_error)
+  __pyx_t_2 = PyCFunction_NewEx(&__pyx_mdef_9decimalfp_11_cdecimalfp_3_padDigits, NULL, __pyx_n_s_decimalfp__cdecimalfp); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 919, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_padDigits, __pyx_t_2) < 0) __PYX_ERR(0, 916, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_padDigits, __pyx_t_2) < 0) __PYX_ERR(0, 919, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "decimalfp/_cdecimalfp.pyx":939
+  /* "decimalfp/_cdecimalfp.pyx":942
  * 
  * 
  * def _iterGrouping(grouping):             # <<<<<<<<<<<<<<
  *     l = None
  *     for i in grouping[:-1]:
  */
-  __pyx_t_2 = PyCFunction_NewEx(&__pyx_mdef_9decimalfp_11_cdecimalfp_5_iterGrouping, NULL, __pyx_n_s_decimalfp__cdecimalfp); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 939, __pyx_L1_error)
+  __pyx_t_2 = PyCFunction_NewEx(&__pyx_mdef_9decimalfp_11_cdecimalfp_5_iterGrouping, NULL, __pyx_n_s_decimalfp__cdecimalfp); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 942, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_iterGrouping, __pyx_t_2) < 0) __PYX_ERR(0, 939, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_iterGrouping, __pyx_t_2) < 0) __PYX_ERR(0, 942, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
   /* "decimalfp/_cdecimalfp.pyx":1
