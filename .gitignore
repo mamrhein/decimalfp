@@ -106,5 +106,8 @@ venv.bak/
 # all hidden files
 .*
 
+# editor backup files
+*.*~
+
 # cython generated html files in src
 src/*/*.html
