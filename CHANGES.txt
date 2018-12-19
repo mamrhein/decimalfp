@@ -1,5 +1,10 @@
 Version     Changes
 ------------------------------------------------------------------------------
+0.9.14      Repository moved to Git (hosted on GitHub).
+            Moved documentation to readthedocs.org.
+            Use generic types from 'numbers' for type checking.
+            Made comparisions to 'inf', 'nan' and Complex compatible with int and float.
+
 0.9.13      Wrapped rounding modes into the Enum 'ROUNDING'.
             Made 'decimalfp' a package.
             Changed 'Decimal' to a *virtual* subclass of 'Rational'.
