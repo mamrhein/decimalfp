@@ -39,7 +39,7 @@ from .rounding import LIMIT_PREC, ROUNDING, get_rounding
 # cython cimports
 from cpython.long cimport *
 from cpython.number cimport *
-from cpython.object cimport PyObject_RichCompare
+from cpython.object cimport Py_EQ, Py_NE, PyObject_RichCompare
 from libc.limits cimport LLONG_MAX
 from libc.stdlib cimport atoi
 
@@ -558,13 +558,63 @@ cdef class Decimal:
         else:
             raise NotImplementedError
 
-    def __richcmp__(self, other, int op):
-        """Compare self and other using operator op."""
-        try:
-            selfVal, otherVal = self._make_comparable(other)
-        except NotImplementedError:
-            return NotImplemented
-        return PyObject_RichCompare(selfVal, otherVal, op)
+    def __richcmp__(self, other, int cmp):
+        """Compare `self` and `other` using operator `cmp`."""
+        sv = self._value
+        sp = self._precision
+        if isinstance(other, Decimal):
+            ov = (<Decimal>other)._value
+            op = (<Decimal>other)._precision
+            # if sp == op, we are done, otherwise we adjust the value with the
+            # lesser precision
+            if sp < op:
+                sv *= 10 ** (op - sp)
+            elif sp > op:
+                ov *= 10 ** (sp - op)
+            return PyObject_RichCompare(sv, ov, cmp)
+        elif isinstance(other, Integral):
+            ov = int(other) * 10 ** sp
+            return PyObject_RichCompare(sv, ov, cmp)
+        elif isinstance(other, Rational):
+            # cross-wise product of numerator and denominator
+            sv *= other.denominator
+            ov = other.numerator * 10 ** sp
+            return PyObject_RichCompare(sv, ov, cmp)
+        elif isinstance(other, Real):
+            try:
+                num, den = other.as_integer_ratio()
+            except AttributeError:
+                return NotImplemented
+            except (ValueError, OverflowError):
+                # 'nan' and 'inf'
+                return PyObject_RichCompare(sv, other, cmp)
+            # cross-wise product of numerator and denominator
+            sv *= den
+            ov = num * 10 ** sp
+            return PyObject_RichCompare(sv, ov, cmp)
+        elif isinstance(other, _StdLibDecimal):
+            if other.is_finite():
+                sign, digits, exp = other.as_tuple()
+                ov = (-1) ** sign * reduce(lambda x, y: x * 10 + y, digits)
+                op = abs(exp)
+                # if sp == op, we are done, otherwise we adjust the value with
+                # the lesser precision
+                if sp < op:
+                    sv *= 10 ** (op - sp)
+                elif sp > op:
+                    ov *= 10 ** (sp - op)
+                return PyObject_RichCompare(sv, ov, cmp)
+            else:
+                # 'nan' and 'inf'
+                return PyObject_RichCompare(sv, other, cmp)
+        elif isinstance(other, Complex):
+            if cmp in (Py_EQ, Py_NE):
+                if other.imag == 0:
+                    return PyObject_RichCompare(self, other.real, cmp)
+                else:
+                    return False if cmp == Py_EQ else True
+        # don't know how to compare
+        return NotImplemented
 
     def __hash__(self):
         """hash(self)"""

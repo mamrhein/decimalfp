@@ -27,7 +27,7 @@ import operator
 import os
 import sys
 import unittest
-from decimal import Decimal as _StdLibDecimal
+from decimal import Decimal as _StdLibDecimal, InvalidOperation
 from fractions import Fraction
 from pickle import dumps, loads
 
@@ -240,11 +240,6 @@ class DecimalTest:
         self.assertTrue(g >= d)
         self.assertTrue(min(d, g) == min(g, d) == d)
         self.assertTrue(max(d, g) == max(g, d) == g)
-        self.assertTrue(d != h)
-        self.assertTrue(h < d)
-        self.assertTrue(d >= h)
-        self.assertTrue(min(d, h) == min(h, d) == h)
-        self.assertTrue(max(d, h) == max(h, d) == d)
         self.assertNotEqual(d, 'abc')
         if sys.version_info.major < 3:
             self.assertTrue(d < 'abc')
@@ -256,23 +251,33 @@ class DecimalTest:
                 self.assertRaises(TypeError, op, d, 'abc')
                 self.assertRaises(TypeError, op, 'abc', d)
         # corner cases
-        nan = float('nan')
-        inf = float('inf')
+        f_nan = float('nan')
+        f_inf = float('inf')
+        d_nan = _StdLibDecimal('nan')
+        d_inf = _StdLibDecimal('inf')
         cmplx = 7 + 3j
-        for num in (nan, inf, cmplx):
+        for num in (f_nan, f_inf, d_nan, d_inf, cmplx):
             self.assertFalse(d == num)
             self.assertFalse(num == d)
             self.assertTrue(d != num)
             self.assertTrue(num != d)
         for op in (operator.lt, operator.le):
-            self.assertTrue(op(d, inf))
-            self.assertFalse(op(inf, d))
+            self.assertTrue(op(d, f_inf))
+            self.assertFalse(op(f_inf, d))
+            self.assertTrue(op(d, d_inf))
+            self.assertFalse(op(d_inf, d))
         for op in (operator.gt, operator.ge):
-            self.assertFalse(op(d, inf))
-            self.assertTrue(op(inf, d))
+            self.assertFalse(op(d, f_inf))
+            self.assertTrue(op(d_inf, d))
+            self.assertFalse(op(d, d_inf))
+            self.assertTrue(op(f_inf, d))
         for op in (operator.lt, operator.le, operator.gt, operator.ge):
-            self.assertFalse(op(d, nan))
-            self.assertFalse(op(nan, d))
+            self.assertFalse(op(d, f_nan))
+            self.assertFalse(op(f_nan, d))
+            # Decimal from standard lib is not compatible with float here:
+            # ordering comparisons with 'nan' raises an exception.
+            self.assertRaises(InvalidOperation, op, d, d_nan)
+            self.assertRaises(InvalidOperation, op, d_nan, d)
         if sys.version_info.major < 3:
             self.assertTrue(d < cmplx)
             self.assertTrue(d <= cmplx)
@@ -282,6 +287,8 @@ class DecimalTest:
             for op in (operator.lt, operator.le, operator.gt, operator.ge):
                 self.assertRaises(TypeError, op, d, cmplx)
                 self.assertRaises(TypeError, op, cmplx, d)
+                self.assertRaises(TypeError, op, d, h)
+                self.assertRaises(TypeError, op, h, d)
 
     def test_adjustment(self):
         f = Decimal('23.456')

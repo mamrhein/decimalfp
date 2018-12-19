@@ -543,44 +543,63 @@ class Decimal:
             else:
                 return raw
 
-    # compare to Decimal or any type that can be converted to a Decimal
-    def _make_comparable(self, other):
+    def _compare(self, other, cmp):
+        """Compare `self` and `other` using operator `cmp`."""
+        sv = self._value
+        sp = self._precision
         if isinstance(other, Decimal):
-            selfPrec, otherPrec = self._precision, other._precision
-            if selfPrec == otherPrec:
-                return self._value, other._value
-            elif selfPrec < otherPrec:
-                return (_get_adjusted_value(self, otherPrec), other._value)
-            else:
-                return (self._value, _get_adjusted_value(other, selfPrec))
-        if isinstance(other, Integral):
-            return self._value, int(other) * 10 ** self._precision
-        if isinstance(other, Rational):
-            return (self.numerator * other.denominator,
-                    other.numerator * self.denominator)
-        if isinstance(other, Real):
+            ov = other._value
+            op = other._precision
+            # if sp == op, we are done, otherwise we adjust the value with the
+            # lesser precision
+            if sp < op:
+                sv *= 10 ** (op - sp)
+            elif sp > op:
+                ov *= 10 ** (sp - op)
+            return cmp(sv, ov)
+        elif isinstance(other, Integral):
+            ov = int(other) * 10 ** sp
+            return cmp(sv, ov)
+        elif isinstance(other, Rational):
+            # cross-wise product of numerator and denominator
+            sv *= other.denominator
+            ov = other.numerator * 10 ** sp
+            return cmp(sv, ov)
+        elif isinstance(other, Real):
             try:
                 num, den = other.as_integer_ratio()
             except AttributeError:
-                raise NotImplementedError
+                return NotImplemented
             except (ValueError, OverflowError):
                 # 'nan' and 'inf'
-                return self._value, other
-            return (self.numerator * den, num * self.denominator)
-        if isinstance(other, _StdLibDecimal):
-            return (self, Decimal(other))
-        if isinstance(other, Complex) and other.imag == 0:
-            return self._make_comparable(other.real)
-        else:
-            raise NotImplementedError
-
-    def _compare(self, other, op):
-        """Compare self and other using operator op."""
-        try:
-            selfVal, otherVal = self._make_comparable(other)
-        except NotImplementedError:
-            return NotImplemented
-        return op(selfVal, otherVal)
+                return cmp(sv, other)
+            # cross-wise product of numerator and denominator
+            sv *= den
+            ov = num * 10 ** sp
+            return cmp(sv, ov)
+        elif isinstance(other, _StdLibDecimal):
+            if other.is_finite():
+                sign, digits, exp = other.as_tuple()
+                ov = (-1) ** sign * reduce(lambda x, y: x * 10 + y, digits)
+                op = abs(exp)
+                # if sp == op, we are done, otherwise we adjust the value with
+                # the lesser precision
+                if sp < op:
+                    sv *= 10 ** (op - sp)
+                elif sp > op:
+                    ov *= 10 ** (sp - op)
+                return cmp(sv, ov)
+            else:
+                # 'nan' and 'inf'
+                return cmp(sv, other)
+        elif isinstance(other, Complex):
+            if cmp in (operator.eq, operator.ne):
+                if other.imag == 0:
+                    return self._compare(other.real, cmp)
+                else:
+                    return False if cmp is operator.eq else True
+        # don't know how to compare
+        return NotImplemented
 
     def __eq__(self, other):
         """self == other"""                                 # noqa: D400, D403
