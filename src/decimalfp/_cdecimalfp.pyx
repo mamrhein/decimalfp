@@ -1,19 +1,19 @@
 # -*- coding: utf-8 -*-
-##----------------------------------------------------------------------------
-## Name:        _cdecimalfp
-## Purpose:     Decimal fixed-point arithmetic (Cython implementation)
-##
-## Author:      Michael Amrhein (mamrhein@users.sourceforge.net)
-##
-## Copyright:   (c) 2014 ff. Michael Amrhein
-##              Portions adopted from FixedPoint.py written by Tim Peters
-## License:     This program is free software. You can redistribute it, use it
-##              and/or modify it under the terms of the 2-clause BSD license.
-##              For license details please read the file LICENSE.TXT provided
-##              together with the source code.
-##----------------------------------------------------------------------------
-## $Source$
-## $Revision$
+# ----------------------------------------------------------------------------
+# Name:        _cdecimalfp
+# Purpose:     Decimal fixed-point arithmetic (Cython implementation)
+#
+# Author:      Michael Amrhein (michael@adrhinum.de)
+#
+# Copyright:   (c) 2014 ff. Michael Amrhein
+#              Portions adopted from FixedPoint.py written by Tim Peters
+# License:     This program is free software. You can redistribute it, use it
+# License:     This program is part of a larger application. For license
+#              details please read the file LICENSE.TXT provided together
+#              with the application.
+# ----------------------------------------------------------------------------
+# $Source$
+# $Revision$
 
 
 """Decimal fixed-point arithmetic."""

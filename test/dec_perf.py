@@ -1,18 +1,19 @@
 #!/usr/bin/env python
-##****************************************************************************
-## Name:        dec_perf
-## Purpose:     Compare performance of different implementations of Decimal
-##
-## Author:      Michael Amrhein (mamrhein@users.sourceforge.net)
-##
-## Copyright:   (c) Michael Amrhein
-## License:     This program is free software. You can redistribute it, use it
-##              and/or modify it under the terms of the 2-clause BSD license.
-##              For license details please read the file LICENSE.TXT provided
-##              together with the source code.
-##****************************************************************************
-## $Source$
-## $Revision$
+# -*- coding: utf-8 -*-
+# ----------------------------------------------------------------------------
+# Name:        dec_perf
+# Purpose:     Compare performance of different implementations of Decimal
+#
+# Author:      Michael Amrhein (michael@adrhinum.de)
+#
+# Copyright:   (c) 2014 ff. Michael Amrhein
+# License:     This program is free software. You can redistribute it, use it
+#              and/or modify it under the terms of the 2-clause BSD license.
+#              For license details please read the file LICENSE.TXT provided
+#              together with the source code.
+# ----------------------------------------------------------------------------
+# $Source$
+# $Revision$
 
 
 """Compare performance of different implementations of Decimal."""
