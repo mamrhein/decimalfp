@@ -38,15 +38,9 @@ except ImportError:
 from .rounding import LIMIT_PREC, ROUNDING, get_rounding
 
 # cython cimports
-# from cpython.long cimport *
 from cpython.long cimport PyLong_AsLong as long_from_pyint
-from cpython.long cimport PyLong_FromLong as pyint_from_long
 from cpython.long cimport PyLong_FromLongLong as pyint_from_longlong
 from cpython.longintrepr cimport py_long as PyInt
-# from cpython.number cimport *
-from cpython.number cimport PyNumber_Float as pynum_float
-from cpython.number cimport PyNumber_Long as pynum_int
-from cpython.number cimport PyNumber_Power as pynum_pow
 from cpython.object cimport Py_EQ, Py_NE, PyObject_RichCompare
 from libc.limits cimport LLONG_MAX
 from libc.stdlib cimport atoi
@@ -239,7 +233,7 @@ cdef class Decimal:
 
         # Integral
         if isinstance(value, Integral):
-            value = pynum_int(value)
+            value = int(value)
             if precision is None:
                 self._precision = 0
                 self._value = value
@@ -301,10 +295,10 @@ cdef class Decimal:
         # If there's a float or int equivalent to value, use it
         ev = None
         try:
-            ev = pynum_float(value)
+            ev = float(value)
         except (TypeError, ValueError):
             try:
-                ev = pynum_int(value)
+                ev = int(value)
             except (TypeError, ValueError):
                 pass
         if ev == value:     # do we really have the same value?
@@ -460,7 +454,7 @@ cdef class Decimal:
         else:
             if not isinstance(precision, Integral):
                 raise TypeError("Precision must be of type 'Integral'.")
-            to_prec = pynum_int(precision)
+            to_prec = int(precision)
             p = self._precision
             if to_prec == p:
                 return self
