@@ -4,7 +4,7 @@
 # Name:        dec_perf
 # Purpose:     Compare performance of different implementations of Decimal
 #
-# Author:      Michael Amrhein (michael@adrhinum.de)
+# Author:      Michael Amrhein michael@adrhinum.de)
 #
 # Copyright:   (c) 2014 ff. Michael Amrhein
 # License:     This program is free software. You can redistribute it, use it
@@ -23,6 +23,7 @@ from __future__ import absolute_import, division, print_function
 
 import math
 import platform
+import sys
 from decimal import Decimal as StdLibDecimal                        # noqa
 from timeit import Timer
 
@@ -39,34 +40,34 @@ def testComputation(cls):
     """Execute several computations for performance testing."""
     f = cls('23.25')
     g = cls('-23.2562398')
-    h = f + g
+    h = cls(sys.maxsize ** 10)
     b = (--f == +f)
     b = (abs(g) == abs(-g))
     r = g - g
     r = f + g - h
     r = f - 23
     r = 23 - f
-    b = (-(3 * f) == (-3) * f == 3 * (-f))
+    b = -(3 * f)
+    b = (-3) * h
     b = ((2 * f) * f == f * (2 * f) == f * (f * 2))
-    b = (3 * h == 3 * f + 3 * g)
+    b = 3 * h / f
     f2 = -2 * f
     b = ((-f2) / f == f2 / (-f) == -(f2 / f) == 2)
-    b = (g / f == cls('-1.0002684'))
-    b = (g // f == -2)
-    b = (g // -f == 1)
+    b = g / f
+    b = g // f
+    b = h / -g
     b = (g % -f == h)
-    b = (divmod(24, f) == (cls(1), cls('.75')))
-    b = (divmod(-g, f) == (1, -h))
-    b = (f ** 2 == f * f)
-    b = (g ** -2 == 1 / g ** 2)
-    b = (2 ** f == 2.0 ** 23.25)
-    b = (1 ** g == 1.0)
-    b = (math.floor(f) == 23)
-    b = (math.floor(g) == -24)
-    b = (math.ceil(f) == 24)
-    b = (math.ceil(g) == -23)
-    b = (round(f) == 23)
-    b = (round(g) == -23)
+    b = divmod(24, f)
+    b = divmod(-g, h)
+    b = f ** 2
+    b = 1 / g ** 2
+    b = 2 ** f
+    b = math.floor(f)
+    b = math.floor(g)
+    b = math.ceil(f)
+    b = math.ceil(g)
+    b = round(f)
+    b = round(g)
     if b:
         return r
     else:
