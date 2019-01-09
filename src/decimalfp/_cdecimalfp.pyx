@@ -56,15 +56,24 @@ str_types = (py_bytes, py_str)
 # cdef PyInt 0 = pyint_from_long(0)
 # cdef PyInt PYINT_10 = pyint_from_long(10)
 
-# 10 ** exp as PyInt
+# 10 ** exp as PyInt (mit cache)
+
+_base10_pow_cache = list(range(128))
+for i in _base10_pow_cache:
+    _base10_pow_cache[i] = 10 ** i
+
 cdef long LLONG_MAX_LOG10 = \
     long_from_pyint(int(log10(pyint_from_longlong(LLONG_MAX))))
 
 cdef base10pow(exp):
-    if 0 <= exp < LLONG_MAX_LOG10:
-        return 10 ** exp
-    else:
-        return pow(10, exp, None)
+    assert exp >= 0
+    try:
+        return _base10_pow_cache[exp]
+    except IndexError:
+        if 0 <= exp < LLONG_MAX_LOG10:
+            return 10 ** exp
+        else:
+            return pow(10, exp, None)
 
 
 # parse functions
@@ -217,18 +226,16 @@ cdef class Decimal:
                 n_frac = len(s_frac)
                 sign_n_digits += s_frac
             if precision is None:
-                self._precision = n_frac - exp
+                precision = max(0, n_frac - exp)
+            self._precision = precision
+            shift10 = precision - n_frac + exp
+            if shift10 == 0:
                 self._value = int(sign_n_digits)
+            elif shift10 > 0:
+                self._value = int(sign_n_digits) * base10pow(shift10)
             else:
-                self._precision = precision
-                shift10 = precision - n_frac + exp
-                if shift10 == 0:
-                    self._value = int(sign_n_digits)
-                elif shift10 > 0:
-                    self._value = int(sign_n_digits) * base10pow(shift10)
-                else:
-                    self._value = _floordiv_rounded(int(sign_n_digits),
-                                                    base10pow(-shift10))
+                self._value = _floordiv_rounded(int(sign_n_digits),
+                                                base10pow(-shift10))
             return
 
         # Integral
@@ -468,7 +475,7 @@ cdef class Decimal:
 
         Args:
             quant (Rational): quantum to get a multiple from
-            rounding (str): rounding mode (default: None)
+            rounding (ROUNDING): rounding mode (default: None)
 
         A string can be given for `quant` as long as it is convertable to a
         :class:`Decimal`.
@@ -568,7 +575,7 @@ cdef class Decimal:
         else:
             sv = self._value
             i = _vp_to_int(sv, sp)
-            f = sv - i * 10 ** sp
+            f = sv - i * base10pow(sp)
             s = (i == 0 and f < 0) * '-'  # -1 < self < 0 => i = 0 and f < 0 !
             return '%s%i.%0*i' % (s, i, sp, abs(f))
 
@@ -639,17 +646,17 @@ cdef class Decimal:
             # if sp == op, we are done, otherwise we adjust the value with the
             # lesser precision
             if sp < op:
-                sv *= 10 ** (op - sp)
+                sv *= base10pow(op - sp)
             elif sp > op:
-                ov *= 10 ** (sp - op)
+                ov *= base10pow(sp - op)
             return PyObject_RichCompare(sv, ov, cmp)
         elif isinstance(other, Integral):
-            ov = int(other) * 10 ** sp
+            ov = int(other) * base10pow(sp)
             return PyObject_RichCompare(sv, ov, cmp)
         elif isinstance(other, Rational):
             # cross-wise product of numerator and denominator
             sv *= other.denominator
-            ov = other.numerator * 10 ** sp
+            ov = other.numerator * base10pow(sp)
             return PyObject_RichCompare(sv, ov, cmp)
         elif isinstance(other, Real):
             try:
@@ -661,7 +668,7 @@ cdef class Decimal:
                 return PyObject_RichCompare(sv, other, cmp)
             # cross-wise product of numerator and denominator
             sv *= den
-            ov = num * 10 ** sp
+            ov = num * base10pow(sp)
             return PyObject_RichCompare(sv, ov, cmp)
         elif isinstance(other, _StdLibDecimal):
             if other.is_finite():
@@ -671,9 +678,9 @@ cdef class Decimal:
                 # if sp == op, we are done, otherwise we adjust the value with
                 # the lesser precision
                 if sp < op:
-                    sv *= 10 ** (op - sp)
+                    sv *= base10pow(op - sp)
                 elif sp > op:
-                    ov *= 10 ** (sp - op)
+                    ov *= base10pow(sp - op)
                 return PyObject_RichCompare(sv, ov, cmp)
             else:
                 # 'nan' and 'inf'
@@ -826,10 +833,10 @@ cdef class Decimal:
         return -(-n // d)
 
     def __round__(self, precision=None):
-        """round(self [, ndigits])
+        """round(self [, n_digits])
 
         Round `self` to a given precision in decimal digits (default 0).
-        `ndigits` may be negative.
+        `n_digits` may be negative.
 
         Note: This method is called by the built-in `round` function only in
         Python 3.x! It returns an `int` when called with one argument,
@@ -1057,8 +1064,8 @@ cdef _floordiv_rounded(x, y, rounding=None):
                 return quot
 
 
-cdef _vp_to_int(v, p):
-    """Return integral part of shifted decimal"""
+def _vp_to_int(v, p):
+    # Return integral part of shifted decimal.
     if p == 0:
         return v
     if v == 0:
@@ -1142,9 +1149,9 @@ cdef object add(Decimal x, object y):
     x_denominator = base10pow(x._precision)
     num = x._value * y_denominator + x_denominator * y_numerator
     den = y_denominator * x_denominator
-    minPrec = x._precision
+    min_prec = x._precision
     # return num / den as Decimal or as Fraction
-    return _div(num, den, minPrec)
+    return _div(num, den, min_prec)
 
 
 cdef object sub(Decimal x, object y):
@@ -1183,9 +1190,9 @@ cdef object sub(Decimal x, object y):
     x_denominator = base10pow(x._precision)
     num = x._value * y_denominator - x_denominator * y_numerator
     den = y_denominator * x_denominator
-    minPrec = x._precision
+    min_prec = x._precision
     # return num / den as Decimal or as Fraction
-    return _div(num, den, minPrec)
+    return _div(num, den, min_prec)
 
 
 cdef object mul(Decimal x, object y):
@@ -1213,9 +1220,9 @@ cdef object mul(Decimal x, object y):
     # handle Rational and Real
     num = x._value * y_numerator
     den = y_denominator * base10pow(x._precision)
-    minPrec = x._precision
+    min_prec = x._precision
     # return num / den as Decimal or as Fraction
-    return _div(num, den, minPrec)
+    return _div(num, den, min_prec)
 
 
 cdef object div1(Decimal x, object y):
@@ -1225,9 +1232,9 @@ cdef object div1(Decimal x, object y):
         xp, yp = x._precision, (<Decimal>y)._precision
         num = x._value * base10pow(yp)
         den = (<Decimal>y)._value * base10pow(xp)
-        minPrec = max(0, xp - yp)
+        min_prec = max(0, xp - yp)
         # return num / den as Decimal or as Fraction
-        return _div(num, den, minPrec)
+        return _div(num, den, min_prec)
     elif isinstance(y, Rational):       # includes Integral
         y_numerator, y_denominator = (y.numerator, y.denominator)
     elif isinstance(y, Real):
@@ -1242,9 +1249,9 @@ cdef object div1(Decimal x, object y):
     # handle Rational and Real
     num = x._value * y_denominator
     den = y_numerator * base10pow(x._precision)
-    minPrec = x._precision
+    min_prec = x._precision
     # return num / den as Decimal or as Fraction
-    return _div(num, den, minPrec)
+    return _div(num, den, min_prec)
 
 
 cdef object div2(object x, Decimal y):
@@ -1254,9 +1261,9 @@ cdef object div2(object x, Decimal y):
         xp, yp = (<Decimal>x)._precision, y._precision
         num = (<Decimal>x)._value * base10pow(yp)
         den = y._value * base10pow(xp)
-        minPrec = max(0, xp - yp)
+        min_prec = max(0, xp - yp)
         # return num / den as Decimal or as Fraction
-        return _div(num, den, minPrec)
+        return _div(num, den, min_prec)
     if isinstance(x, Rational):
         x_numerator, x_denominator = (x.numerator, x.denominator)
     elif isinstance(x, Real):
@@ -1268,12 +1275,12 @@ cdef object div2(object x, Decimal y):
         return div1(Decimal(x), y)
     else:
         return NotImplemented
-    # handle Rational and float
+    # handle Rational and Real
     num = x_numerator * base10pow(y._precision)
     den = y._value * x_denominator
-    minPrec = y._precision
+    min_prec = y._precision
     # return num / den as Decimal or as Fraction
-    return _div(num, den, minPrec)
+    return _div(num, den, min_prec)
 
 
 cdef tuple divmod1(Decimal x, object y):

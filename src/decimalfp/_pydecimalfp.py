@@ -45,6 +45,22 @@ bytes = type(b'')                                               # noqa: A001
 str_types = (bytes, str)
 
 
+# 10 ** exp (mit cache)
+
+_base10_pow_cache = list(range(128))
+for i in _base10_pow_cache:
+    _base10_pow_cache[i] = 10 ** i
+
+
+def base10pow(exp):
+    """Return 10 ** `exp`."""
+    assert exp >= 0, 'base10pow called with exponent < 0: %i' % exp
+    try:
+        return _base10_pow_cache[exp]
+    except IndexError:
+        return 10 ** exp
+
+
 # parse functions
 import re                                                   # noqa: I100, I202
 
@@ -197,18 +213,16 @@ class Decimal:
                 n_frac = len(s_frac)
                 sign_n_digits += s_frac
             if precision is None:
-                self._precision = n_frac - exp
+                precision = max(0, n_frac - exp)
+            self._precision = precision
+            shift10 = precision - n_frac + exp
+            if shift10 == 0:
                 self._value = int(sign_n_digits)
+            elif shift10 > 0:
+                self._value = int(sign_n_digits) * base10pow(shift10)
             else:
-                self._precision = precision
-                shift10 = precision - n_frac + exp
-                if shift10 == 0:
-                    self._value = int(sign_n_digits)
-                elif shift10 > 0:
-                    self._value = int(sign_n_digits) * 10 ** shift10
-                else:
-                    self._value = _floordiv_rounded(int(sign_n_digits),
-                                                    10 ** -shift10)
+                self._value = _floordiv_rounded(int(sign_n_digits),
+                                                base10pow(-shift10))
             return self
 
         # Integral
@@ -219,7 +233,7 @@ class Decimal:
                 self._value = value
             else:
                 self._precision = precision
-                self._value = value * 10 ** precision
+                self._value = value * base10pow(precision)
             return self
 
         # Decimal (from standard library)
@@ -229,7 +243,7 @@ class Decimal:
                 coeff = (-1) ** sign * reduce(lambda x, y: x * 10 + y, digits)
                 if precision is None:
                     if exp > 0:
-                        self._value = coeff * 10 ** exp
+                        self._value = coeff * base10pow(exp)
                         self._precision = 0
                     else:
                         self._value = coeff
@@ -240,9 +254,10 @@ class Decimal:
                     if shift10 == 0:
                         self._value = coeff
                     elif shift10 > 0:
-                        self._value = coeff * 10 ** shift10
+                        self._value = coeff * base10pow(shift10)
                     else:
-                        self._value = _floordiv_rounded(coeff, 10 ** -shift10)
+                        self._value = _floordiv_rounded(coeff,
+                                                        base10pow(-shift10))
                 return self
             else:
                 raise ValueError("Can't convert %s to Decimal." % repr(value))
@@ -265,7 +280,8 @@ class Decimal:
                 self._value = v
                 self._precision = p
             else:
-                self._value = _floordiv_rounded(num * 10 ** precision, den)
+                self._value = _floordiv_rounded(num * base10pow(precision),
+                                                den)
                 self._precision = precision
             return self
 
@@ -499,7 +515,7 @@ class Decimal:
                                     % (quant.__class__.__name__, quant))
                 num, den = quant.as_integer_ratio()
         mult = _floordiv_rounded(self._value * den,
-                                 10 ** self._precision * num,
+                                 base10pow(self._precision) * num,
                                  rounding)
         return Decimal(mult) * quant
 
@@ -522,7 +538,7 @@ class Decimal:
         denominator, whose ratio is equal to self.
 
         """
-        n, d = self._value, 10 ** self._precision
+        n, d = self._value, base10pow(self._precision)
         g = gcd(n, d)
         return n // g, d // g
 
@@ -570,7 +586,7 @@ class Decimal:
         else:
             sv = self._value
             i = _vp_to_int(sv, sp)
-            f = sv - i * 10 ** sp
+            f = sv - i * base10pow(sp)
             s = (i == 0 and f < 0) * '-'  # -1 < self < 0 => i = 0 and f < 0 !
             return '%s%i.%0*i' % (s, i, sp, abs(f))
 
@@ -642,17 +658,17 @@ class Decimal:
             # if sp == op, we are done, otherwise we adjust the value with the
             # lesser precision
             if sp < op:
-                sv *= 10 ** (op - sp)
+                sv *= base10pow(op - sp)
             elif sp > op:
-                ov *= 10 ** (sp - op)
+                ov *= base10pow(sp - op)
             return cmp(sv, ov)
         elif isinstance(other, Integral):
-            ov = int(other) * 10 ** sp
+            ov = int(other) * base10pow(sp)
             return cmp(sv, ov)
         elif isinstance(other, Rational):
             # cross-wise product of numerator and denominator
             sv *= other.denominator
-            ov = other.numerator * 10 ** sp
+            ov = other.numerator * base10pow(sp)
             return cmp(sv, ov)
         elif isinstance(other, Real):
             try:
@@ -664,7 +680,7 @@ class Decimal:
                 return cmp(sv, other)
             # cross-wise product of numerator and denominator
             sv *= den
-            ov = num * 10 ** sp
+            ov = num * base10pow(sp)
             return cmp(sv, ov)
         elif isinstance(other, _StdLibDecimal):
             if other.is_finite():
@@ -674,9 +690,9 @@ class Decimal:
                 # if sp == op, we are done, otherwise we adjust the value with
                 # the lesser precision
                 if sp < op:
-                    sv *= 10 ** (op - sp)
+                    sv *= base10pow(op - sp)
                 elif sp > op:
-                    ov *= 10 ** (sp - op)
+                    ov *= base10pow(sp - op)
                 return cmp(sv, ov)
             else:
                 # 'nan' and 'inf'
@@ -719,7 +735,7 @@ class Decimal:
             if sp == 0:           # if self == int(self),
                 return hash(sv)   # same hash as int
             else:                 # otherwise same hash as equivalent fraction
-                return hash(Fraction(sv, 10 ** sp))
+                return hash(Fraction(sv, base10pow(sp)))
 
     # return 0 or 1 for truth-value testing
     def __nonzero__(self):
@@ -736,7 +752,7 @@ class Decimal:
     # convert to float (may loose precision!)
     def __float__(self):
         """float(self)"""                                       # noqa: D400
-        return self._value / 10 ** self._precision
+        return self._value / base10pow(self._precision)
 
     def __pos__(self):
         """+self"""                                             # noqa: D400
@@ -841,12 +857,12 @@ class Decimal:
 
     def __floor__(self):
         """math.floor(self)"""                                  # noqa: D400
-        n, d = self._value, 10 ** self._precision
+        n, d = self._value, base10pow(self._precision)
         return n // d
 
     def __ceil__(self):
         """math.ceil(self)"""                                   # noqa: D400
-        n, d = self._value, 10 ** self._precision
+        n, d = self._value, base10pow(self._precision)
         return -(-n // d)
 
     def __round__(self, precision=None):
@@ -977,17 +993,18 @@ def _vp_adjust_to_prec(v, p, to_prec, rounding=None):
     dp = to_prec - p
     if dp >= 0:
         # increase precision -> increase internal value
-        return v * 10 ** dp
+        return v * base10pow(dp)
     # decrease precision -> decrease internal value -> rounding
     elif to_prec >= 0:
         # resulting precision >= 0 -> just return adjusted internal value
-        return _floordiv_rounded(v, 10 ** -dp, rounding)
+        return _floordiv_rounded(v, base10pow(-dp), rounding)
     else:
         # result to be rounded to a power of 10 -> two steps needed:
         # 1) round internal value to requested precision
         # 2) adjust internal value to precison 0 (because internal precision
         # must be >= 0)
-        return _floordiv_rounded(v, 10 ** -dp, rounding) * 10 ** -to_prec
+        return (_floordiv_rounded(v, base10pow(-dp), rounding) *
+                base10pow(-to_prec))
 
 
 def _vp_normalize(v, p):
@@ -1043,14 +1060,16 @@ def _floordiv_rounded(x, y, rounding=None):
                 return quot
         elif rounding == ROUNDING.ROUND_DOWN:
             # Round towards 0 (aka truncate)
-            # quotient negativ => add 1
+            # quotient negativ
+            # => add 1
             if quot < 0:
                 return quot + 1
             else:
                 return quot
         elif rounding == ROUNDING.ROUND_UP:
             # Round away from 0
-            # quotient not negativ => add 1
+            # quotient not negativ
+            # => add 1
             if quot >= 0:
                 return quot + 1
             else:
@@ -1064,9 +1083,12 @@ def _floordiv_rounded(x, y, rounding=None):
             # => never add 1
             return quot
         elif rounding == ROUNDING.ROUND_05UP:
-            # Round down unless last digit is 0 or 5 quotient not negativ and
-            # quotient divisible by 5 without remainder or quotient negativ
-            # and (quotient + 1) not divisible by 5 without remainder => add 1
+            # Round down unless last digit is 0 or 5
+            # quotient not negativ and
+            # quotient divisible by 5 without remainder or
+            # quotient negativ and
+            # (quotient + 1) not divisible by 5 without remainder
+            # => add 1
             if (quot >= 0 and quot % 5 == 0 or
                     quot < 0 and (quot + 1) % 5 != 0):
                 return quot + 1
@@ -1082,11 +1104,11 @@ def _vp_to_int(v, p):
         return v
     if p > 0:
         if v > 0:
-            return v // 10 ** p
+            return v // base10pow(p)
         else:
-            return -(-v // 10 ** p)
+            return -(-v // base10pow(p))
     else:   # shouldn't happen!
-        return v * 10 ** -p
+        return v * base10pow(-p)
 
 
 def _approx_rational(num, den, min_prec=0):
@@ -1097,7 +1119,7 @@ def _approx_rational(num, den, min_prec=0):
     max_prec = max(min_prec, LIMIT_PREC)
     while True:
         p = (min_prec + max_prec) // 2
-        v, r = divmod(num * 10 ** p, den)
+        v, r = divmod(num * base10pow(p), den)
         if p == max_prec:
             break
         if r == 0:
@@ -1136,15 +1158,15 @@ def add(x, y):
             result._value += y._value
         elif p > 0:
             result = Decimal(x)
-            result._value += y._value * 10 ** p
+            result._value += y._value * base10pow(p)
         else:
             result = Decimal(y)
-            result._value += x._value * 10 ** -p
+            result._value += x._value * base10pow(-p)
         return result
     elif isinstance(y, Integral):
         p = x._precision
         result = Decimal(x)
-        result._value += int(y) * 10 ** p
+        result._value += int(y) * base10pow(p)
         return result
     elif isinstance(y, Rational):
         y_numerator, y_denominator = (y.numerator, y.denominator)
@@ -1158,7 +1180,7 @@ def add(x, y):
     else:
         return NotImplemented
     # handle Rational and Real
-    x_denominator = 10 ** x._precision
+    x_denominator = base10pow(x._precision)
     num = x._value * y_denominator + x_denominator * y_numerator
     den = y_denominator * x_denominator
     min_prec = x._precision
@@ -1179,15 +1201,15 @@ def sub(x, y):
             result._value -= y._value
         elif p > 0:
             result = Decimal(x)
-            result._value -= y._value * 10 ** p
+            result._value -= y._value * base10pow(p)
         else:
             result = Decimal(y)
-            result._value = x._value * 10 ** -p - y._value
+            result._value = x._value * base10pow(-p) - y._value
         return result
     elif isinstance(y, Integral):
         p = x._precision
         result = Decimal(x)
-        result._value -= int(y) * 10 ** p
+        result._value -= int(y) * base10pow(p)
         return result
     elif isinstance(y, Rational):
         y_numerator, y_denominator = (y.numerator, y.denominator)
@@ -1201,7 +1223,7 @@ def sub(x, y):
     else:
         return NotImplemented
     # handle Rational and Real
-    x_denominator = 10 ** x._precision
+    x_denominator = base10pow(x._precision)
     num = x._value * y_denominator - x_denominator * y_numerator
     den = y_denominator * x_denominator
     min_prec = x._precision
@@ -1237,7 +1259,7 @@ def mul(x, y):
         return NotImplemented
     # handle Rational and Real
     num = x._value * y_numerator
-    den = y_denominator * 10 ** x._precision
+    den = y_denominator * base10pow(x._precision)
     min_prec = x._precision
     # return num / den as Decimal or as Fraction
     return _div(num, den, min_prec)
@@ -1251,8 +1273,8 @@ def div1(x, y):
     """
     if isinstance(y, Decimal):
         xp, yp = x._precision, y._precision
-        num = x._value * 10 ** yp
-        den = y._value * 10 ** xp
+        num = x._value * base10pow(yp)
+        den = y._value * base10pow(xp)
         min_prec = max(0, xp - yp)
         # return num / den as Decimal or as Fraction
         return _div(num, den, min_prec)
@@ -1269,7 +1291,7 @@ def div1(x, y):
         return NotImplemented
     # handle Rational and Real
     num = x._value * y_denominator
-    den = y_numerator * 10 ** x._precision
+    den = y_numerator * base10pow(x._precision)
     min_prec = x._precision
     # return num / den as Decimal or as Fraction
     return _div(num, den, min_prec)
@@ -1283,8 +1305,8 @@ def div2(x, y):
     """
     if isinstance(x, Decimal):
         xp, yp = x._precision, y._precision
-        num = x._value * 10 ** yp
-        den = y._value * 10 ** xp
+        num = x._value * base10pow(yp)
+        den = y._value * base10pow(xp)
         min_prec = max(0, xp - yp)
         # return num / den as Decimal or as Fraction
         return _div(num, den, min_prec)
@@ -1300,7 +1322,7 @@ def div2(x, y):
     else:
         return NotImplemented
     # handle Rational and Real
-    num = x_numerator * 10 ** y._precision
+    num = x_numerator * base10pow(y._precision)
     den = y._value * x_denominator
     min_prec = y._precision
     # return num / den as Decimal or as Fraction
@@ -1318,10 +1340,10 @@ def divmod1(x, y):
         if xp >= yp:
             r = Decimal(x)
             xv = x._value
-            yv = y._value * 10 ** (xp - yp)
+            yv = y._value * base10pow(xp - yp)
         else:
             r = Decimal(y)
-            xv = x._value * 10 ** (yp - xp)
+            xv = x._value * base10pow(yp - xp)
             yv = y._value
         q = xv // yv
         r._value = xv - q * yv
@@ -1330,7 +1352,7 @@ def divmod1(x, y):
         r = Decimal(x)
         xv = x._value
         xp = x._precision
-        yv = y * 10 ** xp
+        yv = y * base10pow(xp)
         q = xv // yv
         r._value = xv - q * yv
         return Decimal(q, xp), r
@@ -1351,10 +1373,10 @@ def divmod2(x, y):
         if xp >= yp:
             r = Decimal(x)
             xv = x._value
-            yv = y._value * 10 ** (xp - yp)
+            yv = y._value * base10pow(xp - yp)
         else:
             r = Decimal(y)
-            xv = x._value * 10 ** (yp - xp)
+            xv = x._value * base10pow(yp - xp)
             yv = y._value
         q = xv // yv
         r._value = xv - q * yv
@@ -1363,7 +1385,7 @@ def divmod2(x, y):
         r = Decimal(y)
         yv = y._value
         yp = y._precision
-        xv = x * 10 ** yp
+        xv = x * base10pow(yp)
         q = xv // yv
         r._value = xv - q * yv
         return Decimal(q, yp), r
