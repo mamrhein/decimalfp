@@ -986,7 +986,75 @@ cdef _floordiv_rounded(x, y, rounding=None):
     quot, rem = divmod(x, y)
     if rem == 0:              # no need for rounding
         return quot
-    return quot + _round(quot, rem, y, rounding)
+    else:
+        if rounding is None:
+            rounding = get_rounding()
+        if rounding == ROUNDING.ROUND_HALF_UP:
+            # Round 5 up (away from 0)
+            # |remainder| > |divisor|/2 or
+            # |remainder| = |divisor|/2 and quotient >= 0
+            # => add 1
+            ar, ay = abs(2 * rem), abs(y)
+            if ar > ay or (ar == ay and quot >= 0):
+                return quot + 1
+            else:
+                return quot
+        elif rounding == ROUNDING.ROUND_HALF_EVEN:
+            # Round 5 to even, rest to nearest
+            # |remainder| > |divisor|/2 or
+            # |remainder| = |divisor|/2 and quotient not even
+            # => add 1
+            ar, ay = abs(2 * rem), abs(y)
+            if ar > ay or (ar == ay and quot % 2 != 0):
+                return quot + 1
+            else:
+                return quot
+        elif rounding == ROUNDING.ROUND_HALF_DOWN:
+            # Round 5 down
+            # |remainder| > |divisor|/2 or
+            # |remainder| = |divisor|/2 and quotient < 0
+            # => add 1
+            ar, ay = abs(2 * rem), abs(y)
+            if ar > ay or (ar == ay and quot < 0):
+                return quot + 1
+            else:
+                return quot
+        elif rounding == ROUNDING.ROUND_DOWN:
+            # Round towards 0 (aka truncate)
+            # quotient negativ
+            # => add 1
+            if quot < 0:
+                return quot + 1
+            else:
+                return quot
+        elif rounding == ROUNDING.ROUND_UP:
+            # Round away from 0
+            # quotient not negativ
+            # => add 1
+            if quot >= 0:
+                return quot + 1
+            else:
+                return quot
+        elif rounding == ROUNDING.ROUND_CEILING:
+            # Round up (not away from 0 if negative)
+            # => always add 1
+            return quot + 1
+        elif rounding == ROUNDING.ROUND_FLOOR:
+            # Round down (not towards 0 if negative)
+            # => never add 1
+            return quot
+        elif rounding == ROUNDING.ROUND_05UP:
+            # Round down unless last digit is 0 or 5
+            # quotient not negativ and
+            # quotient divisible by 5 without remainder or
+            # quotient negativ and
+            # (quotient + 1) not divisible by 5 without remainder
+            # => add 1
+            if (quot >= 0 and quot % 5 == 0 or
+                    quot < 0 and (quot + 1) % 5 != 0):
+                return quot + 1
+            else:
+                return quot
 
 
 cdef _vp_to_int(v, p):
@@ -1329,71 +1397,3 @@ cdef object pow2(object x, Decimal y):
     if y.denominator == 1:
         return x ** y.numerator
     return x ** float(y)
-
-
-# helper for different rounding modes
-
-cdef int _round(q, r, y, rounding=None):
-    if rounding is None:
-        rounding = get_rounding()
-    if rounding == ROUNDING.ROUND_HALF_UP:
-        # Round 5 up (away from 0)
-        # |remainder| > |divisor|/2 or
-        # |remainder| = |divisor|/2 and quotient >= 0
-        # => add 1
-        ar, ay = abs(2 * r), abs(y)
-        if ar > ay or (ar == ay and q >= 0):
-            return 1
-        else:
-            return 0
-    elif rounding == ROUNDING.ROUND_HALF_EVEN:
-        # Round 5 to even, rest to nearest
-        # |remainder| > |divisor|/2 or
-        # |remainder| = |divisor|/2 and quotient not even
-        # => add 1
-        ar, ay = abs(2 * r), abs(y)
-        if ar > ay or (ar == ay and q % 2 != 0):
-            return 1
-        else:
-            return 0
-    elif rounding == ROUNDING.ROUND_HALF_DOWN:
-        # Round 5 down
-        # |remainder| > |divisor|/2 or
-        # |remainder| = |divisor|/2 and quotient < 0
-        # => add 1
-        ar, ay = abs(2 * r), abs(y)
-        if ar > ay or (ar == ay and q < 0):
-            return 1
-        else:
-            return 0
-    elif rounding == ROUNDING.ROUND_DOWN:
-        # Round towards 0 (aka truncate)
-        # quotient negativ => add 1
-        if q < 0:
-            return 1
-        else:
-            return 0
-    elif rounding == ROUNDING.ROUND_UP:
-        # Round away from 0
-        # quotient not negativ => add 1
-        if q >= 0:
-            return 1
-        else:
-            return 0
-    elif rounding == ROUNDING.ROUND_CEILING:
-        # Round up (not away from 0 if negative)
-        # => always add 1
-        return 1
-    elif rounding == ROUNDING.ROUND_FLOOR:
-        # Round down (not towards 0 if negative)
-        # => never add 1
-        return 0
-    elif rounding == ROUNDING.ROUND_05UP:
-        # Round down unless last digit is 0 or 5
-        # quotient not negativ and quotient divisible by 5 without remainder
-        # or quotient negativ and (quotient + 1) not divisible by 5 without
-        # remainder => add 1
-        if q >= 0 and q % 5 == 0 or q < 0 and (q + 1) % 5 != 0:
-            return 1
-        else:
-            return 0
