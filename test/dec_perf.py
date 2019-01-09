@@ -22,25 +22,26 @@
 from __future__ import absolute_import, division, print_function
 
 import math
+import os
 import platform
 import sys
-from decimal import Decimal as StdLibDecimal                        # noqa
 from timeit import Timer
 
+from decimalfp import ROUNDING
 from decimalfp._pydecimalfp import Decimal as PyDecimal             # noqa
 from decimalfp._cdecimalfp import Decimal as CDecimal               # noqa
 
 PY_IMPL = platform.python_implementation()
 PY_VERSION = platform.python_version()
 
-dec_impls = ("StdLibDecimal", "PyDecimal", "CDecimal")
+dec_impls = ("PyDecimal", "CDecimal")
 
 
 def testComputation(cls):
     """Execute several computations for performance testing."""
     f = cls('23.25')
     g = cls('-23.2562398')
-    h = cls(sys.maxsize ** 10)
+    h = cls(sys.maxsize ** 10) + cls(1 / f, 128)
     b = (--f == +f)
     b = (abs(g) == abs(-g))
     r = g - g
@@ -68,6 +69,8 @@ def testComputation(cls):
     b = math.ceil(g)
     b = round(f)
     b = round(g)
+    for mode in ROUNDING:
+        b = h.adjusted(14, mode)
     if b:
         return r
     else:
@@ -75,12 +78,8 @@ def testComputation(cls):
 
 
 if __name__ == '__main__':
+    print(os.path.realpath(os.path.curdir))
     print('---', PY_IMPL, PY_VERSION, '---')
-    # for reference, run it with 'float'
-    timer = Timer("testComputation(float)",
-                  "from dec_perf import testComputation")
-    results = timer.repeat(10, 1000)
-    print("float:", min(results))
     for impl in dec_impls:
         timer = Timer("testComputation(%s)" % impl,
                       "from dec_perf import testComputation, %s" % impl)
