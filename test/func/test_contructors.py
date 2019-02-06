@@ -20,7 +20,7 @@
 
 from importlib import import_module
 # from decimal import Decimal as _StdLibDecimal, InvalidOperation
-# from fractions import Fraction
+from fractions import Fraction
 
 import pytest
 
@@ -87,24 +87,24 @@ def test_decimal_wrong_precision_value(impl):
 
 compact_coeff = 174
 compact_prec = 1
-compact_ratio = (compact_coeff // 2, 10 ** compact_prec // 2)
+compact_ratio = Fraction(compact_coeff, 10 ** compact_prec)
 compact_str = "17.4"
 compact_adj = 2
 compact_adj_ratio = compact_ratio
 small_coeff = 123456789012345678901234567890
 small_prec = 20
-small_ratio = (-small_coeff // 10, 10 ** (small_prec - 1))
+small_ratio = Fraction(-small_coeff, 10 ** small_prec)
 small_str = "-12345678901234567890.1234567890E-10"
 small_adj = 15
-small_adj_ratio = (round(small_coeff, small_adj - small_prec),
-                   10 ** small_adj)
+small_adj_ratio = Fraction(round(-small_coeff, small_adj - small_prec),
+                           10 ** small_prec)
 large_coeff = 294898 * 10 ** 24573 + 1498953
 large_prec = 24573
-large_ratio = (large_coeff, 10 ** large_prec)
+large_ratio = Fraction(large_coeff, 10 ** large_prec)
 large_str = f"{large_coeff}e-{large_prec}"
 large_adj = large_prec - 30
-large_adj_ratio = (round(large_coeff, large_adj - large_prec),
-                   10 ** large_adj)
+large_adj_ratio = Fraction(round(large_coeff, large_adj - large_prec),
+                           10 ** large_prec)
 
 
 @pytest.mark.parametrize(("value", "prec", "ratio"),
@@ -116,7 +116,19 @@ def test_decimal_from_str(impl, value, prec, ratio):
     dec = impl.Decimal(value)
     assert isinstance(dec, impl.Decimal)
     assert dec.precision == prec
-    assert dec.as_integer_ratio() == ratio
+    assert dec.as_fraction() == ratio
+
+
+@pytest.mark.parametrize(("value", "prec", "ratio"),
+                         ((compact_str, compact_adj, compact_adj_ratio),
+                          (small_str, small_adj, small_adj_ratio),
+                          (large_str, large_adj, large_adj_ratio)),
+                         ids=("compact", "small", "large"))
+def test_decimal_from_str_adj(impl, value, prec, ratio):
+    dec = impl.Decimal(value, prec)
+    assert isinstance(dec, impl.Decimal)
+    assert dec.precision == prec
+    assert dec.as_fraction() == ratio
 
 
 # @pytest.mark.parametrize("value", ["\u1811\u1817.\u1814", "\u0f20.\u0f24"],
