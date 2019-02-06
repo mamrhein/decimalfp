@@ -131,8 +131,61 @@ def test_decimal_from_str_adj(impl, value, prec, ratio):
     assert dec.as_fraction() == ratio
 
 
+@pytest.mark.parametrize(("value", "prec", "ratio"),
+                         ((compact_str, compact_prec, compact_ratio),
+                          (small_str, small_prec, small_ratio),
+                          (large_str, large_prec, large_ratio)),
+                         ids=("compact", "small", "large"))
+def test_decimal_from_decimal(impl, value, prec, ratio):
+    dec = impl.Decimal(value)
+    dec = impl.Decimal(dec)
+    assert isinstance(dec, impl.Decimal)
+    assert dec.precision == prec
+    assert dec.as_fraction() == ratio
+
+
+@pytest.mark.parametrize(("value", "prec", "ratio"),
+                         ((compact_str, compact_adj, compact_adj_ratio),
+                          (small_str, small_adj, small_adj_ratio),
+                          (large_str, large_adj, large_adj_ratio)),
+                         ids=("compact", "small", "large"))
+def test_decimal_from_decimal_adj(impl, value, prec, ratio):
+    dec = impl.Decimal(value)
+    assert isinstance(dec, impl.Decimal)
+    dec = impl.Decimal(dec, prec)
+    assert dec.precision == prec
+    assert dec.as_fraction() == ratio
+
+
 # @pytest.mark.parametrize("value", ["\u1811\u1817.\u1814", "\u0f20.\u0f24"],
 #                          ids=["mongolian", "tibetian"])
 # def test_decimal_from_non_ascii_digits(impl, value):
 #     dec = impl.Decimal(value)
 #     assert isinstance(dec, impl.Decimal)
+
+
+@pytest.mark.parametrize(("value", "ratio"),
+                         ((compact_coeff, Fraction(compact_coeff, 1)),
+                          (small_coeff, Fraction(small_coeff, 1)),
+                          (large_coeff, Fraction(large_coeff, 1)),
+                          (IntWrapper(328), Fraction(328, 1))),
+                         ids=("compact", "small", "large", "IntWrapper"))
+def test_decimal_from_integral(impl, value, ratio):
+    dec = impl.Decimal(value)
+    assert isinstance(dec, impl.Decimal)
+    assert dec.precision == 0
+    assert dec.as_fraction() == ratio
+
+
+@pytest.mark.parametrize(("value", "prec", "ratio"),
+                         ((compact_coeff, compact_adj,
+                           Fraction(compact_coeff, 1)),
+                          (small_coeff, small_adj, Fraction(small_coeff, 1)),
+                          (large_coeff, large_adj, Fraction(large_coeff, 1)),
+                          (IntWrapper(328), 7, Fraction(328, 1))),
+                         ids=("compact", "small", "large", "IntWrapper"))
+def test_decimal_from_integral_adj(impl, value, prec, ratio):
+    dec = impl.Decimal(value, prec)
+    assert isinstance(dec, impl.Decimal)
+    assert dec.precision == prec
+    assert dec.as_fraction() == ratio
