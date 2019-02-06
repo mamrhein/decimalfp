@@ -19,7 +19,7 @@
 
 
 from importlib import import_module
-# from decimal import Decimal as _StdLibDecimal, InvalidOperation
+from decimal import Decimal as StdLibDecimal  # , InvalidOperation
 from fractions import Fraction
 
 import pytest
@@ -189,3 +189,42 @@ def test_decimal_from_integral_adj(impl, value, prec, ratio):
     assert isinstance(dec, impl.Decimal)
     assert dec.precision == prec
     assert dec.as_fraction() == ratio
+
+
+@pytest.mark.parametrize(("value", "prec", "ratio"),
+                         ((StdLibDecimal(compact_str), compact_prec,
+                           compact_ratio),
+                          (StdLibDecimal(small_str), small_prec, small_ratio),
+                          (StdLibDecimal(large_str), large_prec, large_ratio)
+                          ),
+                         ids=("compact", "small", "large"))
+def test_decimal_from_stdlib_decimal(impl, value, prec, ratio):
+    dec = impl.Decimal(value)
+    assert isinstance(dec, impl.Decimal)
+    assert dec.precision == prec
+    assert dec.as_fraction() == ratio
+
+
+@pytest.mark.parametrize(("value", "prec", "ratio"),
+                         ((StdLibDecimal(compact_str), compact_adj,
+                           compact_adj_ratio),
+                          (StdLibDecimal(small_str), small_adj,
+                           small_adj_ratio),
+                          (StdLibDecimal(large_str), large_adj,
+                           large_adj_ratio)),
+                         ids=("compact", "small", "large"))
+def test_decimal_from_stdlib_decimal_adj(impl, value, prec, ratio):
+    dec = impl.Decimal(value, prec)
+    assert isinstance(dec, impl.Decimal)
+    assert dec.precision == prec
+    assert dec.as_fraction() == ratio
+
+
+@pytest.mark.parametrize(("value", "prec"),
+                         ((StdLibDecimal('inf'), compact_prec),
+                          (StdLibDecimal('-inf'), None),
+                          (StdLibDecimal('nan'), large_prec)),
+                         ids=("inf", "-inf", "nan"))
+def test_decimal_from_incompat_stdlib_decimal(impl, value, prec):
+    with pytest.raises(ValueError):
+        impl.Decimal(value, prec)
