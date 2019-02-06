@@ -18,6 +18,7 @@
 """Test driver for both implementations of decimalfp."""
 
 
+import sys
 from importlib import import_module
 from decimal import Decimal as StdLibDecimal  # , InvalidOperation
 from fractions import Fraction
@@ -38,6 +39,7 @@ set_rounding(ROUNDING.ROUND_HALF_UP)
 class IntWrapper():
 
     def __init__(self, i):
+        assert isinstance(i, int)
         self.i = i
 
     def __int__(self):
@@ -47,6 +49,21 @@ class IntWrapper():
     def __eq__(self, i):
         """self == i"""
         return self.i == i
+
+
+class FloatWrapper():
+
+    def __init__(self, f):
+        assert isinstance(f, float)
+        self.f = f
+
+    def __float__(self):
+        """float(self)"""
+        return self.f
+
+    def __eq__(self, f):
+        """self == f"""
+        return self.f == f
 
 
 @pytest.fixture(scope="session",
@@ -226,5 +243,42 @@ def test_decimal_from_stdlib_decimal_adj(impl, value, prec, ratio):
                           (StdLibDecimal('nan'), large_prec)),
                          ids=("inf", "-inf", "nan"))
 def test_decimal_from_incompat_stdlib_decimal(impl, value, prec):
+    with pytest.raises(ValueError):
+        impl.Decimal(value, prec)
+
+
+@pytest.mark.parametrize(("value", "prec", "ratio"),
+                         ((17.5, 1, Fraction(175, 10)),
+                          (sys.float_info.max, 0,
+                           Fraction(int(sys.float_info.max), 1)),
+                          (FloatWrapper(328.5), 1, Fraction(3285, 10))),
+                         ids=("compact", "float.max", "FloatWrapper"))
+def test_decimal_from_float(impl, value, prec, ratio):
+    dec = impl.Decimal(value)
+    assert isinstance(dec, impl.Decimal)
+    assert dec.precision == prec
+    assert dec.as_fraction() == ratio
+
+
+@pytest.mark.parametrize(("value", "prec", "ratio"),
+                         ((17.5, 3, Fraction(175, 10)),
+                          (sys.float_info.min, 17, Fraction(0, 1)),
+                          (FloatWrapper(328.5), 0, Fraction(329, 1))),
+                         ids=("compact", "float.max", "FloatWrapper"))
+def test_decimal_from_float_adj(impl, value, prec, ratio):
+    dec = impl.Decimal(value, prec)
+    assert isinstance(dec, impl.Decimal)
+    assert dec.precision == prec
+    assert dec.as_fraction() == ratio
+
+
+@pytest.mark.parametrize(("value", "prec"),
+                         ((float('inf'), compact_prec),
+                          (float('-inf'), None),
+                          (float('nan'), large_prec),
+                          (0.3, None),
+                          (sys.float_info.min, None)),
+                         ids=("inf", "-inf", "nan", "0.3", "float.min"))
+def test_decimal_from_incompat_float(impl, value, prec):
     with pytest.raises(ValueError):
         impl.Decimal(value, prec)
