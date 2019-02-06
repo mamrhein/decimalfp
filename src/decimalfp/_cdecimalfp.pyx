@@ -521,11 +521,19 @@ cdef class Decimal:
         exp = -self._precision
         return sign, coeff, exp
 
-    def as_integer_ratio(self):
-        """Return normalized fraction equal to `self`.
+    def as_fraction(self):
+        """Return an instance of `Fraction` equal to `self`.
 
-        I. e. the pair of numerator and denominator with the smallest positive
-        denominator, whose ratio is equal to self.
+        Returns the `Fraction` with the smallest positive denominator, whose
+        ratio is equal to `self`.
+        """
+        return Fraction(self._value, base10pow(self._precision))
+
+    def as_integer_ratio(self):
+        """Return a pair of integers whose ratio is equal to `self`.
+
+        Returns the pair of numerator and denominator with the smallest
+        positive denominator, whose ratio is equal to `self`.
         """
         n, d = self._value, base10pow(self._precision)
         g = gcd(n, d)
