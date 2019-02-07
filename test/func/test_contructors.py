@@ -282,3 +282,38 @@ def test_decimal_from_float_adj(impl, value, prec, ratio):
 def test_decimal_from_incompat_float(impl, value, prec):
     with pytest.raises(ValueError):
         impl.Decimal(value, prec)
+
+
+@pytest.mark.parametrize(("prec", "ratio"),
+                         ((1, Fraction(175, 10)),
+                          (0, Fraction(int(sys.float_info.max), 1)),
+                          (15, Fraction(sys.maxsize, 10 ** 15))),
+                         ids=("compact", "float.max", "maxsize"))
+def test_decimal_from_fraction(impl, prec, ratio):
+    dec = impl.Decimal(ratio)
+    assert isinstance(dec, impl.Decimal)
+    assert dec.precision == prec
+    assert dec.as_fraction() == ratio
+
+
+@pytest.mark.parametrize(("value", "prec", "ratio"),
+                         ((Fraction(175, 10), 0, Fraction(18, 1)),
+                          (Fraction(int(sys.float_info.max), 1), 7,
+                           Fraction(int(sys.float_info.max), 1)),
+                          (Fraction(sys.maxsize, 10 ** 15), 10,
+                           Fraction(round(sys.maxsize, -5), 10 ** 15))),
+                         ids=("compact", "float.max", "maxsize"))
+def test_decimal_from_fraction_adj(impl, value, prec, ratio):
+    dec = impl.Decimal(value, prec)
+    assert isinstance(dec, impl.Decimal)
+    assert dec.precision == prec
+    assert dec.as_fraction() == ratio
+
+
+@pytest.mark.parametrize(("value", "prec"),
+                         ((Fraction(1, 3), None),
+                          (Fraction.from_float(sys.float_info.min), None)),
+                         ids=("1/3", "float.min"))
+def test_decimal_from_incompat_fraction(impl, value, prec):
+    with pytest.raises(ValueError):
+        impl.Decimal(value, prec)
