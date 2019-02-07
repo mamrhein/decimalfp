@@ -95,7 +95,7 @@ def test_decimal_wrong_precision_value(impl):
 compact_coeff = 174
 compact_prec = 1
 compact_ratio = Fraction(compact_coeff, 10 ** compact_prec)
-compact_str = "17.4"
+compact_str = ".174e2"
 compact_adj = 2
 compact_adj_ratio = compact_ratio
 small_coeff = 123456789012345678901234567890
@@ -233,9 +233,9 @@ def test_decimal_from_integral_adj(impl, value, prec, ratio):
                          ((StdLibDecimal(compact_str), compact_prec,
                            compact_ratio),
                           (StdLibDecimal(small_str), small_prec, small_ratio),
-                          (StdLibDecimal(large_str), large_prec, large_ratio)
-                          ),
-                         ids=("compact", "small", "large"))
+                          (StdLibDecimal(large_str), large_prec, large_ratio),
+                          (StdLibDecimal("5.4e6"), 0, Fraction(5400000, 1))),
+                         ids=("compact", "small", "large", "pos-exp"))
 def test_decimal_from_stdlib_decimal(impl, value, prec, ratio):
     dec = impl.Decimal(value)
     assert isinstance(dec, impl.Decimal)
@@ -249,8 +249,11 @@ def test_decimal_from_stdlib_decimal(impl, value, prec, ratio):
                           (StdLibDecimal(small_str), small_adj,
                            small_adj_ratio),
                           (StdLibDecimal(large_str), large_adj,
-                           large_adj_ratio)),
-                         ids=("compact", "small", "large"))
+                           large_adj_ratio),
+                          (StdLibDecimal("54e-3"), 3, Fraction(54, 1000)),
+                          (StdLibDecimal("5.4e4"), 2, Fraction(54000, 1))),
+                         ids=("compact", "small", "large", "exp+prec=0",
+                              "pos-exp"))
 def test_decimal_from_stdlib_decimal_adj(impl, value, prec, ratio):
     dec = impl.Decimal(value, prec)
     assert isinstance(dec, impl.Decimal)
