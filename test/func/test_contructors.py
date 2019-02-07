@@ -117,8 +117,9 @@ large_adj_ratio = Fraction(round(large_coeff, large_adj - large_prec),
 @pytest.mark.parametrize(("value", "prec", "ratio"),
                          ((compact_str, compact_prec, compact_ratio),
                           (small_str, small_prec, small_ratio),
-                          (large_str, large_prec, large_ratio)),
-                         ids=("compact", "small", "large"))
+                          (large_str, large_prec, large_ratio),
+                          (".829", 3, Fraction(829, 1000))),
+                         ids=("compact", "small", "large", "frac-only"))
 def test_decimal_from_str(impl, value, prec, ratio):
     dec = impl.Decimal(value)
     assert isinstance(dec, impl.Decimal)
@@ -129,8 +130,9 @@ def test_decimal_from_str(impl, value, prec, ratio):
 @pytest.mark.parametrize(("value", "prec", "ratio"),
                          ((compact_str, compact_adj, compact_adj_ratio),
                           (small_str, small_adj, small_adj_ratio),
-                          (large_str, large_adj, large_adj_ratio)),
-                         ids=("compact", "small", "large"))
+                          (large_str, large_adj, large_adj_ratio),
+                          (".829", 2, Fraction(83, 100))),
+                         ids=("compact", "small", "large", "frac-only"))
 def test_decimal_from_str_adj(impl, value, prec, ratio):
     dec = impl.Decimal(value, prec)
     assert isinstance(dec, impl.Decimal)
