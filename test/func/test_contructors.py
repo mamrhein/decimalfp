@@ -145,6 +145,15 @@ def test_decimal_from_str_adj(impl, value, prec, ratio):
 #     assert isinstance(dec, impl.Decimal)
 
 
+@pytest.mark.parametrize(("value"),
+                         (" 1.23.5", "1.24e", "--4.92", "", "3,49E-3"),
+                         ids=("two-points", "missing-exp", "double-sign",
+                              "empty-string", "invalid-char"))
+def test_decimal_from_str_wrong_format(impl, value):
+    with pytest.raises(ValueError):
+        impl.Decimal(value)
+
+
 @pytest.mark.parametrize(("value", "prec", "ratio"),
                          ((compact_str, compact_prec, compact_ratio),
                           (small_str, small_prec, small_ratio),
