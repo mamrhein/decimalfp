@@ -19,7 +19,6 @@
 
 
 import sys
-from importlib import import_module
 from decimal import Decimal as StdLibDecimal  # , InvalidOperation
 from fractions import Fraction
 
@@ -64,15 +63,6 @@ class FloatWrapper():
     def __eq__(self, f):
         """self == f"""
         return self.f == f
-
-
-@pytest.fixture(scope="session",
-                params=("decimalfp._pydecimalfp",
-                        "decimalfp._cdecimalfp"),
-                ids=("pydec", "cydec"))
-def impl(request):
-    mod = import_module(request.param)
-    return mod
 
 
 @pytest.mark.parametrize("prec", [None, 0, 7],
