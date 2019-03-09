@@ -111,3 +111,6 @@ venv.bak/
 
 # cython generated html files in src
 src/*/*.html
+
+# wily config
+wily.cfg
