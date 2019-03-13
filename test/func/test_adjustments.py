@@ -78,3 +78,11 @@ def test_adjust_round(impl, rnd, value, prec):
     quant = StdLibDecimal("1e%i" % -prec)
     eq_dec = StdLibDecimal(value).quantize(quant, rnd.name)
     assert adj.as_fraction() == Fraction(eq_dec)
+
+
+@pytest.mark.parametrize("prec", ["5", 7.5, Fraction(5, 1)],
+                         ids=("prec='5'", "prec=7.5", "prec=Fraction(5, 1)"))
+def test_adjust_wrong_precision_type(impl, prec):
+    dec = impl.Decimal('3.12')
+    with pytest.raises(TypeError):
+        dec.adjusted(precision=prec)
