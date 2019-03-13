@@ -77,4 +77,4 @@ def test_adjust_round(impl, rnd, value, prec):
     assert adj.precision == res_prec
     quant = StdLibDecimal("1e%i" % -prec)
     eq_dec = StdLibDecimal(value).quantize(quant, rnd.name)
-    assert adj.as_fraction() == Fraction(*eq_dec.as_integer_ratio())
+    assert adj.as_fraction() == Fraction(eq_dec)
