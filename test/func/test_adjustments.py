@@ -142,3 +142,30 @@ def test_quantize_wrong_quant_type(impl, quant):
     dec = impl.Decimal('3.12')
     with pytest.raises(TypeError):
         dec.quantize(quant)
+
+
+@pytest.mark.parametrize("value",
+                         ("17.849",
+                          ".".join(("1" * 3297, "4" * 33)),
+                          "0.00015"),
+                         ids=("compact", "large", "fraction"))
+@pytest.mark.parametrize("prec", (0, -3, 4), ids=("0", "-3", "4"))
+def test_round(impl, value, prec):
+    dec = impl.Decimal(value)
+    adj = round(dec, prec)
+    assert isinstance(adj, impl.Decimal)
+    res_prec = max(prec, 0)
+    assert adj.precision == res_prec
+    assert adj.as_fraction() == round(dec.as_fraction(), prec)
+
+
+@pytest.mark.parametrize("value",
+                         ("17.849",
+                          ".".join(("1" * 3297, "4" * 33)),
+                          "0.00015"),
+                         ids=("compact", "large", "fraction"))
+def test_round_to_int(impl, value):
+    dec = impl.Decimal(value)
+    adj = round(dec)
+    assert isinstance(adj, int)
+    assert adj == round(dec.as_fraction())
