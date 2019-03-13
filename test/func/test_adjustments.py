@@ -61,21 +61,15 @@ def test_adjust_dflt_round(impl, value, prec, numerator):
                          ("17.849",
                           ".".join(("1" * 3297, "4" * 33)),
                           "0.00015"),
-                         ids=("compact",
-                              "large",
-                              "fraction"))
-@pytest.mark.parametrize("prec", (1,
-                                  -3,
-                                  4),
-                         ids=("1",
-                              "-3",
-                              "4"))
+                         ids=("compact", "large", "fraction"))
+@pytest.mark.parametrize("prec", (1, -3, 4), ids=("1", "-3", "4"))
 def test_adjust_round(impl, rnd, value, prec):
     dec = impl.Decimal(value)
-    adj = dec.adjusted(prec, rnd)
+    adj = dec.adjusted(prec, rounding=rnd)
     res_prec = max(prec, 0)
     assert adj.precision == res_prec
     quant = StdLibDecimal("1e%i" % -prec)
+    # compute equivalent StdLibDecimal
     eq_dec = StdLibDecimal(value).quantize(quant, rnd.name)
     assert adj.as_fraction() == Fraction(eq_dec)
 
@@ -86,3 +80,65 @@ def test_adjust_wrong_precision_type(impl, prec):
     dec = impl.Decimal('3.12')
     with pytest.raises(TypeError):
         dec.adjusted(precision=prec)
+
+
+@pytest.mark.parametrize("value",
+                         ("17.849",
+                          ".".join(("1" * 3297, "4" * 33)),
+                          "0.0025"),
+                         ids=("compact", "large", "fraction"))
+@pytest.mark.parametrize("quant", (Fraction(1, 40),
+                                  StdLibDecimal("-0.3"),
+                                  "0.4",
+                                  3),
+                         ids=("Fraction 1/4",
+                              "StdLibDecimal -0.3",
+                              "str 0.4",
+                              "3"))
+def test_quantize_dflt_round(impl, value, quant):
+    dec = impl.Decimal(value)
+    adj = dec.quantize(quant)
+    # compute equivalent StdLibDecimal
+    if isinstance(quant, Fraction):
+        q = StdLibDecimal(quant.numerator) / StdLibDecimal(quant.denominator)
+    else:
+        q = StdLibDecimal(quant)
+    eq_dec = (StdLibDecimal(value) / q).quantize(1) * q
+    assert adj.as_fraction() == Fraction(eq_dec)
+
+
+@pytest.mark.parametrize("rnd",
+                         [rnd for rnd in ROUNDING],
+                         ids=[rnd.name for rnd in ROUNDING])
+@pytest.mark.parametrize("value",
+                         ("17.849",
+                          ".".join(("1" * 3297, "4" * 33)),
+                          "0.0025"),
+                         ids=("compact", "large", "fraction"))
+@pytest.mark.parametrize("quant", (Fraction(1, 40),
+                                  StdLibDecimal("-0.3"),
+                                  "0.4",
+                                  3),
+                         ids=("Fraction 1/4",
+                              "StdLibDecimal -0.3",
+                              "str 0.4",
+                              "3"))
+def test_quantize_round(impl, rnd, value, quant):
+    dec = impl.Decimal(value)
+    adj = dec.quantize(quant, rounding=rnd)
+    # compute equivalent StdLibDecimal
+    if isinstance(quant, Fraction):
+        q = StdLibDecimal(quant.numerator) / StdLibDecimal(quant.denominator)
+    else:
+        q = StdLibDecimal(quant)
+    eq_dec = (StdLibDecimal(value) / q).quantize(1, rnd.name) * q
+    assert adj.as_fraction() == Fraction(eq_dec)
+
+
+@pytest.mark.parametrize("quant", ["1/5", 7.5+3j, Fraction],
+                         ids=("quant='1/5'", "quant=7.5+3j",
+                              "quant=Fraction"))
+def test_quantize_wrong_quant_type(impl, quant):
+    dec = impl.Decimal('3.12')
+    with pytest.raises(TypeError):
+        dec.quantize(quant)
