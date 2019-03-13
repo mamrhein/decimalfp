@@ -108,7 +108,7 @@ small_adj_ratio = Fraction(round(-small_coeff, small_adj - small_prec),
 large_coeff = 294898 * 10 ** 24573 + 1498953
 large_prec = 24573
 large_ratio = Fraction(large_coeff, 10 ** large_prec)
-large_str = "%ie-%i" % (large_coeff, large_prec)
+large_str = f"{large_coeff}e-{large_prec}"
 large_adj = large_prec - 30
 large_adj_ratio = Fraction(round(large_coeff, large_adj - large_prec),
                            10 ** large_prec)
