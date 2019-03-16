@@ -18,9 +18,10 @@
 from decimal import Decimal as StdLibDecimal
 from decimal import getcontext
 from fractions import Fraction
+
 import pytest
 
-from decimalfp import set_rounding, ROUNDING
+from decimalfp import ROUNDING, set_rounding
 
 
 set_rounding(ROUNDING.ROUND_HALF_UP)
@@ -88,9 +89,9 @@ def test_adjust_wrong_precision_type(impl, prec):
                           "0.0025"),
                          ids=("compact", "large", "fraction"))
 @pytest.mark.parametrize("quant", (Fraction(1, 40),
-                                  StdLibDecimal("-0.3"),
-                                  "0.4",
-                                  3),
+                                   StdLibDecimal("-0.3"),
+                                   "0.4",
+                                   3),
                          ids=("Fraction 1/4",
                               "StdLibDecimal -0.3",
                               "str 0.4",
@@ -116,9 +117,9 @@ def test_quantize_dflt_round(impl, value, quant):
                           "0.0025"),
                          ids=("compact", "large", "fraction"))
 @pytest.mark.parametrize("quant", (Fraction(1, 40),
-                                  StdLibDecimal("-0.3"),
-                                  "0.4",
-                                  3),
+                                   StdLibDecimal("-0.3"),
+                                   "0.4",
+                                   3),
                          ids=("Fraction 1/4",
                               "StdLibDecimal -0.3",
                               "str 0.4",
@@ -135,7 +136,7 @@ def test_quantize_round(impl, rnd, value, quant):
     assert adj.as_fraction() == Fraction(eq_dec)
 
 
-@pytest.mark.parametrize("quant", ["1/5", 7.5+3j, Fraction],
+@pytest.mark.parametrize("quant", ["1/5", 7.5 + 3j, Fraction],
                          ids=("quant='1/5'", "quant=7.5+3j",
                               "quant=Fraction"))
 def test_quantize_wrong_quant_type(impl, quant):

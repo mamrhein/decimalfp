@@ -52,6 +52,6 @@ str_vals = StrVals("+17.4",
 @pytest.mark.parametrize("value", str_vals, ids=str_vals._fields)
 def test_decimal_from_str(impl, benchmark, value):
     """Decimal from string."""
-    Decimal = impl.Decimal
+    Decimal = impl.Decimal                                      # noqa:N806
     dec = benchmark(Decimal, value)
     assert isinstance(dec, Decimal)

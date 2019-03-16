@@ -18,9 +18,9 @@
 """Test driver for both implementations of decimalfp."""
 
 
-import sys
 from decimal import Decimal as StdLibDecimal  # , InvalidOperation
 from fractions import Fraction
+import sys
 
 import pytest
 
@@ -73,7 +73,7 @@ def test_decimal_no_value(impl, prec):
     assert dec.precision == (prec if prec else 0)
 
 
-@pytest.mark.parametrize("value", [Decimal, 3+2j],
+@pytest.mark.parametrize("value", [Decimal, 3 + 2j],
                          ids=("value=Decimal", "value=3+2j"))
 def test_decimal_wrong_value_type(impl, value):
     with pytest.raises(TypeError):

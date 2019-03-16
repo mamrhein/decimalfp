@@ -14,7 +14,7 @@
 # $Revision$
 
 
-"""Shared pytest fixtures"""
+"""Shared pytest fixtures."""
 
 
 # standard library imports

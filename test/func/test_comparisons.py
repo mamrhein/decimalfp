@@ -174,9 +174,9 @@ def test_ne_rational(impl, rational, value):
                          ids=("compact", "large", "fraction"))
 def test_ne_real(impl, value):
     dec = impl.Decimal(value, 400)
-    non_equiv_gt = float(value) * (1. + 1. / 10 **14)
+    non_equiv_gt = float(value) * (1. + 1. / 10 ** 14)
     chk_gt(dec, non_equiv_gt)
-    non_equiv_lt = float(value) * (1. - 1. / 10 **14)
+    non_equiv_lt = float(value) * (1. - 1. / 10 ** 14)
     chk_lt(dec, non_equiv_lt)
 
 
