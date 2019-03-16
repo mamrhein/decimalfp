@@ -16,8 +16,9 @@
 
 
 from decimal import Decimal as StdLibDecimal
-from decimal import getcontext
+from decimal import getcontext, InvalidOperation
 from fractions import Fraction
+import numbers
 import operator
 import sys
 
@@ -30,6 +31,15 @@ ORDERING_OPS = (operator.le, operator.lt, operator.ge, operator.gt)
 
 ctx = getcontext()
 ctx.prec = 3350
+
+
+class FakeReal:
+
+    def __init__(self, value):
+        self.f = float(value)
+
+
+numbers.Real.register(FakeReal)
 
 
 def chk_eq(dec, equiv):
@@ -199,3 +209,53 @@ def test_ord_ops_non_number(impl, op, other):
     dec = impl.Decimal('3.12')
     with pytest.raises(TypeError):
         op(dec, other)
+
+
+def test_eq_ops_incompat_real(impl):
+    dec = impl.Decimal('3.12')
+    other = FakeReal('1.7')
+    assert not(dec == other)
+    assert dec != other
+
+
+@pytest.mark.parametrize("op",
+                         [op for op in ORDERING_OPS],
+                         ids=[op.__name__ for op in ORDERING_OPS])
+@pytest.mark.parametrize("other", (FakeReal("0.5"),),
+                         ids=("other='FakeReal'",))
+def test_ord_ops_incompat_real(impl, op, other):
+    dec = impl.Decimal('3.12')
+    with pytest.raises(TypeError):
+        op(dec, other)
+
+
+@pytest.mark.parametrize("other", [float('Inf'), StdLibDecimal('Inf')],
+                         ids=("other='inf' (float)", "other='inf' (Decimal)"))
+def test_inf(impl, other):
+    dec = impl.Decimal()
+    chk_gt(dec, other)
+
+
+@pytest.mark.parametrize("other", [float('Nan'), StdLibDecimal('Nan')],
+                         ids=("other='nan' (float)", "other='nan' (Decimal)"))
+def test_eq_ops_nan(impl, other):
+    dec = impl.Decimal()
+    assert not(dec == other)
+    assert dec != other
+
+
+@pytest.mark.parametrize("op",
+                         [op for op in ORDERING_OPS],
+                         ids=[op.__name__ for op in ORDERING_OPS])
+def test_ord_ops_float_nan(impl, op):
+    dec = impl.Decimal()
+    assert not op(dec, float('Nan'))
+
+
+@pytest.mark.parametrize("op",
+                         [op for op in ORDERING_OPS],
+                         ids=[op.__name__ for op in ORDERING_OPS])
+def test_ord_ops_decimal_nan(impl, op):
+    dec = impl.Decimal()
+    with pytest.raises(InvalidOperation):
+        op(dec, StdLibDecimal('Nan'))
