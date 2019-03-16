@@ -30,14 +30,24 @@ def test_magnitude(impl, value, magn):
     assert dec.magnitude == magn
 
 @pytest.mark.parametrize(("num", "den"),
-                         ((17, 1),
+                         ((170, 10),
                           (9 ** 394, 10 ** 247),
                           (19, 4000)),
                          ids=("compact", "large", "fraction"))
-def test_num_den(impl, num, den):
-    dec = impl.Decimal(Fraction(num, den), 250)
-    assert dec.numerator == num
-    assert dec.denominator == den
+def test_numerator(impl, num, den):
+    f = Fraction(num, den)
+    dec = impl.Decimal(f, 250)
+    assert dec.numerator == f.numerator
+
+@pytest.mark.parametrize(("num", "den"),
+                         ((17, 1),
+                          (9 ** 394, 10 ** 247),
+                          (190, 400000)),
+                         ids=("compact", "large", "fraction"))
+def test_denominator(impl, num, den):
+    f = Fraction(num, den)
+    dec = impl.Decimal(f, 250)
+    assert dec.denominator == f.denominator
 
 @pytest.mark.parametrize("value",
                          ("17.8",
