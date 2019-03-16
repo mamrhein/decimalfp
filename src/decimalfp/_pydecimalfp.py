@@ -36,14 +36,6 @@ except ImportError:                                         # pragma: no cover
 # local imports
 from .rounding import LIMIT_PREC, ROUNDING, get_rounding
 
-__metaclass__ = type
-
-
-# Compatible testing for strings
-str = type(u'')                                                 # noqa: A001
-bytes = type(b'')                                               # noqa: A001
-str_types = (bytes, str)
-
 
 # 10 ** exp (mit cache)
 
@@ -77,7 +69,7 @@ _pattern = r"""
             )
             ([eE](?P<exp>[+|-]?\d+))?
             \s*$
-            """.encode()
+            """
 _parse_dec_string = re.compile(_pattern, re.VERBOSE).match
 
 # parse for a format specifier
@@ -185,15 +177,11 @@ class Decimal:
             return self
 
         # String
-        if isinstance(value, str_types):
-            try:
-                s = value.encode()
-            except AttributeError:
-                s = value
-            parsed = _parse_dec_string(s)
+        if isinstance(value, str):
+            parsed = _parse_dec_string(value)
             if parsed is None:
                 raise ValueError("Can't convert %s to Decimal." % repr(value))
-            sign_n_digits = parsed.group('sign') or b''
+            sign_n_digits = parsed.group('sign') or ''
             s_exp = parsed.group('exp')
             if s_exp:
                 exp = int(s_exp)
