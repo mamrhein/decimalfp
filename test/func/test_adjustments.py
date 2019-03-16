@@ -170,3 +170,44 @@ def test_round_to_int(impl, value):
     adj = round(dec)
     assert isinstance(adj, int)
     assert adj == round(dec.as_fraction())
+
+
+@pytest.mark.parametrize("value",
+                         ("17.8",
+                          ".".join(("1" * 3297, "4" * 33)),
+                          "-0.00014"),
+                         ids=("compact", "large", "fraction"))
+def test_pos(impl, value):
+    dec = impl.Decimal(value)
+    assert +dec is dec
+
+
+@pytest.mark.parametrize("value",
+                         ("17.8",
+                          "-" + ".".join(("1" * 3297, "4" * 33)),
+                          "-0.00014",
+                          "0.00"),
+                         ids=("compact", "large", "fraction", "0"))
+def test_neg(impl, value):
+    dec = impl.Decimal(value)
+    assert -(-dec) == dec
+    assert -(-(-dec)) == -dec
+    if dec <= 0:
+        assert -dec >= 0
+    else:
+        assert -dec <= 0
+
+
+@pytest.mark.parametrize("value",
+                         ("17.8",
+                          "-" + ".".join(("1" * 3297, "4" * 33)),
+                          "-0.00014",
+                          "0.00"),
+                         ids=("compact", "large", "fraction", "0"))
+def test_abs(impl, value):
+    dec = impl.Decimal(value)
+    assert abs(dec) >= 0
+    if dec < 0:
+        assert abs(dec) == -dec
+    else:
+        assert abs(dec) == dec
