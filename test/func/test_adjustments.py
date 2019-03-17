@@ -63,7 +63,7 @@ def test_adjust_dflt_round(impl, value, prec, numerator):
                           ".".join(("1" * 3297, "4" * 33)),
                           "0.00015"),
                          ids=("compact", "large", "fraction"))
-@pytest.mark.parametrize("prec", (1, -3, 4), ids=("1", "-3", "4"))
+@pytest.mark.parametrize("prec", (1, -3, 5), ids=("1", "-3", "5"))
 def test_adjust_round(impl, rnd, value, prec):
     dec = impl.Decimal(value)
     adj = dec.adjusted(prec, rounding=rnd)
