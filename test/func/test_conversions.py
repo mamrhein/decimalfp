@@ -103,12 +103,27 @@ def test_as_integer_ratio(impl, num, den):
     assert dec.as_integer_ratio() == (f.numerator, f.denominator)
 
 
-@pytest.mark.parametrize(("value", "prec", "as_str"),
+@pytest.mark.parametrize(("value", "prec", "str_"),
                          ((None, None, "0"),
                           (None, 2, "0.00"),
                           ("-20.7e-3", 5, "-0.02070"),
                           ("0.0000000000207", None, "0.0000000000207"),
                           (887 * 10 ** 14, 0, "887" + "0" * 14)))
-def test_str(impl, value, prec, as_str):
+def test_str(impl, value, prec, str_):
     dec = impl.Decimal(value, prec)
-    assert str(dec) == as_str
+    assert str(dec) == str_
+
+
+@pytest.mark.parametrize(("value", "prec", "repr_"),
+                         ((None, None, "Decimal(0)"),
+                          (None, 2, "Decimal(0, 2)"),
+                          ("15", 2, "Decimal(15, 2)"),
+                          ("15.4", 2, "Decimal('15.4', 2)"),
+                          ("-20.7e-3", 5, "Decimal('-0.0207', 5)"),
+                          ("0.0000000000207", None,
+                           "Decimal('0.0000000000207')"),
+                          (887 * 10 ** 14, 0,
+                           "Decimal(887" + "0" * 14 + ")")))
+def test_repr(impl, value, prec, repr_):
+    dec = impl.Decimal(value, prec)
+    assert repr(dec) == repr_
