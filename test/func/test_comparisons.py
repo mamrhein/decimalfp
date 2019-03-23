@@ -44,11 +44,17 @@ numbers.Real.register(FakeReal)
 
 def chk_eq(dec, equiv):
     assert dec == equiv
+    assert equiv == dec
     assert dec >= equiv
+    assert equiv <= dec
     assert dec <= equiv
+    assert equiv >= dec
     assert not(dec != equiv)
+    assert not(equiv != dec)
     assert not(dec > equiv)
+    assert not(equiv < dec)
     assert not(dec < equiv)
+    assert not(equiv > dec)
     # x == y  <=> hash(x) == hash (y)
     assert hash(dec) == hash(equiv)
 
@@ -107,29 +113,45 @@ def test_eq_complex(impl, value):
     equiv = complex(value)
     non_equiv = complex(float(value), 1)
     assert dec == equiv
+    assert equiv == dec
     assert not (dec != equiv)
+    assert not(equiv != dec)
     assert dec != non_equiv
+    assert non_equiv != dec
     assert not (dec == non_equiv)
+    assert not(non_equiv == dec)
 
 
 def chk_gt(dec, non_equiv_gt):
     assert dec != non_equiv_gt
+    assert non_equiv_gt != dec
     assert dec < non_equiv_gt
+    assert non_equiv_gt > dec
     assert dec <= non_equiv_gt
+    assert non_equiv_gt >= dec
     assert not(dec == non_equiv_gt)
+    assert not(non_equiv_gt == dec)
     assert not(dec > non_equiv_gt)
+    assert not(non_equiv_gt < dec)
     assert not(dec >= non_equiv_gt)
+    assert not(non_equiv_gt <= dec)
     # x != y  <=> hash(x) != hash (y)
     assert hash(dec) != hash(non_equiv_gt)
 
 
 def chk_lt(dec, non_equiv_lt):
     assert dec != non_equiv_lt
+    assert non_equiv_lt != dec
     assert dec > non_equiv_lt
+    assert non_equiv_lt < dec
     assert dec >= non_equiv_lt
+    assert non_equiv_lt <= dec
     assert not(dec == non_equiv_lt)
+    assert not(non_equiv_lt == dec)
     assert not(dec < non_equiv_lt)
+    assert not(non_equiv_lt > dec)
     assert not(dec <= non_equiv_lt)
+    assert not(non_equiv_lt >= dec)
     # x != y  <=> hash(x) != hash (y)
     assert hash(dec) != hash(non_equiv_lt)
 
@@ -190,6 +212,8 @@ def test_ord_ops_complex(impl, op, value):
     cmplx = complex(value)
     with pytest.raises(TypeError):
         op(dec, cmplx)
+    with pytest.raises(TypeError):
+        op(cmplx, dec)
 
 
 @pytest.mark.parametrize("other", ["1/5", operator.ne],
@@ -197,7 +221,9 @@ def test_ord_ops_complex(impl, op, value):
 def test_eq_ops_non_number(impl, other):
     dec = impl.Decimal('3.12')
     assert not(dec == other)
+    assert not(other == dec)
     assert dec != other
+    assert other != dec
 
 
 @pytest.mark.parametrize("op",
@@ -209,13 +235,17 @@ def test_ord_ops_non_number(impl, op, other):
     dec = impl.Decimal('3.12')
     with pytest.raises(TypeError):
         op(dec, other)
+    with pytest.raises(TypeError):
+        op(other, dec)
 
 
 def test_eq_ops_incompat_real(impl):
     dec = impl.Decimal('3.12')
     other = FakeReal('1.7')
     assert not(dec == other)
+    assert not(other == dec)
     assert dec != other
+    assert other != dec
 
 
 @pytest.mark.parametrize("op",
@@ -227,6 +257,8 @@ def test_ord_ops_incompat_real(impl, op, other):
     dec = impl.Decimal('3.12')
     with pytest.raises(TypeError):
         op(dec, other)
+    with pytest.raises(TypeError):
+        op(other, dec)
 
 
 @pytest.mark.parametrize("other", [float('Inf'), StdLibDecimal('Inf')],
@@ -241,7 +273,9 @@ def test_inf(impl, other):
 def test_eq_ops_nan(impl, other):
     dec = impl.Decimal()
     assert not(dec == other)
+    assert not(other == dec)
     assert dec != other
+    assert other != dec
 
 
 @pytest.mark.parametrize("op",
@@ -250,6 +284,7 @@ def test_eq_ops_nan(impl, other):
 def test_ord_ops_float_nan(impl, op):
     dec = impl.Decimal()
     assert not op(dec, float('Nan'))
+    assert not op(float('Nan'), dec)
 
 
 @pytest.mark.parametrize("op",
@@ -259,3 +294,5 @@ def test_ord_ops_decimal_nan(impl, op):
     dec = impl.Decimal()
     with pytest.raises(InvalidOperation):
         op(dec, StdLibDecimal('Nan'))
+    with pytest.raises(InvalidOperation):
+        op(StdLibDecimal('Nan'), dec)
