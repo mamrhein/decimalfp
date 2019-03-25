@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # ----------------------------------------------------------------------------
 # Name:        test_constructors
-# Purpose:     Test driver for both implementations of decimalfp
+# Purpose:     Test driver for package 'decimalfp' (constructors)
 #
 # Author:      Michael Amrhein (michael@adrhinum.de)
 #
@@ -15,9 +15,10 @@
 # $Revision$
 
 
-"""Test driver for both implementations of decimalfp."""
+"""Test driver for package 'decimalfp' (constructors)."""
 
 
+import copy
 from decimal import Decimal as StdLibDecimal  # , InvalidOperation
 from fractions import Fraction
 import sys
@@ -408,3 +409,14 @@ def test_decimal_from_real_cls_meth_exact_fail(impl, value):
 def test_decimal_from_real_cls_meth_wrong_type(impl, value):
     with pytest.raises(TypeError):
         impl.Decimal.from_real(value)
+
+
+@pytest.mark.parametrize("value",
+                         ("17.800",
+                          ".".join(("1" * 3097, "4" * 33 + "0" * 19)),
+                          "-0.00014"),
+                         ids=("compact", "large", "fraction"))
+def test_copy(impl, value):
+    dec = impl.Decimal(value)
+    assert copy.copy(dec) is dec
+    assert copy.deepcopy(dec) is dec
