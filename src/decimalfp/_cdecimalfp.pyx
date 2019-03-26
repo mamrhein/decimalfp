@@ -1307,7 +1307,7 @@ cdef tuple divmod1(Decimal x, object y):
             yv = (<Decimal>y)._value
         q = xv // yv
         r._value = xv - q * yv
-        return Decimal(q, r._precision), r
+        return q, r
     elif isinstance(y, Integral):
         r = Decimal(x)
         xv = x._value
@@ -1315,9 +1315,9 @@ cdef tuple divmod1(Decimal x, object y):
         yv = y * base10pow(xp)
         q = xv // yv
         r._value = xv - q * yv
-        return Decimal(q, xp), r
+        return q, r
     elif isinstance(y, _StdLibDecimal):
-        return x.__divmod__(Decimal(y))
+        return divmod1(x, Decimal(y))
     else:
         return x // y, x % y
 
@@ -1338,7 +1338,7 @@ cdef tuple divmod2(object x, Decimal y):
             yv = y._value
         q = xv // yv
         r._value = xv - q * yv
-        return Decimal(q, r._precision), r
+        return q, r
     elif isinstance(x, Integral):
         r = Decimal(y)
         yv = y._value
@@ -1346,9 +1346,9 @@ cdef tuple divmod2(object x, Decimal y):
         xv = x * base10pow(yp)
         q = xv // yv
         r._value = xv - q * yv
-        return Decimal(q, yp), r
+        return q, r
     elif isinstance(x, _StdLibDecimal):
-        return Decimal(x).__divmod__(y)
+        return divmod2(Decimal(x), y)
     else:
         return x // y, x % y
 
@@ -1358,7 +1358,7 @@ cdef object floordiv1(Decimal x, object y):
     if isinstance(y, (Decimal, Integral, _StdLibDecimal)):
         return divmod1(x, y)[0]
     else:
-        return Decimal(floor(x / y), x._precision)
+        return floor(x / y)
 
 
 cdef object floordiv2(object x, Decimal y):
@@ -1366,7 +1366,7 @@ cdef object floordiv2(object x, Decimal y):
     if isinstance(x, (Decimal, Integral, _StdLibDecimal)):
         return divmod2(x, y)[0]
     else:
-        return Decimal(floor(x / y), y._precision)
+        return floor(x / y)
 
 
 cdef object mod1(Decimal x, object y):

@@ -1347,7 +1347,7 @@ def divmod1(x, y):
             yv = y._value
         q = xv // yv
         r._value = xv - q * yv
-        return Decimal(q, r._precision), r
+        return q, r
     elif isinstance(y, Integral):
         r = Decimal(x)
         xv = x._value
@@ -1355,9 +1355,9 @@ def divmod1(x, y):
         yv = y * base10pow(xp)
         q = xv // yv
         r._value = xv - q * yv
-        return Decimal(q, xp), r
+        return q, r
     elif isinstance(y, _StdLibDecimal):
-        return x.__divmod__(Decimal(y))
+        return divmod1(x, Decimal(y))
     else:
         return x // y, x % y
 
@@ -1380,7 +1380,7 @@ def divmod2(x, y):
             yv = y._value
         q = xv // yv
         r._value = xv - q * yv
-        return Decimal(q, r._precision), r
+        return q, r
     elif isinstance(x, Integral):
         r = Decimal(y)
         yv = y._value
@@ -1388,9 +1388,9 @@ def divmod2(x, y):
         xv = x * base10pow(yp)
         q = xv // yv
         r._value = xv - q * yv
-        return Decimal(q, yp), r
+        return q, r
     elif isinstance(x, _StdLibDecimal):
-        return Decimal(x).__divmod__(y)
+        return divmod2(Decimal(x), y)
     else:
         return x // y, x % y
 
@@ -1404,7 +1404,7 @@ def floordiv1(x, y):
     if isinstance(y, (Decimal, Integral, _StdLibDecimal)):
         return divmod1(x, y)[0]
     else:
-        return Decimal(floor(x / y), x._precision)
+        return floor(x / y)
 
 
 def floordiv2(x, y):
@@ -1416,7 +1416,7 @@ def floordiv2(x, y):
     if isinstance(x, (Decimal, Integral, _StdLibDecimal)):
         return divmod2(x, y)[0]
     else:
-        return Decimal(floor(x / y), y._precision)
+        return floor(x / y)
 
 
 def mod1(x, y):
