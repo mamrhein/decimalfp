@@ -20,6 +20,7 @@
 # standard library imports
 
 from importlib import import_module
+import os
 
 # third-party imports
 
@@ -28,10 +29,17 @@ import pytest
 # local imports
 
 
+if os.getenv('DECIMALFP_FORCE_PYTHON_IMPL'):
+    IMPLS = ("decimalfp._pydecimalfp",)
+    IDS = ("pydec",)
+else:
+    IMPLS = ("decimalfp._pydecimalfp", "decimalfp._cdecimalfp")
+    IDS = ("pydec", "cydec")
+
+
 @pytest.fixture(scope="session",
-                params=("decimalfp._pydecimalfp",
-                        "decimalfp._cdecimalfp"),
-                ids=("pydec", "cydec"))
+                params=IMPLS,
+                ids=IDS)
 def impl(request):
     mod = import_module(request.param)
     return mod
