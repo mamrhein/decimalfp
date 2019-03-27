@@ -1428,7 +1428,7 @@ def mod1(x, y):
     if isinstance(y, (Decimal, Integral, _StdLibDecimal)):
         return divmod1(x, y)[1]
     else:
-        return x - y * (x // y)
+        return x - y * Decimal(x // y)
 
 
 def mod2(x, y):
@@ -1440,7 +1440,7 @@ def mod2(x, y):
     if isinstance(x, (Decimal, Integral, _StdLibDecimal)):
         return divmod2(x, y)[1]
     else:
-        return x - y * (x // y)
+        return x - y * Decimal(x // y)
 
 
 def pow1(x, y):

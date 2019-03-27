@@ -1374,7 +1374,7 @@ cdef object mod1(Decimal x, object y):
     if isinstance(y, (Decimal, Integral, _StdLibDecimal)):
         return divmod1(x, y)[1]
     else:
-        return x - y * (x // y)
+        return x - y * Decimal(x // y)
 
 
 cdef object mod2(object x, Decimal y):
@@ -1382,7 +1382,7 @@ cdef object mod2(object x, Decimal y):
     if isinstance(x, (Decimal, Integral, _StdLibDecimal)):
         return divmod2(x, y)[1]
     else:
-        return x - y * (x // y)
+        return x - y * Decimal(x // y)
 
 
 cdef object pow1(Decimal x, object y):
