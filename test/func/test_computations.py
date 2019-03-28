@@ -256,7 +256,7 @@ def test_num_pow_decimal(impl, operand1, operand2):
 def test_pow_incompat_param(impl):
     dec = impl.Decimal("3.12")
     with pytest.raises(TypeError):
-        pow(dec, 4, mod=3)
+        dec.__pow__(4, mod=3)
 
 
 @pytest.mark.parametrize("op",
