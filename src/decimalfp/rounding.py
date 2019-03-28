@@ -49,7 +49,7 @@ class ROUNDING(Enum):
         member.__doc__ = doc
         return member
 
-    def __index__(self):
+    def __index__(self):                                    # pragma: no cover
         """Return `self` converted to an `int`."""
         return self.value - 1
 

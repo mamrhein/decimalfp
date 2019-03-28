@@ -1110,7 +1110,7 @@ def _vp_to_int(v, p):
         else:
             return -(-v // base10pow(p))
     else:   # shouldn't happen!
-        return v * base10pow(-p)
+        return v * base10pow(-p)                            # pragma: no cover
 
 
 def _approx_rational(num, den, min_prec=0):
