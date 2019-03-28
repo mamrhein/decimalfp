@@ -1266,13 +1266,6 @@ cdef object div1(Decimal x, object y):
 cdef object div2(object x, Decimal y):
     """x / y"""
     cdef int xp, yp
-    if isinstance(x, Decimal):
-        xp, yp = (<Decimal>x)._precision, y._precision
-        num = (<Decimal>x)._value * base10pow(yp)
-        den = y._value * base10pow(xp)
-        min_prec = max(0, xp - yp)
-        # return num / den as Decimal or as Fraction
-        return _div(num, den, min_prec)
     if isinstance(x, Rational):
         x_numerator, x_denominator = (x.numerator, x.denominator)
     elif isinstance(x, Real):
@@ -1327,20 +1320,7 @@ cdef tuple divmod2(object x, Decimal y):
     """x // y, x % y"""
     cdef int xp, yp
     cdef Decimal r
-    if isinstance(x, Decimal):
-        xp, yp = (<Decimal>x)._precision, y._precision
-        if xp >= yp:
-            r = Decimal(x)
-            xv = (<Decimal>x)._value
-            yv = y._value * base10pow(xp - yp)
-        else:
-            r = Decimal(y)
-            xv = (<Decimal>x)._value * base10pow(yp - xp)
-            yv = y._value
-        q = xv // yv
-        r._value = xv - q * yv
-        return q, r
-    elif isinstance(x, Integral):
+    if isinstance(x, Integral):
         r = Decimal(y)
         yv = y._value
         yp = y._precision
@@ -1349,7 +1329,7 @@ cdef tuple divmod2(object x, Decimal y):
         r._value = xv - q * yv
         return q, r
     elif isinstance(x, _StdLibDecimal):
-        return divmod2(Decimal(x), y)
+        return divmod1(Decimal(x), y)
     else:
         return x // y, x % y
 
@@ -1364,7 +1344,7 @@ cdef object floordiv1(Decimal x, object y):
 
 cdef object floordiv2(object x, Decimal y):
     """x // y"""
-    if isinstance(x, (Decimal, Integral, _StdLibDecimal)):
+    if isinstance(x, (Integral, _StdLibDecimal)):
         return divmod2(x, y)[0]
     else:
         return floor(x / y)
@@ -1380,7 +1360,7 @@ cdef object mod1(Decimal x, object y):
 
 cdef object mod2(object x, Decimal y):
     """x % y"""
-    if isinstance(x, (Decimal, Integral, _StdLibDecimal)):
+    if isinstance(x, (Integral, _StdLibDecimal)):
         return divmod2(x, y)[1]
     else:
         return x - y * Decimal(x // y)

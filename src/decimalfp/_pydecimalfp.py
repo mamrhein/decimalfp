@@ -1305,13 +1305,6 @@ def div2(x, y):
     y must be a Decimal.
 
     """
-    if isinstance(x, Decimal):
-        xp, yp = x._precision, y._precision
-        num = x._value * base10pow(yp)
-        den = y._value * base10pow(xp)
-        min_prec = max(0, xp - yp)
-        # return num / den as Decimal or as Fraction
-        return _div(num, den, min_prec)
     if isinstance(x, Rational):
         x_numerator, x_denominator = (x.numerator, x.denominator)
     elif isinstance(x, Real):
@@ -1370,20 +1363,7 @@ def divmod2(x, y):
     y must be a Decimal.
 
     """
-    if isinstance(x, Decimal):
-        xp, yp = x._precision, y._precision
-        if xp >= yp:
-            r = Decimal(x)
-            xv = x._value
-            yv = y._value * base10pow(xp - yp)
-        else:
-            r = Decimal(y)
-            xv = x._value * base10pow(yp - xp)
-            yv = y._value
-        q = xv // yv
-        r._value = xv - q * yv
-        return q, r
-    elif isinstance(x, Integral):
+    if isinstance(x, Integral):
         r = Decimal(y)
         yv = y._value
         yp = y._precision
@@ -1392,7 +1372,7 @@ def divmod2(x, y):
         r._value = xv - q * yv
         return q, r
     elif isinstance(x, _StdLibDecimal):
-        return divmod2(Decimal(x), y)
+        return divmod1(Decimal(x), y)
     else:
         return x // y, x % y
 
@@ -1415,7 +1395,7 @@ def floordiv2(x, y):
     y must be a Decimal.
 
     """
-    if isinstance(x, (Decimal, Integral, _StdLibDecimal)):
+    if isinstance(x, (Integral, _StdLibDecimal)):
         return divmod2(x, y)[0]
     else:
         return floor(x / y)
@@ -1439,7 +1419,7 @@ def mod2(x, y):
     y must be a Decimal.
 
     """
-    if isinstance(x, (Decimal, Integral, _StdLibDecimal)):
+    if isinstance(x, (Integral, _StdLibDecimal)):
         return divmod2(x, y)[1]
     else:
         return x - y * Decimal(x // y)
