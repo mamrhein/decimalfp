@@ -76,15 +76,8 @@ class ROUNDING(Enum):
     ROUND_UP = 'Round away from zero.'
 
 
-# Python 2 / Python 3
-import sys                                                  # noqa: I100, I202
-if sys.version_info[0] < 3:
-    # rounding mode of builtin round function
-    ROUNDING.default = ROUNDING.ROUND_HALF_UP
-else:
-    # In 3.0 round changed from half-up to half-even !
-    ROUNDING.default = ROUNDING.ROUND_HALF_EVEN
-del sys
+# In 3.0 round changed from half-up to half-even !
+ROUNDING.default = ROUNDING.ROUND_HALF_EVEN
 
 
 # functions to get / set rounding mode
