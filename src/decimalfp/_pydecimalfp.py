@@ -843,7 +843,9 @@ class Decimal:
         if mod is not None:
             raise TypeError("3rd argument not allowed unless all arguments "
                             "are integers")
-        return pow1(self, other)
+        if isinstance(other, (Real, _StdLibDecimal)):
+            return pow1(self, other)
+        return NotImplemented
 
     def __rpow__(self, other, mod=None):
         """other ** self
@@ -1449,22 +1451,24 @@ def pow1(x, y):
     x must be a Decimal.
 
     """
-    if isinstance(y, Integral):
+    try:
         exp = int(y)
+    except (ValueError, OverflowError):
+        raise ValueError("Unsupported operand: %s" % repr(y)) from None
+    else:
+        if exp != y:
+            # fractional power -> irrational result
+            return float(x) ** float(y)
         if exp >= 0:
             result = Decimal()
             result._value = x._value ** exp
             result._precision = x._precision * exp
             return result
         else:
-            return 1 / pow1(x, -y)
-    elif isinstance(y, Rational):
-        if y.denominator == 1:
-            return x ** y.numerator
-        else:
-            return float(x) ** float(y)
-    else:
-        return float(x) ** y
+            # 1 / x ** -y)
+            exp = -exp
+            prec = x._precision
+            return _div(base10pow(prec * exp), x._value ** exp, prec)
 
 
 def pow2(x, y):

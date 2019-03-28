@@ -41,6 +41,7 @@ from .rounding import LIMIT_PREC, ROUNDING, get_rounding
 from cpython.long cimport PyLong_AsLong as long_from_pyint
 from cpython.long cimport PyLong_FromLongLong as pyint_from_longlong
 from cpython.longintrepr cimport py_long as PyInt
+from cpython.number cimport PyNumber_Power
 from cpython.object cimport Py_EQ, Py_NE, PyObject_RichCompare
 from libc.limits cimport LLONG_MAX
 from libc.stdlib cimport atoi
@@ -824,7 +825,7 @@ cdef class Decimal:
         if mod is not None:
             raise TypeError("3rd argument not allowed unless all arguments "
                             "are integers")
-        if isinstance(x, Decimal):
+        if isinstance(x, Decimal) and isinstance(y, (Real, _StdLibDecimal)):
             return pow1(x, y)
         if isinstance(y, Decimal):
             return pow2(x, y)
@@ -1387,25 +1388,25 @@ cdef object mod2(object x, Decimal y):
 
 cdef object pow1(Decimal x, object y):
     """x ** y"""
-    cdef int exp
     cdef Decimal result
-    if isinstance(y, Integral):
+    try:
         exp = int(y)
+    except (ValueError, OverflowError):
+        raise ValueError("Unsupported operand: %s" % repr(y)) from None
+    else:
+        if exp != y:
+            # fractional power -> irrational result
+            return PyNumber_Power(float(x), float(y), None)
         if exp >= 0:
             result = Decimal()
             result._value = x._value ** exp
             result._precision = x._precision * exp
             return result
         else:
-            return 1 / pow1(x, -y)
-    elif isinstance(y, Rational):
-        if y.denominator == 1:
-            return x ** y.numerator
-        else:
-            return float(x) ** float(y)
-    else:
-        return float(x) ** y
-
+            # 1 / x ** -y)
+            exp = -exp
+            prec = x._precision
+            return _div(base10pow(prec * exp), x._value ** exp, prec)
 
 cdef object pow2(object x, Decimal y):
     """x ** y"""
