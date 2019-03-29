@@ -76,3 +76,30 @@ def test_invalid_format_spec(impl, format_spec):
     dec = impl.Decimal("23.7")
     with pytest.raises(ValueError):
         format(dec, format_spec)
+
+
+@pytest.fixture(params=
+                (([2, 5], "1234567890123´45678´90.0987"),
+                 ([2, 4, 0], "12´3456´7890´1234´5678´90.0987"),
+                 ([2, 2, 3, locale.CHAR_MAX],
+                  "1234567890123´456´78´90.0987"),),
+                ids=("not_repeated", "repeated", "terminated"))
+def format_tests(request):
+    grouping, formatted = request.param
+    mocked_format_params = {'fill': ' ',
+                            'align': '<',
+                            'sign': '-',
+                            'minimumwidth': 0,
+                            'thousands_sep': '´',
+                            'grouping': grouping,
+                            'decimal_point': '.',
+                            'precision': None,
+                            'type': 'f'}
+    return mocked_format_params, formatted
+
+
+def test_special_grouping(impl, monkeypatch, format_tests):
+    mocked_format_params, formatted = format_tests
+    monkeypatch.setattr(impl, '_dflt_format_params', mocked_format_params)
+    dec = impl.Decimal("12345678901234567890.0987")
+    assert format(dec) == formatted
