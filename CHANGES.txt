@@ -1,5 +1,18 @@
 Version     Changes
 ------------------------------------------------------------------------------
+0.10.0      Removed compatibility with Python 2.x.
+            Modified operator '**':
+                  x ** y now
+                  a) raises TypeError, if y is not of type numbers.Real or
+                     decimal.Decimal,
+                  b) returns the result as decimalfp.Decimal, if y is an
+                     integral number, and
+                  c) otherwise returns the result as float (after converting
+                     both operands to float).
+            Floor division now always returns an int.
+            Added method 'as_fraction'.
+            Migrated all tests to 'pytest'.
+
 0.9.14      Repository moved to Git (hosted on GitHub).
             Moved documentation to readthedocs.org.
             Use generic types from 'numbers' for type checking.

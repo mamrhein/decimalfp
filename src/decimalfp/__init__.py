@@ -36,11 +36,10 @@ If `precision` is given, it must be of type `int` and >= 0.
     >>> Decimal(5555, -3)
     ValueError: Precision must be >= 0.
 
-If `value` is given, it must either be a string (type `str` or `unicode` in
-Python 2.x, `bytes` or `str` in Python 3.x), an instance of `number.Integral`
-(for example `int` or `long` in Python 2.x, `int` in Python 3.x),
-`number.Rational` (for example `fractions.Fraction`), `decimal.Decimal` or
-`float` or be convertable to a `float` or an `int`.
+If `value` is given, it must either be a string, an instance of
+`numbers.Integral`, `number.Rational` (for example `fractions.Fraction`),
+`decimal.Decimal`, a finite instance of `numbers.Real` (for example `float`)
+or be convertable to a `float` or an `int`.
 
 The value is always adjusted to the given precision or the precision is
 calculated from the given value, if no precision is given.
@@ -72,8 +71,7 @@ calculated from the given value, if no precision is given.
 
 When the given `precision` is lower than the precision of the given `value`,
 the result is rounded, according to the rounding mode of the current context
-held by the standard module `decimal` (which defaults to ROUND_HALF_EVEN, in
-contrast to the `round` function in Python 2.x !!!).
+held by the standard module `decimal` (which defaults to ROUND_HALF_EVEN).
 
     >>> Decimal(u'12.345', 2)
     Decimal('12.34')
@@ -180,21 +178,9 @@ Rounding
 :class:`Decimal` supports rounding via the built-in function `round`.
 
 .. note::
-    In Python 2.x the function `round` uses the rounding mode ROUND_HALF_UP
-    and always returns a `float`, while in Python 3.x it rounds according to
-    ROUND_HALF_EVEN and returns an `int` when called with one argument,
-    otherwise the same type as the number to be rounded.
-
-Python 2.x:
-
-    >>> round(Decimal('12.345'))
-    12.0
-    >>> round(Decimal('12.345'), 2)
-    12.35
-    >>> round(Decimal('1234.5'), -2)
-    1200.0
-
-Python 3.x:
+    In Python 3.x the function `round` uses the rounding mode ROUND_HALF_EVEN
+    and returns an `int` when called with one argument, otherwise the same
+    type as the number to be rounded.
 
     >>> round(Decimal('12.345'))
     12

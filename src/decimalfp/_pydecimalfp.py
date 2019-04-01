@@ -104,10 +104,8 @@ class Decimal:
         precision (numbers.Integral): number of fractional digits (default:
             None)
 
-    If `value` is given, it must either be a string (type `str` or `unicode`
-    in Python 2.x, `bytes` or `str` in Python 3.x), an instance of
-    `numbers.Integral` (for example `int` or `long` in Python 2.x, `int` in
-    Python 3.x), `number.Rational` (for example `fractions.Fraction`),
+    If `value` is given, it must either be a string, an instance of
+    `numbers.Integral`, `number.Rational` (for example `fractions.Fraction`),
     `decimal.Decimal`, a finite instance of `numbers.Real` (for example
     `float`) or be convertable to a `float` or an `int`.
 
@@ -873,9 +871,8 @@ class Decimal:
         Round `self` to a given precision in decimal digits (default 0).
         `n_digits` may be negative.
 
-        Note: This method is called by the built-in `round` function only in
-        Python 3.x! It returns an `int` when called with one argument,
-        otherwise a :class:`Decimal`.
+        This method is called by the built-in `round` function. It returns an
+        `int` when called with one argument, otherwise a :class:`Decimal`.
         """
         if precision is None:
             # return integer
