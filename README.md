@@ -9,11 +9,7 @@ a _precision_ (i.e the number of fractional digits, default: None).
 
 If _precision_ is given, it must be of type _int_ and >= 0.
 
-If _value_ is given, it must either be a string (type _str_ or _unicode_ in
-Python 2.x, _bytes_ or _str_ in Python 3.x), an instance of _number.Integral_
-(for example _int_ or _long_ in Python 2.x, _int_ in Python 3.x),
-_number.Rational_ (for example _fractions.Fraction_), _decimal.Decimal_ or
-_float_ or be convertable to a _float_ or an _int_.
+If _value_ is given, it must either be a string, an instance of _number.Integral_, _number.Rational_ (for example _fractions.Fraction_), _decimal.Decimal_ or _float_ or be convertable to a _float_ or an _int_.
 
 If a string is given as value, it must be a string in one of two formats:
 
@@ -25,8 +21,7 @@ calculated from the given value, if no precision is given.
 
 When the given _precision_ is lower than the precision of the given _value_,
 the result is rounded, according to the rounding mode of the current context
-held by the standard module _decimal_ (which defaults to ROUND_HALF_EVEN, in
-contrast to the _round_ function in Python 2.x !!!).
+held by the standard module _decimal_ (which defaults to ROUND_HALF_EVEN).
 
 When no _precision_ is given and the given _value_ is a _float_ or a
 _numbers.Rational_ (but no _Decimal_), the _Decimal_ constructor tries to
@@ -55,10 +50,7 @@ instance within the limit given by _decimalfp.LIMIT_PREC_, an instance of
 _fractions.Fraction_ is returned.
 
 _Decimal_ supports rounding via the built-in function _round_ using the same
-rounding mode as the _float_ type by default (i.e. ROUND_HALF_UP in Pyhton 2.x
-and ROUND_HALF_EVEN in Python 3.x). In addition, via the method _adjusted_ a
-_Decimal_ with a different precision can be derived, supporting all rounding
-modes defined by the standard library module _decimal_.
+rounding mode as the _float_ type by default (ROUND_HALF_EVEN in Python 3). In addition, via the method _adjusted_ a _Decimal_ with a different precision can be derived, supporting all rounding modes defined by the standard library module _decimal_.
 
 For more details see the documentation provided with the source distribution
 or [here](https://decimalfp.readthedocs.io/en/latest).
