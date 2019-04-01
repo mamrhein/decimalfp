@@ -16,6 +16,7 @@ setup(
     packages=['decimalfp'],
     ext_modules=[Extension('decimalfp._cdecimalfp',
                            ['src/decimalfp/_cdecimalfp.c'])],
+    python_requires=">=3.6",
     # install_requires=requirements,
     license='BSD',
     keywords='fixed-point decimal number datatype',
