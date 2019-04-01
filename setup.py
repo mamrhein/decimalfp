@@ -1,18 +1,11 @@
-import sys
 from setuptools import setup, Extension
-
-if sys.version_info[:2] < (3, 4):
-    # We need the back-port of enum
-    requirements = ['enum34']
-else:
-    requirements = []
 
 with open('README.md') as file:
     long_description = file.read()
 
 setup(
     name="decimalfp",
-    version="0.9.14",
+    version="0.10.0",
     author="Michael Amrhein",
     author_email="michael@adrhinum.de",
     url="https://github.com/mamrhein/decimalfp",
@@ -23,7 +16,7 @@ setup(
     packages=['decimalfp'],
     ext_modules=[Extension('decimalfp._cdecimalfp',
                            ['src/decimalfp/_cdecimalfp.c'])],
-    install_requires=requirements,
+    # install_requires=requirements,
     license='BSD',
     keywords='fixed-point decimal number datatype',
     platforms='all',
@@ -33,9 +26,7 @@ setup(
         "License :: OSI Approved :: BSD License",
         "Operating System :: OS Independent",
         "Programming Language :: Python",
-        "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: Implementation :: CPython",

@@ -228,10 +228,10 @@ also support all rounding modes mentioned above.
 from __future__ import absolute_import
 
 # local imports
-from .rounding import LIMIT_PREC, ROUNDING, get_rounding, set_rounding
+from .rounding import get_rounding, LIMIT_PREC, ROUNDING, set_rounding
 
 
-__version__ = 0, 9, 14
+__version__ = 0, 10, 0
 
 
 # Under PyPy the Cython / C implementation is slower than the Python
