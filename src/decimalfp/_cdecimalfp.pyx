@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# cython: language_level=3str
+# cython: language_level=3
 # ----------------------------------------------------------------------------
 # Name:        _cdecimalfp
 # Purpose:     Decimal fixed-point arithmetic (Cython implementation)
@@ -7,8 +7,6 @@
 # Author:      Michael Amrhein (michael@adrhinum.de)
 #
 # Copyright:   (c) 2014 ff. Michael Amrhein
-#              Portions adopted from FixedPoint.py written by Tim Peters
-# License:     This program is free software. You can redistribute it, use it
 # License:     This program is part of a larger application. For license
 #              details please read the file LICENSE.TXT provided together
 #              with the application.
@@ -27,12 +25,8 @@ import locale
 from decimal import Decimal as _StdLibDecimal
 from fractions import Fraction
 from functools import reduce
-from math import floor, log10
+from math import floor, gcd, log10
 from numbers import Complex, Integral, Rational, Real
-try:
-    from math import gcd
-except ImportError:
-    from fractions import gcd
 
 # local imports
 from .rounding import LIMIT_PREC, ROUNDING, get_rounding
@@ -45,12 +39,6 @@ from cpython.number cimport PyNumber_Power
 from cpython.object cimport Py_EQ, Py_NE, PyObject_RichCompare
 from libc.limits cimport LLONG_MAX
 from libc.stdlib cimport atoi
-
-
-# Compatible testing for strings
-py_str = type(u'')
-py_bytes = type(b'')
-str_types = (py_bytes, py_str)
 
 # Integer constants
 # cdef PyInt PYINT_NEG1 = pyint_from_long(-1)
@@ -76,7 +64,6 @@ cdef base10pow(exp):
         else:
             return pow(10, exp, None)
 
-
 # parse functions
 import re
 
@@ -93,7 +80,7 @@ _pattern = r"""
             )
             ([eE](?P<exp>[+|-]?\d+))?
             \s*$
-            """.encode()
+            """
 _parse_dec_string = re.compile(_pattern, re.VERBOSE).match
 
 # parse for a format specifier
@@ -127,10 +114,8 @@ cdef class Decimal:
         precision (numbers.Integral): number of fractional digits (default:
             None)
 
-    If `value` is given, it must either be a string (type `str` or `unicode`
-    in Python 2.x, `bytes` or `str` in Python 3.x), an instance of
-    `numbers.Integral` (for example `int` or `long` in Python 2.x, `int` in
-    Python 3.x), `number.Rational` (for example `fractions.Fraction`),
+    If `value` is given, it must either be a string, an instance of
+    `numbers.Integral`, `number.Rational` (for example `fractions.Fraction`),
     `decimal.Decimal`, a finite instance of `numbers.Real` (for example
     `float`) or be convertable to a `float` or an `int`.
 
@@ -199,15 +184,11 @@ cdef class Decimal:
             return
 
         # String
-        if isinstance(value, str_types):
-            try:
-                s = value.encode()
-            except AttributeError:
-                s = value
-            parsed = _parse_dec_string(s)
+        if isinstance(value, str):
+            parsed = _parse_dec_string(value)
             if parsed is None:
                 raise ValueError("Can't convert %s to Decimal." % repr(value))
-            sign_n_digits = parsed.group('sign') or b''
+            sign_n_digits = parsed.group('sign') or ''
             s_exp = parsed.group('exp')
             if s_exp:
                 exp = int(s_exp)
