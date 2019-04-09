@@ -141,11 +141,11 @@ def test_decimal_from_str_adj(impl, value, prec, ratio):
     assert dec.as_fraction() == ratio
 
 
-# @pytest.mark.parametrize("value", ["\u1811\u1817.\u1814", "\u0f20.\u0f24"],
-#                          ids=["mongolian", "tibetian"])
-# def test_decimal_from_non_ascii_digits(impl, value):
-#     dec = impl.Decimal(value)
-#     assert isinstance(dec, impl.Decimal)
+@pytest.mark.parametrize("value", ["\u1811\u1817.\u1814", "\u0f20.\u0f24"],
+                         ids=["mongolian", "tibetian"])
+def test_decimal_from_non_ascii_digits(impl, value):
+    dec = impl.Decimal(value)
+    assert isinstance(dec, impl.Decimal)
 
 
 @pytest.mark.parametrize(("value"),
