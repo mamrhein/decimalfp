@@ -384,36 +384,51 @@ cdef class Decimal:
 
     @property
     def magnitude(self):
-        """Return magnitude of `self` in terms of power to 10, i.e. the
-        largest integer exp so that 10 ** exp <= self."""
+        """Return magnitude of `self` in terms of power to 10.
+
+        I.e. the largest integer exp so that 10 ** exp <= self.
+
+        """
         return floor(log10(abs(self._value))) - self._precision
 
     @property
     def numerator(self):
-        """Return the numerator from the pair of integers with the smallest
-        positive denominator, whose ratio is equal to `self`."""
+        """Return the normalized numerator of `self`.
+
+        I. e. the numerator from the pair of integers with the smallest
+        positive denominator, whose ratio is equal to `self`.
+
+        """
         n, d = self.as_integer_ratio()
         return n
 
     @property
     def denominator(self):
-        """Return the smallest positive denominator from the pairs of
-        integers, whose ratio is equal to `self`."""
+        """Return the normalized denominator of 'self'.
+
+        I. e. the smallest positive denominator from the pairs of integers,
+        whose ratio is equal to `self`.
+
+        """
         n, d = self.as_integer_ratio()
         return d
 
     @property
     def real(self):
-        """The real part of `self`.
+        """Return real part of `self`.
 
-        Returns `self` (Real numbers are their real component)."""
+        Returns `self` (Real numbers are their real component).
+
+        """
         return self
 
     @property
     def imag(self):
-        """The imaginary part of `self`.
+        """Return imaginary part of `self`.
 
-        Returns 0 (Real numbers have no imaginary component)."""
+        Returns 0 (Real numbers have no imaginary component).
+
+        """
         return 0
 
     def adjusted(self, precision=None, rounding=None):
@@ -436,6 +451,7 @@ cdef class Decimal:
 
         If the given `precision` is less than the precision of `self`, the
         result is rounded and thus information may be lost.
+
         """
         cdef Decimal adj
         if precision is None:
@@ -476,6 +492,7 @@ cdef class Decimal:
         Raises:
             TypeError: `quant` is not a Rational number or can not be
                 converted to a :class:`Decimal`
+
         """
         try:
             num, den = quant.numerator, quant.denominator
@@ -498,6 +515,7 @@ cdef class Decimal:
         """Return a tuple (sign, coeff, exp) equivalent to `self`.
 
         self == (-1) ** sign * coeff * 10 ** exp.
+
         """
         v = self._value
         sign = int(v < 0)
@@ -510,6 +528,7 @@ cdef class Decimal:
 
         Returns the `Fraction` with the smallest positive denominator, whose
         ratio is equal to `self`.
+
         """
         return Fraction(self._value, base10pow(self._precision))
 
@@ -518,6 +537,7 @@ cdef class Decimal:
 
         Returns the pair of numerator and denominator with the smallest
         positive denominator, whose ratio is equal to `self`.
+
         """
         n, d = self._value, base10pow(self._precision)
         g = gcd(n, d)
@@ -579,6 +599,7 @@ cdef class Decimal:
 
         Returns:
             str: `self` converted to a string according to `fmt_spec`
+
         """
         (fmt_fill, fmt_align, fmt_sign, fmt_min_width, fmt_thousands_sep,
             fmt_grouping, fmt_decimal_point, fmt_precision,
@@ -804,6 +825,7 @@ cdef class Decimal:
         complex since roots are generally irrational.
 
         `mod` must always be None (otherwise a `TypeError` is raised).
+
         """
         if mod is not None:
             raise TypeError("3rd argument not allowed unless all arguments "
@@ -830,9 +852,8 @@ cdef class Decimal:
         Round `self` to a given precision in decimal digits (default 0).
         `n_digits` may be negative.
 
-        Note: This method is called by the built-in `round` function only in
-        Python 3.x! It returns an `int` when called with one argument,
-        otherwise a :class:`Decimal`.
+        This method is called by the built-in `round` function. It returns an
+        `int` when called with one argument, otherwise a :class:`Decimal`.
         """
         if precision is None:
             # return integer
@@ -946,7 +967,7 @@ def _iter_grouping(grouping):
 
 
 cdef _vp_adjust_to_prec(v, p, to_prec, rounding=None):
-    # Return v adjusted to precision `to_prec` using given
+    # Return internal tuple (v, p) adjusted to precision `to_prec` using given
     # rounding mode (or default mode if none is given).
     # Assumes p != to_prec.
     dp = to_prec - p
@@ -978,10 +999,9 @@ cdef tuple _vp_normalize(v, p):
     return v, p
 
 
-# divide x by y, return rounded result
 cdef _floordiv_rounded(x, y, rounding=None):
-    """Return x // y, rounded using given rounding mode (or default mode
-    if none is given)."""
+    # Return x // y, rounded using given rounding mode (or default mode
+    # if none is given)
     quot, rem = divmod(x, y)
     if rem == 0:              # no need for rounding
         return quot
