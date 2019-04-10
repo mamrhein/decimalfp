@@ -26,14 +26,9 @@ from decimal import Decimal as _StdLibDecimal
 from fractions import Fraction
 from functools import reduce
 import locale
-from math import floor, log10
+from math import floor, gcd, log10
 from numbers import Complex, Integral, Rational, Real
 import operator
-
-try:
-    from math import gcd
-except ImportError:                                         # pragma: no cover
-    from fractions import gcd
 
 # local imports
 
