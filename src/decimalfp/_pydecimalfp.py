@@ -376,7 +376,7 @@ class Decimal:
         I.e. the largest integer exp so that 10 ** exp <= self.
 
         """
-        return int(floor(log10(abs(self._value)))) - self._precision
+        return floor(log10(abs(self._value))) - self._precision
 
     @property
     def numerator(self):
