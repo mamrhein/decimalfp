@@ -21,15 +21,17 @@
 from __future__ import absolute_import, division
 
 # standard lib imports
-import locale
+
 from decimal import Decimal as _StdLibDecimal
 from fractions import Fraction
 from functools import reduce
+import locale
 from math import floor, gcd, log10
 from numbers import Complex, Integral, Rational, Real
 
 # local imports
-from .rounding import LIMIT_PREC, ROUNDING, get_rounding
+
+from .rounding import get_rounding, LIMIT_PREC, ROUNDING
 
 # cython cimports
 from cpython.long cimport PyLong_AsLong as long_from_pyint
