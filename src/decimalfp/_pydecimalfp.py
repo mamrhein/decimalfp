@@ -29,6 +29,7 @@ import locale
 from math import floor, gcd, log10
 from numbers import Complex, Integral, Rational, Real
 import operator
+from typing import Any, Callable, Optional, Sequence, Tuple, Union
 
 # local imports
 
@@ -42,7 +43,7 @@ for i in _base10_pow_cache:
     _base10_pow_cache[i] = 10 ** i
 
 
-def base10pow(exp):
+def base10pow(exp: int) -> int:
     """Return 10 ** `exp`."""
     assert exp >= 0, 'base10pow called with exponent < 0: %i' % exp
     try:
@@ -287,7 +288,7 @@ class Decimal:
 
     # to be compatible to fractions.Fraction
     @classmethod
-    def from_float(cls, f):
+    def from_float(cls, f: Union[float, Integral]) -> "Decimal":
         """Convert a finite float (or int) to a :class:`Decimal`.
 
         Args:
@@ -310,7 +311,8 @@ class Decimal:
 
     # to be compatible to fractions.Fraction
     @classmethod
-    def from_decimal(cls, d):
+    def from_decimal(cls, d: Union["Decimal", Integral, _StdLibDecimal]) \
+            -> "Decimal":
         """Convert a finite decimal number to a :class:`Decimal`.
 
         Args:
@@ -333,7 +335,7 @@ class Decimal:
         return cls(d)
 
     @classmethod
-    def from_real(cls, r, exact=True):
+    def from_real(cls, r: Real, exact: bool = True) -> "Decimal":
         """Convert a Real number to a :class:`Decimal`.
 
         Args:
@@ -365,12 +367,12 @@ class Decimal:
                 return cls(r, LIMIT_PREC)
 
     @property
-    def precision(self):
+    def precision(self) -> int:
         """Return precision of `self`."""
         return self._precision
 
     @property
-    def magnitude(self):
+    def magnitude(self) -> int:
         """Return magnitude of `self` in terms of power to 10.
 
         I.e. the largest integer exp so that 10 ** exp <= self.
@@ -379,7 +381,7 @@ class Decimal:
         return floor(log10(abs(self._value))) - self._precision
 
     @property
-    def numerator(self):
+    def numerator(self) -> int:
         """Return the normalized numerator of `self`.
 
         I. e. the numerator from the pair of integers with the smallest
@@ -393,7 +395,7 @@ class Decimal:
             return self._numerator
 
     @property
-    def denominator(self):
+    def denominator(self) -> int:
         """Return the normalized denominator of 'self'.
 
         I. e. the smallest positive denominator from the pairs of integers,
@@ -407,7 +409,7 @@ class Decimal:
             return self._denominator
 
     @property
-    def real(self):
+    def real(self) -> "Decimal":
         """Return real part of `self`.
 
         Returns `self` (Real numbers are their real component).
@@ -416,7 +418,7 @@ class Decimal:
         return self
 
     @property
-    def imag(self):
+    def imag(self) -> int:
         """Return imaginary part of `self`.
 
         Returns 0 (Real numbers have no imaginary component).
@@ -424,7 +426,8 @@ class Decimal:
         """
         return 0
 
-    def adjusted(self, precision=None, rounding=None):
+    def adjusted(self, precision: Optional[int] = None,
+                 rounding: Optional[ROUNDING] = None) -> "Decimal":
         """Return adjusted copy of `self`.
 
         Args:
@@ -462,15 +465,14 @@ class Decimal:
             adj._precision = max(0, to_prec)
         return adj
 
-    def quantize(self, quant, rounding=None):
+    def quantize(self, quant: Any, rounding: Optional[ROUNDING] = None) \
+            -> Union["Decimal", Fraction]:
         """Return integer multiple of `quant` closest to `self`.
 
         Args:
-            quant (Rational): quantum to get a multiple from
+            quant (Any): quantum to get a multiple from; must be a `Rational`
+                or convertable to :class:`Decimal`
             rounding (ROUNDING): rounding mode (default: None)
-
-        A string can be given for `quant` as long as it is convertable to a
-        :class:`Decimal`.
 
         If no `rounding` mode is given, the default mode from the current
         context (from module `decimal`) is used.
@@ -503,7 +505,7 @@ class Decimal:
                                  rounding)
         return Decimal(mult) * quant
 
-    def as_tuple(self):
+    def as_tuple(self) -> Tuple[int, int, int]:
         """Return a tuple (sign, coeff, exp) equivalent to `self`.
 
         self == (-1) ** sign * coeff * 10 ** exp.
@@ -515,7 +517,7 @@ class Decimal:
         exp = -self._precision
         return sign, coeff, exp
 
-    def as_fraction(self):
+    def as_fraction(self) -> Fraction:
         """Return an instance of `Fraction` equal to `self`.
 
         Returns the `Fraction` with the smallest positive denominator, whose
@@ -524,7 +526,7 @@ class Decimal:
         """
         return Fraction(self._value, base10pow(self._precision))
 
-    def as_integer_ratio(self):
+    def as_integer_ratio(self) -> Tuple[int, int]:
         """Return a pair of integers whose ratio is equal to `self`.
 
         Returns the pair of numerator and denominator with the smallest
@@ -535,24 +537,24 @@ class Decimal:
         g = gcd(n, d)
         return n // g, d // g
 
-    def __copy__(self):
+    def __copy__(self) -> "Decimal":
         """Return self (Decimal instances are immutable)."""
         return self
 
-    def __deepcopy__(self, memo):
+    def __deepcopy__(self, memo) -> "Decimal":
         """Return self (Decimal instances are immutable)."""
         return self.__copy__()
 
-    def __reduce__(self):
+    def __reduce__(self) -> Tuple[type, Tuple, Tuple[int, int]]:
         """Return pickle helper tuple."""
         return (Decimal, (), (self._value, self._precision))
 
-    def __setstate__(self, state):
+    def __setstate__(self, state: Tuple[int, int]):
         """Set state of `self` from `state`."""
         self._value, self._precision = state
 
     # string representation
-    def __repr__(self):
+    def __repr__(self) -> str:
         """repr(self)"""                                        # noqa: D400
         sv = self._value
         sp = self._precision
@@ -571,7 +573,7 @@ class Decimal:
         else:
             return "Decimal(%s, %s)" % (s, sp)
 
-    def __str__(self):
+    def __str__(self) -> str:
         """str(self)"""                                         # noqa: D400
         sp = self._precision
         if sp == 0:
@@ -583,7 +585,7 @@ class Decimal:
             s = (i == 0 and f < 0) * '-'  # -1 < self < 0 => i = 0 and f < 0 !
             return '%s%i.%0*i' % (s, i, sp, abs(f))
 
-    def __format__(self, fmt_spec):
+    def __format__(self, fmt_spec: str) -> str:
         """Return `self` converted to a string according to `fmt_spec`.
 
         Args:
@@ -641,7 +643,7 @@ class Decimal:
             else:
                 return raw
 
-    def _compare(self, other, cmp):
+    def _compare(self, other: Any, cmp: Callable) -> bool:
         """Compare `self` and `other` using operator `cmp`."""
         sv = self._value
         sp = self._precision
@@ -665,7 +667,7 @@ class Decimal:
             return cmp(sv, ov)
         elif isinstance(other, Real):
             try:
-                num, den = other.as_integer_ratio()
+                num, den = other.as_integer_ratio()             # type: ignore
             except AttributeError:
                 return NotImplemented
             except (ValueError, OverflowError):
@@ -699,27 +701,27 @@ class Decimal:
         # don't know how to compare
         return NotImplemented
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
         """self == other"""                                 # noqa: D400, D403
         return self._compare(other, operator.eq)
 
-    def __lt__(self, other):
+    def __lt__(self, other: Any) -> bool:
         """self < other"""                                  # noqa: D400, D403
         return self._compare(other, operator.lt)
 
-    def __le__(self, other):
+    def __le__(self, other: Any) -> bool:
         """self <= other"""                                 # noqa: D400, D403
         return self._compare(other, operator.le)
 
-    def __gt__(self, other):
+    def __gt__(self, other: Any) -> bool:
         """self > other"""                                  # noqa: D400, D403
         return self._compare(other, operator.gt)
 
-    def __ge__(self, other):
+    def __ge__(self, other: Any) -> bool:
         """self >= other"""                                 # noqa: D400, D403
         return self._compare(other, operator.ge)
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         """hash(self)"""                                        # noqa: D400
         try:
             return self._hash
@@ -731,67 +733,67 @@ class Decimal:
                 return hash(Fraction(sv, base10pow(sp)))
 
     # return 0 or 1 for truth-value testing
-    def __nonzero__(self):
+    def __nonzero__(self) -> bool:
         """bool(self)"""                                        # noqa: D400
         return self._value != 0
     __bool__ = __nonzero__
 
     # return integer portion as int
-    def __int__(self):
+    def __int__(self) -> int:
         """math.trunc(self)"""                                  # noqa: D400
         return _vp_to_int(self._value, self._precision)
     __trunc__ = __int__
 
     # convert to float (may loose precision!)
-    def __float__(self):
+    def __float__(self) -> float:
         """float(self)"""                                       # noqa: D400
         return self._value / base10pow(self._precision)
 
-    def __pos__(self):
+    def __pos__(self) -> "Decimal":
         """+self"""                                             # noqa: D400
         return self
 
-    def __neg__(self):
+    def __neg__(self) -> "Decimal":
         """-self"""                                             # noqa: D400
         result = object.__new__(Decimal)
         result._value = -self._value
         result._precision = self._precision
         return result
 
-    def __abs__(self):
+    def __abs__(self) -> "Decimal":
         """abs(self)"""                                         # noqa: D400
         result = object.__new__(Decimal)
         result._value = abs(self._value)
         result._precision = self._precision
         return result
 
-    def __add__(self, other):
+    def __add__(self, other: Any) -> Union["Decimal", Fraction]:
         """self + other"""                                  # noqa: D400, D403
         return add(self, other)
 
     # other + self
     __radd__ = __add__
 
-    def __sub__(self, other):
+    def __sub__(self, other: Any) -> Union["Decimal", Fraction]:
         """self - other"""                                  # noqa: D400, D403
         return sub(self, other)
 
-    def __rsub__(self, other):
+    def __rsub__(self, other: Any) -> Union["Decimal", Fraction]:
         """other - self"""                                  # noqa: D400, D403
         return add(-self, other)
 
-    def __mul__(self, other):
+    def __mul__(self, other: Any) -> Union["Decimal", Fraction]:
         """self * other"""                                  # noqa: D400, D403
         return mul(self, other)
 
     # other * self
     __rmul__ = __mul__
 
-    def __div__(self, other):
+    def __div__(self, other: Any) -> Union["Decimal", Fraction]:
         """self / other"""                                  # noqa: D400, D403
         return div1(self, other)
 
-    def __rdiv__(self, other):
+    def __rdiv__(self, other: Any) -> Union["Decimal", Fraction]:
         """other / self"""                                  # noqa: D400, D403
         return div2(other, self)
 
@@ -799,31 +801,34 @@ class Decimal:
     __truediv__ = __div__
     __rtruediv__ = __rdiv__
 
-    def __divmod__(self, other):
+    def __divmod__(self, other: Any) \
+            -> Tuple[int, Union["Decimal", Fraction]]:
         """self // other, self % other"""                   # noqa: D400, D403
         return divmod1(self, other)
 
-    def __rdivmod__(self, other):
+    def __rdivmod__(self, other: Any) \
+            -> Tuple[int, Union["Decimal", Fraction]]:
         """other // self, other % self"""                   # noqa: D400, D403
         return divmod2(other, self)
 
-    def __floordiv__(self, other):
+    def __floordiv__(self, other: Any) -> int:
         """self // other"""                                 # noqa: D400, D403
         return floordiv1(self, other)
 
-    def __rfloordiv__(self, other):
+    def __rfloordiv__(self, other: Any) -> int:
         """other // self"""                                 # noqa: D400, D403
         return floordiv2(other, self)
 
-    def __mod__(self, other):
+    def __mod__(self, other: Any) -> Union["Decimal", Fraction]:
         """self % other"""                                  # noqa: D400, D403
         return mod1(self, other)
 
-    def __rmod__(self, other):
+    def __rmod__(self, other: Any) -> Union["Decimal", Fraction]:
         """other % self"""                                  # noqa: D400, D403
         return mod2(other, self)
 
-    def __pow__(self, other, mod=None):
+    def __pow__(self, other: Any, mod: Any = None) \
+            -> Union["Decimal", float, complex]:
         """self ** other
 
         If other is an integer (or a Rational with denominator = 1), the
@@ -840,7 +845,8 @@ class Decimal:
             return pow1(self, other)
         return NotImplemented
 
-    def __rpow__(self, other, mod=None):
+    def __rpow__(self, other: Any, mod: Any = None) \
+            -> Union["Decimal", float, complex]:
         """other ** self
 
         `mod` must always be None (otherwise a `TypeError` is raised).
@@ -850,17 +856,18 @@ class Decimal:
                             "are integers")
         return pow2(other, self)
 
-    def __floor__(self):
+    def __floor__(self) -> int:
         """math.floor(self)"""                                  # noqa: D400
         n, d = self._value, base10pow(self._precision)
         return n // d
 
-    def __ceil__(self):
+    def __ceil__(self) -> int:
         """math.ceil(self)"""                                   # noqa: D400
         n, d = self._value, base10pow(self._precision)
         return -(-n // d)
 
-    def __round__(self, precision=None):
+    def __round__(self, precision: Optional[int] = None) \
+            -> Union[int, "Decimal"]:
         """round(self [, n_digits])
 
         Round `self` to a given precision in decimal digits (default 0).
@@ -895,7 +902,9 @@ _dflt_format_params = {'fill': ' ',
                        'type': 'f'}
 
 
-def _get_format_params(format_spec):
+def _get_format_params(format_spec: str) \
+        -> Tuple[str, str, str, int, str, Sequence[int], str, Optional[int],
+                 str]:
     m = _parse_format_spec(format_spec)
     if m is None:
         raise ValueError("Invalid format specifier: " + format_spec)
@@ -937,7 +946,9 @@ def _get_format_params(format_spec):
             fmt_grouping, fmt_decimal_point, fmt_precision, fmt_type)
 
 
-def _pad_digits(digits, min_width, fill, sep=None, grouping=None):
+def _pad_digits(digits: str, min_width: int, fill: str,
+                sep: Optional[str] = None,
+                grouping: Optional[Sequence[int]] = None) -> str:
     n_digits = len(digits)
     if sep and grouping:
         slices = []
@@ -980,7 +991,8 @@ def _iter_grouping(grouping):
 # helper functions for decimal arithmetic
 
 
-def _vp_adjust_to_prec(v, p, to_prec, rounding=None):
+def _vp_adjust_to_prec(v: int, p: int, to_prec: int,
+                       rounding: Optional[ROUNDING] = None) -> int:
     # Return internal tuple (v, p) adjusted to precision `to_prec` using given
     # rounding mode (or default mode if none is given).
     # Assumes p != to_prec.
@@ -1001,7 +1013,7 @@ def _vp_adjust_to_prec(v, p, to_prec, rounding=None):
                 base10pow(-to_prec))
 
 
-def _vp_normalize(v, p):
+def _vp_normalize(v: int, p: int) -> Tuple[int, int]:
     # Reduce v, p to the smallest precision >= 0 without loosing value.
     # I. e. return rv, rp so that rv // 10 ** rp == v // 10 ** p and
     # (rv % 10 != 0 or rp == 0)
@@ -1013,7 +1025,8 @@ def _vp_normalize(v, p):
     return v, p
 
 
-def _floordiv_rounded(x, y, rounding=None):
+def _floordiv_rounded(x: int, y: int,
+                      rounding: Optional[ROUNDING] = None) -> int:
     # Return x // y, rounded using given rounding mode (or default mode
     # if none is given)
     quot, rem = divmod(x, y)
@@ -1090,7 +1103,7 @@ def _floordiv_rounded(x, y, rounding=None):
                 return quot
 
 
-def _vp_to_int(v, p):
+def _vp_to_int(v: int, p: int) -> int:
     # Return integral part of shifted decimal.
     if p == 0:
         return v
@@ -1105,7 +1118,8 @@ def _vp_to_int(v, p):
         return v * base10pow(-p)                            # pragma: no cover
 
 
-def _approx_rational(num, den, min_prec=0):
+def _approx_rational(num: int, den: int, min_prec: int = 0) \
+        -> Tuple[int, int, int]:
     # Approximate num / den as internal Decimal representation.
     # Returns v, p, r, so that
     # v * 10 ** -p + r == num / den
@@ -1125,7 +1139,7 @@ def _approx_rational(num, den, min_prec=0):
     return v, p, r
 
 
-def _div(num, den, min_prec):
+def _div(num: int, den: int, min_prec: int) -> Union[Decimal, Fraction]:
     # Return num / den as Decimal,
     # if possible with precision <= max(minPrec, LIMIT_PREC),
     # otherwise as Fraction
@@ -1139,7 +1153,7 @@ def _div(num, den, min_prec):
         return Fraction(num, den)
 
 
-def add(x, y):
+def add(x: Decimal, y: Any) -> Union[Decimal, Fraction]:
     """x + y                                                # noqa: D400, D403
 
     x must be a Decimal.
@@ -1182,7 +1196,7 @@ def add(x, y):
     return _div(num, den, min_prec)
 
 
-def sub(x, y):
+def sub(x: Decimal, y: Any) -> Union[Decimal, Fraction]:
     """x - y                                                # noqa: D400, D403
 
     x must be a Decimal.
@@ -1225,7 +1239,7 @@ def sub(x, y):
     return _div(num, den, min_prec)
 
 
-def mul(x, y):
+def mul(x: Decimal, y: Any) -> Union[Decimal, Fraction]:
     """x * y                                                # noqa: D400, D403
 
     x must be a Decimal.
@@ -1259,7 +1273,7 @@ def mul(x, y):
     return _div(num, den, min_prec)
 
 
-def div1(x, y):
+def div1(x: Decimal, y: Any) -> Union[Decimal, Fraction]:
     """x / y                                                # noqa: D400, D403
 
     x must be a Decimal.
@@ -1291,7 +1305,7 @@ def div1(x, y):
     return _div(num, den, min_prec)
 
 
-def div2(x, y):
+def div2(x: Any, y: Decimal) -> Union[Decimal, Fraction]:
     """x / y                                                # noqa: D400, D403
 
     y must be a Decimal.
@@ -1316,7 +1330,7 @@ def div2(x, y):
     return _div(num, den, min_prec)
 
 
-def divmod1(x, y):
+def divmod1(x: Decimal, y: Any) -> Tuple[int, Union[Decimal, Fraction]]:
     """x // y, x % y                                        # noqa: D400, D403
 
     x must be a Decimal.
@@ -1349,7 +1363,7 @@ def divmod1(x, y):
         return x // y, x % y
 
 
-def divmod2(x, y):
+def divmod2(x: Any, y: Decimal) -> Tuple[int, Union[Decimal, Fraction]]:
     """x // y, x % y                                        # noqa: D400, D403
 
     y must be a Decimal.
@@ -1369,7 +1383,7 @@ def divmod2(x, y):
         return x // y, x % y
 
 
-def floordiv1(x, y):
+def floordiv1(x: Decimal, y: Any) -> int:
     """x // y                                               # noqa: D400, D403
 
     x must be a Decimal.
@@ -1381,7 +1395,7 @@ def floordiv1(x, y):
         return floor(x / y)
 
 
-def floordiv2(x, y):
+def floordiv2(x: Any, y: Decimal) -> int:
     """x // y                                               # noqa: D400, D403
 
     y must be a Decimal.
@@ -1393,7 +1407,7 @@ def floordiv2(x, y):
         return floor(x / y)
 
 
-def mod1(x, y):
+def mod1(x: Decimal, y: Any) -> Union[Decimal, Fraction]:
     """x % y                                                # noqa: D400, D403
 
     x must be a Decimal.
@@ -1405,7 +1419,7 @@ def mod1(x, y):
         return x - y * Decimal(x // y)
 
 
-def mod2(x, y):
+def mod2(x: Any, y: Decimal) -> Union[Decimal, Fraction]:
     """x % y                                                # noqa: D400, D403
 
     y must be a Decimal.
@@ -1417,7 +1431,8 @@ def mod2(x, y):
         return x - y * Decimal(x // y)
 
 
-def pow1(x, y):
+def pow1(x: Decimal, y: Any) \
+        -> Union["Decimal", float, complex]:
     """x ** y                                               # noqa: D400, D403
 
     x must be a Decimal.
@@ -1443,7 +1458,8 @@ def pow1(x, y):
             return _div(base10pow(prec * exp), x._value ** exp, prec)
 
 
-def pow2(x, y):
+def pow2(x: Any, y: Decimal) \
+        -> Union["Decimal", float, complex]:
     """x ** y                                               # noqa: D400, D403
 
     y must be a Decimal.
