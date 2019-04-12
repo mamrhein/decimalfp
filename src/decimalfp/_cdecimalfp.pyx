@@ -28,43 +28,42 @@ from functools import reduce
 import locale
 from math import floor, gcd, log10
 from numbers import Complex, Integral, Rational, Real
+from typing import Any, Optional, Sequence, Tuple, Union
 
 # local imports
 
 from .rounding import get_rounding, LIMIT_PREC, ROUNDING
 
 # cython cimports
-from cpython.long cimport PyLong_AsLong as long_from_pyint
-from cpython.long cimport PyLong_FromLongLong as pyint_from_longlong
+# from cpython.long cimport PyLong_AsLong as long_from_pyint
+# from cpython.long cimport PyLong_FromLong as pyint_from_long
+# from cpython.long cimport PyLong_FromLongLong as pyint_from_longlong
 from cpython.longintrepr cimport py_long as PyInt
 from cpython.number cimport PyNumber_Power
 from cpython.object cimport Py_EQ, Py_NE, PyObject_RichCompare
-from libc.limits cimport LLONG_MAX
-from libc.stdlib cimport atoi
+# from libc.limits cimport LLONG_MAX
+# from libc.stdlib cimport atoi
 
 # Integer constants
 # cdef PyInt PYINT_NEG1 = pyint_from_long(-1)
-# cdef PyInt 0 = pyint_from_long(0)
+# cdef PyInt PYINT_0 = pyint_from_long(0)
 # cdef PyInt PYINT_10 = pyint_from_long(10)
 
-# 10 ** exp as PyInt (mit cache)
+# 10 ** exp (mit cache)
 
 _base10_pow_cache = list(range(128))
 for i in _base10_pow_cache:
     _base10_pow_cache[i] = 10 ** i
 
-cdef long LLONG_MAX_LOG10 = \
-    long_from_pyint(int(log10(pyint_from_longlong(LLONG_MAX))))
 
-cdef base10pow(exp):
-    assert exp >= 0
+cdef PyInt base10pow(PyInt exp):
+    """Return 10 ** `exp`."""
+    assert exp >= 0, 'base10pow called with exponent < 0: %i' % exp
     try:
         return _base10_pow_cache[exp]
     except IndexError:
-        if 0 <= exp < LLONG_MAX_LOG10:
-            return 10 ** exp
-        else:
-            return pow(10, exp, None)
+        return 10 ** exp
+
 
 # parse functions
 import re
@@ -151,12 +150,15 @@ cdef class Decimal:
 
     """
 
-    cdef object _value
-    cdef object _precision
+    cdef PyInt _value
+    cdef PyInt _precision
 
-    def __cinit__(self, value=None, precision=None):
+    def __cinit__(self, value: Any = None,
+                  precision: Optional[Integral] = None):
 
         cdef Decimal dec
+        cdef PyInt v, p, exp, n_frac, shift10
+        cdef PyInt sign, coeff, x, y, num, den, rem
 
         if precision is None:
             if value is None:
@@ -210,9 +212,11 @@ cdef class Decimal:
                 n_frac = len(s_frac)
                 sign_n_digits += s_frac
             if precision is None:
-                precision = max(0, n_frac - exp)
-            self._precision = precision
-            shift10 = precision - n_frac + exp
+                p = max(0, n_frac - exp)
+            else:
+                p = precision
+            self._precision = p
+            shift10 = p - n_frac + exp
             if shift10 == 0:
                 self._value = int(sign_n_digits)
             elif shift10 > 0:
@@ -224,10 +228,10 @@ cdef class Decimal:
 
         # Integral
         if isinstance(value, Integral):
-            value = int(value)
+            v = int(value)
             if precision is None:
                 self._precision = 0
-                self._value = value
+                self._value = v
             else:
                 self._precision = precision
                 self._value = value * base10pow(precision)
@@ -303,7 +307,7 @@ cdef class Decimal:
 
     # to be compatible to fractions.Fraction
     @classmethod
-    def from_float(cls, f):
+    def from_float(cls, f: Union[float, Integral]) -> "Decimal":
         """Convert a finite float (or int) to a :class:`Decimal`.
 
         Args:
@@ -325,7 +329,8 @@ cdef class Decimal:
 
     # to be compatible to fractions.Fraction
     @classmethod
-    def from_decimal(cls, d):
+    def from_decimal(cls, d: Union[Decimal, Integral, _StdLibDecimal]) \
+            -> "Decimal":
         """Convert a finite decimal number to a :class:`Decimal`.
 
         Args:
@@ -347,7 +352,7 @@ cdef class Decimal:
         return cls(d)
 
     @classmethod
-    def from_real(cls, r, exact=True):
+    def from_real(cls, r: Real, exact: bool = True) -> "Decimal":
         """Convert a Real number to a :class:`Decimal`.
 
         Args:
@@ -378,12 +383,12 @@ cdef class Decimal:
                 return cls(r, LIMIT_PREC)
 
     @property
-    def precision(self):
+    def precision(self) -> int:
         """Return precision of `self`."""
         return self._precision
 
     @property
-    def magnitude(self):
+    def magnitude(self) -> int:
         """Return magnitude of `self` in terms of power to 10.
 
         I.e. the largest integer exp so that 10 ** exp <= self.
@@ -392,7 +397,7 @@ cdef class Decimal:
         return floor(log10(abs(self._value))) - self._precision
 
     @property
-    def numerator(self):
+    def numerator(self) -> int:
         """Return the normalized numerator of `self`.
 
         I. e. the numerator from the pair of integers with the smallest
@@ -403,7 +408,7 @@ cdef class Decimal:
         return n
 
     @property
-    def denominator(self):
+    def denominator(self) -> int:
         """Return the normalized denominator of 'self'.
 
         I. e. the smallest positive denominator from the pairs of integers,
@@ -414,7 +419,7 @@ cdef class Decimal:
         return d
 
     @property
-    def real(self):
+    def real(self) -> "Decimal":
         """Return real part of `self`.
 
         Returns `self` (Real numbers are their real component).
@@ -423,7 +428,7 @@ cdef class Decimal:
         return self
 
     @property
-    def imag(self):
+    def imag(self) -> int:
         """Return imaginary part of `self`.
 
         Returns 0 (Real numbers have no imaginary component).
@@ -431,7 +436,8 @@ cdef class Decimal:
         """
         return 0
 
-    def adjusted(self, precision=None, rounding=None):
+    def adjusted(self, precision: Optional[int] = None,
+                 rounding: Optional[ROUNDING] = None) -> "Decimal":
         """Return adjusted copy of `self`.
 
         Args:
@@ -454,6 +460,8 @@ cdef class Decimal:
 
         """
         cdef Decimal adj
+        cdef PyInt to_prec, p
+
         if precision is None:
             adj = Decimal()
             adj._value, adj._precision = _vp_normalize(self._value,
@@ -470,15 +478,14 @@ cdef class Decimal:
             adj._precision = max(0, to_prec)
         return adj
 
-    def quantize(self, quant, rounding=None):
+    def quantize(self, quant, rounding: Optional[ROUNDING] = None) \
+            -> Union["Decimal", Fraction]:
         """Return integer multiple of `quant` closest to `self`.
 
         Args:
-            quant (Rational): quantum to get a multiple from
+            quant (Any): quantum to get a multiple from; must be a `Rational`
+                or convertable to :class:`Decimal`
             rounding (ROUNDING): rounding mode (default: None)
-
-        A string can be given for `quant` as long as it is convertable to a
-        :class:`Decimal`.
 
         If no `rounding` mode is given, the default mode from the current
         context (from module `decimal`) is used.
@@ -494,6 +501,8 @@ cdef class Decimal:
                 converted to a :class:`Decimal`
 
         """
+        cdef PyInt num, den, mult
+
         try:
             num, den = quant.numerator, quant.denominator
         except AttributeError:
@@ -511,19 +520,21 @@ cdef class Decimal:
                                  rounding)
         return Decimal(mult) * quant
 
-    def as_tuple(self):
+    def as_tuple(self) -> Tuple[int, int, int]:
         """Return a tuple (sign, coeff, exp) equivalent to `self`.
 
         self == (-1) ** sign * coeff * 10 ** exp.
 
         """
+        cdef PyInt v, sign, coeff, exp
+
         v = self._value
         sign = int(v < 0)
         coeff = abs(v)
         exp = -self._precision
         return sign, coeff, exp
 
-    def as_fraction(self):
+    def as_fraction(self) -> Fraction:
         """Return an instance of `Fraction` equal to `self`.
 
         Returns the `Fraction` with the smallest positive denominator, whose
@@ -532,36 +543,40 @@ cdef class Decimal:
         """
         return Fraction(self._value, base10pow(self._precision))
 
-    def as_integer_ratio(self):
+    def as_integer_ratio(self) -> Tuple[int, int]:
         """Return a pair of integers whose ratio is equal to `self`.
 
         Returns the pair of numerator and denominator with the smallest
         positive denominator, whose ratio is equal to `self`.
 
         """
+        cdef PyInt n, d, g
+
         n, d = self._value, base10pow(self._precision)
         g = gcd(n, d)
         return n // g, d // g
 
-    def __copy__(self):
+    def __copy__(self) -> "Decimal":
         """Return self (Decimal instances are immutable)."""
         return self
 
-    def __deepcopy__(self, memo):
+    def __deepcopy__(self, memo) -> "Decimal":
         """Return self (Decimal instances are immutable)."""
         return self.__copy__()
 
-    def __reduce__(self):
+    def __reduce__(self) -> Tuple[type, Tuple, Tuple[int, int]]:
         """Return pickle helper tuple."""
         return (Decimal, (), (self._value, self._precision))
 
-    def __setstate__(self, state):
+    def __setstate__(self, state: Tuple[int, int]):
         """Set state of `self` from `state`."""
         self._value, self._precision = state
 
     # string representation
-    def __repr__(self):
+    def __repr__(self) -> str:
         """repr(self)"""
+        cdef PyInt sv, sp, rv, rp, n
+
         sv = self._value
         sp = self._precision
         rv, rp = _vp_normalize(sv, sp)
@@ -579,8 +594,10 @@ cdef class Decimal:
         else:
             return "Decimal(%s, %s)" % (s, sp)
 
-    def __str__(self):
+    def __str__(self) -> str:
         """str(self)"""
+        cdef PyInt sv, sp, i, f
+
         sp = self._precision
         if sp == 0:
             return "%i" % self._value
@@ -591,7 +608,7 @@ cdef class Decimal:
             s = (i == 0 and f < 0) * '-'  # -1 < self < 0 => i = 0 and f < 0 !
             return '%s%i.%0*i' % (s, i, sp, abs(f))
 
-    def __format__(self, fmt_spec):
+    def __format__(self, fmt_spec: str) -> str:
         """Return `self` converted to a string according to `fmt_spec`.
 
         Args:
@@ -601,6 +618,8 @@ cdef class Decimal:
             str: `self` converted to a string according to `fmt_spec`
 
         """
+        cdef PyInt sv, sp, v, fmt_min_width, n_to_fill, xtra_shift
+
         (fmt_fill, fmt_align, fmt_sign, fmt_min_width, fmt_thousands_sep,
             fmt_grouping, fmt_decimal_point, fmt_precision,
             fmt_type) = _get_format_params(fmt_spec)
@@ -649,8 +668,10 @@ cdef class Decimal:
             else:
                 return raw
 
-    def __richcmp__(self, other, int cmp):
+    def __richcmp__(self, other: Any, int cmp) -> bool:
         """Compare `self` and `other` using operator `cmp`."""
+        cdef PyInt sv, sp, ov, op, num, den, sign, exp
+
         sv = self._value
         sp = self._precision
         if isinstance(other, Decimal):
@@ -707,8 +728,10 @@ cdef class Decimal:
         # don't know how to compare
         return NotImplemented
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         """hash(self)"""
+        cdef PyInt sv, sp
+
         sv, sp = self._value, self._precision
         if sp == 0:               # if self == int(self),
             return hash(sv)       # same hash as int
@@ -716,43 +739,45 @@ cdef class Decimal:
             return hash(Fraction(sv, base10pow(sp)))
 
     # return 0 or 1 for truth-value testing
-    def __nonzero__(self):
+    def __nonzero__(self) -> bool:
         """bool(self)"""
         return self._value != 0
     # __bool__ = __nonzero__
 
     # return integer portion as int
-    def __int__(self):
+    def __int__(self) -> int:
         """math.trunc(self)"""
         return _vp_to_int(self._value, self._precision)
     __trunc__ = __int__
 
     # convert to float (may loose precision!)
-    def __float__(self):
+    def __float__(self) -> float:
         """float(self)"""
         return self._value / base10pow(self._precision)
 
-    def __pos__(self):
+    def __pos__(self) -> "Decimal":
         """+self"""
         return self
 
-    def __neg__(self):
+    def __neg__(self) -> "Decimal":
         """-self"""
         cdef Decimal result
+
         result = Decimal()
         result._value = -self._value
         result._precision = self._precision
         return result
 
-    def __abs__(self):
+    def __abs__(self) -> "Decimal":
         """abs(self)"""
         cdef Decimal result
+
         result = Decimal()
         result._value = abs(self._value)
         result._precision = self._precision
         return result
 
-    def __add__(x, y):
+    def __add__(x, y) -> Union["Decimal", Fraction]:
         """x + y"""
         if isinstance(x, Decimal):
             return add(x, y)
@@ -760,7 +785,7 @@ cdef class Decimal:
             return add(y, x)
         return NotImplemented
 
-    def __sub__(x, y):
+    def __sub__(x, y) -> Union["Decimal", Fraction]:
         """x - y"""
         if isinstance(x, Decimal):
             return sub(x, y)
@@ -768,7 +793,7 @@ cdef class Decimal:
             return add(-y, x)
         return NotImplemented
 
-    def __mul__(x, y):
+    def __mul__(x, y) -> Union["Decimal", Fraction]:
         """x * y"""
         if isinstance(x, Decimal):
             return mul(x, y)
@@ -776,7 +801,7 @@ cdef class Decimal:
             return mul(y, x)
         return NotImplemented
 
-    def __div__(x, y):
+    def __div__(x, y) -> Union["Decimal", Fraction]:
         """x / y"""
         if isinstance(x, Decimal):
             return div1(x, y)
@@ -785,7 +810,7 @@ cdef class Decimal:
         return NotImplemented
 
     # Decimal division is true division
-    def __truediv__(x, y):
+    def __truediv__(x, y) -> Union["Decimal", Fraction]:
         """x / y"""
         if isinstance(x, Decimal):
             return div1(x, y)
@@ -793,7 +818,7 @@ cdef class Decimal:
             return div2(x, y)
         return NotImplemented
 
-    def __divmod__(x, y):
+    def __divmod__(x, y) -> Tuple[int, Union["Decimal", Fraction]]:
         """x // y, x % y"""
         if isinstance(x, Decimal):
             return divmod1(x, y)
@@ -801,7 +826,7 @@ cdef class Decimal:
             return divmod2(x, y)
         return NotImplemented
 
-    def __floordiv__(x, y):
+    def __floordiv__(x, y) -> int:
         """x // y"""
         if isinstance(x, Decimal):
             return floordiv1(x, y)
@@ -809,7 +834,7 @@ cdef class Decimal:
             return floordiv2(x, y)
         return NotImplemented
 
-    def __mod__(x, y):
+    def __mod__(x, y) -> Union["Decimal", Fraction]:
         """x % y"""
         if isinstance(x, Decimal):
             return mod1(x, y)
@@ -817,7 +842,7 @@ cdef class Decimal:
             return mod2(x, y)
         return NotImplemented
 
-    def __pow__(x, y, mod):
+    def __pow__(x, y, mod) -> Union["Decimal", float, complex]:
         """x ** y
 
         If y is an integer (or a Rational with denominator = 1), the
@@ -836,17 +861,18 @@ cdef class Decimal:
             return pow2(x, y)
         return NotImplemented
 
-    def __floor__(self):
+    def __floor__(self) -> int:
         """math.floor(self)"""
         n, d = self._value, base10pow(self._precision)
         return n // d
 
-    def __ceil__(self):
+    def __ceil__(self) -> int:
         """math.ceil(self)"""
         n, d = self._value, base10pow(self._precision)
         return -(-n // d)
 
-    def __round__(self, precision=None):
+    def __round__(self, precision: Optional[int] = None) \
+            -> Union[int, "Decimal"]:
         """round(self [, n_digits])
 
         Round `self` to a given precision in decimal digits (default 0).
@@ -881,7 +907,11 @@ _dflt_format_params = {'fill': ' ',
                        'type': 'f'}
 
 
-def _get_format_params(format_spec):
+def _get_format_params(format_spec: str) \
+        -> Tuple[str, str, str, int, str, Sequence[int], str, Optional[int],
+                 str]:
+    cdef PyInt fmt_min_width
+
     m = _parse_format_spec(format_spec)
     if m is None:
         raise ValueError("Invalid format specifier: " + format_spec)
@@ -923,7 +953,11 @@ def _get_format_params(format_spec):
             fmt_grouping, fmt_decimal_point, fmt_precision, fmt_type)
 
 
-def _pad_digits(digits, min_width, fill, sep=None, grouping=None):
+def _pad_digits(digits: str, min_width: int, fill: str,
+                sep: Optional[str] = None,
+                grouping: Optional[Tuple[int]] = None) -> str:
+    cdef PyInt n_digits, i, j, k, limit
+
     n_digits = len(digits)
     if sep and grouping:
         slices = []
@@ -966,9 +1000,9 @@ def _iter_grouping(grouping):
 # helper functions for decimal arithmetic
 
 
-cdef _vp_adjust_to_prec(v, p, to_prec, rounding=None):
-    # Return internal tuple (v, p) adjusted to precision `to_prec` using given
-    # rounding mode (or default mode if none is given).
+cdef PyInt _vp_adjust_to_prec(PyInt v, PyInt p, PyInt to_prec, rounding=None):
+    # Return value from internal tuple (v, p) adjusted to precision `to_prec`
+    # using given rounding mode (or default mode if none is given).
     # Assumes p != to_prec.
     dp = to_prec - p
     if dp >= 0:
@@ -999,7 +1033,7 @@ cdef tuple _vp_normalize(v, p):
     return v, p
 
 
-cdef _floordiv_rounded(x, y, rounding=None):
+cdef PyInt _floordiv_rounded(PyInt x, PyInt y, rounding=None):
     # Return x // y, rounded using given rounding mode (or default mode
     # if none is given)
     quot, rem = divmod(x, y)
@@ -1076,7 +1110,7 @@ cdef _floordiv_rounded(x, y, rounding=None):
                 return quot
 
 
-def _vp_to_int(v, p):
+cdef PyInt _vp_to_int(PyInt v, PyInt p):
     # Return integral part of shifted decimal.
     if p == 0:
         return v
@@ -1091,7 +1125,7 @@ def _vp_to_int(v, p):
         return v * base10pow(-p)
 
 
-cdef tuple _approx_rational(num, den, min_prec):
+cdef tuple _approx_rational(PyInt num, PyInt den, PyInt min_prec):
     # Approximate num / den as internal Decimal representation.
     # Returns v, p, r, so that
     # v * 10 ** -p + r == num / den
@@ -1111,7 +1145,7 @@ cdef tuple _approx_rational(num, den, min_prec):
     return v, p, r
 
 
-cdef _div(num, den, min_prec):
+cdef _div(PyInt num, PyInt den, PyInt min_prec):
     # Return num / den as Decimal,
     # if possible with precision <= max(minPrec, LIMIT_PREC),
     # otherwise as Fraction
@@ -1337,7 +1371,7 @@ cdef tuple divmod2(object x, Decimal y):
         return x // y, x % y
 
 
-cdef object floordiv1(Decimal x, object y):
+cdef PyInt floordiv1(Decimal x, object y):
     """x // y"""
     if isinstance(y, (Decimal, Integral, _StdLibDecimal)):
         return divmod1(x, y)[0]
@@ -1345,7 +1379,7 @@ cdef object floordiv1(Decimal x, object y):
         return floor(x / y)
 
 
-cdef object floordiv2(object x, Decimal y):
+cdef PyInt floordiv2(object x, Decimal y):
     """x // y"""
     if isinstance(x, (Integral, _StdLibDecimal)):
         return divmod2(x, y)[0]
