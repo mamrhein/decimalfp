@@ -18,8 +18,6 @@
 """Decimal fixed-point arithmetic."""
 
 
-from __future__ import absolute_import, division
-
 # standard lib imports
 
 from decimal import Decimal as _StdLibDecimal
