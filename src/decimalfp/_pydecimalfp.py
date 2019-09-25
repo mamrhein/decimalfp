@@ -376,7 +376,10 @@ class Decimal:
         I.e. the largest integer exp so that 10 ** exp <= self.
 
         """
-        return floor(log10(abs(self._value))) - self._precision
+        sv = self._value
+        if sv == 0:
+            raise OverflowError("Result would be '-Infinity'.")
+        return floor(log10(abs(sv))) - self._precision
 
     @property
     def numerator(self) -> int:
