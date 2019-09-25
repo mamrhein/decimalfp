@@ -30,6 +30,12 @@ def test_magnitude(impl, value, magn):
     assert dec.magnitude == magn
 
 
+def test_magnitude_fail_on_zero(impl):
+    dec = impl.Decimal()
+    with pytest.raises(OverflowError):
+        m = dec.magnitude
+
+
 @pytest.mark.parametrize(("num", "den"),
                          ((170, 10),
                           (9 ** 394, 10 ** 247),
