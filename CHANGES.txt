@@ -1,5 +1,7 @@
 Version     Changes
 ------------------------------------------------------------------------------
+0.10.1      Changed default 'align' for formatting to right-aligned.
+
 0.10.0      Removed compatibility with Python 2.x.
             Modified operator '**':
                   x ** y now
