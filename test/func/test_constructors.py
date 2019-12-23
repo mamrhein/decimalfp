@@ -26,7 +26,6 @@ import sys
 import pytest
 
 from decimalfp import (
-    Decimal,
     ROUNDING,
     set_rounding,
 )
@@ -36,7 +35,7 @@ from decimalfp import (
 set_rounding(ROUNDING.ROUND_HALF_UP)
 
 
-class IntWrapper():
+class IntWrapper:
 
     def __init__(self, i):
         assert isinstance(i, int)
@@ -51,7 +50,7 @@ class IntWrapper():
         return self.i == i
 
 
-class FloatWrapper():
+class FloatWrapper:
 
     def __init__(self, f):
         assert isinstance(f, float)
@@ -74,8 +73,8 @@ def test_decimal_no_value(impl, prec):
     assert dec.precision == (prec if prec else 0)
 
 
-@pytest.mark.parametrize("value", [Decimal, 3 + 2j],
-                         ids=("value=Decimal", "value=3+2j"))
+@pytest.mark.parametrize("value", [float, 3 + 2j],
+                         ids=("value=float", "value=3+2j"))
 def test_decimal_wrong_value_type(impl, value):
     with pytest.raises(TypeError):
         impl.Decimal(value=value)
