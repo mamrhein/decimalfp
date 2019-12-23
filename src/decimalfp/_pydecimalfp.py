@@ -892,7 +892,7 @@ Rational.register(Decimal)
 
 
 _dflt_format_params = {'fill': ' ',
-                       'align': '<',
+                       'align': '>',
                        'sign': '-',
                        #'zeropad': '',
                        'minimumwidth': 0,

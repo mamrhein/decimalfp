@@ -37,10 +37,11 @@ def test_testdata(impl, set_locale_de):
     pth = os.path.dirname(__file__)
     fn = os.path.join(pth, "format.tests")
     with open(fn) as tests:
-        for line in tests:
+        for n, line in enumerate(tests):
             format_spec, formatted = [s.strip("'")
                                       for s in line.strip().split("\t")]
-            assert format(dec, format_spec) == formatted
+            assert format(dec, format_spec) == formatted, \
+                f"Format {format_spec!r} in line {n + 1} failed."
 
 
 @pytest.mark.parametrize("value",
