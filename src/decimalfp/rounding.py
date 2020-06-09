@@ -14,22 +14,12 @@
 # $Revision$
 
 
-"""Rounding parameters for decimal fixed-point arithmetic."""
+"""Rounding modes for decimal fixed-point arithmetic."""
 
 
 # standard library imports
 from decimal import getcontext as _getcontext
 from enum import Enum
-
-# third-party imports
-
-
-# local imports
-
-
-# precision limit for division or conversion without explicitly given
-# precision
-LIMIT_PREC = 32
 
 
 # rounding modes equivalent to those defined in standard lib module 'decimal'
@@ -99,7 +89,6 @@ def set_rounding(rounding):
 
 
 __all__ = [
-    'LIMIT_PREC',
     'ROUNDING',
     'get_rounding',
     'set_rounding',

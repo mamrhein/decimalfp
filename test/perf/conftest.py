@@ -51,5 +51,5 @@ def str_value(request):
 
 
 @pytest.fixture(scope="session")
-def dec_value(impl, str_value):
+def dec_value(str_value, impl):
     return impl.Decimal(str_value)

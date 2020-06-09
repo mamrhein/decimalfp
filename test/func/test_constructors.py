@@ -29,7 +29,8 @@ from decimalfp import (
     ROUNDING,
     set_rounding,
 )
-
+# ???: where to export global constants?
+from decimalfp._pydecimalfp import MAX_DEC_PRECISION
 
 # set default rounding to ROUND_HALF_UP
 set_rounding(ROUNDING.ROUND_HALF_UP)
@@ -300,9 +301,12 @@ def test_decimal_from_float_adj(impl, value, prec, ratio):
                          ((float('inf'), compact_prec),
                           (float('-inf'), None),
                           (float('nan'), large_prec),
-                          (0.3, None),
-                          (sys.float_info.min, None)),
-                         ids=("inf", "-inf", "nan", "0.3", "float.min"))
+                          # (0.3, None),
+                          # (sys.float_info.min, None)
+                          ),
+                         ids=("inf", "-inf", "nan",
+                              # "0.3", "float.min"
+                              ))
 def test_decimal_from_incompat_float(impl, value, prec):
     with pytest.raises(ValueError):
         impl.Decimal(value, prec)
@@ -359,8 +363,11 @@ def test_decimal_from_fraction_adj(impl, value, prec, ratio):
 
 @pytest.mark.parametrize(("value", "prec"),
                          ((Fraction(1, 3), None),
-                          (Fraction.from_float(sys.float_info.min), None)),
-                         ids=("1/3", "float.min"))
+                          # (Fraction.from_float(sys.float_info.min), None)
+                          ),
+                         ids=("1/3",
+                              # "float.min"
+                              ))
 def test_decimal_from_incompat_fraction(impl, value, prec):
     with pytest.raises(ValueError):
         impl.Decimal(value, prec)
@@ -368,8 +375,9 @@ def test_decimal_from_incompat_fraction(impl, value, prec):
 
 @pytest.mark.parametrize(("value", "prec", "ratio"),
                          ((17.5, 1, Fraction(175, 10)),
-                          (Fraction(1, 3), 32,
-                           Fraction(int("3" * 32), 10 ** 32)),
+                          (Fraction(1, 3), MAX_DEC_PRECISION,
+                           Fraction(int("3" * MAX_DEC_PRECISION),
+                                    10 ** MAX_DEC_PRECISION)),
                           (Fraction(328, 100000), 5, Fraction(328, 100000))),
                          ids=("float", "1/3", "Fraction"))
 def test_decimal_from_real_cls_meth_non_exact(impl, value, prec, ratio):
@@ -392,11 +400,10 @@ def test_decimal_from_real_cls_meth_exact(impl, value, prec, ratio):
     assert dec.as_fraction() == ratio
 
 
-@pytest.mark.parametrize(("value"),
+@pytest.mark.parametrize("value",
                          (float("inf"),
-                          Fraction(1, 3),
-                          0.1),
-                         ids=("inf", "1/3", "0.1"))
+                          Fraction(1, 3)),
+                         ids=("inf", "1/3"))
 def test_decimal_from_real_cls_meth_exact_fail(impl, value):
     with pytest.raises(ValueError):
         impl.Decimal.from_real(value, exact=True)

@@ -30,7 +30,7 @@ from typing import Any, Optional, Sequence, Tuple, Union
 
 # local imports
 
-from .rounding import get_rounding, LIMIT_PREC, ROUNDING
+from .rounding import get_rounding, ROUNDING, set_rounding
 
 # cython cimports
 # from cpython.long cimport PyLong_AsLong as long_from_pyint
@@ -46,6 +46,9 @@ from cpython.object cimport Py_EQ, Py_NE, PyObject_RichCompare
 # cdef PyInt PYINT_NEG1 = pyint_from_long(-1)
 # cdef PyInt PYINT_0 = pyint_from_long(0)
 # cdef PyInt PYINT_10 = pyint_from_long(10)
+
+
+MAX_DEC_PRECISION = 9 * 255
 
 # 10 ** exp (mit cache)
 
@@ -134,7 +137,7 @@ cdef class Decimal:
     reasons, in the latter case the conversion of a `numbers.Rational` (like
     `fractions.Fraction`) or a `float` tries to give an exact result as a
     :class:`Decimal` only up to a fixed limit of fractional digits
-    (`decimalfp.LIMIT_PREC`).
+    (`decimalfp.MAX_DEC_PRECISION`).
 
     Raises:
         TypeError: `precision` is given, but not of type `Integral`.
@@ -142,7 +145,7 @@ cdef class Decimal:
             not convertable to `float` or `int`.
         ValueError: `precision` is given, but not >= 0.
         ValueError: `value` can not be converted to a `Decimal` (with a number
-            of fractional digits <= `LIMIT_PREC` if no `precision` is given).
+            of fractional digits <= `MAX_DEC_PRECISION` if no `precision` is given).
 
     :class:`Decimal` instances are immutable.
 
@@ -317,7 +320,7 @@ cdef class Decimal:
         Raises:
             TypeError: `f` is neither a `float` nor an `int`.
             ValueError: `f` can not be converted to a :class:`Decimal` with
-                a precision <= `LIMIT_PREC`.
+                a precision <= `MAX_DEC_PRECISION`.
 
         Beware that Decimal.from_float(0.3) != Decimal('0.3').
         """
@@ -364,11 +367,11 @@ cdef class Decimal:
         Raises:
             TypeError: `r` is not an instance of `numbers.Real`.
             ValueError: `exact` is `True` and `r` can not exactly be converted
-                to a :class:`Decimal` with a precision <= `LIMIT_PREC`.
+                to a :class:`Decimal` with a precision <= `MAX_DEC_PRECISION`.
 
         If `exact` is `False` and `r` can not exactly be represented by a
-        `Decimal` with a precision <= `LIMIT_PREC`, the result is rounded to a
-        precision = `LIMIT_PREC`.
+        `Decimal` with a precision <= `MAX_DEC_PRECISION`, the result is rounded to a
+        precision = `MAX_DEC_PRECISION`.
         """
         if not isinstance(r, Real):
             raise TypeError("%s is not a Real." % repr(r))
@@ -378,7 +381,7 @@ cdef class Decimal:
             if exact:
                 raise
             else:
-                return cls(r, LIMIT_PREC)
+                return cls(r, MAX_DEC_PRECISION)
 
     @property
     def precision(self) -> int:
@@ -1130,8 +1133,8 @@ cdef tuple _approx_rational(PyInt num, PyInt den, PyInt min_prec):
     # Approximate num / den as internal Decimal representation.
     # Returns v, p, r, so that
     # v * 10 ** -p + r == num / den
-    # and p <= max(min_prec, LIMIT_PREC) and r -> 0.
-    max_prec = max(min_prec, LIMIT_PREC)
+    # and p <= max(min_prec, MAX_DEC_PRECISION) and r -> 0.
+    max_prec = max(min_prec, MAX_DEC_PRECISION)
     while True:
         p = (min_prec + max_prec) // 2
         v, r = divmod(num * base10pow(p), den)
@@ -1148,7 +1151,7 @@ cdef tuple _approx_rational(PyInt num, PyInt den, PyInt min_prec):
 
 cdef _div(PyInt num, PyInt den, PyInt min_prec):
     # Return num / den as Decimal,
-    # if possible with precision <= max(minPrec, LIMIT_PREC),
+    # if possible with precision <= max(minPrec, MAX_DEC_PRECISION),
     # otherwise as Fraction
     v, p, r = _approx_rational(num, den, min_prec)
     if r == 0:

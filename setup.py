@@ -5,7 +5,7 @@ with open('README.md') as file:
 
 setup(
     name="decimalfp",
-    version="0.10.1",
+    version="0.11.0",
     author="Michael Amrhein",
     author_email="michael@adrhinum.de",
     url="https://github.com/mamrhein/decimalfp",

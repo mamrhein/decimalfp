@@ -25,7 +25,7 @@ ctx = getcontext()
 ctx.prec = 390
 
 
-def test_decimal_from_str(benchmark, impl, str_value):
+def test_decimal_from_str(benchmark, str_value, impl):
     benchmark(impl.Decimal, str_value)
 
 

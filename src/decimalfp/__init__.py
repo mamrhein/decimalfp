@@ -87,9 +87,9 @@ held by the standard module `decimal` (which defaults to ROUND_HALF_EVEN).
 When no `precision` is given and the given `value` is a `float` or a
 `numbers.Rational` (but no :class:`Decimal`), the :class:`Decimal` constructor
 tries to convert `value` exactly. But, for performance reasons, this is done
-only up a fixed limit of fractional digits. This limit defaults to 32 and is
-accessible as `decimalfp.LIMIT_PREC`. If `value` can not be represented as a
-:class:`Decimal` within this limit, an exception is raised.
+only up a fixed limit of fractional digits (imposed by the implementation,
+currently 2295). If `value` can not be represented as a :class:`Decimal`
+within this limit, an exception is raised.
 
     >>> Decimal(0.2)
     ValueError: Can't convert 0.2 exactly to Decimal.
@@ -113,8 +113,8 @@ All numerical operations give an exact result, i.e. they are not automatically
 constraint to the precision of the operands or to a number of significant
 digits (like the floating-point `Decimal` type from the standard module
 `decimal`). When the result can not exactly be represented by a
-:class:`Decimal` instance within the limit given by `decimalfp.LIMIT_PREC`, an
-instance of `fractions.Fraction` is returned.
+:class:`Decimal` instance within the limit of fractional digits, an instance
+of `fractions.Fraction` is returned.
 
 Addition and subtraction
 ------------------------
@@ -130,8 +130,8 @@ operands.
 
 In operations with other numerical types the precision of the result is at
 least equal to the precision of the involved :class:`Decimal` instance, but
-may be greater, if neccessary. If the needed precision exceeds
-`decimalfp.LIMIT_PREC`, an instance of `fractions.Fraction` is returned.
+may be greater, if neccessary. If the needed precision exceeds the limit of
+fractional digits, an instance of `fractions.Fraction` is returned.
 
     >>> 0.25 + Decimal(3)
     Decimal('3.25')
@@ -162,8 +162,8 @@ denominator.precision), but may be greater, if needed.
 
 In operations with other numerical types the precision of the result is at
 least equal to the precision of the involved :class:`Decimal` instance, but
-may be greater, if neccessary. If the needed precision exceeds
-`decimalfp.LIMIT_PREC`, an instance of `fractions.Fraction` is returned.
+may be greater, if neccessary. If the needed precision exceeds the limit of
+fractional digits, an instance of `fractions.Fraction` is returned.
 
     >>> 3 * Decimal('7.5')
     Decimal('22.5')
@@ -224,14 +224,7 @@ also support all rounding modes mentioned above.
     Decimal('12')
 """
 
-
-from __future__ import absolute_import
-
-# local imports
-from .rounding import get_rounding, LIMIT_PREC, ROUNDING, set_rounding
-
-
-__version__ = 0, 10, 1
+__version__ = 0, 11, 0
 
 
 # Under PyPy the Cython / C implementation is slower than the Python
@@ -245,19 +238,19 @@ import os                                                   # noqa: I100, I202
 _force_python_impl = os.getenv('DECIMALFP_FORCE_PYTHON_IMPL')
 del os
 if _impl == 'PyPy' or _force_python_impl:
-    from ._pydecimalfp import Decimal
+    from ._pydecimalfp import Decimal, get_rounding, ROUNDING, set_rounding
 else:                                                       # pragma: no cover
     try:
         # Cython / C implementation available?
-        from ._cdecimalfp import Decimal
+        from ._cdecimalfp import Decimal, get_rounding, ROUNDING, set_rounding
     except ImportError:
-        from ._pydecimalfp import Decimal
+        from ._pydecimalfp import (
+            Decimal, get_rounding, ROUNDING, set_rounding)
 
 
 # define public namespace
 __all__ = [
     'Decimal',
-    'LIMIT_PREC',
     'ROUNDING',
     'get_rounding',
     'set_rounding',
