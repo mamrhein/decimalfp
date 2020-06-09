@@ -117,11 +117,7 @@ class Decimal:
             to `precision`
 
     The value is always adjusted to the given precision or the precision is
-    calculated from the given value, if no precision is given. For performance
-    reasons, in the latter case the conversion of a `numbers.Rational` (like
-    `fractions.Fraction`) or a `float` tries to give an exact result as a
-    :class:`Decimal` only up to a fixed limit of fractional digits
-    (`decimalfp.MAX_DEC_PRECISION`).
+    calculated from the given value, if no precision is given.
 
     Raises:
         TypeError: `precision` is given, but not of type `Integral`.
@@ -129,7 +125,7 @@ class Decimal:
             not convertable to `float` or `int`.
         ValueError: `precision` is given, but not >= 0.
         ValueError: `value` can not be converted to a `Decimal` (with a number
-            of fractional digits <= `MAX_DEC_PRECISION` if no `precision` is given).
+            of fractional digits <= `MAX_DEC_PRECISION`).
 
     :class:`Decimal` instances are immutable.
 
@@ -157,6 +153,8 @@ class Decimal:
                 precision = int(precision)
             if precision < 0:
                 raise ValueError("Precision must be >= 0.")
+            if precision > MAX_DEC_PRECISION:
+                raise ValueError("Precision limit exceeded.")
             if value is None:
                 self._value = 0
                 self._precision = precision
@@ -199,6 +197,8 @@ class Decimal:
                 sign_n_digits += s_frac
             if precision is None:
                 precision = max(0, n_frac - exp)
+                if precision > MAX_DEC_PRECISION:
+                    raise ValueError("Precision limit exceeded.")
             self._precision = precision
             shift10 = precision - n_frac + exp
             if shift10 == 0:
@@ -233,6 +233,8 @@ class Decimal:
                     else:
                         self._value = coeff
                         self._precision = abs(exp)
+                        if self._precision > MAX_DEC_PRECISION:
+                            raise ValueError("Precision limit exceeded.")
                 else:
                     self._precision = precision
                     shift10 = exp + precision
@@ -262,6 +264,8 @@ class Decimal:
                 if rem:
                     raise ValueError("Can't convert %s exactly to Decimal."
                                      % repr(value))
+                if p > MAX_DEC_PRECISION:
+                    raise ValueError("Precision limit exceeded.")
                 self._value = v
                 self._precision = p
             else:
@@ -1253,6 +1257,8 @@ def mul(x: Decimal, y: Any) -> Union[Decimal, Fraction]:
         result = Decimal(x)
         result._value *= y._value
         result._precision += y._precision
+        if result._precision > MAX_DEC_PRECISION:
+            raise ValueError("Precision limit exceeded.")
         return result
     elif isinstance(y, Integral):
         result = Decimal(x)
@@ -1454,6 +1460,8 @@ def pow1(x: Decimal, y: Any) \
             result = Decimal()
             result._value = x._value ** exp
             result._precision = x._precision * exp
+            if result._precision > MAX_DEC_PRECISION:
+                raise ValueError("Precision limit exceeded.")
             return result
         else:
             # 1 / x ** -y)

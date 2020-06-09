@@ -158,7 +158,7 @@ def chk_lt(dec, non_equiv_lt):
 
 @pytest.mark.parametrize("value",
                          ("-17",
-                          "".join(("1" * 3097, "4" * 33, "0" * 19)),
+                          "".join(("1" * 759, "4" * 33, "0" * 19)),
                           "-0"),
                          ids=("compact", "large", "zero"))
 def test_ne_integral(impl, value):

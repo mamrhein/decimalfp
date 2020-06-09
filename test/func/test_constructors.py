@@ -106,8 +106,8 @@ small_str = "-12345678901234567890.1234567890E-10"
 small_adj = 15
 small_adj_ratio = Fraction(round(-small_coeff, small_adj - small_prec),
                            10 ** small_prec)
-large_coeff = 294898 * 10 ** 24573 + 1498953
-large_prec = 24573
+large_coeff = 294898 * 10 ** 2453 + 1498953
+large_prec = 2073
 large_ratio = Fraction(large_coeff, 10 ** large_prec)
 large_str = f"{large_coeff}e-{large_prec}"
 large_adj = large_prec - 30

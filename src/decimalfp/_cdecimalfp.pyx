@@ -172,6 +172,8 @@ cdef class Decimal:
                     "Precision must be of type 'numbers.Integral'.")
             if precision < 0:
                 raise ValueError("Precision must be >= 0.")
+            if precision > MAX_DEC_PRECISION:
+                raise ValueError("Precision limit exceeded.")
             if value is None:
                 self._value = 0
                 self._precision = precision
@@ -214,6 +216,8 @@ cdef class Decimal:
                 sign_n_digits += s_frac
             if precision is None:
                 p = max(0, n_frac - exp)
+                if p > MAX_DEC_PRECISION:
+                    raise ValueError("Precision limit exceeded.")
             else:
                 p = precision
             self._precision = p
@@ -250,6 +254,8 @@ cdef class Decimal:
                     else:
                         self._value = coeff
                         self._precision = abs(exp)
+                        if self._precision > MAX_DEC_PRECISION:
+                            raise ValueError("Precision limit exceeded.")
                 else:
                     self._precision = precision
                     shift10 = exp + precision
@@ -279,6 +285,8 @@ cdef class Decimal:
                 if rem:
                     raise ValueError("Can't convert %s exactly to Decimal."
                                      % repr(value))
+                if p > MAX_DEC_PRECISION:
+                    raise ValueError("Precision limit exceeded.")
                 self._value = v
                 self._precision = p
             else:
@@ -1251,6 +1259,8 @@ cdef object mul(Decimal x, object y):
         result = Decimal(x)
         (<Decimal>result)._value *= (<Decimal>y)._value
         (<Decimal>result)._precision += (<Decimal>y)._precision
+        if (<Decimal>result)._precision > MAX_DEC_PRECISION:
+            raise ValueError("Precision limit exceeded.")
         return result
     elif isinstance(y, Integral):
         result = Decimal(x)
@@ -1422,6 +1432,8 @@ cdef object pow1(Decimal x, object y):
             result = Decimal()
             result._value = x._value ** exp
             result._precision = x._precision * exp
+            if result._precision > MAX_DEC_PRECISION:
+                raise ValueError("Precision limit exceeded.")
             return result
         else:
             # 1 / x ** -y)
