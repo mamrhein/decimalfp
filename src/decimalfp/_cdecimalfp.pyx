@@ -482,6 +482,8 @@ cdef class Decimal:
             if not isinstance(precision, Integral):
                 raise TypeError("Precision must be of type 'Integral'.")
             to_prec = int(precision)
+            if to_prec > MAX_DEC_PRECISION:
+                raise ValueError("Precision limit exceeded.")
             p = self._precision
             if to_prec == p:
                 return self
@@ -1255,16 +1257,17 @@ cdef object sub(Decimal x, object y):
 
 cdef object mul(Decimal x, object y):
     """x * y"""
+    cdef Decimal result
     if isinstance(y, Decimal):
         result = Decimal(x)
-        (<Decimal>result)._value *= (<Decimal>y)._value
-        (<Decimal>result)._precision += (<Decimal>y)._precision
-        if (<Decimal>result)._precision > MAX_DEC_PRECISION:
-            raise ValueError("Precision limit exceeded.")
+        result._value *= (<Decimal>y)._value
+        result._precision += (<Decimal>y)._precision
+        if result._precision > MAX_DEC_PRECISION:
+            return Fraction(result._value, 10 ** result._precision)
         return result
     elif isinstance(y, Integral):
         result = Decimal(x)
-        (<Decimal>result)._value *= y
+        result._value *= y
         return result
     elif isinstance(y, Rational):
         y_numerator, y_denominator = (y.numerator, y.denominator)

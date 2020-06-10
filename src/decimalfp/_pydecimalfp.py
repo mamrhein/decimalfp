@@ -464,6 +464,8 @@ class Decimal:
             if not isinstance(precision, Integral):
                 raise TypeError("Precision must be of type 'Integral'.")
             to_prec = int(precision)
+            if to_prec > MAX_DEC_PRECISION:
+                raise ValueError("Precision limit exceeded.")
             p = self._precision
             if to_prec == p:
                 return self
@@ -1258,7 +1260,7 @@ def mul(x: Decimal, y: Any) -> Union[Decimal, Fraction]:
         result._value *= y._value
         result._precision += y._precision
         if result._precision > MAX_DEC_PRECISION:
-            raise ValueError("Precision limit exceeded.")
+            return Fraction(result._value, 10 ** result._precision)
         return result
     elif isinstance(y, Integral):
         result = Decimal(x)
