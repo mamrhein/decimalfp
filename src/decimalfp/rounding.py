@@ -18,20 +18,34 @@
 
 
 # standard library imports
-from decimal import getcontext as _getcontext
-from enum import Enum
+from enum import Enum, EnumMeta
+
+
+class _EnumMetaWithDefault(EnumMeta):
+
+    def __init__(cls, cls_name, bases, classdict):
+        super().__init__(cls_name, bases, classdict)
+        cls._default = None
+
+    @property
+    def default(cls) -> Enum:
+        """Return default value."""
+        return cls._default
+
+    @default.setter
+    def default(cls, dflt: Enum):
+        assert(isinstance(dflt, cls))
+        cls._default = dflt
 
 
 # rounding modes equivalent to those defined in standard lib module 'decimal'
-class ROUNDING(Enum):
+class ROUNDING(metaclass=_EnumMetaWithDefault):
 
     """Enumeration of rounding modes."""
 
-    # Implementation of __index__ depends on values in ROUNDING being ints
-    # starting with 1 !!!
     __next_value__ = 1
 
-    def __new__(cls, doc):
+    def __new__(cls, doc: str) -> 'ROUNDING':
         """Return new member of the Enum."""
         member = object.__new__(cls)
         member._value_ = cls.__next_value__
@@ -39,11 +53,10 @@ class ROUNDING(Enum):
         member.__doc__ = doc
         return member
 
-    def __index__(self):                                    # pragma: no cover
-        """Return `self` converted to an `int`."""
-        return self.value - 1
-
-    __int__ = __index__
+    @property
+    def name(self) -> str:
+        """Name of the element."""
+        return self._name_
 
     #: Round away from zero if last digit after rounding towards
     #: zero would have been 0 or 5; otherwise round towards zero.
@@ -71,21 +84,19 @@ ROUNDING.default = ROUNDING.ROUND_HALF_EVEN
 
 
 # functions to get / set rounding mode
-def get_rounding():
-    """Return rounding mode from current context."""
-    ctx = _getcontext()
-    return ROUNDING[ctx.rounding]
+def get_rounding() -> ROUNDING:
+    """Return default rounding mode."""
+    return ROUNDING.default
 
 
-def set_rounding(rounding):
-    """Set rounding mode in current context.
+def set_rounding(rounding: ROUNDING):
+    """Set default rounding mode.
 
     Args:
-        rounding (ROUNDING): rounding mode to be set
+        rounding (ROUNDING): rounding mode to be set as default
 
     """
-    ctx = _getcontext()
-    ctx.rounding = rounding.name
+    ROUNDING.default = rounding
 
 
 __all__ = [
