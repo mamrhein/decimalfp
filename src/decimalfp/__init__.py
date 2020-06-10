@@ -70,8 +70,8 @@ calculated from the given value, if no precision is given.
     Decimal('-19.26', 3)
 
 When the given `precision` is lower than the precision of the given `value`,
-the result is rounded, according to the rounding mode of the current context
-held by the standard module `decimal` (which defaults to ROUND_HALF_EVEN).
+the result is rounded, according to the current default rounding mode (which
+defaults to ROUND_HALF_EVEN).
 
     >>> Decimal(u'12.345', 2)
     Decimal('12.34')

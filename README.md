@@ -9,7 +9,9 @@ a _precision_ (i.e the number of fractional digits, default: None).
 
 If _precision_ is given, it must be of type _int_ and >= 0.
 
-If _value_ is given, it must either be a string, an instance of _number.Integral_, _number.Rational_ (for example _fractions.Fraction_), _decimal.Decimal_ or _float_ or be convertable to a _float_ or an _int_.
+If _value_ is given, it must either be a string, an instance of 
+_number.Integral_, _number.Rational_ (for example _fractions.Fraction_), 
+_decimal.Decimal_ or _float_ or be convertable to a _float_ or an _int_.
 
 If a string is given as value, it must be a string in one of two formats:
 
@@ -20,15 +22,15 @@ The value is always adjusted to the given precision or the precision is
 calculated from the given value, if no precision is given.
 
 When the given _precision_ is lower than the precision of the given _value_,
-the result is rounded, according to the rounding mode of the current context
-held by the standard module _decimal_ (which defaults to ROUND_HALF_EVEN).
+the result is rounded, according to the current default rounding mode (which 
+defaults to ROUND_HALF_EVEN).
 
 When no _precision_ is given and the given _value_ is a _float_ or a
 _numbers.Rational_ (but no _Decimal_), the _Decimal_ constructor tries to
 convert _value_ exactly. But, for performance reasons, this is done only up a
-fixed limit of fractional digits. This limit defaults to 32 and is accessible
-as _decimalfp.LIMIT_PREC_. If _value_ can not be represented as a _Decimal_
-within this limit, an exception is raised.
+fixed limit of fractional digits (imposed by the implementation, currently 
+2295). If _value_ can not be represented as a _Decimal_ within this limit, an 
+exception is raised.
 
 _Decimal_ does not deal with infinity, division by 0 always raises a
 _ZeroDivisionError_. Likewise, infinite instances of type _float_ or
@@ -46,7 +48,7 @@ All numerical operations give an exact result, i.e. they are not automatically
 constraint to the precision of the operands or to a number of significant
 digits (like the floating-point _Decimal_ type from the standard module
 _decimal_). When the result can not exactly be represented by a _Decimal_
-instance within the limit given by _decimalfp.LIMIT_PREC_, an instance of
+instance within the limit of fractional digits, an instance of
 _fractions.Fraction_ is returned.
 
 _Decimal_ supports rounding via the built-in function _round_ using the same
