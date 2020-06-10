@@ -17,7 +17,6 @@
 
 """Test driver for package 'decimalfp' (constructors)."""
 
-
 import copy
 from decimal import Decimal as StdLibDecimal  # , InvalidOperation
 from fractions import Fraction
@@ -97,8 +96,8 @@ compact_coeff = 174
 compact_prec = 1
 compact_ratio = Fraction(compact_coeff, 10 ** compact_prec)
 compact_str = ".174e2"
-compact_adj = 2
-compact_adj_ratio = compact_ratio
+compact_adj = 0
+compact_adj_ratio = round(compact_ratio)
 small_coeff = 123456789012345678901234567890
 small_prec = 20
 small_ratio = Fraction(-small_coeff, 10 ** small_prec)
@@ -107,7 +106,7 @@ small_adj = 15
 small_adj_ratio = Fraction(round(-small_coeff, small_adj - small_prec),
                            10 ** small_prec)
 large_coeff = 294898 * 10 ** 2453 + 1498953
-large_prec = 2073
+large_prec = 459
 large_ratio = Fraction(large_coeff, 10 ** large_prec)
 large_str = f"{large_coeff}e-{large_prec}"
 large_adj = large_prec - 30
@@ -119,9 +118,12 @@ large_adj_ratio = Fraction(round(large_coeff, large_adj - large_prec),
                          ((compact_str, compact_prec, compact_ratio),
                           (small_str, small_prec, small_ratio),
                           (large_str, large_prec, large_ratio),
-                          (".829", 3, Fraction(829, 1000))),
-                         ids=("compact", "small", "large", "frac-only"))
-def test_decimal_from_str(impl, value, prec, ratio):
+                          (" .829  ", 3, Fraction(829, 1000)),
+                          ("\t -00000000 ", 0, 0),
+                          ("\t -000.00000", 5, 0)),
+                         ids=("compact", "small", "large", "frac-only",
+                              "zeros", "zeros-with-point"))
+def test_decimal_from_str_dflt_prec(impl, value, prec, ratio):
     dec = impl.Decimal(value)
     assert isinstance(dec, impl.Decimal)
     assert dec.precision == prec
@@ -132,9 +134,28 @@ def test_decimal_from_str(impl, value, prec, ratio):
                          ((compact_str, compact_adj, compact_adj_ratio),
                           (small_str, small_adj, small_adj_ratio),
                           (large_str, large_adj, large_adj_ratio),
-                          (".829", 2, Fraction(83, 100))),
-                         ids=("compact", "small", "large", "frac-only"))
+                          (".829", 2, Fraction(83, 100)),
+                          (".726", 0, 1)),
+                         ids=("compact", "small", "large", "frac-only",
+                              "carry-over"))
 def test_decimal_from_str_adj(impl, value, prec, ratio):
+    dec = impl.Decimal(value, prec)
+    assert isinstance(dec, impl.Decimal)
+    assert dec.precision == prec
+    assert dec.as_fraction() == ratio
+
+
+@pytest.mark.parametrize(("value", "prec", "ratio"),
+                         ((compact_str, compact_prec, compact_ratio),
+                          (small_str, small_prec, small_ratio),
+                          (large_str, large_prec, large_ratio),
+                          (" .829  ", 3, Fraction(829, 1000)),
+                          ("\t -00000000 ", 0, 0),
+                          ("\t -000.00000", 5, 0)),
+                         ids=("compact", "small", "large", "frac-only",
+                              "zeros", "zeros-with-point"))
+def test_decimal_from_str_no_adj(impl, value, prec, ratio):
+    prec *= 3
     dec = impl.Decimal(value, prec)
     assert isinstance(dec, impl.Decimal)
     assert dec.precision == prec
@@ -148,10 +169,12 @@ def test_decimal_from_non_ascii_digits(impl, value):
     assert isinstance(dec, impl.Decimal)
 
 
-@pytest.mark.parametrize(("value"),
-                         (" 1.23.5", "1.24e", "--4.92", "", "3,49E-3"),
+@pytest.mark.parametrize("value",
+                         (" 1.23.5", "1.24e", "--4.92", "", "   ", "3,49E-3",
+                          "\t+   \r\n"),
                          ids=("two-points", "missing-exp", "double-sign",
-                              "empty-string", "invalid-char"))
+                              "empty-string", "blanks", "invalid-char",
+                              "sign-only"))
 def test_decimal_from_str_wrong_format(impl, value):
     with pytest.raises(ValueError):
         impl.Decimal(value)
@@ -162,7 +185,7 @@ def test_decimal_from_str_wrong_format(impl, value):
                           (small_str, small_prec, small_ratio),
                           (large_str, large_prec, large_ratio)),
                          ids=("compact", "small", "large"))
-def test_decimal_from_decimal(impl, value, prec, ratio):
+def test_decimal_from_decimal_dflt_prec(impl, value, prec, ratio):
     dec = impl.Decimal(value)
     dec = impl.Decimal(dec)
     assert isinstance(dec, impl.Decimal)
@@ -184,6 +207,20 @@ def test_decimal_from_decimal_adj(impl, value, prec, ratio):
 
 
 @pytest.mark.parametrize(("value", "prec", "ratio"),
+                         ((compact_str, compact_prec, compact_ratio),
+                          (small_str, small_prec, small_ratio),
+                          (large_str, large_prec, large_ratio)),
+                         ids=("compact", "small", "large"))
+def test_decimal_from_decimal_no_adj(impl, value, prec, ratio):
+    prec += 17
+    dec = impl.Decimal(value)
+    dec = impl.Decimal(dec, prec)
+    assert isinstance(dec, impl.Decimal)
+    assert dec.precision == prec
+    assert dec.as_fraction() == ratio
+
+
+@pytest.mark.parametrize(("value", "prec", "ratio"),
                          ((StdLibDecimal("123.4567"), 4,
                            Fraction(1234567, 10000)),
                           (5, 0, Fraction(5, 1))),
@@ -195,7 +232,7 @@ def test_decimal_from_decimal_cls_meth(impl, value, prec, ratio):
     assert dec.as_fraction() == ratio
 
 
-@pytest.mark.parametrize(("value"),
+@pytest.mark.parametrize("value",
                          (Fraction(12346, 100), FloatWrapper(328.5), 5.31),
                          ids=("Fraction", "FloatWrapper", "float"))
 def test_decimal_from_decimal_cls_meth_wrong_type(impl, value):
@@ -237,7 +274,7 @@ def test_decimal_from_integral_adj(impl, value, prec, ratio):
                           (StdLibDecimal(large_str), large_prec, large_ratio),
                           (StdLibDecimal("5.4e6"), 0, Fraction(5400000, 1))),
                          ids=("compact", "small", "large", "pos-exp"))
-def test_decimal_from_stdlib_decimal(impl, value, prec, ratio):
+def test_decimal_from_stdlib_decimal_dflt_prec(impl, value, prec, ratio):
     dec = impl.Decimal(value)
     assert isinstance(dec, impl.Decimal)
     assert dec.precision == prec
@@ -262,6 +299,21 @@ def test_decimal_from_stdlib_decimal_adj(impl, value, prec, ratio):
     assert dec.as_fraction() == ratio
 
 
+@pytest.mark.parametrize(("value", "prec", "ratio"),
+                         ((StdLibDecimal(compact_str), compact_prec,
+                           compact_ratio),
+                          (StdLibDecimal(small_str), small_prec, small_ratio),
+                          (StdLibDecimal(large_str), large_prec, large_ratio),
+                          (StdLibDecimal("5.4e6"), 0, Fraction(5400000, 1))),
+                         ids=("compact", "small", "large", "pos-exp"))
+def test_decimal_from_stdlib_decimal_no_adj(impl, value, prec, ratio):
+    prec *= 5
+    dec = impl.Decimal(value, prec)
+    assert isinstance(dec, impl.Decimal)
+    assert dec.precision == prec
+    assert dec.as_fraction() == ratio
+
+
 @pytest.mark.parametrize(("value", "prec"),
                          ((StdLibDecimal('inf'), compact_prec),
                           (StdLibDecimal('-inf'), None),
@@ -278,7 +330,7 @@ def test_decimal_from_incompat_stdlib_decimal(impl, value, prec):
                            Fraction(int(sys.float_info.max), 1)),
                           (FloatWrapper(328.5), 1, Fraction(3285, 10))),
                          ids=("compact", "float.max", "FloatWrapper"))
-def test_decimal_from_float(impl, value, prec, ratio):
+def test_decimal_from_float_dflt_prec(impl, value, prec, ratio):
     dec = impl.Decimal(value)
     assert isinstance(dec, impl.Decimal)
     assert dec.precision == prec
@@ -289,8 +341,22 @@ def test_decimal_from_float(impl, value, prec, ratio):
                          ((17.5, 3, Fraction(175, 10)),
                           (sys.float_info.min, 17, Fraction(0, 1)),
                           (FloatWrapper(328.5), 0, Fraction(329, 1))),
-                         ids=("compact", "float.max", "FloatWrapper"))
+                         ids=("compact", "float.min", "FloatWrapper"))
 def test_decimal_from_float_adj(impl, value, prec, ratio):
+    dec = impl.Decimal(value, prec)
+    assert isinstance(dec, impl.Decimal)
+    assert dec.precision == prec
+    assert dec.as_fraction() == ratio
+
+
+@pytest.mark.parametrize(("value", "prec", "ratio"),
+                         ((17.5, 1, Fraction(175, 10)),
+                          (sys.float_info.max, 0,
+                           Fraction(int(sys.float_info.max), 1)),
+                          (FloatWrapper(328.5), 1, Fraction(3285, 10))),
+                         ids=("compact", "float.max", "FloatWrapper"))
+def test_decimal_from_float_no_adj(impl, value, prec, ratio):
+    prec += 7
     dec = impl.Decimal(value, prec)
     assert isinstance(dec, impl.Decimal)
     assert dec.precision == prec
@@ -301,11 +367,11 @@ def test_decimal_from_float_adj(impl, value, prec, ratio):
                          ((float('inf'), compact_prec),
                           (float('-inf'), None),
                           (float('nan'), large_prec),
-                          # (0.3, None),
-                          # (sys.float_info.min, None)
+                                 # (0.3, None),
+                                 # (sys.float_info.min, None)
                           ),
                          ids=("inf", "-inf", "nan",
-                              # "0.3", "float.min"
+                                 # "0.3", "float.min"
                               ))
 def test_decimal_from_incompat_float(impl, value, prec):
     with pytest.raises(ValueError):
@@ -325,7 +391,7 @@ def test_decimal_from_float_cls_meth(impl, value, prec, ratio):
     assert dec.as_fraction() == ratio
 
 
-@pytest.mark.parametrize(("value"),
+@pytest.mark.parametrize("value",
                          (Fraction(12346, 100),
                           FloatWrapper(328.5),
                           StdLibDecimal("5.31")),
@@ -338,9 +404,10 @@ def test_decimal_from_float_cls_meth_wrong_type(impl, value):
 @pytest.mark.parametrize(("prec", "ratio"),
                          ((1, Fraction(175, 10)),
                           (0, Fraction(int(sys.float_info.max), 1)),
-                          (15, Fraction(sys.maxsize, 10 ** 15))),
-                         ids=("compact", "float.max", "maxsize"))
-def test_decimal_from_fraction(impl, prec, ratio):
+                          (15, Fraction(sys.maxsize, 10 ** 15)),
+                          (63, Fraction(1, sys.maxsize + 1))),
+                         ids=("compact", "float.max", "maxsize", "frac_only"))
+def test_decimal_from_fraction_dflt_prec(impl, prec, ratio):
     dec = impl.Decimal(ratio)
     assert isinstance(dec, impl.Decimal)
     assert dec.precision == prec
@@ -352,8 +419,11 @@ def test_decimal_from_fraction(impl, prec, ratio):
                           (Fraction(int(sys.float_info.max), 1), 7,
                            Fraction(int(sys.float_info.max), 1)),
                           (Fraction(sys.maxsize, 10 ** 15), 10,
-                           Fraction(round(sys.maxsize, -5), 10 ** 15))),
-                         ids=("compact", "float.max", "maxsize"))
+                           Fraction(round(sys.maxsize, -5), 10 ** 15)),
+                          (Fraction(1, 333333333333333333333333333333), 30,
+                           round(Fraction(1, 333333333333333333333333333333),
+                                 30))),
+                         ids=("compact", "float.max", "maxsize", "fraction"))
 def test_decimal_from_fraction_adj(impl, value, prec, ratio):
     dec = impl.Decimal(value, prec)
     assert isinstance(dec, impl.Decimal)
@@ -361,12 +431,26 @@ def test_decimal_from_fraction_adj(impl, value, prec, ratio):
     assert dec.as_fraction() == ratio
 
 
+@pytest.mark.parametrize(("prec", "ratio"),
+                         ((1, Fraction(175, 10)),
+                          (0, Fraction(int(sys.float_info.max), 1)),
+                          (15, Fraction(sys.maxsize, 10 ** 15)),
+                          (63, Fraction(1, sys.maxsize + 1))),
+                         ids=("compact", "float.max", "maxsize", "frac_only"))
+def test_decimal_from_fraction_no_adj(impl, prec, ratio):
+    prec = 2 * prec + 5
+    dec = impl.Decimal(ratio, prec)
+    assert isinstance(dec, impl.Decimal)
+    assert dec.precision == prec
+    assert dec.as_fraction() == ratio
+
+
 @pytest.mark.parametrize(("value", "prec"),
                          ((Fraction(1, 3), None),
-                          # (Fraction.from_float(sys.float_info.min), None)
+                                 # (Fraction.from_float(sys.float_info.min), None)
                           ),
                          ids=("1/3",
-                              # "float.min"
+                                 # "float.min"
                               ))
 def test_decimal_from_incompat_fraction(impl, value, prec):
     with pytest.raises(ValueError):
@@ -409,7 +493,7 @@ def test_decimal_from_real_cls_meth_exact_fail(impl, value):
         impl.Decimal.from_real(value, exact=True)
 
 
-@pytest.mark.parametrize(("value"),
+@pytest.mark.parametrize("value",
                          (3 + 2j, "31.209", FloatWrapper(328.5)),
                          ids=("complex", "str", "FloatWrapper"))
 def test_decimal_from_real_cls_meth_wrong_type(impl, value):
@@ -426,3 +510,15 @@ def test_copy(impl, value):
     dec = impl.Decimal(value)
     assert copy.copy(dec) is dec
     assert copy.deepcopy(dec) is dec
+
+
+@pytest.mark.parametrize("value",
+                         (# "17.800e2305",
+                          # ".".join(("1" * 2260, "4" * 33 + "0" * 19)),
+                          "-0." + "7" * (MAX_DEC_PRECISION + 1),),
+                         ids=(# "exp > 127",
+                              # "coeff too large",
+                              f"prec > {MAX_DEC_PRECISION}",))
+def test_limits_exceeded(impl, value):
+    with pytest.raises(ValueError):
+        impl.Decimal(value)

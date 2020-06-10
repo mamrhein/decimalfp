@@ -22,7 +22,7 @@ from fractions import Fraction
 import pytest
 
 from decimalfp import ROUNDING, set_rounding
-
+from decimalfp._pydecimalfp import MAX_DEC_PRECISION
 
 set_rounding(ROUNDING.ROUND_HALF_UP)
 ctx = getcontext()
@@ -83,19 +83,32 @@ def test_adjust_wrong_precision_type(impl, prec):
         dec.adjusted(precision=prec)
 
 
-@pytest.mark.parametrize("value",
-                         ("17.849",
-                          ".".join(("1" * 3297, "4" * 33)),
-                          "0.0025"),
-                         ids=("compact", "large", "fraction"))
+@pytest.mark.parametrize("prec",
+                         (MAX_DEC_PRECISION + 1, -MAX_DEC_PRECISION - 1),
+                         ids=("max+1", "-max-1"))
+def test_adjust_limits_exceeded(impl, prec):
+    dec = impl.Decimal("4.83")
+    if "fpnum" in impl.__name__:
+        with pytest.raises(ValueError):
+            dec.adjusted(prec)
+
+
 @pytest.mark.parametrize("quant", (Fraction(1, 40),
                                    StdLibDecimal("-0.3"),
                                    "0.4",
-                                   3),
+                                   3,
+                                   1),
                          ids=("Fraction 1/4",
                               "StdLibDecimal -0.3",
                               "str 0.4",
-                              "3"))
+                              "3",
+                              "1"))
+@pytest.mark.parametrize("value",
+                         ("17.849",
+                          ".".join(("1" * 2259, "4" * 33)),
+                          "0.0025",
+                          "12345678901234567e12"),
+                         ids=("compact", "large", "fraction", "int"))
 def test_quantize_dflt_round(impl, value, quant):
     dec = impl.Decimal(value)
     adj = dec.quantize(quant)
@@ -111,20 +124,23 @@ def test_quantize_dflt_round(impl, value, quant):
 @pytest.mark.parametrize("rnd",
                          [rnd for rnd in ROUNDING],
                          ids=[rnd.name for rnd in ROUNDING])
-@pytest.mark.parametrize("value",
-                         ("17.849",
-                          ".".join(("1" * 3297, "4" * 33)),
-                          "0.0025"),
-                         ids=("compact", "large", "fraction"))
 @pytest.mark.parametrize("quant", (Fraction(1, 40),
                                    StdLibDecimal("-0.3"),
                                    "0.4",
-                                   3),
+                                   3,
+                                   1),
                          ids=("Fraction 1/4",
                               "StdLibDecimal -0.3",
                               "str 0.4",
-                              "3"))
-def test_quantize_round(impl, rnd, value, quant):
+                              "3",
+                              "1"))
+@pytest.mark.parametrize("value",
+                         ("17.849",
+                          ".".join(("1" * 2259, "4" * 33)),
+                          "0.0025",
+                          "12345678901234567e12"),
+                         ids=("compact", "large", "fraction", "int"))
+def test_quantize_round(impl, value, quant, rnd):
     dec = impl.Decimal(value)
     adj = dec.quantize(quant, rounding=rnd)
     # compute equivalent StdLibDecimal
@@ -163,8 +179,9 @@ def test_round(impl, value, prec):
 @pytest.mark.parametrize("value",
                          ("17.849",
                           ".".join(("1" * 3297, "4" * 33)),
-                          "0.00015"),
-                         ids=("compact", "large", "fraction"))
+                          "0.00015",
+                          "999999999999999999.67",),
+                         ids=("compact", "large", "fraction", "carry",))
 def test_round_to_int(impl, value):
     dec = impl.Decimal(value)
     adj = round(dec)

@@ -24,6 +24,8 @@ import operator
 
 import pytest
 
+from decimalfp._pydecimalfp import MAX_DEC_PRECISION
+
 
 ADD_SUB = (operator.add, operator.sub)
 DIV_OPS = (operator.floordiv, operator.truediv)
@@ -49,19 +51,33 @@ class FakeReal:
 numbers.Real.register(FakeReal)
 
 
+@pytest.mark.parametrize("operand2",
+                         ("17.800",
+                          ".".join(("1" * 825, "47" * 13 + "0" * 29)),
+                          "-0.00014",
+                          "999999999999999999.9",
+                          "1",
+                          "-1"),
+                         ids=("compact",
+                              "large",
+                              "fraction",
+                              "999999999999999999.9",
+                              "one",
+                              "minus-one"))
+@pytest.mark.parametrize("operand1",
+                         ("17.800",
+                          ".".join(("1" * 1121, "4" * 33 + "0" * 19)),
+                          "-0.00014",
+                          "1",
+                          "-1"),
+                         ids=("compact",
+                              "large",
+                              "fraction",
+                              "one",
+                              "minus-one"))
 @pytest.mark.parametrize("op",
                          [op for op in BIN_OPS],
                          ids=[op.__name__ for op in BIN_OPS])
-@pytest.mark.parametrize("operand1",
-                         ("17.800",
-                          ".".join(("1" * 3097, "4" * 33 + "0" * 19)),
-                          "-0.00014"),
-                         ids=("compact", "large", "fraction"))
-@pytest.mark.parametrize("operand2",
-                         ("17.800",
-                          ".".join(("1" * 3097, "4" * 33 + "0" * 19)),
-                          "-0.00014"),
-                         ids=("compact", "large", "fraction"))
 def test_bin_ops_with_decimal_operands(impl, op, operand1, operand2):
     dec1 = impl.Decimal(operand1)
     dec2 = impl.Decimal(operand2)
@@ -70,18 +86,18 @@ def test_bin_ops_with_decimal_operands(impl, op, operand1, operand2):
     assert op(dec1, dec2) == op(equiv1, equiv2)
 
 
-@pytest.mark.parametrize("op",
-                         [op for op in BIN_OPS],
-                         ids=[op.__name__ for op in BIN_OPS])
-@pytest.mark.parametrize("operand1",
-                         ("17.800",
-                          ".".join(("1" * 3097, "4" * 33 + "0" * 19)),
-                          "-0.00014"),
-                         ids=("compact", "large", "fraction"))
 @pytest.mark.parametrize("operand2",
                          (1080, 6 / 7, Fraction(-34, 5),
                           StdLibDecimal("192.38463")),
                          ids=("int", "float", "Fraction", "StdLibDecimal"))
+@pytest.mark.parametrize("operand1",
+                         ("17.800",
+                          ".".join(("1" * 2059, "4" * 33 + "0" * 19)),
+                          "-0.00014"),
+                         ids=("compact", "large", "fraction"))
+@pytest.mark.parametrize("op",
+                         [op for op in BIN_OPS],
+                         ids=[op.__name__ for op in BIN_OPS])
 def test_bin_ops_with_mixed_typed_operands(impl, op, operand1, operand2):
     dec = impl.Decimal(operand1)
     equiv1 = Fraction(operand1)
@@ -90,18 +106,18 @@ def test_bin_ops_with_mixed_typed_operands(impl, op, operand1, operand2):
     assert op(operand2, dec) == op(equiv2, equiv1)
 
 
-@pytest.mark.parametrize("op",
-                         [op for op in ADD_SUB],
-                         ids=[op.__name__ for op in ADD_SUB])
-@pytest.mark.parametrize("operand",
-                         ("17.800",
-                          ".".join(("1" * 3097, "4" * 33 + "0" * 19)),
-                          "-0.00014"),
-                         ids=("compact", "large", "fraction"))
 @pytest.mark.parametrize("zero",
                          (None, 0, 0.0, Fraction(0, 1), StdLibDecimal(0)),
                          ids=("Decimal", "int", "float", "Fraction",
                               "StdLibDecimal"))
+@pytest.mark.parametrize("operand",
+                         ("17.800",
+                          ".".join(("1" * 2259, "4" * 33 + "0" * 19)),
+                          "-0.00014"),
+                         ids=("compact", "large", "fraction"))
+@pytest.mark.parametrize("op",
+                         [op for op in ADD_SUB],
+                         ids=[op.__name__ for op in ADD_SUB])
 def test_decimal_add_sub_zero(impl, op, operand, zero):
     dec = impl.Decimal(operand)
     if zero is None:
@@ -111,15 +127,15 @@ def test_decimal_add_sub_zero(impl, op, operand, zero):
     assert res == dec
 
 
-@pytest.mark.parametrize("operand",
-                         ("17.800",
-                          ".".join(("1" * 3097, "4" * 33 + "0" * 19)),
-                          "-0.00014"),
-                         ids=("compact", "large", "fraction"))
 @pytest.mark.parametrize("zero",
                          (None, 0, 0.0, Fraction(0, 1), StdLibDecimal(0)),
                          ids=("Decimal", "int", "float", "Fraction",
                               "StdLibDecimal"))
+@pytest.mark.parametrize("operand",
+                         ("17.800",
+                          ".".join(("1" * 2259, "4" * 33 + "0" * 19)),
+                          "-0.00014"),
+                         ids=("compact", "large", "fraction"))
 def test_decimal_mul_zero(impl, operand, zero):
     dec = impl.Decimal(operand)
     if zero is None:
@@ -129,15 +145,24 @@ def test_decimal_mul_zero(impl, operand, zero):
     assert res == zero
 
 
-@pytest.mark.parametrize("operand",
-                         ("17.800",
-                          ".".join(("1" * 3097, "4" * 33 + "0" * 19)),
-                          "-0.00014"),
-                         ids=("compact", "large", "fraction"))
+def test_mul_prec_limit_exceeded(impl):
+    e = (MAX_DEC_PRECISION + 1) // 2
+    f = Fraction(1, 10 ** e)
+    d = impl.Decimal(f)
+    p = d * d
+    assert(isinstance(p, Fraction))
+    assert(p == f * f)
+
+
 @pytest.mark.parametrize("zero",
                          (None, 0, 0.0, Fraction(0, 1), StdLibDecimal(0)),
                          ids=("Decimal", "int", "float", "Fraction",
                               "StdLibDecimal"))
+@pytest.mark.parametrize("operand",
+                         ("17.800",
+                          ".".join(("1" * 2259, "4" * 33 + "0" * 19)),
+                          "-0.00014"),
+                         ids=("compact", "large", "fraction"))
 def test_zero_truediv_decimal(impl, operand, zero):
     dec = impl.Decimal(operand)
     if zero is None:
@@ -147,15 +172,15 @@ def test_zero_truediv_decimal(impl, operand, zero):
     assert res == zero
 
 
-@pytest.mark.parametrize("operand",
-                         ("17.800",
-                          ".".join(("1" * 3097, "4" * 33 + "0" * 19)),
-                          "-0.00014"),
-                         ids=("compact", "large", "fraction"))
 @pytest.mark.parametrize("zero",
                          (None, 0, 0.0, Fraction(0, 1), StdLibDecimal(0)),
                          ids=("Decimal", "int", "float", "Fraction",
                               "StdLibDecimal"))
+@pytest.mark.parametrize("operand",
+                         ("17.800",
+                          ".".join(("1" * 2259, "4" * 33 + "0" * 19)),
+                          "-0.00014"),
+                         ids=("compact", "large", "fraction"))
 def test_zero_floordiv_decimal(impl, operand, zero):
     dec = impl.Decimal(operand)
     if zero is None:
@@ -165,18 +190,18 @@ def test_zero_floordiv_decimal(impl, operand, zero):
     assert res == zero
 
 
-@pytest.mark.parametrize("op",
-                         [op for op in DIV_MOD_OPS],
-                         ids=[op.__name__ for op in DIV_MOD_OPS])
-@pytest.mark.parametrize("operand",
-                         ("17.800",
-                          ".".join(("1" * 3097, "4" * 33 + "0" * 19)),
-                          "-0.00014"),
-                         ids=("compact", "large", "fraction"))
 @pytest.mark.parametrize("zero",
                          (None, 0, 0.0, Fraction(0, 1), StdLibDecimal(0)),
                          ids=("Decimal", "int", "float", "Fraction",
                               "StdLibDecimal"))
+@pytest.mark.parametrize("operand",
+                         ("17.800",
+                          ".".join(("1" * 2259, "4" * 33 + "0" * 19)),
+                          "-0.00014"),
+                         ids=("compact", "large", "fraction"))
+@pytest.mark.parametrize("op",
+                         [op for op in DIV_MOD_OPS],
+                         ids=[op.__name__ for op in DIV_MOD_OPS])
 def test_decimal_div_zero(impl, op, operand, zero):
     dec = impl.Decimal(operand)
     if zero is None:
