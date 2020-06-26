@@ -15,7 +15,7 @@ setup(
     package_dir = {'': 'src'},
     packages=['decimalfp'],
     ext_modules=[Extension('decimalfp._cdecimalfp',
-                           ['src/decimalfp/_cdecimalfp.c'])],
+                           ['src/decimalfp/_cdecimalfp.cpp'])],
     python_requires=">=3.6",
     # install_requires=requirements,
     license='BSD',
