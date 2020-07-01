@@ -1,5 +1,5 @@
 /* ---------------------------------------------------------------------------
-Name:        fpdec.cpp
+Name:        fpdecimal.cpp
 
 Author:      Michael Amrhein (michael@adrhinum.de)
 
@@ -12,7 +12,8 @@ $Source$
 $Revision$
 */
 
-#include "fpdec.hpp"
+#include <sstream>
+#include "fpdecimal.hpp"
 #include "fpdec.h"
 
 using namespace fpdec;
@@ -135,7 +136,7 @@ bool Decimal::operator>(const Decimal &rhs) const noexcept {
     return fpdec_compare(&fpdec, &(rhs.fpdec), 0) > 0;
 }
 
-Decimal Decimal::operator+(Decimal &rhs) {
+Decimal Decimal::operator+(const Decimal &rhs) const {
     auto dec = Decimal();
     error_t err = fpdec_add(&dec.fpdec, &fpdec, &rhs.fpdec);
     if (err != FPDEC_OK)
@@ -143,7 +144,7 @@ Decimal Decimal::operator+(Decimal &rhs) {
     return dec;
 }
 
-Decimal Decimal::operator-(Decimal &rhs) {
+Decimal Decimal::operator-(const Decimal &rhs) const {
     auto dec = Decimal();
     error_t err = fpdec_sub(&dec.fpdec, &fpdec, &rhs.fpdec);
     if (err != FPDEC_OK)
@@ -151,7 +152,7 @@ Decimal Decimal::operator-(Decimal &rhs) {
     return dec;
 }
 
-Decimal Decimal::operator*(Decimal &rhs) {
+Decimal Decimal::operator*(const Decimal &rhs) const {
     auto dec = Decimal();
     error_t err = fpdec_mul(&dec.fpdec, &fpdec, &rhs.fpdec);
     if (err != FPDEC_OK)
@@ -159,7 +160,7 @@ Decimal Decimal::operator*(Decimal &rhs) {
     return dec;
 }
 
-Decimal Decimal::operator/(Decimal &rhs) {
+Decimal Decimal::operator/(const Decimal &rhs) const {
     auto dec = Decimal();
     error_t err = fpdec_div(&dec.fpdec, &fpdec, &rhs.fpdec, -1,
                             FPDEC_ROUND_DEFAULT);
@@ -168,28 +169,51 @@ Decimal Decimal::operator/(Decimal &rhs) {
     return dec;
 }
 
+// member functions
+
+std::string Decimal::dump() {
+    std::ostringstream buf;
+    buf << "flags:" << std::endl
+        << "  dyn_alloc:  " << FPDEC_IS_DYN_ALLOC(&fpdec) << std::endl
+        << "  normalized: " << FPDEC_IS_NORMALIZED(&fpdec) << std::endl
+        << "sign: " << (int)FPDEC_SIGN(&fpdec) << std::endl
+        << "dec_prec: " << FPDEC_DEC_PREC(&fpdec) << std::endl;
+    if (FPDEC_IS_DYN_ALLOC(&fpdec)) {
+        buf << "exp: " << FPDEC_EXP(&fpdec) << std::endl
+            << "n digits: " << fpdec.digit_array->n_alloc << std::endl
+            << "digits: ";
+        for (int i = 0; i < fpdec.digit_array->n_alloc; ++i)
+            buf << fpdec.digit_array->digits[i] << ", ";
+    }
+    else {
+        buf << "digits: " << fpdec.lo << ", " << fpdec.hi;
+    }
+    buf << std::endl;
+    return buf.str();
+}
+
 // interacting with integers
 
 bool fpdec::operator==(const long long int lhs, const Decimal &rhs) noexcept {
-    return rhs == lhs;
+    return rhs == (Decimal)lhs;
 }
 
 bool fpdec::operator!=(const long long int lhs, const Decimal &rhs) noexcept {
-    return !(rhs == lhs);
+    return !(rhs == (Decimal)lhs);
 }
 
 bool fpdec::operator<=(const long long int lhs, const Decimal &rhs) noexcept {
-    return rhs >= lhs;
+    return rhs >= (Decimal)lhs;
 }
 
 bool fpdec::operator<(const long long int lhs, const Decimal &rhs) noexcept {
-    return rhs > lhs;
+    return rhs > (Decimal)lhs;
 }
 
 bool fpdec::operator>=(const long long int lhs, const Decimal &rhs) noexcept {
-    return rhs <= lhs;
+    return rhs <= (Decimal)lhs;
 }
 
 bool fpdec::operator>(const long long int lhs, const Decimal &rhs) noexcept {
-    return rhs < lhs;
+    return rhs < (Decimal)lhs;
 }
