@@ -28,12 +28,13 @@ import pytest
 
 
 @pytest.fixture(scope="session",
-                params=("decimal", "decimalfp._pydecimalfp",
-                        "decimalfp._cdecimalfp"),
-                ids=("stdlib", "pydec", "cydec"))
+                params=(("decimal", None),
+                        ("decimalfp._pydecimalfp", "decimalfp"),
+                        ("decimalfp._cdecimalfp", "decimalfp"),),
+                ids=("stdlib", "pydec", "cdec"))
 def impl(request):
     """Return Decimal implementation."""
-    mod = import_module(request.param)
+    mod = import_module(*request.param)
     return mod
 
 
