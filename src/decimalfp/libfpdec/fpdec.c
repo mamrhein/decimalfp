@@ -15,7 +15,6 @@ $Revision$
 */
 
 #include <assert.h>
-#include <malloc.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -120,7 +119,7 @@ fpdec_from_ascii_literal(fpdec_t *fpdec, const char *literal) {
         dec_repr = &st_dec_repr;
     }
     else {
-        dec_repr = malloc(offsetof(dec_repr_t, coeff) + n_chars);
+        dec_repr = fpdec_mem_alloc(offsetof(dec_repr_t, coeff) + n_chars, 1);
         if (dec_repr == NULL) MEMERROR
     }
     rc = parse_ascii_dec_literal(dec_repr, literal);
@@ -160,7 +159,7 @@ fpdec_from_ascii_literal(fpdec_t *fpdec, const char *literal) {
     fpdec->dec_prec = MAX(0, -dec_repr->exp);
 EXIT:
     if (dec_repr != &st_dec_repr) {
-        free(dec_repr);
+        fpdec_mem_free(dec_repr);
     }
     return rc;
 }
@@ -680,7 +679,7 @@ fpdec_sub_abs_dyn_from_dyn(fpdec_t *z, const fpdec_t *x, const fpdec_t *y) {
     }
     digits_isub_digits(z_digits, s_digits);
     if (s_digits_is_copy)
-        free((void *) s_digits);
+        fpdec_mem_free((void *) s_digits);
     z->exp = z_exp;
     z->digit_array = z_digits;
     z->dyn_alloc = true;
@@ -1229,7 +1228,7 @@ fpdec_div(fpdec_t *z, const fpdec_t *x, const fpdec_t *y,
 void
 fpdec_reset_to_zero(fpdec_t *fpdec, fpdec_dec_prec_t dec_prec) {
     if (FPDEC_IS_DYN_ALLOC(fpdec)) {
-        free((void *) fpdec->digit_array);
+        fpdec_mem_free((void *) fpdec->digit_array);
     }
     memset((void *) fpdec, 0, sizeof(fpdec_t));
     FPDEC_DEC_PREC(fpdec) = dec_prec;

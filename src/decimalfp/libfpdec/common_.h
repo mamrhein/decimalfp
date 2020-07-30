@@ -37,7 +37,6 @@ typedef unsigned char dec_digit_t;
 #define ERROR_RETVAL(err, retval) {errno = err; return retval;}
 #define MEMERROR ERROR(ENOMEM)
 #define MEMERROR_RETVAL(retval) ERROR_RETVAL(ENOMEM, retval)
-#define FREE_N_ERROR(buf, err) {free(buf); ERROR(err)}
 
 // int compare
 #define CMP(a, b) (((a) > (b)) - ((a) < (b)))

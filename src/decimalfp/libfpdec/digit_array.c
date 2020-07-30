@@ -14,7 +14,6 @@ $Revision$
 */
 
 #include <assert.h>
-#include <malloc.h>
 #include <string.h>
 
 #include "basemath.h"
@@ -42,7 +41,7 @@ $Revision$
 static inline fpdec_digit_array_t *
 digits_alloc(size_t n_digits) {
     fpdec_digit_array_t *digit_array = (fpdec_digit_array_t *) \
-        calloc(n_digits + 1, sizeof(fpdec_digit_t));
+        fpdec_mem_alloc(n_digits + 1, sizeof(fpdec_digit_t));
     if (digit_array != NULL) {
         digit_array->n_alloc = n_digits;
     }
@@ -430,7 +429,7 @@ digits_div_digit(const fpdec_digit_array_t *x,
     if (rem != NULL)
         *rem = r;
     if (xhat != x)
-        free((void*) xhat);
+        fpdec_mem_free((void*) xhat);
     return q;
 }
 
@@ -517,8 +516,8 @@ digits_divmod(const fpdec_digit_array_t *x, const fpdec_n_digits_t n_shift_x,
     if (rem != NULL)
         *rem = digits_div_digit(xd, 0, d, NULL);
     // clean-up
-    free((void *) xd);
-    free((void *) yd);
+    fpdec_mem_free((void *) xd);
+    fpdec_mem_free((void *) yd);
     // return quotient
     return q;
 }

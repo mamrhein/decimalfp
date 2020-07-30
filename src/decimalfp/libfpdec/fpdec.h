@@ -22,8 +22,9 @@ extern "C" {
 #endif // __cplusplus
 
 #include "common.h"
-#include "rounding.h"
 #include "digit_array.h"
+#include "mem.h"
+#include "rounding.h"
 #include "shifted_int.h"
 
 

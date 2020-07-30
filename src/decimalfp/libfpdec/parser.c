@@ -12,11 +12,8 @@ $Source$
 $Revision$
 */
 
-#include <assert.h>
 #include <ctype.h>
-#include <malloc.h>
 #include <stddef.h>
-#include <string.h>
 
 #include "common_.h"
 #include "parser.h"
