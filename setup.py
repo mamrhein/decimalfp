@@ -8,24 +8,16 @@ from setuptools import setup, Extension
 LIBFPDEC_PATH = 'src/decimalfp/libfpdec'
 LIBFPDEC_SRC_FILES = sorted(f"{LIBFPDEC_PATH}/{fn}"
                             for fn in os.listdir(path=LIBFPDEC_PATH)
-                            if fn.endswith(('.c', 'cpp')))
-
-
-class PybindIncludePath:
-    """Helper for determining the pybind11 include path."""
-
-    def __str__(self) -> str:
-        import pybind11
-        return pybind11.get_include()
+                            if fn.endswith(('.c',)))
 
 
 ext_modules = [
     Extension(
         'decimalfp._cdecimalfp',
-        ['src/decimalfp/_cdecimalfp.cpp'] + LIBFPDEC_SRC_FILES,
-        include_dirs=[LIBFPDEC_PATH, PybindIncludePath()],
+        ['src/decimalfp/_cdecimalfp.c'] + LIBFPDEC_SRC_FILES,
+        include_dirs=[LIBFPDEC_PATH],
         # extra_link_args="",
-        language='c++',
+        language='c',
     ),
 ]
 
