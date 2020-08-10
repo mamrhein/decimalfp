@@ -93,6 +93,11 @@ runtime_error_ptr(const char *msg) {
             return NULL;                                                    \
     }
 
+// *** Constants ***
+
+static PyObject *PyZERO;
+static PyObject *PyONE;
+
 // *** Helper prototypes ***
 
 static void *
@@ -245,198 +250,6 @@ DecimalType_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
     }
 }
 
-//static PyObject *
-//DecimalType_FromCString(PyTypeObject *type, const char *s,
-//                      PyObject *context)
-//{
-//    PyObject *dec;
-//    uint32_t status = 0;
-//
-//    dec = DecimalType_new(type);
-//    if (dec == NULL) {
-//        return NULL;
-//    }
-//
-//    mpd_qset_string(MPD(dec), s, CTX(context), &status);
-//    if (Decimal_addstatus(context, status)) {
-//        Py_DECREF(dec);
-//        return NULL;
-//    }
-//    return dec;
-//}
-//
-//
-///* Return a new DecimalObject or a subtype from a PyUnicodeObject. */
-//static PyObject *
-//DecimalType_FromUnicode(PyTypeObject *type, const PyObject *u,
-//                      PyObject *context)
-//{
-//    PyObject *dec;
-//    char *s;
-//
-//    s = numeric_as_ascii(u, 0, 0);
-//    if (s == NULL) {
-//        return NULL;
-//    }
-//
-//    dec = DecimalType_FromCString(type, s, context);
-//    PyMem_Free(s);
-//    return dec;
-//}
-//
-//
-///* Return a DecimalObject or a subtype from a PyFloatObject.
-//   Conversion is exact. */
-//static PyObject *
-//DecimalType_FromFloatExact(PyTypeObject *type, PyObject *v,
-//                         PyObject *context)
-//{
-//    PyObject *dec, *tmp;
-//    PyObject *n, *d, *n_d;
-//    mpd_ssize_t k;
-//    double x;
-//    int sign;
-//    mpd_t *d1, *d2;
-//    uint32_t status = 0;
-//    mpd_context_t maxctx;
-//
-//
-//    assert(PyType_IsSubtype(type, &DecimalType));
-//
-//    if (PyLong_Check(v)) {
-//        return DecimalType_FromLongExact(type, v, context);
-//    }
-//    if (!PyFloat_Check(v)) {
-//        PyErr_SetString(PyExc_TypeError,
-//            "argument must be int or float");
-//        return NULL;
-//    }
-//
-//    x = PyFloat_AsDouble(v);
-//    if (x == -1.0 && PyErr_Occurred()) {
-//        return NULL;
-//    }
-//    sign = (copysign(1.0, x) == 1.0) ? 0 : 1;
-//
-//    if (Py_IS_NAN(x) || Py_IS_INFINITY(x)) {
-//        dec = DecimalType_new(type);
-//        if (dec == NULL) {
-//            return NULL;
-//        }
-//        if (Py_IS_NAN(x)) {
-//            /* decimal.py calls repr(float(+-nan)),
-//             * which always gives a positive result. */
-//            mpd_setspecial(MPD(dec), MPD_POS, MPD_NAN);
-//        }
-//        else {
-//            mpd_setspecial(MPD(dec), sign, MPD_INF);
-//        }
-//        return dec;
-//    }
-//
-//    /* absolute value of the float */
-//    tmp = _py_float_abs(v);
-//    if (tmp == NULL) {
-//        return NULL;
-//    }
-//
-//    /* float as integer ratio: numerator/denominator */
-//    n_d = _py_float_as_integer_ratio(tmp, NULL);
-//    Py_DECREF(tmp);
-//    if (n_d == NULL) {
-//        return NULL;
-//    }
-//    n = PyTuple_GET_ITEM(n_d, 0);
-//    d = PyTuple_GET_ITEM(n_d, 1);
-//
-//    tmp = _py_long_bit_length(d, NULL);
-//    if (tmp == NULL) {
-//        Py_DECREF(n_d);
-//        return NULL;
-//    }
-//    k = PyLong_AsSsize_t(tmp);
-//    Py_DECREF(tmp);
-//    if (k == -1 && PyErr_Occurred()) {
-//        Py_DECREF(n_d);
-//        return NULL;
-//    }
-//    k--;
-//
-//    dec = DecimalType_FromLongExact(type, n, context);
-//    Py_DECREF(n_d);
-//    if (dec == NULL) {
-//        return NULL;
-//    }
-//
-//    d1 = mpd_qnew();
-//    if (d1 == NULL) {
-//        Py_DECREF(dec);
-//        PyErr_NoMemory();
-//        return NULL;
-//    }
-//    d2 = mpd_qnew();
-//    if (d2 == NULL) {
-//        mpd_del(d1);
-//        Py_DECREF(dec);
-//        PyErr_NoMemory();
-//        return NULL;
-//    }
-//
-//    mpd_maxcontext(&maxctx);
-//    mpd_qset_uint(d1, 5, &maxctx, &status);
-//    mpd_qset_ssize(d2, k, &maxctx, &status);
-//    mpd_qpow(d1, d1, d2, &maxctx, &status);
-//    if (Decimal_addstatus(context, status)) {
-//        mpd_del(d1);
-//        mpd_del(d2);
-//        Py_DECREF(dec);
-//        return NULL;
-//    }
-//
-//    /* result = n * 5**k */
-//    mpd_qmul(MPD(dec), MPD(dec), d1, &maxctx, &status);
-//    mpd_del(d1);
-//    mpd_del(d2);
-//    if (Decimal_addstatus(context, status)) {
-//        Py_DECREF(dec);
-//        return NULL;
-//    }
-//    /* result = +- n * 5**k * 10**-k */
-//    mpd_set_sign(MPD(dec), sign);
-//    MPD(dec)->exp = -k;
-//
-//    return dec;
-//}
-//
-///* Return a new DecimalObject or a subtype from a Decimal. */
-//static PyObject *
-//DecimalType_FromDecimalExact(PyTypeObject *type, PyObject *v, PyObject
-//*context)
-//{
-//    PyObject *dec;
-//    uint32_t status = 0;
-//
-//    if (type == &DecimalType && Decimal_CheckExact(v)) {
-//        Py_INCREF(v);
-//        return v;
-//    }
-//
-//    dec = DecimalType_new(type);
-//    if (dec == NULL) {
-//        return NULL;
-//    }
-//
-//    mpd_qcopy(MPD(dec), MPD(v), &status);
-//    if (Decimal_addstatus(context, status)) {
-//        Py_DECREF(dec);
-//        return NULL;
-//    }
-//
-//    return dec;
-//}
-//
-///* Special methods */
-
 // properties
 
 static PyObject *
@@ -472,7 +285,7 @@ Decimal_real_get(DecimalObject *self) {
 
 static PyObject *
 Decimal_imag_get(DecimalObject *self) {
-    return PyLong_FromLong(0L);
+    return PyZERO;
 }
 
 // converting methods
@@ -496,8 +309,8 @@ Decimal_as_tuple(DecimalObject *self) {
     PyObject *exp = NULL;
     PyObject *res = NULL;
 
-    sign = PyLong_FromLong(FPDEC_SIGN(fpdec) = FPDEC_SIGN_NEG ? 1 : 0);
-
+    sign = FPDEC_SIGN(fpdec) == FPDEC_SIGN_NEG ? PyONE : PyZERO;
+    fpdec_as_dec_coeff_exp(coeff, exp, fpdec);
 
     res = PyTuple_Pack(3, sign, coeff, exp);
     Py_DECREF(sign);
@@ -564,8 +377,7 @@ Decimal_format(DecimalObject *self, PyObject *fmt_spec) {
 
 static Py_hash_t
 Decimal_hash(DecimalObject *self) {
-    if (PyObject_RichCompareBool(Decimal_numerator_get(self),
-                                 PyLong_FromLong(1), Py_EQ))
+    if (PyObject_RichCompareBool(Decimal_denominator_get(self), PyONE, Py_EQ))
         return PyObject_Hash(Decimal_numerator_get(self));
     else
         return PyObject_Hash(Decimal_as_fraction(self));
@@ -1062,6 +874,10 @@ cdecimalfp_exec(PyObject *module) {
     /* Init libfpdec memory handlers */
     fpdec_mem_alloc = PyMem_Calloc;
     fpdec_mem_free = PyMem_Free;
+
+    /* Init global constants */
+    PyZERO = PyLong_FromLong(0);
+    PyONE = PyLong_FromLong(1);
 
     /* Init global vars */
     PyModule_AddIntConstant(module, "MAX_DEC_PRECISION", FPDEC_MAX_DEC_PREC);
