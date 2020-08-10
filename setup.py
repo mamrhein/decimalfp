@@ -15,7 +15,7 @@ ext_modules = [
     Extension(
         'decimalfp._cdecimalfp',
         ['src/decimalfp/_cdecimalfp.c'] + LIBFPDEC_SRC_FILES,
-        include_dirs=[LIBFPDEC_PATH],
+        include_dirs=['src/decimalfp', LIBFPDEC_PATH],
         # extra_link_args="",
         language='c',
     ),
