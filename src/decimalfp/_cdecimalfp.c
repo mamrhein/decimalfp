@@ -436,10 +436,14 @@ Decimal_format(DecimalObject *self, PyObject *fmt_spec) {
 
 static Py_hash_t
 Decimal_hash(DecimalObject *self) {
-    if (PyObject_RichCompareBool(Decimal_denominator_get(self), PyONE, Py_EQ))
-        return PyObject_Hash(Decimal_numerator_get(self));
-    else
-        return PyObject_Hash(Decimal_as_fraction(self));
+    if (self->hash == -1) {
+        if (PyObject_RichCompareBool(Decimal_denominator_get(self), PyONE,
+                                     Py_EQ))
+            self->hash = PyObject_Hash(Decimal_numerator_get(self));
+        else
+            self->hash = PyObject_Hash(Decimal_as_fraction(self));
+    }
+    return self->hash;
 }
 
 static PyObject *
