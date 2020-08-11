@@ -19,6 +19,13 @@ $Revision$
 #include "_cdecimalfp_docstrings.h"
 #include "libfpdec/fpdec.h"
 
+// TODO: include constants from libfpdec?
+#define DEC_DIGITS_PER_DIGIT 19             // int(log10(2^64))
+#define RADIX 10000000000000000000UL        // 10 ** DEC_DIGITS_PER_DIGIT
+
+#define ASSIGN_AND_CHECK_NULL(result, expr) \
+    do { result = (expr); if (result == NULL) goto ERROR; } while (0)
+
 // Abstract number types
 
 static PyObject *Number = NULL;
@@ -31,6 +38,10 @@ static PyObject *Integral = NULL;
 
 static PyObject *Fraction = NULL;
 static PyObject *StdLibDecimal = NULL;
+
+// Python math functions
+
+static PyObject *PyNumber_gcd;
 
 // *** error handling ***
 
@@ -93,18 +104,20 @@ runtime_error_ptr(const char *msg) {
             return NULL;                                                    \
     }
 
-// *** Constants ***
+// *** Python number constants ***
 
 static PyObject *PyZERO;
 static PyObject *PyONE;
+static PyObject *PyTEN;
+static PyObject *PyRADIX;
 
 // *** Helper prototypes ***
 
-static void *
-fpdec_as_dec_coeff_exp(PyObject *coeff, PyObject *exp, const fpdec_t *fpdec);
+static long
+fpdec_dec_coeff_exp(PyObject **coeff, const fpdec_t *fpdec);
 
-static void *
-fpdec_as_integer_ratio(PyObject *numerator, PyObject *denominator,
+static void
+fpdec_as_integer_ratio(PyObject **numerator, PyObject **denominator,
                        const fpdec_t *fpdec);
 
 // *** Decimal type ***
@@ -270,12 +283,18 @@ Decimal_magnitude_get(DecimalObject *self) {
 
 static PyObject *
 Decimal_numerator_get(DecimalObject *self) {
-    Py_RETURN_NOTIMPLEMENTED;
+    if (self->numerator == NULL)
+        fpdec_as_integer_ratio(&self->numerator, &self->denominator,
+                               &self->fpdec);
+    return self->numerator;
 }
 
 static PyObject *
 Decimal_denominator_get(DecimalObject *self) {
-    Py_RETURN_NOTIMPLEMENTED;
+    if (self->denominator == NULL)
+        fpdec_as_integer_ratio(&self->numerator, &self->denominator,
+                               &self->fpdec);
+    return self->denominator;
 }
 
 static PyObject *
@@ -306,27 +325,64 @@ Decimal_as_tuple(DecimalObject *self) {
     fpdec_t *fpdec = &self->fpdec;
     PyObject *sign = NULL;
     PyObject *coeff = NULL;
-    PyObject *exp = NULL;
+    PyObject *adj_coeff = NULL;
+    PyObject *dec_prec = NULL;
     PyObject *res = NULL;
+    long exp;
+    long dec_shift;
 
     sign = FPDEC_SIGN(fpdec) == FPDEC_SIGN_NEG ? PyONE : PyZERO;
-    fpdec_as_dec_coeff_exp(coeff, exp, fpdec);
-
-    res = PyTuple_Pack(3, sign, coeff, exp);
-    Py_DECREF(sign);
+    exp = fpdec_dec_coeff_exp(&coeff, fpdec);
+    if (coeff == NULL)
+        return NULL;
+    dec_shift = exp + fpdec->dec_prec;
+    if (dec_shift < 0) {
+        PyObject *divisor = PyLong_FromLong(-dec_shift);
+        if (divisor == NULL) {
+            Py_DECREF(coeff);
+            return NULL;
+        }
+        adj_coeff = PyNumber_FloorDivide(coeff, divisor);
+        if (adj_coeff == NULL) {
+            Py_DECREF(coeff);
+            Py_DECREF(divisor);
+            return NULL;
+        }
+        coeff = adj_coeff;      // stealing reference
+    }
+    else if (dec_shift > 0) {
+        PyObject *factor = PyLong_FromLong(dec_shift);
+        if (factor == NULL) {
+            Py_DECREF(coeff);
+            return NULL;
+        }
+        adj_coeff = PyNumber_Multiply(coeff, factor);
+        if (adj_coeff == NULL) {
+            Py_DECREF(coeff);
+            Py_DECREF(factor);
+            return NULL;
+        }
+        coeff = adj_coeff;      // stealing reference
+    }
+    dec_prec = PyLong_FromLong(-fpdec->dec_prec);
+    if (dec_prec != NULL) {
+        res = PyTuple_Pack(3, sign, coeff, dec_prec);
+        Py_DECREF(dec_prec);
+    }
     Py_DECREF(coeff);
-    Py_DECREF(exp);
     return res;
 }
 
 static PyObject *
 Decimal_as_fraction(DecimalObject *self) {
-    Py_RETURN_NOTIMPLEMENTED;
+    return PyObject_CallFunctionObjArgs(Fraction, Decimal_numerator_get(self),
+                                        Decimal_denominator_get(self), NULL);
 }
 
 static PyObject *
 Decimal_as_integer_ratio(DecimalObject *self) {
-    Py_RETURN_NOTIMPLEMENTED;
+    return PyTuple_Pack(2, Decimal_numerator_get(self),
+                        Decimal_denominator_get(self));
 }
 
 static PyObject *
@@ -811,20 +867,144 @@ static PyType_Spec DecimalType_spec = {
 
 // *** Helper functions ***
 
-static PyLongObject *
-digits_as_int(fpdec_digit_array_t *digits) {
+static PyObject *
+digits_as_int(fpdec_digit_array_t *digit_array) {
+    PyObject *res;
+    PyObject *mult;
+    PyObject *digit;
+    ssize_t idx = digit_array->n_signif - 1;
 
+    assert(digit_array->n_signif > 0);
+
+    ASSIGN_AND_CHECK_NULL(res,
+                          PyLong_FromUnsignedLong(digit_array->digits[idx]));
+    while (--idx >= 0) {
+        ASSIGN_AND_CHECK_NULL(digit,
+                              PyLong_FromUnsignedLong(
+                                  digit_array->digits[idx]));
+        ASSIGN_AND_CHECK_NULL(mult, PyNumber_Multiply(res, PyRADIX));
+        Py_DECREF(res);
+        ASSIGN_AND_CHECK_NULL(res, PyNumber_Add(mult, digit));
+        Py_DECREF(digit);
+        Py_DECREF(mult);
+    }
+    return res;
+
+ERROR:
+    Py_XDECREF(res);
+    Py_XDECREF(mult);
+    Py_XDECREF(digit);
+    return NULL;
 }
 
-static void *
-fpdec_as_dec_coeff_exp(PyObject *coeff, PyObject *exp, const fpdec_t *fpdec) {
+static long
+fpdec_dec_coeff_exp(PyObject **coeff, const fpdec_t *fpdec) {
+    assert(*coeff == NULL);
 
+    if (FPDEC_EQ_ZERO(fpdec)) {
+        *coeff = PyZERO;
+        Py_INCREF(*coeff);
+        return 0;
+    }
+    else if (FPDEC_IS_DYN_ALLOC(fpdec)) {
+        *coeff = digits_as_int(fpdec->digit_array);
+        if (*coeff == NULL)
+            return 0;
+        return FPDEC_EXP(fpdec) * DEC_DIGITS_PER_DIGIT;
+    }
+    else {
+        if (fpdec->hi == 0)
+            *coeff = PyLong_FromUnsignedLong(fpdec->lo);
+        else {
+            PyObject *hi = PyLong_FromUnsignedLong(fpdec->hi);
+            if (hi == NULL)
+                return 0;
+            PyObject *lo = PyLong_FromUnsignedLong(fpdec->lo);
+            if (lo == NULL) {
+                Py_DECREF(hi);
+                return 0;
+            }
+            PyObject *sh = PyNumber_Lshift(hi, PyLong_FromSize_t(64));
+            if (sh == NULL) {
+                Py_DECREF(hi);
+                Py_DECREF(lo);
+                return 0;
+            }
+            *coeff = PyNumber_Add(sh, lo);
+        }
+        if (*coeff == NULL)
+            return 0;
+        return -fpdec->dec_prec;
+    }
 }
 
-static void *
-fpdec_as_integer_ratio(PyObject *numerator, PyObject *denominator,
+static void
+fpdec_as_integer_ratio(PyObject **numerator, PyObject **denominator,
                        const fpdec_t *fpdec) {
+    PyObject *coeff = NULL;
+    PyObject *neg_coeff = NULL;
+    PyObject *py_exp = NULL;
+    PyObject *ten_pow_exp = NULL;
+    PyObject *gcd = NULL;
+    long exp;
 
+    assert(*numerator == NULL);
+    assert(*denominator == NULL);
+
+    exp = fpdec_dec_coeff_exp(&coeff, fpdec);
+    if (coeff == NULL)
+        return;
+
+    if (FPDEC_SIGN(fpdec) == FPDEC_SIGN_NEG) {
+        ASSIGN_AND_CHECK_NULL(neg_coeff, PyNumber_Negative(coeff));
+        Py_DECREF(coeff);
+        coeff = neg_coeff;      // stealing reference
+    }
+
+    if (exp == 0) {
+        // *numerator = coeff, *denominator = 1
+        *numerator = coeff;      // stealing reference
+        *denominator = PyONE;
+        Py_INCREF(*denominator);
+        return;
+    }
+    if (exp > 0) {
+        // *numerator = coeff * 10 ^ exp, *denominator = 1
+        ASSIGN_AND_CHECK_NULL(py_exp, PyLong_FromLong(exp));
+        ASSIGN_AND_CHECK_NULL(ten_pow_exp,
+                              PyNumber_Power(PyTEN, py_exp, Py_None));
+        ASSIGN_AND_CHECK_NULL(*numerator,
+                              PyNumber_Multiply(coeff, ten_pow_exp));
+        Py_DECREF(py_exp);
+        Py_DECREF(ten_pow_exp);
+        *denominator = PyONE;
+        Py_INCREF(*denominator);
+    }
+    else {
+        // *numerator = coeff, *denominator = 10 ^ -exp, but they may need
+        // to be
+        // normalized!
+        ASSIGN_AND_CHECK_NULL(py_exp, PyLong_FromLong(-exp));
+        ASSIGN_AND_CHECK_NULL(ten_pow_exp,
+                              PyNumber_Power(PyTEN, py_exp, Py_None));
+        ASSIGN_AND_CHECK_NULL(gcd,
+                              PyObject_CallFunctionObjArgs(PyNumber_gcd,
+                                                           coeff,
+                                                           ten_pow_exp,
+                                                           NULL));
+        ASSIGN_AND_CHECK_NULL(*numerator, PyNumber_FloorDivide(coeff, gcd));
+        *denominator = PyNumber_FloorDivide(ten_pow_exp, gcd);
+        if (*denominator == NULL) {
+            Py_DECREF(*numerator);
+            *numerator = NULL;
+        }
+    }
+ERROR:
+    // clean-up (not only in case of an error!)
+    Py_XDECREF(coeff);
+    Py_XDECREF(py_exp);
+    Py_XDECREF(ten_pow_exp);
+    Py_XDECREF(gcd);
 }
 
 // *** _cdecimalfp module ***
@@ -840,9 +1020,6 @@ PyModule_AddType(PyObject *module, const char *name, PyObject *type) {
 }
 
 PyDoc_STRVAR(cdecimalfp_doc, "Decimal fixed-point arithmetic.");
-
-#define ASSIGN_AND_CHECK_NULL(result, expr) \
-    do { result = (expr); if (result == NULL) goto ERROR; } while (0)
 
 static int
 cdecimalfp_exec(PyObject *module) {
@@ -870,14 +1047,21 @@ cdecimalfp_exec(PyObject *module) {
     ASSIGN_AND_CHECK_NULL(StdLibDecimal, PyObject_GetAttrString(decimal,
                                                                 "Decimal"));
     Py_CLEAR(decimal);
+    /* Import from math */
+    PyObject *math = NULL;
+    ASSIGN_AND_CHECK_NULL(math, PyImport_ImportModule("math"));
+    ASSIGN_AND_CHECK_NULL(PyNumber_gcd, PyObject_GetAttrString(math, "gcd"));
+    Py_CLEAR(math);
 
     /* Init libfpdec memory handlers */
     fpdec_mem_alloc = PyMem_Calloc;
     fpdec_mem_free = PyMem_Free;
 
     /* Init global constants */
-    PyZERO = PyLong_FromLong(0);
-    PyONE = PyLong_FromLong(1);
+    PyZERO = PyLong_FromLong(0L);
+    PyONE = PyLong_FromLong(1L);
+    PyTEN = PyLong_FromLong(10L);
+    PyRADIX = PyLong_FromUnsignedLong(RADIX);
 
     /* Init global vars */
     PyModule_AddIntConstant(module, "MAX_DEC_PRECISION", FPDEC_MAX_DEC_PREC);
