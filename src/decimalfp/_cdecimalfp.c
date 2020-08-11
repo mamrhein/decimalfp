@@ -586,182 +586,30 @@ Decimal_pow(PyObject *x, PyObject *y, PyObject *mod) {
     Py_RETURN_NOTIMPLEMENTED;
 }
 
+// Decimal type spec
 
-//
-//static PyMethodDef Decimal_methods [] =
-//{
-//  /* Unary arithmetic functions, optional context arg */
-//  { "exp", (PyCFunction)(void(*)(void))Decimal_mpd_qexp,
-//    METH_VARARGS|METH_KEYWORDS, doc_exp },
-//  { "ln", (PyCFunction)(void(*)(void))Decimal_mpd_qln,
-//    METH_VARARGS|METH_KEYWORDS, doc_ln },
-//  { "log10", (PyCFunction)(void(*)(void))Decimal_mpd_qlog10,
-//    METH_VARARGS|METH_KEYWORDS, doc_log10 },
-//  { "next_minus", (PyCFunction)(void(*)(void))Decimal_mpd_qnext_minus,
-//    METH_VARARGS|METH_KEYWORDS, doc_next_minus },
-//  { "next_plus", (PyCFunction)(void(*)(void))Decimal_mpd_qnext_plus,
-//    METH_VARARGS|METH_KEYWORDS, doc_next_plus },
-//  { "normalize", (PyCFunction)(void(*)(void))Decimal_mpd_qreduce,
-//    METH_VARARGS|METH_KEYWORDS, doc_normalize },
-//  { "to_integral", (PyCFunction)(void(*)(void))Decimal_ToIntegralValue,
-//    METH_VARARGS|METH_KEYWORDS, doc_to_integral },
-//  { "to_integral_exact", (PyCFunction)(void(*)(void))Decimal_ToIntegralExact,
-//    METH_VARARGS|METH_KEYWORDS, doc_to_integral_exact },
-//  { "to_integral_value", (PyCFunction)(void(*)(void))Decimal_ToIntegralValue,
-//    METH_VARARGS|METH_KEYWORDS, doc_to_integral_value },
-//  { "sqrt", (PyCFunction)(void(*)(void))Decimal_mpd_qsqrt,
-//    METH_VARARGS|METH_KEYWORDS, doc_sqrt },
-//
-//  /* Binary arithmetic functions, optional context arg */
-//  { "compare", (PyCFunction)(void(*)(void))Decimal_mpd_qcompare,
-//    METH_VARARGS|METH_KEYWORDS, doc_compare },
-//  { "compare_signal", (PyCFunction)(void(*)(void))
-//  Decimal_mpd_qcompare_signal,
-//    METH_VARARGS|METH_KEYWORDS, doc_compare_signal },
-//  { "max", (PyCFunction)(void(*)(void))Decimal_mpd_qmax,
-//    METH_VARARGS|METH_KEYWORDS, doc_max },
-//  { "max_mag", (PyCFunction)(void(*)(void))Decimal_mpd_qmax_mag,
-//    METH_VARARGS|METH_KEYWORDS, doc_max_mag },
-//  { "min", (PyCFunction)(void(*)(void))Decimal_mpd_qmin,
-//    METH_VARARGS|METH_KEYWORDS, doc_min },
-//  { "min_mag", (PyCFunction)(void(*)(void))Decimal_mpd_qmin_mag,
-//    METH_VARARGS|METH_KEYWORDS, doc_min_mag },
-//  { "next_toward", (PyCFunction)(void(*)(void))Decimal_mpd_qnext_toward,
-//    METH_VARARGS|METH_KEYWORDS, doc_next_toward },
-//  { "quantize", (PyCFunction)(void(*)(void))Decimal_mpd_qquantize,
-//    METH_VARARGS|METH_KEYWORDS, doc_quantize },
-//  { "remainder_near", (PyCFunction)(void(*)(void))Decimal_mpd_qrem_near,
-//    METH_VARARGS|METH_KEYWORDS, doc_remainder_near },
-//
-//  /* Ternary arithmetic functions, optional context arg */
-//  { "fma", (PyCFunction)(void(*)(void))Decimal_mpd_qfma,
-//    METH_VARARGS|METH_KEYWORDS, doc_fma },
-//
-//  /* Boolean functions, no context arg */
-//  { "is_canonical", Decimal_mpd_iscanonical, METH_NOARGS, doc_is_canonical },
-//  { "is_finite", Decimal_mpd_isfinite, METH_NOARGS, doc_is_finite },
-//  { "is_infinite", Decimal_mpd_isinfinite, METH_NOARGS, doc_is_infinite },
-//  { "is_nan", Decimal_mpd_isnan, METH_NOARGS, doc_is_nan },
-//  { "is_qnan", Decimal_mpd_isqnan, METH_NOARGS, doc_is_qnan },
-//  { "is_snan", Decimal_mpd_issnan, METH_NOARGS, doc_is_snan },
-//  { "is_signed", Decimal_mpd_issigned, METH_NOARGS, doc_is_signed },
-//  { "is_zero", Decimal_mpd_iszero, METH_NOARGS, doc_is_zero },
-//
-//  /* Boolean functions, optional context arg */
-//  { "is_normal", (PyCFunction)(void(*)(void))Decimal_mpd_isnormal,
-//    METH_VARARGS|METH_KEYWORDS, doc_is_normal },
-//  { "is_subnormal", (PyCFunction)(void(*)(void))Decimal_mpd_issubnormal,
-//    METH_VARARGS|METH_KEYWORDS, doc_is_subnormal },
-//
-//  /* Unary functions, no context arg */
-//  { "adjusted", Decimal_mpd_adjexp, METH_NOARGS, doc_adjusted },
-//  { "canonical", Decimal_canonical, METH_NOARGS, doc_canonical },
-//  { "conjugate", Decimal_conjugate, METH_NOARGS, doc_conjugate },
-//  { "radix", Decimal_mpd_radix, METH_NOARGS, doc_radix },
-//
-//  /* Unary functions, optional context arg for conversion errors */
-//  { "copy_abs", Decimal_mpd_qcopy_abs, METH_NOARGS, doc_copy_abs },
-//  { "copy_negate", Decimal_mpd_qcopy_negate, METH_NOARGS, doc_copy_negate },
-//
-//  /* Unary functions, optional context arg */
-//  { "logb", (PyCFunction)(void(*)(void))Decimal_mpd_qlogb,
-//    METH_VARARGS|METH_KEYWORDS, doc_logb },
-//  { "logical_invert", (PyCFunction)(void(*)(void))Decimal_mpd_qinvert,
-//    METH_VARARGS|METH_KEYWORDS, doc_logical_invert },
-//  { "number_class", (PyCFunction)(void(*)(void))Decimal_mpd_class,
-//    METH_VARARGS|METH_KEYWORDS, doc_number_class },
-//  { "to_eng_string", (PyCFunction)(void(*)(void))Decimal_mpd_to_eng,
-//    METH_VARARGS|METH_KEYWORDS, doc_to_eng_string },
-//
-//  /* Binary functions, optional context arg for conversion errors */
-//  { "compare_total", (PyCFunction)(void(*)(void))Decimal_mpd_compare_total,
-//    METH_VARARGS|METH_KEYWORDS, doc_compare_total },
-//  { "compare_total_mag", (PyCFunction)(void(*)(void))
-//  Decimal_mpd_compare_total_mag, METH_VARARGS|METH_KEYWORDS,
-//  doc_compare_total_mag },
-//  { "copy_sign", (PyCFunction)(void(*)(void))Decimal_mpd_qcopy_sign,
-//    METH_VARARGS|METH_KEYWORDS, doc_copy_sign },
-//  { "same_quantum", (PyCFunction)(void(*)(void))Decimal_mpd_same_quantum,
-//    METH_VARARGS|METH_KEYWORDS, doc_same_quantum },
-//
-//  /* Binary functions, optional context arg */
-//  { "logical_and", (PyCFunction)(void(*)(void))Decimal_mpd_qand,
-//    METH_VARARGS|METH_KEYWORDS, doc_logical_and },
-//  { "logical_or", (PyCFunction)(void(*)(void))Decimal_mpd_qor,
-//    METH_VARARGS|METH_KEYWORDS, doc_logical_or },
-//  { "logical_xor", (PyCFunction)(void(*)(void))Decimal_mpd_qxor,
-//    METH_VARARGS|METH_KEYWORDS, doc_logical_xor },
-//  { "rotate", (PyCFunction)(void(*)(void))Decimal_mpd_qrotate,
-//    METH_VARARGS|METH_KEYWORDS, doc_rotate },
-//  { "scaleb", (PyCFunction)(void(*)(void))Decimal_mpd_qscaleb,
-//    METH_VARARGS|METH_KEYWORDS, doc_scaleb },
-//  { "shift", (PyCFunction)(void(*)(void))Decimal_mpd_qshift,
-//    METH_VARARGS|METH_KEYWORDS, doc_shift },
-//
-//  /* Miscellaneous */
-//  { "from_float", DecimalType_from_float, METH_O|METH_CLASS, doc_from_float },
-//  { "as_tuple", Decimal_AsTuple, METH_NOARGS, doc_as_tuple },
-//  { "as_integer_ratio", Decimal_as_integer_ratio, METH_NOARGS,
-//    doc_as_integer_ratio },
-//
-//  /* Special methods */
-//  { "__copy__", Decimal_copy, METH_NOARGS, NULL },
-//  { "__deepcopy__", Decimal_copy, METH_O, NULL },
-//  { "__format__", Decimal_format, METH_VARARGS, NULL },
-//  { "__reduce__", Decimal_reduce, METH_NOARGS, NULL },
-//  { "__round__", Decimal_Round, METH_VARARGS, NULL },
-//  { "__ceil__", Decimal_ceil, METH_NOARGS, NULL },
-//  { "__floor__", Decimal_floor, METH_NOARGS, NULL },
-//  { "__trunc__", Decimal_trunc, METH_NOARGS, NULL },
-//  { "__complex__", Decimal_complex, METH_NOARGS, NULL },
-//  { "__sizeof__", Decimal_sizeof, METH_NOARGS, NULL },
-//
-//  { NULL, NULL, 1 }
-//};
-//
-//static PyTypeObject DecimalType =
-//{
-//    PyVarObject_HEAD_INIT(NULL, 0)
-//    "decimal.Decimal",                      /* tp_name */
-//    sizeof(DecimalObject),                    /* tp_basicsize */
-//    0,                                      /* tp_itemsize */
-//    (destructor) Decimal_dealloc,               /* tp_dealloc */
-//    0,                                      /* tp_vectorcall_offset */
-//    (getattrfunc) 0,                        /* tp_getattr */
-//    (setattrfunc) 0,                        /* tp_setattr */
-//    0,                                      /* tp_as_async */
-//    (reprfunc) Decimal_repr,                    /* tp_repr */
-//    &Decimal_number_methods,                    /* tp_as_number */
-//    0,                                      /* tp_as_sequence */
-//    0,                                      /* tp_as_mapping */
-//    (hashfunc) Decimal_hash,                    /* tp_hash */
-//    0,                                      /* tp_call */
-//    (reprfunc) Decimal_str,                     /* tp_str */
-//    (getattrofunc) PyObject_GenericGetAttr, /* tp_getattro */
-//    (setattrofunc) 0,                       /* tp_setattro */
-//    (PyBufferProcs *) 0,                    /* tp_as_buffer */
-//    (Py_TPFLAGS_DEFAULT|
-//     Py_TPFLAGS_BASETYPE),                  /* tp_flags */
-//    doc_decimal,                            /* tp_doc */
-//    0,                                      /* tp_traverse */
-//    0,                                      /* tp_clear */
-//    Decimal_richcompare,                        /* tp_richcompare */
-//    0,                                      /* tp_weaklistoffset */
-//    0,                                      /* tp_iter */
-//    0,                                      /* tp_iternext */
-//    Decimal_methods,                            /* tp_methods */
-//    0,                                      /* tp_members */
-//    Decimal_getsets,                            /* tp_getset */
-//    0,                                      /* tp_base */
-//    0,                                      /* tp_dict */
-//    0,                                      /* tp_descr_get */
-//    0,                                      /* tp_descr_set */
-//    0,                                      /* tp_dictoffset */
-//    0,                                      /* tp_init */
-//    0,                                      /* tp_alloc */
-//    Decimal_new,                                /* tp_new */
-//    PyObject_Del,                           /* tp_free */
-//};
+static PyGetSetDef Decimal_properties[] = {
+    {"precision", (getter)Decimal_precision_get, 0,
+     "Return precision of `self`.", 0},
+    {"magnitude", (getter)Decimal_magnitude_get, 0,
+     "Return magnitude of `self` in terms of power to 10.\n\n"
+     "I.e. the largest integer exp so that 10 ** exp <= self.\n\n", 0},
+    {"numerator", (getter)Decimal_numerator_get, 0,
+     "Return the normalized numerator of `self`.\n\n"
+     "I. e. the numerator from the pair of integers with the smallest\n"
+     "positive denominator, whose ratio is equal to `self`.\n\n", 0},
+    {"denominator", (getter)Decimal_denominator_get, 0,
+     "Return the normalized denominator of 'self'.\n\n"
+     "I. e. the smallest positive denominator from the pairs of integers,\n"
+     "whose ratio is equal to `self`.\n\n", 0},
+    {"real", (getter)Decimal_real_get, 0,
+     "Return real part of `self`.\n\n"
+     "Returns `self` (Real numbers are their real component).\n\n", 0},
+    {"imag", (getter)Decimal_imag_get, 0,
+     "Return imaginary part of `self`.\n\n"
+     "Returns 0 (Real numbers have no imaginary component).\n\n", 0},
+    {0, 0, 0, 0, 0}
+};
 
 static PyMethodDef Decimal_methods[] = {
     /* class methods */
@@ -835,9 +683,15 @@ static PyMethodDef Decimal_methods[] = {
 };
 
 static PyType_Slot decimal_type_slots[] = {
+    //{Py_tp_doc, DecimalType_doc},
     {Py_tp_new, DecimalType_new},
     {Py_tp_dealloc, Decimal_dealloc},
     {Py_tp_richcompare, Decimal_richcompare},
+    {Py_tp_hash, Decimal_hash},
+    //{Py_tp_str, Decimal_str},
+    //{Py_tp_repr, Decimal_repr},
+    /* properties */
+    {Py_tp_getset, Decimal_properties},
     /* number methods */
     {Py_nb_add, Decimal_add},
     {Py_nb_subtract, Decimal_sub},
