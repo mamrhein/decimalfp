@@ -15,7 +15,7 @@ $Revision$
 
 #include <assert.h>
 
-#include "shifted_int_.h"
+#include "shifted_int.h"
 #include "fpdec.h"
 
 /*****************************************************************************

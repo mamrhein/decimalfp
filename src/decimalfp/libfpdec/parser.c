@@ -15,7 +15,7 @@ $Revision$
 #include <ctype.h>
 #include <stddef.h>
 
-#include "common_.h"
+#include "helper_macros.h"
 #include "parser.h"
 
 /*****************************************************************************

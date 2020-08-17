@@ -1,6 +1,6 @@
 /*
 ------------------------------------------------------------------------------
-Name:        common_.h
+Name:        helper_macros.h
 
 Author:      Michael Amrhein (michael@adrhinum.de)
 
@@ -14,19 +14,13 @@ $Revision$
 */
 
 
-#ifndef FPDEC_COMMON__H
-#define FPDEC_COMMON__H
+#ifndef FPDEC_HELPER_MACROS_H
+#define FPDEC_HELPER_MACROS_H
 
 #include <stddef.h>
 
 #include "common.h"
 
-
-/*****************************************************************************
-*  Types
-*****************************************************************************/
-
-typedef unsigned char dec_digit_t;
 
 /*****************************************************************************
 *  Macros
@@ -89,4 +83,4 @@ static uint128_t _DW_10_POWS[10] = {
 };
 #define _DW_10_POW_N(exp) (_DW_10_POWS[exp - 20])
 
-#endif //FPDEC_COMMON__H
+#endif //FPDEC_HELPER_MACROS_H

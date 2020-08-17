@@ -15,7 +15,7 @@ $Revision$
 #ifndef FPDEC_PARSER_H
 #define FPDEC_PARSER_H
 
-#include "common_.h"
+#include "helper_macros.h"
 
 
 /*****************************************************************************

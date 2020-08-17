@@ -1,6 +1,6 @@
 /*
 ------------------------------------------------------------------------------
-Name:        rounding_.h
+Name:        rounding_helper.h
 
 Author:      Michael Amrhein (michael@adrhinum.de)
 
@@ -13,8 +13,8 @@ $Source$
 $Revision$
 */
 
-#ifndef FPDEC_ROUNDING__H
-#define FPDEC_ROUNDING__H
+#ifndef FPDEC_ROUNDING_HELPER_H
+#define FPDEC_ROUNDING_HELPER_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -161,4 +161,4 @@ round_u128(fpdec_sign_t sign, uint128_t *quot, uint128_t *rem,
 }
 #endif // __cplusplus
 
-#endif //FPDEC_ROUNDING__H
+#endif //FPDEC_ROUNDING_HELPER_H

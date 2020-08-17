@@ -17,7 +17,7 @@ $Revision$
 
 #include <assert.h>
 
-#include "common_.h"
+#include "helper_macros.h"
 
 /*****************************************************************************
 *  Macros

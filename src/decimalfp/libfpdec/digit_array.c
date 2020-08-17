@@ -17,19 +17,9 @@ $Revision$
 #include <string.h>
 
 #include "basemath.h"
-#include "digit_array_.h"
-#include "rounding_.h"
-
-
-/*****************************************************************************
-*  Macros
-*****************************************************************************/
-
-#define BITS_PER_DIGIT 64
-#define BYTES_PER_DIGIT 8                       // BITS_PER_DIGIT / 8
-#define DEC_DIGITS_PER_DIGIT 19                 // int(log10(2 ** 64))
-#define RADIX 10000000000000000000UL            // 10 ** DEC_DIGITS_PER_DIGIT
-#define MAX_DIGIT 9999999999999999999UL         // RADIX - 1
+#include "digit_array.h"
+#include "digit_array_struct.h"
+#include "rounding_helper.h"
 
 
 /*****************************************************************************
@@ -137,7 +127,9 @@ digits_from_digits(fpdec_digit_array_t **digit_array,
     assert(n_digits > 0);
     assert(*digits != 0);
 
+    // eliminate leading zeros
     for (; n_digits > 0 && digits[n_digits - 1] == 0; --n_digits);
+
     *digit_array = digits_alloc(n_digits);
     if (*digit_array == NULL) MEMERROR
 

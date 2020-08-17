@@ -15,7 +15,7 @@ $Revision$
 
 #include <assert.h>
 
-#include "rounding_.h"
+#include "rounding_helper.h"
 
 
 static enum FPDEC_ROUNDING_MODE dflt_rounding_mode = FPDEC_ROUND_HALF_EVEN;
