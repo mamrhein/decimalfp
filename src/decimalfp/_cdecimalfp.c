@@ -39,7 +39,7 @@ static PyObject *StdLibDecimal = NULL;
 
 // Python math functions
 
-static PyObject *PyNumber_gcd;
+static PyCFunction PyNumber_gcd;
 
 // *** error handling ***
 
@@ -845,11 +845,7 @@ fpdec_as_integer_ratio(PyObject **numerator, PyObject **denominator,
         ASSIGN_AND_CHECK_NULL(py_exp, PyLong_FromLong(-exp));
         ASSIGN_AND_CHECK_NULL(ten_pow_exp,
                               PyNumber_Power(PyTEN, py_exp, Py_None));
-        ASSIGN_AND_CHECK_NULL(gcd,
-                              PyObject_CallFunctionObjArgs(PyNumber_gcd,
-                                                           coeff,
-                                                           ten_pow_exp,
-                                                           NULL));
+        ASSIGN_AND_CHECK_NULL(gcd, PyNumber_gcd(coeff, ten_pow_exp));
         ASSIGN_AND_CHECK_NULL(*numerator, PyNumber_FloorDivide(coeff, gcd));
         *denominator = PyNumber_FloorDivide(ten_pow_exp, gcd);
         if (*denominator == NULL) {
@@ -908,7 +904,8 @@ cdecimalfp_exec(PyObject *module) {
     /* Import from math */
     PyObject *math = NULL;
     ASSIGN_AND_CHECK_NULL(math, PyImport_ImportModule("math"));
-    ASSIGN_AND_CHECK_NULL(PyNumber_gcd, PyObject_GetAttrString(math, "gcd"));
+    ASSIGN_AND_CHECK_NULL(PyNumber_gcd,
+                          (PyCFunction)PyObject_GetAttrString(math, "gcd"));
     Py_CLEAR(math);
 
     /* Init libfpdec memory handlers */
