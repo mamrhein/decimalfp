@@ -579,15 +579,9 @@ const v_adjust_to_prec vtab_adjust_to_prec[2] = {fpdec_shint_adjust_to_prec,
                                                  fpdec_dyn_adjust_to_prec};
 
 error_t
-fpdec_adjusted(fpdec_t *fpdec, const fpdec_t *src,
-               const fpdec_dec_prec_t dec_prec,
-               const enum FPDEC_ROUNDING_MODE rounding) {
+fpdec_adjust(fpdec_t *fpdec, const fpdec_dec_prec_t dec_prec,
+             const enum FPDEC_ROUNDING_MODE rounding) {
     error_t rc;
-
-    ASSERT_FPDEC_IS_ZEROED(fpdec);
-
-    rc = fpdec_copy(fpdec, src);
-    if (rc == ENOMEM) MEMERROR
 
     if (FPDEC_DEC_PREC(fpdec) == dec_prec)
         return FPDEC_OK;
@@ -599,6 +593,20 @@ fpdec_adjusted(fpdec_t *fpdec, const fpdec_t *src,
     }
 
     return DISPATCH_FUNC_VA(vtab_adjust_to_prec, fpdec, dec_prec, rounding);
+}
+
+error_t
+fpdec_adjusted(fpdec_t *fpdec, const fpdec_t *src,
+               const fpdec_dec_prec_t dec_prec,
+               const enum FPDEC_ROUNDING_MODE rounding) {
+    error_t rc;
+
+    ASSERT_FPDEC_IS_ZEROED(fpdec);
+
+    rc = fpdec_copy(fpdec, src);
+    if (rc == ENOMEM) MEMERROR
+
+    return fpdec_adjust(fpdec, dec_prec, rounding);
 }
 
 // Basic arithmetic operations
