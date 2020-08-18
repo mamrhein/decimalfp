@@ -18,10 +18,8 @@ $Revision$
 #include <Python.h>
 #include "_cdecimalfp_docstrings.h"
 #include "libfpdec/fpdec.h"
-
-// TODO: include constants from libfpdec?
-#define DEC_DIGITS_PER_DIGIT 19             // int(log10(2^64))
-#define RADIX 10000000000000000000UL        // 10 ** DEC_DIGITS_PER_DIGIT
+#include "libfpdec/fpdec_struct.h"
+#include "libfpdec/digit_array_struct.h"
 
 #define ASSIGN_AND_CHECK_NULL(result, expr) \
     do { result = (expr); if (result == NULL) goto ERROR; } while (0)
@@ -771,7 +769,7 @@ fpdec_dec_coeff_exp(PyObject **coeff, const fpdec_t *fpdec) {
         *coeff = digits_as_int(fpdec->digit_array);
         if (*coeff == NULL)
             return 0;
-        return FPDEC_EXP(fpdec) * DEC_DIGITS_PER_DIGIT;
+        return FPDEC_DYN_EXP(fpdec) * DEC_DIGITS_PER_DIGIT;
     }
     else {
         if (fpdec->hi == 0)
@@ -843,8 +841,7 @@ fpdec_as_integer_ratio(PyObject **numerator, PyObject **denominator,
     }
     else {
         // *numerator = coeff, *denominator = 10 ^ -exp, but they may need
-        // to be
-        // normalized!
+        // to be normalized!
         ASSIGN_AND_CHECK_NULL(py_exp, PyLong_FromLong(-exp));
         ASSIGN_AND_CHECK_NULL(ten_pow_exp,
                               PyNumber_Power(PyTEN, py_exp, Py_None));
