@@ -80,27 +80,32 @@ runtime_error_ptr(const char *msg) {
 }
 
 #define CHECK_FPDEC_ERROR(rc)                                               \
+    do {                                                                    \
     switch (rc) {                                                           \
         case FPDEC_OK:                                                      \
             break;                                                          \
         case ENOMEM:                                                        \
-            return PyErr_NoMemory();                                        \
+            PyErr_SetNone(PyExc_MemoryError);                               \
+            goto ERROR;                                                     \
         case FPDEC_PREC_LIMIT_EXCEEDED:                                     \
-            return value_error_ptr("Precision limit exceeded.");            \
+            PyErr_SetString(PyExc_ValueError, "Precision limit exceeded."); \
+            goto ERROR;                                                     \
         case FPDEC_EXP_LIMIT_EXCEEDED:                                      \
         case FPDEC_N_DIGITS_LIMIT_EXCEEDED:                                 \
             PyErr_SetString(PyExc_OverflowError,                            \
                             "Internal limit exceeded.");                    \
-            return NULL;                                                    \
+            goto ERROR;                                                     \
         case FPDEC_INVALID_DECIMAL_LITERAL:                                 \
-            return value_error_ptr("Invalid Decimal literal.");             \
+            PyErr_SetString(PyExc_ValueError, "Invalid Decimal literal.");  \
+            goto ERROR;                                                     \
         case FPDEC_DIVIDE_BY_ZERO:                                          \
             PyErr_SetString(PyExc_ZeroDivisionError, "Division by zero.");  \
-            return NULL;                                                    \
+            goto ERROR;                                                     \
         default:                                                            \
             PyErr_SetString(PyExc_SystemError, "Unknown error code.");      \
-            return NULL;                                                    \
-    }
+            goto ERROR;                                                     \
+    }} while (0)
+
 
 // *** Python number constants ***
 
@@ -176,25 +181,33 @@ Decimal_dealloc(DecimalObject *self) {
     Py_DECREF(tp);
 }
 
-#define DECIMAL_ALLOC(type) \
-    DecimalObject *self; \
-    do {self = DecimalType_alloc(type); \
-        if (self == NULL) \
+#define DECIMAL_ALLOC(type, name) \
+    do {name = DecimalType_alloc(type); \
+        if (name == NULL) \
             return NULL;  \
         } while (0)
+
+#define DECIMAL_ALLOC_SELF(type) \
+    DecimalObject *self; \
+    DECIMAL_ALLOC(type, self)
 
 static PyObject *
 DecimalType_from_fpdec(PyTypeObject *type, fpdec_t *fpdec,
                        long adjust_to_prec) {
     error_t rc;
-    DECIMAL_ALLOC(type);
+    DECIMAL_ALLOC_SELF(type);
 
     if (adjust_to_prec == -1 || adjust_to_prec == FPDEC_DEC_PREC(fpdec))
         rc = fpdec_copy(&self->fpdec, fpdec);
     else
         rc = fpdec_adjusted(&self->fpdec, fpdec, adjust_to_prec,
                             FPDEC_ROUND_DEFAULT);
-    CHECK_FPDEC_ERROR(rc)
+    CHECK_FPDEC_ERROR(rc);
+    return (PyObject *)self;
+
+ERROR:
+    Decimal_dealloc(self);
+    return NULL;
 }
 
 static PyObject *
@@ -216,7 +229,7 @@ static PyObject *
 DecimalType_from_obj(PyTypeObject *type, PyObject *obj, long adjust_to_prec) {
 
     if (obj == Py_None) {
-        DECIMAL_ALLOC(type);
+        DECIMAL_ALLOC_SELF(type);
         self->fpdec.dec_prec = Py_MAX(0, adjust_to_prec);        \
         return (PyObject *)self;
     }
@@ -225,6 +238,9 @@ DecimalType_from_obj(PyTypeObject *type, PyObject *obj, long adjust_to_prec) {
         if (type == DecimalType && (adjust_to_prec == -1 ||
                                     ((DecimalObject *)obj)->fpdec.dec_prec ==
                                     adjust_to_prec)) {
+            // obj is a direct instance of DecimalType, a direct instance of
+            // DecinalType is wanted and there's no need to adjust the result,
+            // so just return the given instance (ref count increased)
             Py_IncRef(obj);
             return obj;
         }
@@ -509,11 +525,15 @@ Decimal_neg(PyObject *x) {
     if (FPDEC_EQ_ZERO(x_fpdec))
         return x;
 
-    dec = DecimalType_alloc(Py_TYPE(x));
+    DECIMAL_ALLOC(Py_TYPE(x), dec);
     rc = fpdec_copy(&dec->fpdec, x_fpdec);
     CHECK_FPDEC_ERROR(rc);
     dec->fpdec.sign *= -1;
     return (PyObject *)dec;
+
+ERROR:
+    Decimal_dealloc(dec);
+    return NULL;
 }
 
 static PyObject *
@@ -530,11 +550,15 @@ Decimal_abs(PyObject *x) {
     if (FPDEC_SIGN(x_fpdec) != FPDEC_SIGN_NEG)
         return x;
 
-    dec = DecimalType_alloc(Py_TYPE(x));
+    DECIMAL_ALLOC(Py_TYPE(x), dec);
     rc = fpdec_copy(&dec->fpdec, x_fpdec);
     CHECK_FPDEC_ERROR(rc);
     dec->fpdec.sign = 1;
     return (PyObject *)dec;
+
+ERROR:
+    Decimal_dealloc(dec);
+    return NULL;
 }
 
 static PyObject *
