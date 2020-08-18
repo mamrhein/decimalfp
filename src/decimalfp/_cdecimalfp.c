@@ -234,7 +234,7 @@ DecimalType_from_obj(PyTypeObject *type, PyObject *obj, long adjust_to_prec) {
         return (PyObject *)self;
     }
 
-    if (PyObject_IsInstance(obj, (PyObject *)DecimalType)) {
+    if (Decimal_Check(obj)) {
         if (type == DecimalType && (adjust_to_prec == -1 ||
                                     ((DecimalObject *)obj)->fpdec.dec_prec ==
                                     adjust_to_prec)) {
