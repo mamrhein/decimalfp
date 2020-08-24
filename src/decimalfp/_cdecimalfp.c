@@ -176,7 +176,6 @@ Decimal_dealloc(DecimalObject *self) {
     fpdec_reset_to_zero(&self->fpdec, 0);
     Py_XDECREF(self->numerator);
     Py_XDECREF(self->denominator);
-    Py_XDECREF(self->hash);
     PyObject_Free(self);
     Py_DECREF(tp);
 }
