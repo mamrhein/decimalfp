@@ -289,6 +289,7 @@ DecimalType_from_obj(PyTypeObject *type, PyObject *obj, long adjust_to_prec) {
         return (PyObject *)self;
     }
 
+    // Decimal
     if (Decimal_Check(obj)) {
         if (type == DecimalType && (adjust_to_prec == -1 ||
                                     ((DecimalObject *)obj)->fpdec.dec_prec ==
@@ -303,8 +304,20 @@ DecimalType_from_obj(PyTypeObject *type, PyObject *obj, long adjust_to_prec) {
                                       adjust_to_prec);
     }
 
+    // Python <int>
     if (PyLong_Check(obj)) {
         return DecimalType_from_int(type, obj, adjust_to_prec);
+    }
+
+    // Integral
+    if (PyObject_IsInstance(obj, Integral)) {
+        PyObject *d;
+        PyObject *i = PyNumber_Index(obj);
+        if (i == NULL)
+            return NULL;
+        d = DecimalType_from_int(type, i, adjust_to_prec);
+        Py_DECREF(i);
+        return d;
     }
 
     // unable to create Decimal
