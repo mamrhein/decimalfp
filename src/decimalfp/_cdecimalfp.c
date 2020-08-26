@@ -16,6 +16,7 @@ $Revision$
 #define Py_LIMITED_API 0x03060000
 
 #include <Python.h>
+#include <math.h>
 #include "_cdecimalfp_docstrings.h"
 #include "libfpdec/fpdec.h"
 #include "libfpdec/fpdec_struct.h"
@@ -39,7 +40,11 @@ static PyObject *StdLibDecimal = NULL;
 
 // Python math functions
 
-static PyCFunction PyNumber_gcd;
+static PyObject *PyNumber_gcd = NULL;
+
+// PyLong methods
+
+static PyObject *PyLong_bit_length = NULL;
 
 // *** error handling ***
 
@@ -109,10 +114,11 @@ runtime_error_ptr(const char *msg) {
 
 // *** Python number constants ***
 
-static PyObject *PyZERO;
-static PyObject *PyONE;
-static PyObject *PyTEN;
-static PyObject *PyRADIX;
+static PyObject *PyZERO = NULL;
+static PyObject *PyONE = NULL;
+static PyObject *PyTEN = NULL;
+static PyObject *PyRADIX = NULL;
+static PyObject *Py2pow64 = NULL;
 
 // *** Helper prototypes ***
 
@@ -122,6 +128,12 @@ fpdec_dec_coeff_exp(PyObject **coeff, const fpdec_t *fpdec);
 static void
 fpdec_as_integer_ratio(PyObject **numerator, PyObject **denominator,
                        const fpdec_t *fpdec);
+
+static inline size_t
+n_digits_needed(size_t n, uint64_t fb, uint64_t tb);
+
+static error_t
+fpdec_from_pylong(fpdec_t *fpdec, PyObject *val);
 
 // *** Decimal type ***
 
@@ -172,11 +184,13 @@ DecimalType_alloc(PyTypeObject *type) {
 
 static void
 Decimal_dealloc(DecimalObject *self) {
+    freefunc tp_free;
     PyTypeObject *tp = Py_TYPE(self);
     fpdec_reset_to_zero(&self->fpdec, 0);
-    Py_XDECREF(self->numerator);
-    Py_XDECREF(self->denominator);
-    PyObject_Free(self);
+    Py_CLEAR(self->numerator);
+    Py_CLEAR(self->denominator);
+    tp_free = (freefunc)PyType_GetSlot(tp, Py_tp_free);
+    tp_free(self);
     Py_DECREF(tp);
 }
 
@@ -210,6 +224,44 @@ ERROR:
 }
 
 static PyObject *
+DecimalType_from_int(PyTypeObject *type, PyObject *val, long adjust_to_prec) {
+    long long lval;
+    error_t rc;
+    fpdec_t *fpdec;
+    DECIMAL_ALLOC_SELF(type);
+
+    fpdec = &self->fpdec;
+    lval = PyLong_AsLongLong(val);
+    if (PyErr_Occurred() == NULL) {
+        rc = fpdec_from_long_long(fpdec, lval);
+        CHECK_FPDEC_ERROR(rc);
+    }
+    else if (PyErr_ExceptionMatches(PyExc_OverflowError)) {
+        PyErr_Clear();
+        // handle PyLong out of range of long long
+        rc = fpdec_from_pylong(fpdec, val);
+        CHECK_FPDEC_ERROR(rc);
+    }
+    else
+        // some other exception occured
+        goto ERROR;
+
+    if (adjust_to_prec != -1 && adjust_to_prec != FPDEC_DEC_PREC(fpdec)) {
+        rc = fpdec_adjust(fpdec, adjust_to_prec, FPDEC_ROUND_DEFAULT);
+        CHECK_FPDEC_ERROR(rc);
+    }
+    Py_INCREF(val);
+    self->numerator = val;
+    Py_INCREF(PyONE);
+    self->denominator = PyONE;
+    return (PyObject *)self;
+
+ERROR:
+    Decimal_dealloc(self);
+    return NULL;
+}
+
+static PyObject *
 DecimalType_from_float(PyTypeObject *type, PyObject *f) {
     Py_RETURN_NOTIMPLEMENTED;
 }
@@ -229,7 +281,11 @@ DecimalType_from_obj(PyTypeObject *type, PyObject *obj, long adjust_to_prec) {
 
     if (obj == Py_None) {
         DECIMAL_ALLOC_SELF(type);
-        self->fpdec.dec_prec = Py_MAX(0, adjust_to_prec);        \
+        self->fpdec.dec_prec = Py_MAX(0, adjust_to_prec);
+        Py_INCREF(PyZERO);
+        self->numerator = PyZERO;
+        Py_INCREF(PyONE);
+        self->denominator = PyONE;
         return (PyObject *)self;
     }
 
@@ -245,6 +301,10 @@ DecimalType_from_obj(PyTypeObject *type, PyObject *obj, long adjust_to_prec) {
         }
         return DecimalType_from_fpdec(type, &((DecimalObject *)obj)->fpdec,
                                       adjust_to_prec);
+    }
+
+    if (PyLong_Check(obj)) {
+        return DecimalType_from_int(type, obj, adjust_to_prec);
     }
 
     // unable to create Decimal
@@ -751,9 +811,9 @@ static PyType_Spec DecimalType_spec = {
 
 static PyObject *
 digits_as_int(fpdec_digit_array_t *digit_array) {
-    PyObject *res;
-    PyObject *mult;
-    PyObject *digit;
+    PyObject *res = NULL;
+    PyObject *mult = NULL;
+    PyObject *digit = NULL;
     ssize_t idx = digit_array->n_signif - 1;
 
     assert(digit_array->n_signif > 0);
@@ -868,7 +928,10 @@ fpdec_as_integer_ratio(PyObject **numerator, PyObject **denominator,
         ASSIGN_AND_CHECK_NULL(py_exp, PyLong_FromLong(-exp));
         ASSIGN_AND_CHECK_NULL(ten_pow_exp,
                               PyNumber_Power(PyTEN, py_exp, Py_None));
-        ASSIGN_AND_CHECK_NULL(gcd, PyNumber_gcd(coeff, ten_pow_exp));
+        ASSIGN_AND_CHECK_NULL(gcd, PyObject_CallFunctionObjArgs(PyNumber_gcd,
+                                                                coeff,
+                                                                ten_pow_exp,
+                                                                NULL));
         ASSIGN_AND_CHECK_NULL(*numerator, PyNumber_FloorDivide(coeff, gcd));
         *denominator = PyNumber_FloorDivide(ten_pow_exp, gcd);
         if (*denominator == NULL) {
@@ -884,11 +947,112 @@ ERROR:
     Py_XDECREF(gcd);
 }
 
+/* No. of digits base tb needed to represent an n-digit number base fb */
+static inline size_t
+n_digits_needed(size_t n, uint64_t fb, uint64_t tb) {
+    const double log10_2pow64 = log10(pow(2, 64));
+    double log10_fb = (fb == 0) ? log10_2pow64 : log10(fb);
+    double log10_tb = (tb == 0) ? log10_2pow64 : log10(tb);
+    return (size_t)ceil(log10_fb * n / log10_tb);
+}
+
+static inline uint128_t
+PyLong_as_u128(PyObject *val) {
+    // val must be a PyLong and must be >= 0 and < 2 ^ 96 !!!
+    uint128_t res;
+    PyObject *t, *q, *r;
+
+    t = PyNumber_Divmod(val, Py2pow64);
+    q = PySequence_GetItem(t, 0);
+    r = PySequence_GetItem(t, 1);
+    Py_DECREF(t);
+    res.lo = PyLong_AsUnsignedLongLong(r);
+    Py_DECREF(r);
+    res.hi = PyLong_AsUnsignedLongLong(q);
+    Py_DECREF(q);
+    return res;
+}
+
+static inline error_t
+PyLong_as_digit_array(fpdec_digit_t *res, const size_t n_digits,
+                      PyObject *val) {
+    // val must be a PyLong and must be > 0 !!!
+    fpdec_digit_t *digit = res;
+    PyObject *t, *q, *r;
+
+    q = val;
+    Py_INCREF(q);
+    while (PyObject_RichCompareBool(q, PyZERO, Py_GT)) {
+        t = PyNumber_Divmod(q, PyRADIX);
+        Py_DECREF(q);
+        q = PySequence_GetItem(t, 0);
+        r = PySequence_GetItem(t, 1);
+        Py_DECREF(t);
+        *digit = PyLong_AsUnsignedLongLong(r);
+        digit++;
+        Py_DECREF(r);
+    }
+    Py_DECREF(q);
+    return FPDEC_OK;
+}
+
+static error_t
+fpdec_from_pylong(fpdec_t *fpdec, PyObject *val) {
+    // val must be a PyLong and must not equal 0 !!!
+    error_t rc;
+    PyObject *n_bits = NULL;
+    size_t size_base_2;
+    PyObject *abs_val = NULL;
+    fpdec_sign_t sign;
+
+    assert(!PyObject_RichCompareBool(val, PyZERO, Py_EQ));
+
+    if (PyObject_RichCompareBool(val, PyZERO, Py_LT)) {
+        abs_val = PyNumber_Absolute(val);
+        if (abs_val == NULL)
+            return ENOMEM;
+        sign = FPDEC_SIGN_NEG;
+    }
+    else {
+        abs_val = val;
+        Py_INCREF(abs_val);
+        sign = FPDEC_SIGN_POS;
+    }
+    n_bits = PyObject_CallFunctionObjArgs(PyLong_bit_length, abs_val, NULL);
+    size_base_2 = PyLong_AsSize_t(n_bits);
+    Py_DECREF(n_bits);
+    if (size_base_2 <= 96) {
+        uint128_t i = PyLong_as_u128(abs_val);
+        Py_DECREF(abs_val);
+        fpdec->lo = i.lo;
+        fpdec->hi = i.hi;
+        FPDEC_SIGN(fpdec) = sign;
+        return FPDEC_OK;
+    }
+    else {
+        size_t n_digits = n_digits_needed(size_base_2, 2, RADIX);
+        fpdec_digit_t *digits =
+            (fpdec_digit_t *)fpdec_mem_alloc(n_digits, sizeof(fpdec_digit_t));
+        if (digits == NULL) {
+            Py_DECREF(abs_val);
+            return ENOMEM;
+        }
+        rc = PyLong_as_digit_array(digits, n_digits, abs_val);
+        Py_DECREF(abs_val);
+        if (rc == FPDEC_OK)
+            rc = fpdec_from_sign_digits_exp(fpdec, sign, n_digits, digits, 0);
+        fpdec_mem_free(digits);
+        return rc;
+    }
+}
+
 // *** _cdecimalfp module ***
 
 static int
 PyModule_AddType(PyObject *module, const char *name, PyObject *type) {
     Py_INCREF(type);
+    PyObject_SetAttrString(type, "__module__",
+                           PyModule_GetNameObject(module));
     if (PyModule_AddObject(module, name, type) < 0) {
         Py_DECREF(type);
         return -1;
@@ -927,19 +1091,26 @@ cdecimalfp_exec(PyObject *module) {
     /* Import from math */
     PyObject *math = NULL;
     ASSIGN_AND_CHECK_NULL(math, PyImport_ImportModule("math"));
-    ASSIGN_AND_CHECK_NULL(PyNumber_gcd,
-                          (PyCFunction)PyObject_GetAttrString(math, "gcd"));
+    ASSIGN_AND_CHECK_NULL(PyNumber_gcd, PyObject_GetAttrString(math, "gcd"));
     Py_CLEAR(math);
+
+    /* PyLong methods */
+    ASSIGN_AND_CHECK_NULL(PyLong_bit_length,
+                          PyObject_GetAttrString((PyObject *)&PyLong_Type,
+                                                 "bit_length"));
 
     /* Init libfpdec memory handlers */
     fpdec_mem_alloc = PyMem_Calloc;
     fpdec_mem_free = PyMem_Free;
 
-    /* Init global constants */
+    /* Init global Python constants */
     PyZERO = PyLong_FromLong(0L);
     PyONE = PyLong_FromLong(1L);
     PyTEN = PyLong_FromLong(10L);
     PyRADIX = PyLong_FromUnsignedLong(RADIX);
+    PyObject *Py2pow32 = PyLong_FromLong(4294967296L);
+    Py2pow64 = PyNumber_Multiply(Py2pow32, Py2pow32);
+    Py_CLEAR(Py2pow32);
 
     /* Init global vars */
     PyModule_AddIntConstant(module, "MAX_DEC_PRECISION", FPDEC_MAX_DEC_PREC);
@@ -960,6 +1131,13 @@ ERROR:
     Py_CLEAR(Fraction);
     Py_CLEAR(StdLibDecimal);
     Py_CLEAR(DecimalType);
+    Py_CLEAR(PyNumber_gcd);
+    Py_CLEAR(PyLong_bit_length);
+    Py_CLEAR(PyZERO);
+    Py_CLEAR(PyONE);
+    Py_CLEAR(PyTEN);
+    Py_CLEAR(PyRADIX);
+    Py_CLEAR(Py2pow64);
     return -1;
 }
 
