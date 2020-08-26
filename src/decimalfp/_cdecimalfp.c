@@ -224,6 +224,30 @@ ERROR:
 }
 
 static PyObject *
+DecimalType_from_str(PyTypeObject *type, PyObject *val, long adjust_to_prec) {
+    wchar_t *buf;
+    error_t rc;
+    fpdec_t *fpdec;
+    DECIMAL_ALLOC_SELF(type);
+
+    fpdec = &self->fpdec;
+    ASSIGN_AND_CHECK_NULL(buf, PyUnicode_AsWideCharString(val, NULL));
+    rc = fpdec_from_unicode_literal(fpdec, buf);
+    PyMem_Free(buf);
+    CHECK_FPDEC_ERROR(rc);
+
+    if (adjust_to_prec != -1 && adjust_to_prec != FPDEC_DEC_PREC(fpdec)) {
+        rc = fpdec_adjust(fpdec, adjust_to_prec, FPDEC_ROUND_DEFAULT);
+        CHECK_FPDEC_ERROR(rc);
+    }
+    return (PyObject *)self;
+
+ERROR:
+    Decimal_dealloc(self);
+    return NULL;
+}
+
+static PyObject *
 DecimalType_from_int(PyTypeObject *type, PyObject *val, long adjust_to_prec) {
     long long lval;
     error_t rc;
@@ -304,10 +328,13 @@ DecimalType_from_obj(PyTypeObject *type, PyObject *obj, long adjust_to_prec) {
                                       adjust_to_prec);
     }
 
+    // String
+    if (PyUnicode_Check(obj))
+        return DecimalType_from_str(type, obj, adjust_to_prec);
+
     // Python <int>
-    if (PyLong_Check(obj)) {
+    if (PyLong_Check(obj))
         return DecimalType_from_int(type, obj, adjust_to_prec);
-    }
 
     // Integral
     if (PyObject_IsInstance(obj, Integral)) {
