@@ -348,7 +348,7 @@ DecimalType_from_obj(PyTypeObject *type, PyObject *obj, long adjust_to_prec) {
     }
 
     // unable to create Decimal
-    return PyErr_Format(PyExc_TypeError, "Can't convert %r to Decimal.", obj);
+    return PyErr_Format(PyExc_TypeError, "Can't convert %R to Decimal.", obj);
 }
 
 static PyObject *
