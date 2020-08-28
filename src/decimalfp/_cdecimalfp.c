@@ -316,42 +316,27 @@ DecimalType_from_integral(PyTypeObject *type, PyObject *val,
 static PyObject *
 DecimalType_from_num_den(PyTypeObject *type, PyObject *numerator,
                          PyObject *denominator, long adjust_to_prec) {
-    PyObject *ratio = NULL;
-}
-
-static PyObject *
-DecimalType_from_float(PyTypeObject *type, PyObject *val,
-                       long adjust_to_prec) {
-    PyObject *as_integer_ratio = NULL;
-    PyObject *ratio = NULL;
     error_t rc;
     fpdec_t *fpdec;
     fpdec_t num = FPDEC_ZERO;
     fpdec_t den = FPDEC_ZERO;
     DECIMAL_ALLOC_SELF(type);
 
-    ASSIGN_AND_CHECK_NULL(as_integer_ratio,
-                          PyObject_GetAttrString(val, "as_integer_ratio"));
-    ASSIGN_AND_CHECK_NULL(ratio,
-                          PyObject_CallFunctionObjArgs(as_integer_ratio,
-                                                       NULL));
-    Py_CLEAR(as_integer_ratio);
     fpdec = &self->fpdec;
-    ASSIGN_AND_CHECK_NULL(self->numerator, PySequence_GetItem(ratio, 0));
-    ASSIGN_AND_CHECK_NULL(self->denominator, PySequence_GetItem(ratio, 1));
-    Py_CLEAR(ratio);
-    rc = fpdec_from_pylong(&num, self->numerator);
+    rc = fpdec_from_pylong(&num, numerator);
     CHECK_FPDEC_ERROR(rc);
-    rc = fpdec_from_pylong(&den, self->denominator);
+    rc = fpdec_from_pylong(&den, denominator);
     CHECK_FPDEC_ERROR(rc);
     rc = fpdec_div(fpdec, &num, &den, (int)adjust_to_prec,
                    FPDEC_ROUND_DEFAULT);
     CHECK_FPDEC_ERROR(rc);
-    if (adjust_to_prec != -1) {
-        // The quotient might have been adjusted, so we need to invalidate
+    if (adjust_to_prec == -1) {
+        // The quotient has not been adjusted, so we can safely cache
         // numerator and denominator
-        Py_CLEAR(self->numerator);
-        Py_CLEAR(self->denominator);
+        Py_INCREF(numerator);
+        self->numerator = numerator;
+        Py_INCREF(denominator);
+        self->denominator = denominator;
     }
     fpdec_reset_to_zero(&num, 0);
     fpdec_reset_to_zero(&den, 0);
@@ -361,8 +346,38 @@ ERROR:
     fpdec_reset_to_zero(&num, 0);
     fpdec_reset_to_zero(&den, 0);
     Decimal_dealloc(self);
+    return NULL;
+}
+
+static PyObject *
+DecimalType_from_float(PyTypeObject *type, PyObject *val,
+                       long adjust_to_prec) {
+    PyObject *as_integer_ratio = NULL;
+    PyObject *ratio = NULL;
+    PyObject *numerator = NULL;
+    PyObject *denominator = NULL;
+    PyObject *dec = NULL;
+
+    ASSIGN_AND_CHECK_NULL(as_integer_ratio,
+                          PyObject_GetAttrString(val, "as_integer_ratio"));
+    ASSIGN_AND_CHECK_NULL(ratio,
+                          PyObject_CallFunctionObjArgs(as_integer_ratio,
+                                                       NULL));
+    Py_DECREF(as_integer_ratio);
+    ASSIGN_AND_CHECK_NULL(numerator, PySequence_GetItem(ratio, 0));
+    ASSIGN_AND_CHECK_NULL(denominator, PySequence_GetItem(ratio, 1));
+    Py_DECREF(ratio);
+    dec = DecimalType_from_num_den(type, numerator, denominator,
+                                   adjust_to_prec);
+    Py_DECREF(numerator);
+    Py_DECREF(denominator);
+    return dec;
+
+ERROR:
     Py_XDECREF(as_integer_ratio);
     Py_XDECREF(ratio);
+    Py_XDECREF(numerator);
+    Py_XDECREF(denominator);
     return NULL;
 }
 
