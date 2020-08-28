@@ -224,6 +224,22 @@ ERROR:
 }
 
 static PyObject *
+DecimalType_from_decimal(PyTypeObject *type, PyObject *val,
+                         long adjust_to_prec) {
+    if (type == DecimalType && (adjust_to_prec == -1 ||
+                                ((DecimalObject *)val)->fpdec.dec_prec ==
+                                adjust_to_prec)) {
+        // obj is a direct instance of DecimalType, a direct instance of
+        // DecinalType is wanted and there's no need to adjust the result,
+        // so just return the given instance (ref count increased)
+        Py_IncRef(val);
+        return val;
+    }
+    return DecimalType_from_fpdec(type, &((DecimalObject *)val)->fpdec,
+                                  adjust_to_prec);
+}
+
+static PyObject *
 DecimalType_from_str(PyTypeObject *type, PyObject *val, long adjust_to_prec) {
     wchar_t *buf;
     error_t rc;
@@ -286,17 +302,94 @@ ERROR:
 }
 
 static PyObject *
-DecimalType_from_float(PyTypeObject *type, PyObject *f) {
-    Py_RETURN_NOTIMPLEMENTED;
+DecimalType_from_integral(PyTypeObject *type, PyObject *val,
+                          long adjust_to_prec) {
+    PyObject *d;
+    PyObject *i = PyNumber_Long(val);
+    if (i == NULL)
+        return NULL;
+    d = DecimalType_from_int(type, i, adjust_to_prec);
+    Py_DECREF(i);
+    return d;
 }
 
 static PyObject *
-DecimalType_from_decimal(PyTypeObject *type, PyObject *d) {
-    Py_RETURN_NOTIMPLEMENTED;
+DecimalType_from_num_den(PyTypeObject *type, PyObject *numerator,
+                         PyObject *denominator, long adjust_to_prec) {
+    PyObject *ratio = NULL;
 }
 
 static PyObject *
-DecimalType_from_real(PyTypeObject *type, PyObject *r, PyObject *exact) {
+DecimalType_from_float(PyTypeObject *type, PyObject *val,
+                       long adjust_to_prec) {
+    PyObject *as_integer_ratio = NULL;
+    PyObject *ratio = NULL;
+    error_t rc;
+    fpdec_t *fpdec;
+    fpdec_t num = FPDEC_ZERO;
+    fpdec_t den = FPDEC_ZERO;
+    DECIMAL_ALLOC_SELF(type);
+
+    ASSIGN_AND_CHECK_NULL(as_integer_ratio,
+                          PyObject_GetAttrString(val, "as_integer_ratio"));
+    ASSIGN_AND_CHECK_NULL(ratio,
+                          PyObject_CallFunctionObjArgs(as_integer_ratio,
+                                                       NULL));
+    Py_CLEAR(as_integer_ratio);
+    fpdec = &self->fpdec;
+    ASSIGN_AND_CHECK_NULL(self->numerator, PySequence_GetItem(ratio, 0));
+    ASSIGN_AND_CHECK_NULL(self->denominator, PySequence_GetItem(ratio, 1));
+    Py_CLEAR(ratio);
+    rc = fpdec_from_pylong(&num, self->numerator);
+    CHECK_FPDEC_ERROR(rc);
+    rc = fpdec_from_pylong(&den, self->denominator);
+    CHECK_FPDEC_ERROR(rc);
+    rc = fpdec_div(fpdec, &num, &den, (int)adjust_to_prec,
+                   FPDEC_ROUND_DEFAULT);
+    CHECK_FPDEC_ERROR(rc);
+    if (adjust_to_prec != -1) {
+        // The quotient might have been adjusted, so we need to invalidate
+        // numerator and denominator
+        Py_CLEAR(self->numerator);
+        Py_CLEAR(self->denominator);
+    }
+    fpdec_reset_to_zero(&num, 0);
+    fpdec_reset_to_zero(&den, 0);
+    return (PyObject *)self;
+
+ERROR:
+    fpdec_reset_to_zero(&num, 0);
+    fpdec_reset_to_zero(&den, 0);
+    Decimal_dealloc(self);
+    Py_XDECREF(as_integer_ratio);
+    Py_XDECREF(ratio);
+    return NULL;
+}
+
+static PyObject *
+DecimalType_from_float_or_int(PyTypeObject *type, PyObject *val) {
+    if (PyFloat_Check(val))
+        return DecimalType_from_float(type, val, -1);
+    if (PyLong_Check(val))
+        return DecimalType_from_int(type, val, -1);
+    return PyErr_Format(PyExc_TypeError, "%R is not a float or int.", val);
+}
+
+static PyObject *
+DecimalType_from_decimal_or_int(PyTypeObject *type, PyObject *val) {
+    if (Decimal_Check(val))
+        return DecimalType_from_decimal(type, val, -1);
+    if (PyObject_IsInstance(val, StdLibDecimal))
+        return DecimalType_from_float(type, val, -1);
+    if (PyLong_Check(val))
+        return DecimalType_from_int(type, val, -1);
+    if (PyObject_IsInstance(val, Integral))
+        return DecimalType_from_integral(type, val, -1);
+    return PyErr_Format(PyExc_TypeError, "%R is not a Decimal.", val);
+}
+
+static PyObject *
+DecimalType_from_real(PyTypeObject *type, PyObject *val, PyObject *exact) {
     Py_RETURN_NOTIMPLEMENTED;
 }
 
@@ -314,19 +407,8 @@ DecimalType_from_obj(PyTypeObject *type, PyObject *obj, long adjust_to_prec) {
     }
 
     // Decimal
-    if (Decimal_Check(obj)) {
-        if (type == DecimalType && (adjust_to_prec == -1 ||
-                                    ((DecimalObject *)obj)->fpdec.dec_prec ==
-                                    adjust_to_prec)) {
-            // obj is a direct instance of DecimalType, a direct instance of
-            // DecinalType is wanted and there's no need to adjust the result,
-            // so just return the given instance (ref count increased)
-            Py_IncRef(obj);
-            return obj;
-        }
-        return DecimalType_from_fpdec(type, &((DecimalObject *)obj)->fpdec,
-                                      adjust_to_prec);
-    }
+    if (Decimal_Check(obj))
+        return DecimalType_from_decimal(type, obj, adjust_to_prec);
 
     // String
     if (PyUnicode_Check(obj))
@@ -337,15 +419,14 @@ DecimalType_from_obj(PyTypeObject *type, PyObject *obj, long adjust_to_prec) {
         return DecimalType_from_int(type, obj, adjust_to_prec);
 
     // Integral
-    if (PyObject_IsInstance(obj, Integral)) {
-        PyObject *d;
-        PyObject *i = PyNumber_Index(obj);
-        if (i == NULL)
-            return NULL;
-        d = DecimalType_from_int(type, i, adjust_to_prec);
-        Py_DECREF(i);
-        return d;
-    }
+    if (PyObject_IsInstance(obj, Integral))
+        return DecimalType_from_integral(type, obj, adjust_to_prec);
+
+    // Rational
+
+    // Python <float>, standard lib Decimal
+    if (PyFloat_Check(obj) || PyObject_IsInstance(obj, StdLibDecimal))
+        return DecimalType_from_float(type, obj, adjust_to_prec);
 
     // unable to create Decimal
     return PyErr_Format(PyExc_TypeError, "Can't convert %R to Decimal.", obj);
@@ -742,11 +823,11 @@ static PyGetSetDef Decimal_properties[] = {
 static PyMethodDef Decimal_methods[] = {
     /* class methods */
     {"from_float",
-     (PyCFunction)DecimalType_from_float,
+     (PyCFunction)DecimalType_from_float_or_int,
      METH_O | METH_CLASS,
      DecimalType_from_float_doc},
     {"from_decimal",
-     (PyCFunction)DecimalType_from_decimal,
+     (PyCFunction)DecimalType_from_decimal_or_int,
      METH_O | METH_CLASS,
      DecimalType_from_decimal_doc},
     {"from_real",
