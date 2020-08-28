@@ -350,6 +350,29 @@ ERROR:
 }
 
 static PyObject *
+DecimalType_from_rational(PyTypeObject *type, PyObject *val,
+                          long adjust_to_prec) {
+    PyObject *numerator = NULL;
+    PyObject *denominator = NULL;
+    PyObject *dec = NULL;
+
+    ASSIGN_AND_CHECK_NULL(numerator, PyObject_GetAttrString(val,
+                                                            "numerator"));
+    ASSIGN_AND_CHECK_NULL(denominator, PyObject_GetAttrString(val,
+                                                              "denominator"));
+    dec = DecimalType_from_num_den(type, numerator, denominator,
+                                   adjust_to_prec);
+    Py_DECREF(numerator);
+    Py_DECREF(denominator);
+    return dec;
+
+ERROR:
+    Py_XDECREF(numerator);
+    Py_XDECREF(denominator);
+    return NULL;
+}
+
+static PyObject *
 DecimalType_from_float(PyTypeObject *type, PyObject *val,
                        long adjust_to_prec) {
     PyObject *as_integer_ratio = NULL;
@@ -438,6 +461,8 @@ DecimalType_from_obj(PyTypeObject *type, PyObject *obj, long adjust_to_prec) {
         return DecimalType_from_integral(type, obj, adjust_to_prec);
 
     // Rational
+    if (PyObject_IsInstance(obj, Rational))
+        return DecimalType_from_rational(type, obj, adjust_to_prec);
 
     // Python <float>, standard lib Decimal
     if (PyFloat_Check(obj) || PyObject_IsInstance(obj, StdLibDecimal))
