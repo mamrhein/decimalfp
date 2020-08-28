@@ -428,7 +428,18 @@ DecimalType_from_decimal_or_int(PyTypeObject *type, PyObject *val) {
 
 static PyObject *
 DecimalType_from_real(PyTypeObject *type, PyObject *val, PyObject *exact) {
-    Py_RETURN_NOTIMPLEMENTED;
+    PyObject *dec;
+
+    if (!PyObject_IsInstance(val, Real))
+        return PyErr_Format(PyExc_TypeError, "%R is not a Real.", val);
+
+    dec = DecimalType_from_float(type, val, -1);
+    if (dec == NULL && PyErr_ExceptionMatches(PyExc_OverflowError) &&
+            !PyObject_IsTrue(exact)) {
+        PyErr_Clear();
+        dec = DecimalType_from_float(type, val, FPDEC_MAX_DEC_PREC);
+    }
+    return dec;
 }
 
 static PyObject *
@@ -464,8 +475,9 @@ DecimalType_from_obj(PyTypeObject *type, PyObject *obj, long adjust_to_prec) {
     if (PyObject_IsInstance(obj, Rational))
         return DecimalType_from_rational(type, obj, adjust_to_prec);
 
-    // Python <float>, standard lib Decimal
-    if (PyFloat_Check(obj) || PyObject_IsInstance(obj, StdLibDecimal))
+    // Python <float>, standard lib Decimal, Real
+    if (PyFloat_Check(obj) || PyObject_IsInstance(obj, Real)
+            || PyObject_IsInstance(obj, StdLibDecimal))
         return DecimalType_from_float(type, obj, adjust_to_prec);
 
     // unable to create Decimal
