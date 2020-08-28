@@ -921,7 +921,7 @@ static PyType_Slot decimal_type_slots[] = {
 };
 
 static PyType_Spec DecimalType_spec = {
-    "Decimal",                              /* name */
+    "_cdecimalfp.Decimal",                  /* name */
     sizeof(DecimalObject),                  /* basicsize */
     0,                                      /* itemsize */
     0,                                      /* flags */
@@ -1172,8 +1172,6 @@ fpdec_from_pylong(fpdec_t *fpdec, PyObject *val) {
 static int
 PyModule_AddType(PyObject *module, const char *name, PyObject *type) {
     Py_INCREF(type);
-    PyObject_SetAttrString(type, "__module__",
-                           PyModule_GetNameObject(module));
     if (PyModule_AddObject(module, name, type) < 0) {
         Py_DECREF(type);
         return -1;
@@ -1197,18 +1195,21 @@ cdecimalfp_exec(PyObject *module) {
     ASSIGN_AND_CHECK_NULL(Integral, PyObject_GetAttrString(numbers,
                                                            "Integral"));
     Py_CLEAR(numbers);
+
     /* Import from fractions */
     PyObject *fractions = NULL;
     ASSIGN_AND_CHECK_NULL(fractions, PyImport_ImportModule("fractions"));
     ASSIGN_AND_CHECK_NULL(Fraction, PyObject_GetAttrString(fractions,
                                                            "Fraction"));
     Py_CLEAR(fractions);
+
     /* Import from decimal */
     PyObject *decimal = NULL;
     ASSIGN_AND_CHECK_NULL(decimal, PyImport_ImportModule("decimal"));
     ASSIGN_AND_CHECK_NULL(StdLibDecimal, PyObject_GetAttrString(decimal,
                                                                 "Decimal"));
     Py_CLEAR(decimal);
+
     /* Import from math */
     PyObject *math = NULL;
     ASSIGN_AND_CHECK_NULL(math, PyImport_ImportModule("math"));
