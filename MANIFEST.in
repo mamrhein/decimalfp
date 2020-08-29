@@ -5,4 +5,4 @@ include test/func/format.tests
 include test/perf/*.py
 recursive-include doc/html *.*
 prune doc/html/.*
-recursive-include src *.hpp
+recursive-include src *.h
