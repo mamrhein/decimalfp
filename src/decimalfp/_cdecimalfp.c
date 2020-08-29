@@ -1073,14 +1073,14 @@ fpdec_as_integer_ratio(PyObject **numerator, PyObject **denominator,
     if (FPDEC_SIGN(fpdec) == FPDEC_SIGN_NEG) {
         ASSIGN_AND_CHECK_NULL(neg_coeff, PyNumber_Negative(coeff));
         Py_DECREF(coeff);
-        coeff = neg_coeff;      // stealing reference
+        coeff = neg_coeff;          // stealing reference
     }
 
     if (exp == 0) {
         // *numerator = coeff, *denominator = 1
-        *numerator = coeff;      // stealing reference
+        *numerator = coeff;         // stealing reference
+        Py_INCREF(PyONE);
         *denominator = PyONE;
-        Py_INCREF(*denominator);
         return;
     }
     if (exp > 0) {
@@ -1090,10 +1090,8 @@ fpdec_as_integer_ratio(PyObject **numerator, PyObject **denominator,
                               PyNumber_Power(PyTEN, py_exp, Py_None));
         ASSIGN_AND_CHECK_NULL(*numerator,
                               PyNumber_Multiply(coeff, ten_pow_exp));
-        Py_DECREF(py_exp);
-        Py_DECREF(ten_pow_exp);
+        Py_INCREF(PyONE);
         *denominator = PyONE;
-        Py_INCREF(*denominator);
     }
     else {
         // *numerator = coeff, *denominator = 10 ^ -exp, but they may need
@@ -1107,13 +1105,12 @@ fpdec_as_integer_ratio(PyObject **numerator, PyObject **denominator,
                                                                 NULL));
         ASSIGN_AND_CHECK_NULL(*numerator, PyNumber_FloorDivide(coeff, gcd));
         *denominator = PyNumber_FloorDivide(ten_pow_exp, gcd);
-        if (*denominator == NULL) {
-            Py_DECREF(*numerator);
-            *numerator = NULL;
-        }
+        if (*denominator == NULL)
+            Py_CLEAR(*numerator);
     }
+
 ERROR:
-    // clean-up (not only in case of an error!)
+CLEAN_UP:
     Py_XDECREF(coeff);
     Py_XDECREF(py_exp);
     Py_XDECREF(ten_pow_exp);
