@@ -586,6 +586,11 @@ fpdec_adjust(fpdec_t *fpdec, const fpdec_dec_prec_t dec_prec,
     if (FPDEC_DEC_PREC(fpdec) == dec_prec)
         return FPDEC_OK;
 
+    if (FPDEC_EQ_ZERO(fpdec)) {
+        FPDEC_DEC_PREC(fpdec) = dec_prec;
+        return FPDEC_OK;
+    }
+
     if (dec_prec > MAX_DEC_PREC_FOR_SHINT && !FPDEC_IS_DYN_ALLOC(fpdec)) {
         rc = fpdec_shint_to_dyn(fpdec);
         if (rc != FPDEC_OK)
