@@ -519,8 +519,8 @@ digits_div_max_prec(const fpdec_digit_array_t *x,
                     const fpdec_digit_array_t *y,
                     int *exp) {
     fpdec_digit_array_t *q;
-    unsigned shift = MAX(0, y->n_signif + 1 - x->n_signif);
-    unsigned accel = 1;
+    int shift = MAX(0, (int)(y->n_signif) + 1 - (int)(x->n_signif));
+    int accel = 1;
     int max_shift = -FPDEC_MIN_EXP + *exp;
 
     if (y->n_signif == 1) {
