@@ -405,6 +405,44 @@ ERROR:
 }
 
 static PyObject *
+DecimalType_from_stdlib_decimal(PyTypeObject *type, PyObject *val,
+                                long adjust_to_prec) {
+    PyObject *dec = NULL;
+    PyObject *is_finite = NULL;
+    PyObject *tup = NULL;
+    PyObject *exp = NULL;
+    long prec = adjust_to_prec;
+
+    ASSIGN_AND_CHECK_NULL(is_finite, PyObject_CallMethod(val, "is_finite",
+                                                         NULL));
+    if (!PyObject_IsTrue(is_finite)) {
+        PyErr_Format(PyExc_ValueError, "Can't convert %R to Decimal.", val);
+        goto ERROR;
+    }
+
+    if (adjust_to_prec == -1) {
+        // get number of fractional digits from given value
+        ASSIGN_AND_CHECK_NULL(tup, PyObject_CallMethod(val, "as_tuple",
+                                                       NULL));
+        ASSIGN_AND_CHECK_NULL(exp, PySequence_GetItem(tup, 2));
+        prec = MAX(0L, -PyLong_AsLong(exp));
+        if (PyErr_Occurred())
+            goto ERROR;
+    }
+    ASSIGN_AND_CHECK_NULL(dec, DecimalType_from_float(type, val, prec));
+    goto CLEAN_UP;
+
+ERROR:
+    assert(PyErr_Occurred());
+
+CLEAN_UP:
+    Py_XDECREF(is_finite);
+    Py_XDECREF(tup);
+    Py_XDECREF(exp);
+    return dec;
+}
+
+static PyObject *
 DecimalType_from_float_or_int(PyTypeObject *type, PyObject *val) {
     if (PyFloat_Check(val))
         return DecimalType_from_float(type, val, -1);
@@ -418,7 +456,7 @@ DecimalType_from_decimal_or_int(PyTypeObject *type, PyObject *val) {
     if (Decimal_Check(val))
         return DecimalType_from_decimal(type, val, -1);
     if (PyObject_IsInstance(val, StdLibDecimal))
-        return DecimalType_from_float(type, val, -1);
+        return DecimalType_from_stdlib_decimal(type, val, -1);
     if (PyLong_Check(val))
         return DecimalType_from_int(type, val, -1);
     if (PyObject_IsInstance(val, Integral))
@@ -475,9 +513,12 @@ DecimalType_from_obj(PyTypeObject *type, PyObject *obj, long adjust_to_prec) {
     if (PyObject_IsInstance(obj, Rational))
         return DecimalType_from_rational(type, obj, adjust_to_prec);
 
+    // Python standard lib Decimal
+    if (PyObject_IsInstance(obj, StdLibDecimal))
+        return DecimalType_from_stdlib_decimal(type, obj, adjust_to_prec);
+
     // Python <float>, standard lib Decimal, Real
-    if (PyFloat_Check(obj) || PyObject_IsInstance(obj, Real)
-            || PyObject_IsInstance(obj, StdLibDecimal))
+    if (PyFloat_Check(obj) || PyObject_IsInstance(obj, Real))
         return DecimalType_from_float(type, obj, adjust_to_prec);
 
     // unable to create Decimal
