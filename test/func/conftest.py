@@ -16,7 +16,6 @@
 
 """Shared pytest fixtures."""
 
-
 # standard library imports
 
 from importlib import import_module
@@ -27,7 +26,7 @@ import os
 import pytest
 
 # local imports
-
+from decimalfp import ROUNDING
 
 if os.getenv('DECIMALFP_FORCE_PYTHON_IMPL'):
     IMPLS = ("decimalfp._pydecimalfp",)
@@ -43,3 +42,10 @@ else:
 def impl(request):
     mod = import_module(request.param)
     return mod
+
+
+@pytest.fixture(scope="session",
+                params=[rnd.name for rnd in ROUNDING],
+                ids=[rnd.name for rnd in ROUNDING])
+def rnd(impl, request):
+    return impl.ROUNDING[request.param]

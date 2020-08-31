@@ -24,15 +24,21 @@ import sys
 
 import pytest
 
-from decimalfp import (
-    ROUNDING,
-    set_rounding,
-)
 # ???: where to export global constants?
 from decimalfp._pydecimalfp import MAX_DEC_PRECISION
 
-# set default rounding to ROUND_HALF_UP
-set_rounding(ROUNDING.ROUND_HALF_UP)
+
+@pytest.fixture(scope="module")
+def dflt_rounding(impl):
+    rnd = impl.get_rounding()
+    impl.set_rounding(impl.ROUNDING.ROUND_HALF_UP);
+    yield
+    impl.set_rounding(rnd);
+
+
+def test_dflt_rounding(dflt_rounding):
+    """Activate fixture to set default rounding"""
+    pass
 
 
 class IntWrapper:

@@ -21,12 +21,24 @@ from fractions import Fraction
 
 import pytest
 
-from decimalfp import ROUNDING, set_rounding
 from decimalfp._pydecimalfp import MAX_DEC_PRECISION
 
-set_rounding(ROUNDING.ROUND_HALF_UP)
+
 ctx = getcontext()
 ctx.prec = 3350
+
+
+@pytest.fixture(scope="module")
+def dflt_rounding(impl):
+    rnd = impl.get_rounding()
+    impl.set_rounding(impl.ROUNDING.ROUND_HALF_UP);
+    yield
+    impl.set_rounding(rnd);
+
+
+def test_dflt_rounding(dflt_rounding):
+    """Activate fixture to set default rounding"""
+    pass
 
 
 @pytest.mark.parametrize(("value", "prec"),
@@ -55,9 +67,6 @@ def test_adjust_dflt_round(impl, value, prec, numerator):
     assert adj.as_fraction() == Fraction(numerator, 10 ** res_prec)
 
 
-@pytest.mark.parametrize("rnd",
-                         [rnd for rnd in ROUNDING],
-                         ids=[rnd.name for rnd in ROUNDING])
 @pytest.mark.parametrize("value",
                          ("17.849",
                           ".".join(("1" * 3297, "4" * 33)),
@@ -121,9 +130,6 @@ def test_quantize_dflt_round(impl, value, quant):
     assert adj.as_fraction() == Fraction(eq_dec)
 
 
-@pytest.mark.parametrize("rnd",
-                         [rnd for rnd in ROUNDING],
-                         ids=[rnd.name for rnd in ROUNDING])
 @pytest.mark.parametrize("quant", (Fraction(1, 40),
                                    StdLibDecimal("-0.3"),
                                    "0.4",
@@ -140,7 +146,7 @@ def test_quantize_dflt_round(impl, value, quant):
                           "0.0025",
                           "12345678901234567e12"),
                          ids=("compact", "large", "fraction", "int"))
-def test_quantize_round(impl, value, quant, rnd):
+def test_quantize_round(impl, rnd, value, quant):
     dec = impl.Decimal(value)
     adj = dec.quantize(quant, rounding=rnd)
     # compute equivalent StdLibDecimal
