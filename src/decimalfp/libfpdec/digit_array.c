@@ -30,7 +30,7 @@ $Revision$
 
 static inline fpdec_digit_array_t *
 digits_alloc(size_t n_digits) {
-    fpdec_digit_array_t *digit_array = (fpdec_digit_array_t *) \
+    fpdec_digit_array_t *digit_array = (fpdec_digit_array_t *)\
         fpdec_mem_alloc(n_digits + 1, sizeof(fpdec_digit_t));
     if (digit_array != NULL) {
         digit_array->n_alloc = n_digits;
@@ -93,7 +93,7 @@ digits_from_dec_coeff_exp(fpdec_digit_array_t **digit_array, fpdec_exp_t *exp,
     assert(n_dec_digits > 0);
 
     *exp = FLOOR(dec_exp, DEC_DIGITS_PER_DIGIT);
-    n_dec_shift = (size_t) MOD(dec_exp, DEC_DIGITS_PER_DIGIT);
+    n_dec_shift = (size_t)MOD(dec_exp, DEC_DIGITS_PER_DIGIT);
     n_digits = CEIL(n_dec_digits + n_dec_shift, DEC_DIGITS_PER_DIGIT);
     *digit_array = digits_alloc(n_digits);
     if (*digit_array == NULL) MEMERROR
@@ -391,7 +391,7 @@ digits_mul(const fpdec_digit_array_t *x, const fpdec_digit_array_t *y) {
 // Exercise 16
 fpdec_digit_array_t *
 digits_div_digit(const fpdec_digit_array_t *x,
-                 const fpdec_n_digits_t n_shift_x,
+                 const fpdec_n_digits_t x_n_shift,
                  const fpdec_digit_t y, fpdec_digit_t *rem) {
     const fpdec_digit_array_t *xhat;
     fpdec_digit_array_t *q;
@@ -401,11 +401,11 @@ digits_div_digit(const fpdec_digit_array_t *x,
     assert(x->n_signif > 0);
     assert(y > 0);
 
-    q = digits_alloc(x->n_signif + n_shift_x);
+    q = digits_alloc(x->n_signif + x_n_shift);
     if (q == NULL) MEMERROR_RETVAL(NULL)
 
-    if (n_shift_x > 0) {
-        xhat = digits_copy(x, n_shift_x, 0);
+    if (x_n_shift > 0) {
+        xhat = digits_copy(x, x_n_shift, 0);
         if (xhat == NULL) MEMERROR_RETVAL(NULL)
     }
     else
@@ -421,37 +421,37 @@ digits_div_digit(const fpdec_digit_array_t *x,
     if (rem != NULL)
         *rem = r;
     if (xhat != x)
-        fpdec_mem_free((void*) xhat);
+        fpdec_mem_free((void *)xhat);
     return q;
 }
 
 // See D. E. Knuth, The Art of Computer Programming, Vol. 2, Ch. 4.3.1,
 // Algorithm D
 fpdec_digit_array_t *
-digits_divmod(const fpdec_digit_array_t *x, const fpdec_n_digits_t n_shift_x,
-              const fpdec_digit_array_t *y, const fpdec_n_digits_t n_shift_y,
+digits_divmod(const fpdec_digit_array_t *x, const fpdec_n_digits_t x_n_shift,
+              const fpdec_digit_array_t *y, const fpdec_n_digits_t y_n_shift,
               fpdec_digit_array_t **rem) {
-    const fpdec_n_digits_t m = x->n_signif + n_shift_x;
-    const fpdec_n_digits_t n = y->n_signif + n_shift_y;
+    const fpdec_n_digits_t m = x->n_signif + x_n_shift;
+    const fpdec_n_digits_t n = y->n_signif + y_n_shift;
     const fpdec_n_digits_t n_1 = n - 1;
     const fpdec_n_digits_t n_2 = n - 2;
     fpdec_digit_t d, qhat, rhat, carry, borrow;
     fpdec_digit_array_t *xd, *yd, *q;
     uint128_t t1, t2;
 
-    assert(y->n_signif > 1 || (y->n_signif == 1 && n_shift_y > 0));
-    assert(y->digits[y->n_signif - 1] > 0);
+    assert(n > 1);
     assert(m >= n);
+    assert(y->digits[y->n_signif - 1] > 0);
 
     q = digits_alloc(m - n + 1);
     if (q == NULL) MEMERROR_RETVAL(NULL)
 
     // D1: normalize, so that yd[n - 1] >= RADIX / 2
     d = RADIX / (y->digits[y->n_signif - 1] + 1);
-    xd = digits_copy(x, n_shift_x, 1);
+    xd = digits_copy(x, x_n_shift, 1);
     if (xd == NULL) MEMERROR_RETVAL(NULL)
     digits_imul_digit(xd, d);
-    yd = digits_copy(y, n_shift_y, 1);
+    yd = digits_copy(y, y_n_shift, 1);
     if (yd == NULL) MEMERROR_RETVAL(NULL)
     digits_imul_digit(yd, d);
 
@@ -497,7 +497,7 @@ digits_divmod(const fpdec_digit_array_t *x, const fpdec_n_digits_t n_shift_x,
             for (int i = 0; i < n_1; ++i) {
                 xd->digits[j + i] += yd->digits[i] + carry;
                 carry = (xd->digits[j + i] < yd->digits[i] ||
-                        xd->digits[j + i] >= RADIX);
+                    xd->digits[j + i] >= RADIX);
                 if (carry)
                     xd->digits[j + i] -= RADIX;
             }
@@ -508,8 +508,8 @@ digits_divmod(const fpdec_digit_array_t *x, const fpdec_n_digits_t n_shift_x,
     if (rem != NULL)
         *rem = digits_div_digit(xd, 0, d, NULL);
     // clean-up
-    fpdec_mem_free((void *) xd);
-    fpdec_mem_free((void *) yd);
+    fpdec_mem_free((void *)xd);
+    fpdec_mem_free((void *)yd);
     // return quotient
     return q;
 }
@@ -519,36 +519,42 @@ digits_div_max_prec(const fpdec_digit_array_t *x,
                     const fpdec_digit_array_t *y,
                     int *exp) {
     fpdec_digit_array_t *q;
-    int shift = MAX(0, (int)(y->n_signif) + 1 - (int)(x->n_signif));
-    int accel = 1;
-    int max_shift = -FPDEC_MIN_EXP + *exp;
+    int min_n_shift = (int)(y->n_signif) + 1 - (int)(x->n_signif);
+    fpdec_n_digits_t x_n_shift =
+        min_n_shift < 0 ? 0 : (fpdec_n_digits_t)min_n_shift;
+    fpdec_n_digits_t accel = 1;
+    fpdec_n_digits_t max_x_n_shift =
+        (fpdec_n_digits_t)(*exp - FPDEC_MIN_EXP);
+
+    assert(*exp >= FPDEC_MIN_EXP);
 
     if (y->n_signif == 1) {
         fpdec_digit_t d = y->digits[0];
         fpdec_digit_t r;
         while (true) {
-            q = digits_div_digit(x, shift, d, &r);
-            if (shift >= max_shift || r == 0)
+            q = digits_div_digit(x, x_n_shift, d, &r);
+            if (x_n_shift >= max_x_n_shift || r == 0)
                 break;
             accel++;
-            shift = MIN(shift + accel * accel, max_shift);
+            x_n_shift = MIN(x_n_shift + accel * accel, max_x_n_shift);
         }
         if (r == 0)
-            *exp -= shift;
+            *exp -= x_n_shift;
         else
             *exp = FPDEC_MIN_EXP - 1;       // signal precision limit exceeded
     }
     else {
         fpdec_digit_array_t *r;
         while (true) {
-            q = digits_divmod(x, shift, y, 0, &r);
-            if (shift >= max_shift || digits_all_zero(r->digits, r->n_signif))
+            q = digits_divmod(x, x_n_shift, y, 0, &r);
+            if (x_n_shift >= max_x_n_shift ||
+                digits_all_zero(r->digits, r->n_signif))
                 break;
             accel++;
-            shift = MIN(shift + accel * accel, max_shift);
+            x_n_shift = MIN(x_n_shift + accel * accel, max_x_n_shift);
         }
         if (digits_all_zero(r->digits, r->n_signif))
-            *exp -= shift;
+            *exp -= x_n_shift;
         else
             *exp = FPDEC_MIN_EXP - 1;       // signal precision limit exceeded
     }
@@ -557,10 +563,16 @@ digits_div_max_prec(const fpdec_digit_array_t *x,
 
 fpdec_digit_array_t *
 digits_div_limit_prec(const fpdec_digit_array_t *x,
+                      const fpdec_n_digits_t x_n_shift,
                       const fpdec_digit_array_t *y,
-                      const int n_shift) {
-    if (y->n_signif == 1 && n_shift <= 0)
-        return digits_div_digit(x, MAX(0, -n_shift), y->digits[0], NULL);
+                      const fpdec_n_digits_t y_n_shift) {
+    fpdec_n_digits_t x_n_digits = x->n_signif + x_n_shift;
+    fpdec_n_digits_t y_n_digits = y->n_signif + y_n_shift;
+
+    assert(x_n_digits >= y_n_digits);
+
+    if (y_n_digits == 1)
+        return digits_div_digit(x, x_n_shift, y->digits[0], NULL);
     else
-        return digits_divmod(x, MAX(0, -n_shift), y, MAX(0, n_shift), NULL);
+        return digits_divmod(x, x_n_shift, y, y_n_shift, NULL);
 }

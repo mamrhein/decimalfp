@@ -356,10 +356,10 @@ DecimalType_from_rational(PyTypeObject *type, PyObject *val,
     PyObject *denominator = NULL;
     PyObject *dec = NULL;
 
-    ASSIGN_AND_CHECK_NULL(numerator, PyObject_GetAttrString(val,
-                                                            "numerator"));
-    ASSIGN_AND_CHECK_NULL(denominator, PyObject_GetAttrString(val,
-                                                              "denominator"));
+    ASSIGN_AND_CHECK_NULL(numerator,
+                          PyObject_GetAttrString(val, "numerator"));
+    ASSIGN_AND_CHECK_NULL(denominator,
+                          PyObject_GetAttrString(val, "denominator"));
     dec = DecimalType_from_num_den(type, numerator, denominator,
                                    adjust_to_prec);
     Py_DECREF(numerator);
@@ -375,33 +375,37 @@ ERROR:
 static PyObject *
 DecimalType_from_float(PyTypeObject *type, PyObject *val,
                        long adjust_to_prec) {
-    PyObject *as_integer_ratio = NULL;
+    PyObject *dec = NULL;
     PyObject *ratio = NULL;
     PyObject *numerator = NULL;
     PyObject *denominator = NULL;
-    PyObject *dec = NULL;
 
-    ASSIGN_AND_CHECK_NULL(as_integer_ratio,
-                          PyObject_GetAttrString(val, "as_integer_ratio"));
     ASSIGN_AND_CHECK_NULL(ratio,
-                          PyObject_CallFunctionObjArgs(as_integer_ratio,
-                                                       NULL));
-    Py_DECREF(as_integer_ratio);
+                          PyObject_CallMethod(val, "as_integer_ratio", NULL));
     ASSIGN_AND_CHECK_NULL(numerator, PySequence_GetItem(ratio, 0));
     ASSIGN_AND_CHECK_NULL(denominator, PySequence_GetItem(ratio, 1));
-    Py_DECREF(ratio);
-    dec = DecimalType_from_num_den(type, numerator, denominator,
-                                   adjust_to_prec);
-    Py_DECREF(numerator);
-    Py_DECREF(denominator);
-    return dec;
+    ASSIGN_AND_CHECK_NULL(dec, DecimalType_from_num_den(type, numerator,
+                                                        denominator,
+                                                        adjust_to_prec));
+    goto CLEAN_UP;
 
 ERROR:
-    Py_XDECREF(as_integer_ratio);
+    {
+        PyObject *err = PyErr_Occurred();
+        assert(err);
+        if (err == PyExc_ValueError || err == PyExc_OverflowError ||
+            err == PyExc_AttributeError) {
+            PyErr_Clear();
+            PyErr_Format(PyExc_ValueError, "Can't convert %R to Decimal.",
+                         val);
+        }
+    }
+
+CLEAN_UP:
     Py_XDECREF(ratio);
     Py_XDECREF(numerator);
     Py_XDECREF(denominator);
-    return NULL;
+    return dec;
 }
 
 static PyObject *
@@ -413,8 +417,8 @@ DecimalType_from_stdlib_decimal(PyTypeObject *type, PyObject *val,
     PyObject *exp = NULL;
     long prec = adjust_to_prec;
 
-    ASSIGN_AND_CHECK_NULL(is_finite, PyObject_CallMethod(val, "is_finite",
-                                                         NULL));
+    ASSIGN_AND_CHECK_NULL(is_finite,
+                          PyObject_CallMethod(val, "is_finite", NULL));
     if (!PyObject_IsTrue(is_finite)) {
         PyErr_Format(PyExc_ValueError, "Can't convert %R to Decimal.", val);
         goto ERROR;
@@ -422,8 +426,8 @@ DecimalType_from_stdlib_decimal(PyTypeObject *type, PyObject *val,
 
     if (adjust_to_prec == -1) {
         // get number of fractional digits from given value
-        ASSIGN_AND_CHECK_NULL(tup, PyObject_CallMethod(val, "as_tuple",
-                                                       NULL));
+        ASSIGN_AND_CHECK_NULL(tup,
+                              PyObject_CallMethod(val, "as_tuple", NULL));
         ASSIGN_AND_CHECK_NULL(exp, PySequence_GetItem(tup, 2));
         prec = MAX(0L, -PyLong_AsLong(exp));
         if (PyErr_Occurred())
@@ -473,7 +477,7 @@ DecimalType_from_real(PyTypeObject *type, PyObject *val, PyObject *exact) {
 
     dec = DecimalType_from_float(type, val, -1);
     if (dec == NULL && PyErr_ExceptionMatches(PyExc_OverflowError) &&
-            !PyObject_IsTrue(exact)) {
+        !PyObject_IsTrue(exact)) {
         PyErr_Clear();
         dec = DecimalType_from_float(type, val, FPDEC_MAX_DEC_PREC);
     }
@@ -532,8 +536,8 @@ DecimalType_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
     PyObject *precision = Py_None;
     long adjust_to_prec;
 
-    if (!PyArg_ParseTupleAndKeywords(args, kwds, "|OO", kw_names,
-                                     &value, &precision))
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "|OO", kw_names, &value,
+                                     &precision))
         return NULL;
 
     if (precision == Py_None) {
@@ -753,8 +757,7 @@ Decimal_richcompare(PyObject *self, PyObject *other, int op) {
 
     if (Decimal_Check(other)) {
         r = fpdec_compare(&((DecimalObject *)self)->fpdec,
-                          &((DecimalObject *)other)->fpdec,
-                          false);
+                          &((DecimalObject *)other)->fpdec, false);
     }
     else {
         // TODO
@@ -902,16 +905,15 @@ static PyGetSetDef Decimal_properties[] = {
      "positive denominator, whose ratio is equal to `self`.\n\n", 0},
     {"denominator", (getter)Decimal_denominator_get, 0,
      "Return the normalized denominator of 'self'.\n\n"
-     "I. e. the smallest positive denominator from the pairs of integers,\n"
-     "whose ratio is equal to `self`.\n\n", 0},
+     "I. e. the smallest positive denominator from the pairs of integers,"
+     "\nwhose ratio is equal to `self`.\n\n", 0},
     {"real", (getter)Decimal_real_get, 0,
      "Return real part of `self`.\n\n"
      "Returns `self` (Real numbers are their real component).\n\n", 0},
     {"imag", (getter)Decimal_imag_get, 0,
      "Return imaginary part of `self`.\n\n"
      "Returns 0 (Real numbers have no imaginary component).\n\n", 0},
-    {0, 0, 0, 0, 0}
-};
+    {0, 0, 0, 0, 0}};
 
 static PyMethodDef Decimal_methods[] = {
     /* class methods */
@@ -1140,10 +1142,10 @@ fpdec_as_integer_ratio(PyObject **numerator, PyObject **denominator,
         ASSIGN_AND_CHECK_NULL(py_exp, PyLong_FromLong(-exp));
         ASSIGN_AND_CHECK_NULL(ten_pow_exp,
                               PyNumber_Power(PyTEN, py_exp, Py_None));
-        ASSIGN_AND_CHECK_NULL(gcd, PyObject_CallFunctionObjArgs(PyNumber_gcd,
-                                                                coeff,
-                                                                ten_pow_exp,
-                                                                NULL));
+        ASSIGN_AND_CHECK_NULL(gcd,
+                              PyObject_CallFunctionObjArgs(PyNumber_gcd,
+                                                           coeff, ten_pow_exp,
+                                                           NULL));
         ASSIGN_AND_CHECK_NULL(*numerator, PyNumber_FloorDivide(coeff, gcd));
         *denominator = PyNumber_FloorDivide(ten_pow_exp, gcd);
         if (*denominator == NULL)
@@ -1277,27 +1279,27 @@ cdecimalfp_exec(PyObject *module) {
     PyObject *numbers = NULL;
     ASSIGN_AND_CHECK_NULL(numbers, PyImport_ImportModule("numbers"));
     ASSIGN_AND_CHECK_NULL(Number, PyObject_GetAttrString(numbers, "Number"));
-    ASSIGN_AND_CHECK_NULL(Complex, PyObject_GetAttrString(numbers,
-                                                          "Complex"));
+    ASSIGN_AND_CHECK_NULL(Complex,
+                          PyObject_GetAttrString(numbers, "Complex"));
     ASSIGN_AND_CHECK_NULL(Real, PyObject_GetAttrString(numbers, "Real"));
-    ASSIGN_AND_CHECK_NULL(Rational, PyObject_GetAttrString(numbers,
-                                                           "Rational"));
-    ASSIGN_AND_CHECK_NULL(Integral, PyObject_GetAttrString(numbers,
-                                                           "Integral"));
+    ASSIGN_AND_CHECK_NULL(Rational,
+                          PyObject_GetAttrString(numbers, "Rational"));
+    ASSIGN_AND_CHECK_NULL(Integral,
+                          PyObject_GetAttrString(numbers, "Integral"));
     Py_CLEAR(numbers);
 
     /* Import from fractions */
     PyObject *fractions = NULL;
     ASSIGN_AND_CHECK_NULL(fractions, PyImport_ImportModule("fractions"));
-    ASSIGN_AND_CHECK_NULL(Fraction, PyObject_GetAttrString(fractions,
-                                                           "Fraction"));
+    ASSIGN_AND_CHECK_NULL(Fraction,
+                          PyObject_GetAttrString(fractions, "Fraction"));
     Py_CLEAR(fractions);
 
     /* Import from decimal */
     PyObject *decimal = NULL;
     ASSIGN_AND_CHECK_NULL(decimal, PyImport_ImportModule("decimal"));
-    ASSIGN_AND_CHECK_NULL(StdLibDecimal, PyObject_GetAttrString(decimal,
-                                                                "Decimal"));
+    ASSIGN_AND_CHECK_NULL(StdLibDecimal,
+                          PyObject_GetAttrString(decimal, "Decimal"));
     Py_CLEAR(decimal);
 
     /* Import from math */

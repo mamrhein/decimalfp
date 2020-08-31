@@ -83,12 +83,12 @@ digits_mul(const fpdec_digit_array_t *x, const fpdec_digit_array_t *y);
 
 fpdec_digit_array_t *
 digits_div_digit(const fpdec_digit_array_t *x,
-                 const fpdec_n_digits_t n_shift_x,
+                 const fpdec_n_digits_t x_n_shift,
                  const fpdec_digit_t y, fpdec_digit_t *rem);
 
 fpdec_digit_array_t *
-digits_divmod(const fpdec_digit_array_t *x, const fpdec_n_digits_t n_shift_x,
-              const fpdec_digit_array_t *y, const fpdec_n_digits_t n_shift_y,
+digits_divmod(const fpdec_digit_array_t *x, const fpdec_n_digits_t x_n_shift,
+              const fpdec_digit_array_t *y, const fpdec_n_digits_t y_n_shift,
               fpdec_digit_array_t **rem);
 
 fpdec_digit_array_t *
@@ -97,8 +97,7 @@ digits_div_max_prec(const fpdec_digit_array_t *x,
                     int *exp);
 
 fpdec_digit_array_t *
-digits_div_limit_prec(const fpdec_digit_array_t *x,
-                      const fpdec_digit_array_t *y,
-                      const int n_shift);
+digits_div_limit_prec(const fpdec_digit_array_t *x, const fpdec_n_digits_t x_n_shift,
+                      const fpdec_digit_array_t *y, const fpdec_n_digits_t y_n_shift);
 
 #endif //FPDEC_DIGIT_ARRAY_H

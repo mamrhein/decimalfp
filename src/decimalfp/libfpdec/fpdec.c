@@ -204,8 +204,7 @@ fpdec_from_unicode_literal(fpdec_t *fpdec, const wchar_t *literal) {
     char *buf, *ch;
     error_t rc;
 
-    if (size == 0)
-        ERROR(FPDEC_INVALID_DECIMAL_LITERAL);
+    if (size == 0) ERROR(FPDEC_INVALID_DECIMAL_LITERAL);
 
     ch = buf = fpdec_mem_alloc(size + 1, sizeof(char));
     if (buf == NULL) MEMERROR
@@ -288,11 +287,11 @@ fpdec_shint_magnitude(const fpdec_t *fpdec) {
 static int
 fpdec_dyn_magnitude(const fpdec_t *fpdec) {
     int rel_pos_radix_point = FPDEC_DYN_N_DIGITS(fpdec) +
-                              FPDEC_DYN_EXP(fpdec);
+        FPDEC_DYN_EXP(fpdec);
     fpdec_digit_t most_signif_digit = FPDEC_DYN_MOST_SIGNIF_DIGIT(fpdec);
     assert(most_signif_digit != 0);
     return (rel_pos_radix_point - 1) * DEC_DIGITS_PER_DIGIT +
-           U64_MAGNITUDE(most_signif_digit);
+        U64_MAGNITUDE(most_signif_digit);
 }
 
 typedef int (*v_magnitude)(const fpdec_t *);
@@ -417,7 +416,7 @@ fpdec_shint_to_dyn(fpdec_t *fpdec) {
         fpdec->dyn_alloc = true;
         fpdec->normalized = true;
         fpdec->exp = n_trailing_zeros -
-                     CEIL(FPDEC_DEC_PREC(fpdec), DEC_DIGITS_PER_DIGIT);
+            CEIL(FPDEC_DEC_PREC(fpdec), DEC_DIGITS_PER_DIGIT);
     }
     return rc;
 }
@@ -441,7 +440,7 @@ fpdec_dyn_normalize(fpdec_t *fpdec) {
     assert(FPDEC_IS_DYN_ALLOC(fpdec));
 
     while (FPDEC_DYN_N_DIGITS(fpdec) > 0 &&
-           FPDEC_DYN_MOST_SIGNIF_DIGIT(fpdec) == 0)
+        FPDEC_DYN_MOST_SIGNIF_DIGIT(fpdec) == 0)
         (FPDEC_DYN_N_DIGITS(fpdec))--;
     if (FPDEC_DYN_N_DIGITS(fpdec) == 0) {
         fpdec_reset_to_zero(fpdec, dec_prec);
@@ -678,8 +677,8 @@ fpdec_add_abs_dyn_to_dyn(fpdec_t *z, const fpdec_t *x, const fpdec_t *y) {
     else if (FPDEC_DYN_EXP(x) > FPDEC_DYN_EXP(y)) {
         n_shift = FPDEC_DYN_EXP(x) - FPDEC_DYN_EXP(y);
         n_add_zeros = MAX((int)FPDEC_DYN_N_DIGITS(y) -
-                          (int)FPDEC_DYN_N_DIGITS(x) -
-                          (int)n_shift + 1,
+                              (int)FPDEC_DYN_N_DIGITS(x) -
+                              (int)n_shift + 1,
                           1);
         z_digits = digits_copy(x->digit_array, n_shift, n_add_zeros);
         if (z_digits == NULL) MEMERROR
@@ -689,8 +688,8 @@ fpdec_add_abs_dyn_to_dyn(fpdec_t *z, const fpdec_t *x, const fpdec_t *y) {
     else {
         n_shift = FPDEC_DYN_EXP(y) - FPDEC_DYN_EXP(x);
         n_add_zeros = MAX((int)FPDEC_DYN_N_DIGITS(x) -
-                          (int)FPDEC_DYN_N_DIGITS(y) -
-                          (int)n_shift + 1,
+                              (int)FPDEC_DYN_N_DIGITS(y) -
+                              (int)n_shift + 1,
                           1);
         z_digits = digits_copy(y->digit_array, n_shift, n_add_zeros);
         if (z_digits == NULL) MEMERROR
@@ -1147,7 +1146,7 @@ fpdec_divmod(fpdec_t *q, fpdec_t *r, const fpdec_t *x, const fpdec_t *y) {
     FPDEC_SIGN(r) = FPDEC_SIGN(x);
     FPDEC_DEC_PREC(r) = MAX(FPDEC_DEC_PREC(x), FPDEC_DEC_PREC(y));
     rc = vtab_divmod_abs[((FPDEC_IS_DYN_ALLOC(x)) << 1U) +
-                         FPDEC_IS_DYN_ALLOC(y)](q, r, x, y);
+        FPDEC_IS_DYN_ALLOC(y)](q, r, x, y);
 
     if (FPDEC_IS_DYN_ALLOC(q))
         fpdec_dyn_normalize(q);
@@ -1159,48 +1158,82 @@ fpdec_divmod(fpdec_t *q, fpdec_t *r, const fpdec_t *x, const fpdec_t *y) {
 }
 
 error_t
-fpdec_div_abs_dyn_by_dyn(fpdec_t *z, const fpdec_t *x, const fpdec_t *y,
-                         const int prec_limit,
-                         const enum FPDEC_ROUNDING_MODE rounding) {
-    fpdec_digit_array_t *q_digits, *r_digits;
+fpdec_div_abs_dyn_by_dyn_exact(fpdec_t *z, const fpdec_t *x,
+                               const fpdec_t *y) {
+    fpdec_digit_array_t *q_digits;
     int exp = FPDEC_DYN_EXP(x) - FPDEC_DYN_EXP(y);
 
-    if (prec_limit == -1) {
-        q_digits = digits_div_max_prec(x->digit_array, y->digit_array,
-                                       &exp);
-        if (q_digits == NULL) MEMERROR
-        if (exp > FPDEC_MAX_EXP) ERROR(FPDEC_EXP_LIMIT_EXCEEDED)
-        if (exp < FPDEC_MIN_EXP) ERROR(FPDEC_PREC_LIMIT_EXCEEDED)
-        FPDEC_DYN_EXP(z) = exp;
-        // calculate decimal precision
-        FPDEC_DEC_PREC(z) = MAX(0, -exp * DEC_DIGITS_PER_DIGIT);
-        if (FPDEC_DEC_PREC(z) > 0) {
-            for (fpdec_digit_t *d = q_digits->digits;; ++d) {
-                if (*d == 0)
-                    FPDEC_DEC_PREC(z) -= DEC_DIGITS_PER_DIGIT;
-                else {
-                    fpdec_digit_t t = *d;
-                    while (t % 10 == 0) {
-                        t /= 10;
-                        FPDEC_DEC_PREC(z)--;
-                    }
-                    break;
+    if (exp < FPDEC_MIN_EXP) ERROR(FPDEC_PREC_LIMIT_EXCEEDED)
+
+    q_digits = digits_div_max_prec(x->digit_array, y->digit_array,
+                                   &exp);
+    if (q_digits == NULL) MEMERROR
+    if (exp > FPDEC_MAX_EXP) ERROR(FPDEC_EXP_LIMIT_EXCEEDED)
+    if (exp < FPDEC_MIN_EXP) ERROR(FPDEC_PREC_LIMIT_EXCEEDED)
+    FPDEC_DYN_EXP(z) = exp;
+    // calculate decimal precision
+    FPDEC_DEC_PREC(z) = MAX(0, -exp * DEC_DIGITS_PER_DIGIT);
+    if (FPDEC_DEC_PREC(z) > 0) {
+        for (fpdec_digit_t *d = q_digits->digits;; ++d) {
+            if (*d == 0)
+                FPDEC_DEC_PREC(z) -= DEC_DIGITS_PER_DIGIT;
+            else {
+                fpdec_digit_t t = *d;
+                while (t % 10 == 0) {
+                    t /= 10;
+                    FPDEC_DEC_PREC(z)--;
                 }
+                break;
             }
         }
     }
-    else {
-        int d_shift = prec_limit % DEC_DIGITS_PER_DIGIT;
-        FPDEC_DYN_EXP(z) = -prec_limit / DEC_DIGITS_PER_DIGIT - 1;
-        q_digits = digits_div_limit_prec(x->digit_array, y->digit_array,
-                                         FPDEC_DYN_EXP(z) - exp);
-        if (q_digits == NULL) MEMERROR
-        digits_round(q_digits, FPDEC_SIGN(z), DEC_DIGITS_PER_DIGIT - d_shift,
-                     rounding);
-        FPDEC_DEC_PREC(z) = prec_limit;
-    }
     z->digit_array = q_digits;
     z->dyn_alloc = true;
+    return FPDEC_OK;
+}
+
+error_t
+fpdec_div_abs_dyn_by_dyn(fpdec_t *z, const fpdec_t *x, const fpdec_t *y,
+                         const int prec_limit,
+                         const enum FPDEC_ROUNDING_MODE rounding) {
+    if (prec_limit == -1)
+        return fpdec_div_abs_dyn_by_dyn_exact(z, x, y);
+
+    else {
+        FPDEC_DEC_PREC(z) = prec_limit;
+        // calculate digit shifts to accomplish wanted precision
+        int quot_exp = FPDEC_DYN_EXP(x) - FPDEC_DYN_EXP(y);
+        int res_exp = -prec_limit / DEC_DIGITS_PER_DIGIT - 1;
+        fpdec_n_digits_t x_n_shift, y_n_shift;
+        fpdec_n_digits_t x_n_digits_after_shift, y_n_digits_after_shift;
+
+        if (res_exp < quot_exp) {
+            x_n_shift = (fpdec_n_digits_t)(quot_exp - res_exp);
+            x_n_digits_after_shift = FPDEC_DYN_N_DIGITS(x) + x_n_shift;
+            y_n_shift = 0;
+            y_n_digits_after_shift = FPDEC_DYN_N_DIGITS(y);
+        }
+        else {
+            x_n_shift = 0;
+            x_n_digits_after_shift = FPDEC_DYN_N_DIGITS(x);
+            y_n_shift = (fpdec_n_digits_t)(res_exp - quot_exp);
+            y_n_digits_after_shift = FPDEC_DYN_N_DIGITS(y) + y_n_shift;
+        }
+        // check if result will have significant digits
+        if (x_n_digits_after_shift >= y_n_digits_after_shift) {
+            fpdec_digit_array_t *q_digits =
+                digits_div_limit_prec(x->digit_array, x_n_shift,
+                                      y->digit_array, y_n_shift);
+            if (q_digits == NULL) MEMERROR
+            int d_shift = prec_limit % DEC_DIGITS_PER_DIGIT;
+            digits_round(q_digits, FPDEC_SIGN(z),
+                         DEC_DIGITS_PER_DIGIT - d_shift,
+                         rounding);
+            FPDEC_DYN_EXP(z) = res_exp;
+            z->digit_array = q_digits;
+            z->dyn_alloc = true;
+        }
+    }
     return FPDEC_OK;
 }
 
@@ -1247,10 +1280,10 @@ fpdec_div_abs_shint_by_shint(fpdec_t *z, const fpdec_t *x, const fpdec_t *y,
 
     if (prec_limit == -1)
         shift = MAX_DEC_PREC_FOR_SHINT - FPDEC_DEC_PREC(x) +
-                FPDEC_DEC_PREC(y);
+            FPDEC_DEC_PREC(y);
     else
         shift = MIN(prec_limit, MAX_DEC_PREC_FOR_SHINT) - FPDEC_DEC_PREC(x) +
-                FPDEC_DEC_PREC(y);
+            FPDEC_DEC_PREC(y);
     if (shift > 0)
         u128_imul_10_pow_n(&divident, shift);
     else if (shift < 0)
@@ -1325,12 +1358,21 @@ fpdec_div(fpdec_t *z, const fpdec_t *x, const fpdec_t *y,
     if (FPDEC_EQ_ZERO(x))
         return FPDEC_OK;
 
-    FPDEC_SIGN(z) = FPDEC_SIGN(x) * FPDEC_SIGN(y);
     rc = DISPATCH_BIN_OP_VA(vtab_div_abs, z, x, y, prec_limit, rounding);
+    if (rc != FPDEC_OK)
+        return rc;
 
-    if (FPDEC_IS_DYN_ALLOC(z))
+    if (FPDEC_IS_DYN_ALLOC(z)) {
+        FPDEC_SIGN(z) = FPDEC_SIGN(x) * FPDEC_SIGN(y);
         fpdec_dyn_normalize(z);
-    return rc;
+    }
+    else {
+        if (z->lo == 0 && z->hi == 0)
+            FPDEC_SIGN(z) = FPDEC_SIGN_ZERO;
+        else
+            FPDEC_SIGN(z) = FPDEC_SIGN(x) * FPDEC_SIGN(y);
+    }
+    return FPDEC_OK;
 }
 
 // Deallocator
