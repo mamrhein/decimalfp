@@ -525,6 +525,22 @@ DecimalType_from_obj(PyTypeObject *type, PyObject *obj, long adjust_to_prec) {
     if (PyFloat_Check(obj) || PyObject_IsInstance(obj, Real))
         return DecimalType_from_float(type, obj, adjust_to_prec);
 
+    // If there's a float or int equivalent to value, use it
+    {
+        PyObject *num = PyNumber_Float(obj);
+        if (num != NULL) {
+            PyObject *dec = DecimalType_from_float(type, num, adjust_to_prec);
+            Py_DECREF(num);
+            return dec;
+        }
+        num = PyNumber_Long(obj);
+        if (num != NULL) {
+            PyObject *dec = DecimalType_from_int(type, num, adjust_to_prec);
+            Py_DECREF(num);
+            return dec;
+        }
+    }
+
     // unable to create Decimal
     return PyErr_Format(PyExc_TypeError, "Can't convert %R to Decimal.", obj);
 }
