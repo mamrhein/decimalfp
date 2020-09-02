@@ -18,28 +18,11 @@
 
 
 # standard library imports
-from enum import Enum, EnumMeta
-
-
-class _EnumMetaWithDefault(EnumMeta):
-
-    def __init__(cls, cls_name, bases, classdict):
-        super().__init__(cls_name, bases, classdict)
-        cls._default = None
-
-    @property
-    def default(cls) -> Enum:
-        """Return default value."""
-        return cls._default
-
-    @default.setter
-    def default(cls, dflt: Enum):
-        assert(isinstance(dflt, cls))
-        cls._default = dflt
+from enum import Enum
 
 
 # rounding modes equivalent to those defined in standard lib module 'decimal'
-class ROUNDING(metaclass=_EnumMetaWithDefault):
+class ROUNDING(Enum):
 
     """Enumeration of rounding modes."""
 
@@ -52,11 +35,6 @@ class ROUNDING(metaclass=_EnumMetaWithDefault):
         cls.__next_value__ += 1
         member.__doc__ = doc
         return member
-
-    @property
-    def name(self) -> str:
-        """Name of the element."""
-        return self._name_
 
     #: Round away from zero if last digit after rounding towards
     #: zero would have been 0 or 5; otherwise round towards zero.
@@ -79,28 +57,6 @@ class ROUNDING(metaclass=_EnumMetaWithDefault):
     ROUND_UP = 'Round away from zero.'
 
 
-# In 3.0 round changed from half-up to half-even !
-ROUNDING.default = ROUNDING.ROUND_HALF_EVEN
-
-
-# functions to get / set rounding mode
-def get_rounding() -> ROUNDING:
-    """Return default rounding mode."""
-    return ROUNDING.default
-
-
-def set_rounding(rounding: ROUNDING):
-    """Set default rounding mode.
-
-    Args:
-        rounding (ROUNDING): rounding mode to be set as default
-
-    """
-    ROUNDING.default = rounding
-
-
 __all__ = [
     'ROUNDING',
-    'get_rounding',
-    'set_rounding',
 ]

@@ -31,7 +31,7 @@ from typing import Any, Callable, Optional, Sequence, Tuple, Union
 
 # local imports
 
-from .rounding import get_rounding, ROUNDING, set_rounding
+from .rounding import ROUNDING
 
 
 MAX_DEC_PRECISION = 9 * 255
@@ -887,9 +887,9 @@ class Decimal:
         """
         if precision is None:
             # return integer
-            return int(self.adjusted(0, ROUNDING.default))
+            return int(self.adjusted(0))
         # otherwise return Decimal
-        return self.adjusted(precision, ROUNDING.default)
+        return self.adjusted(precision)
 
 
 # register Decimal as Rational
@@ -1482,6 +1482,28 @@ def pow2(x: Any, y: Decimal) \
     if y.denominator == 1:
         return x ** y.numerator
     return x ** float(y)
+
+
+# get / set default rounding mode
+
+_dflt_rounding_mode = ROUNDING.ROUND_HALF_EVEN
+
+
+def get_rounding() -> ROUNDING:
+    """Return default rounding mode."""
+    global _dflt_rounding_mode
+    return _dflt_rounding_mode
+
+
+def set_rounding(rounding: ROUNDING):
+    """Set default rounding mode.
+
+    Args:
+        rounding (ROUNDING): rounding mode to be set as default
+
+    """
+    global _dflt_rounding_mode
+    _dflt_rounding_mode = rounding
 
 
 __all__ = [
