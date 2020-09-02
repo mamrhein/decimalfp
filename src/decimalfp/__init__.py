@@ -238,20 +238,20 @@ import os                                                   # noqa: I100, I202
 _force_python_impl = os.getenv('DECIMALFP_FORCE_PYTHON_IMPL')
 del os
 if _impl == 'PyPy' or _force_python_impl:
-    from ._pydecimalfp import Decimal, get_rounding, ROUNDING, set_rounding
+    from ._pydecimalfp import Decimal, get_dflt_rounding_mode, ROUNDING, set_dflt_rounding_mode
 else:                                                       # pragma: no cover
     try:
         # Cython / C implementation available?
         from ._cdecimalfp import Decimal, get_rounding, ROUNDING, set_rounding
     except ImportError:
         from ._pydecimalfp import (
-            Decimal, get_rounding, ROUNDING, set_rounding)
+            Decimal, get_dflt_rounding_mode, ROUNDING, set_dflt_rounding_mode)
 
 
 # define public namespace
 __all__ = [
     'Decimal',
     'ROUNDING',
-    'get_rounding',
-    'set_rounding',
+    'get_dflt_rounding_mode',
+    'set_dflt_rounding_mode',
 ]

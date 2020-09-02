@@ -1043,7 +1043,7 @@ def _floordiv_rounded(x: int, y: int,
         return quot
     else:
         if rounding is None:
-            rounding = get_rounding()
+            rounding = get_dflt_rounding_mode()
         if rounding == ROUNDING.ROUND_HALF_UP:
             # Round 5 up (away from 0)
             # |remainder| > |divisor|/2 or
@@ -1489,13 +1489,13 @@ def pow2(x: Any, y: Decimal) \
 _dflt_rounding_mode = ROUNDING.ROUND_HALF_EVEN
 
 
-def get_rounding() -> ROUNDING:
+def get_dflt_rounding_mode() -> ROUNDING:
     """Return default rounding mode."""
     global _dflt_rounding_mode
     return _dflt_rounding_mode
 
 
-def set_rounding(rounding: ROUNDING):
+def set_dflt_rounding_mode(rounding: ROUNDING):
     """Set default rounding mode.
 
     Args:
@@ -1509,6 +1509,6 @@ def set_rounding(rounding: ROUNDING):
 __all__ = [
     'Decimal',
     'ROUNDING',
-    'get_rounding',
-    'set_rounding',
+    'get_dflt_rounding_mode',
+    'set_dflt_rounding_mode',
 ]

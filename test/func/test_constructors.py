@@ -30,10 +30,10 @@ from decimalfp._pydecimalfp import MAX_DEC_PRECISION
 
 @pytest.fixture(scope="module")
 def dflt_rounding(impl):
-    rnd = impl.get_rounding()
-    impl.set_rounding(impl.ROUNDING.ROUND_HALF_UP);
+    rnd = impl.get_dflt_rounding_mode()
+    impl.set_dflt_rounding_mode(impl.ROUNDING.ROUND_HALF_UP);
     yield
-    impl.set_rounding(rnd);
+    impl.set_dflt_rounding_mode(rnd);
 
 
 def test_dflt_rounding(dflt_rounding):
