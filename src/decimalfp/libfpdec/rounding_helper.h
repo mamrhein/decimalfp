@@ -137,14 +137,16 @@ round_u128(fpdec_sign_t sign, uint128_t *quot, uint128_t *rem,
             tie.hi = divisor->hi >> 1U;
             tie.lo = ((divisor->hi % 2) << 63) + (divisor->lo >> 1UL);
             cmp = u128_cmp(rem, &tie);
-            if (cmp > 0 || cmp == 0 && quot->lo % 2 != 0)
+            if (cmp > 0 || cmp == 0 && divisor->lo % 2 == 0 &&
+                quot->lo % 2 != 0)
                 return true;
             break;
         case FPDEC_ROUND_HALF_UP:
             // Round 5 up (away from 0), rest to nearest
             tie.hi = divisor->hi >> 1U;
             tie.lo = ((divisor->hi % 2) << 63) + (divisor->lo >> 1UL);
-            if (u128_cmp(rem, &tie) >= 0)
+            cmp = u128_cmp(rem, &tie);
+            if (cmp > 0 || cmp == 0 && divisor->lo % 2 == 0)
                 return true;
             break;
         case FPDEC_ROUND_UP:
