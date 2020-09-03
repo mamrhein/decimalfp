@@ -1501,8 +1501,12 @@ def set_dflt_rounding_mode(rounding: ROUNDING):
     Args:
         rounding (ROUNDING): rounding mode to be set as default
 
+    Raises:
+        TypeError: given 'rounding' is not a valid rounding mode
     """
     global _dflt_rounding_mode
+    if not isinstance(rounding, ROUNDING):
+        raise TypeError(f"Illegal rounding mode: {rounding!r}")
     _dflt_rounding_mode = rounding
 
 
