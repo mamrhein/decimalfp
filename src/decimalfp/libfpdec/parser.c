@@ -46,6 +46,7 @@ parse_ascii_dec_literal(dec_repr_t *result, const char *literal) {
     ptrdiff_t len_int_part = 0;
     const char *frac_part = NULL;
     ptrdiff_t len_frac_part = 0;
+    int64_t t;
 
     while isspace(*curr_char) {
         curr_char++;
@@ -88,8 +89,8 @@ parse_ascii_dec_literal(dec_repr_t *result, const char *literal) {
             return FPDEC_INVALID_DECIMAL_LITERAL;
     }
     if (*curr_char == 'e' || *curr_char == 'E') {
-        int sign = 1;
-        int exp = 0;
+        int8_t sign = 1;
+        int64_t exp = 0;
         curr_char++;
         switch (*curr_char) {
             case '-':
@@ -102,7 +103,10 @@ parse_ascii_dec_literal(dec_repr_t *result, const char *literal) {
                     return FPDEC_INVALID_DECIMAL_LITERAL;
         }
         while isdigit(*curr_char) {
+            t = exp;
             exp = exp * 10 + (*curr_char - '0');
+            if (exp < t)    // overflow occured!
+                return FPDEC_EXP_LIMIT_EXCEEDED;
             curr_char++;
         }
         result->exp = sign * exp;
@@ -112,8 +116,18 @@ parse_ascii_dec_literal(dec_repr_t *result, const char *literal) {
     }
     if (*curr_char != 0)
         return FPDEC_INVALID_DECIMAL_LITERAL;
+    t = result->exp;
+    result->exp -= len_frac_part;
+    if (result->exp > t)    // overflow occured!
+        return FPDEC_EXP_LIMIT_EXCEEDED;
+    if (result->exp > 0) {
+        t = CEIL(result->exp, DEC_DIGITS_PER_DIGIT);
+        if (t > FPDEC_MAX_EXP)
+            return FPDEC_EXP_LIMIT_EXCEEDED;
+    }
+    if (-result->exp > FPDEC_MAX_DEC_PREC)
+        return FPDEC_PREC_LIMIT_EXCEEDED;
     fill_in_digits(result, signif_int_part, len_int_part);
     fill_in_digits(result, frac_part, len_frac_part);
-    result->exp -= len_frac_part;
     return FPDEC_OK;
 }

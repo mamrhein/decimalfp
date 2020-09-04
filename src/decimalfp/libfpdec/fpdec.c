@@ -181,16 +181,21 @@ fpdec_from_ascii_literal(fpdec_t *fpdec, const char *literal) {
                                    dec_repr->n_dec_digits, dec_repr->coeff,
                                    dec_repr->exp);
     if (rc != FPDEC_OK)
-        goto EXIT;
-    fpdec->dyn_alloc = true;
+        goto ERROR;
     fpdec->exp += digits_eliminate_trailing_zeros(fpdec->digit_array);
+    fpdec->dyn_alloc = true;
     if (FPDEC_DYN_N_DIGITS(fpdec) > 0) {
         fpdec->normalized = true;
     }
     else {      // corner case: result == 0
         fpdec_reset_to_zero(fpdec, 0);
     }
-    fpdec->dec_prec = MAX(0, -dec_repr->exp);
+    fpdec->dec_prec = MAX(0, -(dec_repr->exp));
+    goto EXIT;
+
+ERROR:
+    fpdec_reset_to_zero(fpdec, 0);
+
 EXIT:
     if (dec_repr != &st_dec_repr) {
         fpdec_mem_free(dec_repr);

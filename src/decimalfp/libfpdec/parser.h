@@ -27,7 +27,7 @@ $Revision$
 // represent decimal number as (negative ? -1 : 1) * coeff * pow(10, exp)
 typedef struct {
     bool negative;
-    int exp;
+    int64_t exp;
     size_t n_dec_digits;
     dec_digit_t coeff[COEFF_SIZE_THRESHOLD];
 } dec_repr_t;
