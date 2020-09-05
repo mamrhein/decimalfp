@@ -1021,6 +1021,7 @@ static PyType_Slot decimal_type_slots[] = {
     //{Py_tp_doc, DecimalType_doc},
     {Py_tp_new, DecimalType_new},
     {Py_tp_dealloc, Decimal_dealloc},
+    {Py_tp_free, PyObject_Del},
     {Py_tp_richcompare, Decimal_richcompare},
     {Py_tp_hash, Decimal_hash},
     //{Py_tp_str, Decimal_str},
