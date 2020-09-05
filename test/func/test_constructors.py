@@ -140,10 +140,11 @@ def test_decimal_from_str_dflt_prec(impl, value, prec, ratio):
                          ((compact_str, compact_adj, compact_adj_ratio),
                           (small_str, small_adj, small_adj_ratio),
                           (large_str, large_adj, large_adj_ratio),
+                          ("27.81029", IntWrapper(3), Fraction(2781, 100)),
                           (".829", 2, Fraction(83, 100)),
                           (".726", 0, 1)),
-                         ids=("compact", "small", "large", "frac-only",
-                              "carry-over"))
+                         ids=("compact", "small", "large", "Integral as prec",
+                              "frac-only", "carry-over"))
 def test_decimal_from_str_adj(impl, value, prec, ratio):
     dec = impl.Decimal(value, prec)
     assert isinstance(dec, impl.Decimal)
