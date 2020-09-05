@@ -119,6 +119,7 @@ static PyObject *PyONE = NULL;
 static PyObject *PyTEN = NULL;
 static PyObject *PyRADIX = NULL;
 static PyObject *Py2pow64 = NULL;
+static PyObject *MAX_DEC_PRECISION = NULL;
 
 // *** Helper prototypes ***
 
@@ -469,17 +470,26 @@ DecimalType_from_decimal_or_int(PyTypeObject *type, PyObject *val) {
 }
 
 static PyObject *
-DecimalType_from_real(PyTypeObject *type, PyObject *val, PyObject *exact) {
+DecimalType_from_real(PyTypeObject *type, PyObject *args, PyObject *kwds) {
+    static char *kw_names[] = {"r", "exact", NULL};
+    PyObject *r = Py_None;
+    PyObject *exact = Py_True;
     PyObject *dec;
 
-    if (!PyObject_IsInstance(val, Real))
-        return PyErr_Format(PyExc_TypeError, "%R is not a Real.", val);
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O|O", kw_names, &r,
+                                     &exact))
+        return NULL;
 
-    dec = DecimalType_from_float(type, val, -1);
-    if (dec == NULL && PyErr_ExceptionMatches(PyExc_OverflowError) &&
-        !PyObject_IsTrue(exact)) {
-        PyErr_Clear();
-        dec = DecimalType_from_float(type, val, FPDEC_MAX_DEC_PREC);
+    if (!PyObject_IsInstance(r, Real))
+        return PyErr_Format(PyExc_TypeError, "%R is not a Real.", r);
+
+    dec = PyObject_CallFunctionObjArgs((PyObject *)type, r, Py_None, NULL);
+    if (dec == NULL && PyErr_ExceptionMatches(PyExc_ValueError)) {
+        if (!PyObject_IsTrue(exact)) {
+            PyErr_Clear();
+            dec = PyObject_CallFunctionObjArgs((PyObject *)type, r,
+                                               MAX_DEC_PRECISION, NULL);
+        }
     }
     return dec;
 }
@@ -1343,6 +1353,7 @@ cdecimalfp_exec(PyObject *module) {
     Py_CLEAR(Py2pow32);
 
     /* Init global vars */
+    MAX_DEC_PRECISION = PyLong_FromLong(FPDEC_MAX_DEC_PREC);
     PyModule_AddIntConstant(module, "MAX_DEC_PRECISION", FPDEC_MAX_DEC_PREC);
 
     /* Add types */
