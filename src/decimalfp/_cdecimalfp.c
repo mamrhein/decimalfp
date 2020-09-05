@@ -25,6 +25,11 @@ $Revision$
 #define ASSIGN_AND_CHECK_NULL(result, expr) \
     do { result = (expr); if (result == NULL) goto ERROR; } while (0)
 
+#define CHECK_TYPE(obj, type) \
+    if (!PyObject_TypeCheck(obj, (PyTypeObject *)type)) goto ERROR
+
+#define CHECK_ERROR(rc) if ((rc) != 0) goto ERROR
+
 // Abstract number types
 
 static PyObject *Number = NULL;
@@ -1285,7 +1290,81 @@ fpdec_from_pylong(fpdec_t *fpdec, PyObject *val) {
     }
 }
 
+// *** Enum ROUNDING type ***
+
+static const char EnumRounding_name[] = "ROUNDING";
+static PyObject *EnumRounding;  // will be imported from rounding.py
+
+// ???: check optimization via static mapping (initialized in module exec)
+static PyObject *
+fpdec_rnd_2_py_rnd(enum FPDEC_ROUNDING_MODE fpdec_rnd) {
+    PyObject *val = NULL;
+    PyObject *py_rnd = NULL;
+
+    ASSIGN_AND_CHECK_NULL(val, PyLong_FromLong((long)fpdec_rnd));
+    ASSIGN_AND_CHECK_NULL(py_rnd,
+                          PyObject_CallFunctionObjArgs(EnumRounding, val,
+                                                       NULL));
+    goto CLEAN_UP;
+
+ERROR:
+    assert(PyErr_Occurred());
+
+CLEAN_UP:
+    Py_XDECREF(val);
+    return py_rnd;
+}
+
+static enum FPDEC_ROUNDING_MODE
+py_rnd_2_fpdec_rnd(PyObject *py_rnd) {
+    long fpdec_rnd = -1;
+    PyObject *val = NULL;
+
+    CHECK_TYPE(py_rnd, EnumRounding);
+    ASSIGN_AND_CHECK_NULL(val, PyObject_GetAttrString(py_rnd, "value"));
+    fpdec_rnd = PyLong_AsLong(val);
+    if (fpdec_rnd < 1 || fpdec_rnd > FPDEC_MAX_ROUNDING_MODE) {
+        goto ERROR;
+    }
+    goto CLEAN_UP;
+
+ERROR:
+    PyErr_Format(PyExc_TypeError, "Illegal rounding mode: %R", py_rnd);
+    fpdec_rnd = -1;
+
+CLEAN_UP:
+    Py_XDECREF(val);
+    return (enum FPDEC_ROUNDING_MODE)fpdec_rnd;
+}
+
 // *** _cdecimalfp module ***
+
+static PyObject *
+get_dflt_rounding_mode(PyObject *mod) {
+    enum FPDEC_ROUNDING_MODE dflt = fpdec_get_default_rounding_mode();
+    return fpdec_rnd_2_py_rnd(dflt);
+}
+
+static PyObject *
+set_dflt_rounding_mode(PyObject *mod, PyObject *py_rnd) {
+    enum FPDEC_ROUNDING_MODE new_dflt = py_rnd_2_fpdec_rnd(py_rnd);
+    if (new_dflt < 0)
+        return NULL;
+    fpdec_set_default_rounding_mode(new_dflt);
+    return Py_None;
+}
+
+static PyMethodDef cdecimalfp_methods[] = {
+    {"get_dflt_rounding_mode",
+     (PyCFunction)get_dflt_rounding_mode,
+     METH_NOARGS,
+     get_dflt_rounding_mode_doc},
+    {"set_dflt_rounding_mode",
+     (PyCFunction)set_dflt_rounding_mode,
+     METH_O,
+     set_dflt_rounding_mode_doc},
+    {0, 0, 0, 0}
+};
 
 #define PYMOD_ADD_OBJ(module, name, obj)                    \
     do {                                                    \
@@ -1337,6 +1416,13 @@ cdecimalfp_exec(PyObject *module) {
     ASSIGN_AND_CHECK_NULL(PyLong_bit_length,
                           PyObject_GetAttrString((PyObject *)&PyLong_Type,
                                                  "bit_length"));
+    /* Import from rounding */
+    PyObject *rounding = NULL;
+    ASSIGN_AND_CHECK_NULL(rounding, PyImport_ImportModule("rounding"));
+    ASSIGN_AND_CHECK_NULL(EnumRounding,
+                          PyObject_GetAttrString(rounding,
+                                                 EnumRounding_name));
+    Py_CLEAR(rounding);
 
     /* Init libfpdec memory handlers */
     fpdec_mem_alloc = PyMem_Calloc;
@@ -1359,6 +1445,7 @@ cdecimalfp_exec(PyObject *module) {
     ASSIGN_AND_CHECK_NULL(DecimalType,
                           (PyTypeObject *)PyType_FromSpec(&DecimalType_spec));
     PYMOD_ADD_OBJ(module, "Decimal", (PyObject *)DecimalType);
+    PYMOD_ADD_OBJ(module, EnumRounding_name, EnumRounding);
 
     return 0;
 
@@ -1371,6 +1458,7 @@ ERROR:
     Py_CLEAR(Fraction);
     Py_CLEAR(StdLibDecimal);
     Py_CLEAR(DecimalType);
+    Py_CLEAR(EnumRounding);
     Py_CLEAR(PyNumber_gcd);
     Py_CLEAR(PyLong_bit_length);
     Py_CLEAR(PyZERO);
@@ -1392,7 +1480,7 @@ static struct PyModuleDef cdecimalfp_module = {
     "_cdecimalfp",                      /* m_name */
     cdecimalfp_doc,                     /* m_doc */
     0,                                  /* m_size */
-    NULL,                               /* m_methods */
+    cdecimalfp_methods,                /* m_methods */
     cdecimalfp_slots,                   /* m_slots */
     NULL,                               /* m_traverse */
     NULL,                               /* m_clear */
