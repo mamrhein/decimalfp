@@ -1287,15 +1287,14 @@ fpdec_from_pylong(fpdec_t *fpdec, PyObject *val) {
 
 // *** _cdecimalfp module ***
 
-static int
-PyModule_AddType(PyObject *module, const char *name, PyObject *type) {
-    Py_INCREF(type);
-    if (PyModule_AddObject(module, name, type) < 0) {
-        Py_DECREF(type);
-        return -1;
-    }
-    return 0;
-}
+#define PYMOD_ADD_OBJ(module, name, obj)                    \
+    do {                                                    \
+        Py_INCREF(obj);                                     \
+        if (PyModule_AddObject(module, name, obj) < 0) {    \
+            Py_DECREF(obj);                                 \
+            goto ERROR;                                     \
+        }                                                   \
+    } while (0)
 
 PyDoc_STRVAR(cdecimalfp_doc, "Decimal fixed-point arithmetic.");
 
@@ -1354,15 +1353,15 @@ cdecimalfp_exec(PyObject *module) {
 
     /* Init global vars */
     MAX_DEC_PRECISION = PyLong_FromLong(FPDEC_MAX_DEC_PREC);
-    PyModule_AddIntConstant(module, "MAX_DEC_PRECISION", FPDEC_MAX_DEC_PREC);
+    PYMOD_ADD_OBJ(module, "MAX_DEC_PRECISION", MAX_DEC_PRECISION);
 
     /* Add types */
     ASSIGN_AND_CHECK_NULL(DecimalType,
                           (PyTypeObject *)PyType_FromSpec(&DecimalType_spec));
-    if (PyModule_AddType(module, "Decimal", (PyObject *)DecimalType) < 0)
-        goto ERROR;
+    PYMOD_ADD_OBJ(module, "Decimal", (PyObject *)DecimalType);
 
     return 0;
+
 ERROR:
     Py_CLEAR(Number);
     Py_CLEAR(Complex);
@@ -1379,6 +1378,7 @@ ERROR:
     Py_CLEAR(PyTEN);
     Py_CLEAR(PyRADIX);
     Py_CLEAR(Py2pow64);
+    Py_CLEAR(MAX_DEC_PRECISION);
     return -1;
 }
 
