@@ -1434,7 +1434,8 @@ cdecimalfp_exec(PyObject *module) {
                                                  "bit_length"));
     /* Import from rounding */
     PyObject *rounding = NULL;
-    ASSIGN_AND_CHECK_NULL(rounding, PyImport_ImportModule("rounding"));
+    ASSIGN_AND_CHECK_NULL(rounding,
+                          PyImport_ImportModule("decimalfp.rounding"));
     ASSIGN_AND_CHECK_NULL(EnumRounding,
                           PyObject_GetAttrString(rounding,
                                                  EnumRounding_name));
