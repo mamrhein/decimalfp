@@ -238,7 +238,7 @@ DecimalType_from_decimal(PyTypeObject *type, PyObject *val,
         // obj is a direct instance of DecimalType, a direct instance of
         // DecinalType is wanted and there's no need to adjust the result,
         // so just return the given instance (ref count increased)
-        Py_IncRef(val);
+        Py_INCREF(val);
         return val;
     }
     return DecimalType_from_fpdec(type, &((DecimalObject *)val)->fpdec,
@@ -608,27 +608,37 @@ Decimal_magnitude_get(DecimalObject *self) {
 
 static PyObject *
 Decimal_numerator_get(DecimalObject *self) {
-    if (self->numerator == NULL)
+    if (self->numerator == NULL) {
         fpdec_as_integer_ratio(&self->numerator, &self->denominator,
                                &self->fpdec);
+        if (self->numerator == NULL)
+            return NULL;
+    }
+    Py_INCREF(self->numerator);
     return self->numerator;
 }
 
 static PyObject *
 Decimal_denominator_get(DecimalObject *self) {
-    if (self->denominator == NULL)
+    if (self->denominator == NULL) {
         fpdec_as_integer_ratio(&self->numerator, &self->denominator,
                                &self->fpdec);
+        if (self->denominator == NULL)
+            return NULL;
+    }
+    Py_INCREF(self->denominator);
     return self->denominator;
 }
 
 static PyObject *
 Decimal_real_get(DecimalObject *self) {
+    Py_INCREF(self);
     return (PyObject *)self;
 }
 
 static PyObject *
 Decimal_imag_get(DecimalObject *self) {
+    Py_INCREF(PyZERO);
     return PyZERO;
 }
 
@@ -1179,12 +1189,16 @@ fpdec_as_integer_ratio(PyObject **numerator, PyObject **denominator,
                                                            coeff, ten_pow_exp,
                                                            NULL));
         ASSIGN_AND_CHECK_NULL(*numerator, PyNumber_FloorDivide(coeff, gcd));
-        *denominator = PyNumber_FloorDivide(ten_pow_exp, gcd);
-        if (*denominator == NULL)
-            Py_CLEAR(*numerator);
+        ASSIGN_AND_CHECK_NULL(*denominator, PyNumber_FloorDivide(ten_pow_exp,
+                                                                 gcd));
     }
+    goto CLEAN_UP;
 
 ERROR:
+    assert(PyErr_Occurred());
+    Py_CLEAR(*numerator);
+    Py_CLEAR(*denominator);
+
 CLEAN_UP:
     Py_XDECREF(coeff);
     Py_XDECREF(py_exp);
@@ -1306,6 +1320,7 @@ fpdec_rnd_2_py_rnd(enum FPDEC_ROUNDING_MODE fpdec_rnd) {
     ASSIGN_AND_CHECK_NULL(py_rnd,
                           PyObject_CallFunctionObjArgs(EnumRounding, val,
                                                        NULL));
+    Py_INCREF(py_rnd);
     goto CLEAN_UP;
 
 ERROR:
