@@ -33,7 +33,7 @@ if os.getenv('DECIMALFP_FORCE_PYTHON_IMPL'):
     IDS = ("pydec",)
 else:
     IMPLS = ("decimalfp._pydecimalfp", "decimalfp._cdecimalfp")
-    IDS = ("pydec", "cydec")
+    IDS = ("pydec", "cdec")
 
 
 @pytest.fixture(scope="session",
