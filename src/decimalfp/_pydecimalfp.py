@@ -34,7 +34,7 @@ from typing import Any, Callable, Optional, Sequence, Tuple, Union
 from .rounding import ROUNDING
 
 
-MAX_DEC_PRECISION = 9 * 255
+MAX_DEC_PRECISION = 65535
 
 # 10 ** exp (mit cache)
 
