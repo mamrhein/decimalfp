@@ -25,7 +25,6 @@ import sys
 
 import pytest
 
-# ???: where to export global constants?
 from decimalfp._pydecimalfp import MAX_DEC_PRECISION
 
 
