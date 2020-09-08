@@ -20,6 +20,7 @@
 import copy
 from decimal import Decimal as StdLibDecimal  # , InvalidOperation
 from fractions import Fraction
+from numbers import Integral
 import sys
 
 import pytest
@@ -33,7 +34,7 @@ def dflt_rounding(impl):
     rnd = impl.get_dflt_rounding_mode()
     impl.set_dflt_rounding_mode(impl.ROUNDING.ROUND_HALF_UP);
     yield
-    impl.set_dflt_rounding_mode(rnd);
+    impl.set_dflt_rounding_mode(rnd)
 
 
 def test_dflt_rounding(dflt_rounding):
@@ -54,6 +55,9 @@ class IntWrapper:
     def __eq__(self, i):
         """self == i"""
         return self.i == i
+
+
+Integral.register(IntWrapper)
 
 
 class FloatWrapper:
@@ -86,8 +90,8 @@ def test_decimal_wrong_value_type(impl, value):
         impl.Decimal(value=value)
 
 
-@pytest.mark.parametrize("prec", ["5", 7.5, IntWrapper(5)],
-                         ids=("prec='5'", "prec=7.5", "prec=IntWrapper(5)"))
+@pytest.mark.parametrize("prec", ["5", 7.5],
+                         ids=("prec='5'", "prec=7.5"))
 def test_decimal_wrong_precision_type(impl, prec):
     with pytest.raises(TypeError):
         impl.Decimal(precision=prec)
@@ -261,12 +265,14 @@ def test_decimal_from_integral(impl, value, ratio):
 
 
 @pytest.mark.parametrize(("value", "prec", "ratio"),
-                         ((compact_coeff, compact_adj,
-                           Fraction(compact_coeff, 1)),
+                         ((compact_coeff, compact_adj, compact_coeff),
+                          (IntWrapper(328), 7, Fraction(328, 1)),
+                          (19, 12, 19),
                           (small_coeff, small_adj, Fraction(small_coeff, 1)),
                           (large_coeff, large_adj, Fraction(large_coeff, 1)),
-                          (IntWrapper(328), 7, Fraction(328, 1))),
-                         ids=("compact", "small", "large", "IntWrapper"))
+                          ),
+                         ids=("compact", "IntWrapper", "prec > 9", "small",
+                              "large",))
 def test_decimal_from_integral_adj(impl, value, prec, ratio):
     dec = impl.Decimal(value, prec)
     assert isinstance(dec, impl.Decimal)
