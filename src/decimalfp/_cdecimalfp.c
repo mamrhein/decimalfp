@@ -854,6 +854,7 @@ ERROR:
 
 static PyObject *
 Decimal_pos(PyObject *x) {
+    Py_INCREF(x);
     return x;
 }
 
