@@ -788,44 +788,149 @@ Decimal_deepcopy(DecimalObject *self, PyObject *memo) {
 }
 
 static PyObject *
-Decimal_richcompare(PyObject *self, PyObject *other, int op) {
-    int r;
+Decimal_cmp_to_int(DecimalObject *x, PyObject *y, int op) {
+    PyObject *res = NULL;
+    PyObject *num = NULL;
+    PyObject *den = NULL;
+    PyObject *t = NULL;
 
-    assert(Decimal_Check(self));
+    ASSIGN_AND_CHECK_NULL(num, Decimal_numerator_get(x));
+    ASSIGN_AND_CHECK_NULL(den, Decimal_denominator_get(x));
+    ASSIGN_AND_CHECK_NULL(t, PyNumber_Multiply(y, den));
+    ASSIGN_AND_CHECK_NULL(res, PyObject_RichCompare(t, num, op));
+    goto CLEAN_UP;
 
+ERROR:
+    assert(PyErr_Occurred());
+    Py_CLEAR(res);
+
+CLEAN_UP:
+    Py_CLEAR(num);
+    Py_CLEAR(den);
+    Py_CLEAR(t);
+    return res;
+}
+
+static PyObject *
+Decimal_cmp_to_ratio(DecimalObject *x, PyObject *y, int op) {
+    PyObject *res = NULL;
+    PyObject *x_num = NULL;
+    PyObject *x_den = NULL;
+    PyObject *y_num = NULL;
+    PyObject *y_den = NULL;
+    PyObject *lhs = NULL;
+    PyObject *rhs = NULL;
+
+    ASSIGN_AND_CHECK_NULL(x_num, Decimal_numerator_get(x));
+    ASSIGN_AND_CHECK_NULL(x_den, Decimal_denominator_get(x));
+    ASSIGN_AND_CHECK_NULL(y_num, PySequence_GetItem(y, 0));
+    ASSIGN_AND_CHECK_NULL(y_den, PySequence_GetItem(y, 1));
+    ASSIGN_AND_CHECK_NULL(lhs, PyNumber_Multiply(x_num, y_den));
+    ASSIGN_AND_CHECK_NULL(rhs, PyNumber_Multiply(y_num, x_den));
+    ASSIGN_AND_CHECK_NULL(res, PyObject_RichCompare(lhs, rhs, op));
+    goto CLEAN_UP;
+
+ERROR:
+    assert(PyErr_Occurred());
+    Py_CLEAR(res);
+
+CLEAN_UP:
+    Py_CLEAR(x_num);
+    Py_CLEAR(x_den);
+    Py_CLEAR(y_num);
+    Py_CLEAR(y_den);
+    Py_CLEAR(lhs);
+    Py_CLEAR(rhs);
+    return res;
+}
+
+static PyObject *
+Decimal_richcompare(DecimalObject *self, PyObject *other, int op) {
+    PyObject *res = NULL;
+    PyObject *t = NULL;
+
+    // Decimal
     if (Decimal_Check(other)) {
-        r = fpdec_compare(&((DecimalObject *)self)->fpdec,
-                          &((DecimalObject *)other)->fpdec, false);
+        int r = fpdec_compare(&self->fpdec,
+                              &((DecimalObject *)other)->fpdec, false);
+        Py_RETURN_RICHCOMPARE(r, 0, op);
+    }
+
+    // Python <int>
+    if (PyLong_Check(other))
+        return Decimal_cmp_to_int(self, other, op);
+
+    // Integral
+    if (PyObject_IsInstance(other, Integral)) {
+        ASSIGN_AND_CHECK_NULL(t, PyNumber_Long(other));
+        ASSIGN_AND_CHECK_NULL(res, Decimal_cmp_to_int(self, t, op));
+        goto CLEAN_UP;
+    }
+
+    // Rational
+    if (PyObject_IsInstance(other, Rational)) {
+        ASSIGN_AND_CHECK_NULL(t, Decimal_as_fraction(self));
+        ASSIGN_AND_CHECK_NULL(res, PyObject_RichCompare(t, other, op));
+        goto CLEAN_UP;
+    }
+
+    // Python <float>, standard lib Decimal, Real
+    // Test if convertable to a Rational
+    t = PyObject_CallMethod(other, "as_integer_ratio", NULL);
+    if (t != NULL) {
+        res = Decimal_cmp_to_ratio(self, t, op);
+        goto CLEAN_UP;
     }
     else {
-        // TODO
-        Py_RETURN_NOTIMPLEMENTED;
+        PyObject *exc = PyErr_Occurred();
+        if (exc == PyExc_ValueError || exc == PyExc_OverflowError) {
+            // 'nan' or 'inf'
+            PyErr_Clear();
+            t = Decimal_numerator_get(self);
+            res = PyObject_RichCompare(t, other, op);
+            goto CLEAN_UP;
+        }
+        else if (exc == PyExc_AttributeError &&
+                 PyObject_IsInstance(other, Real)) {
+            PyErr_Clear();
+            Py_INCREF(Py_NotImplemented);
+            res = Py_NotImplemented;
+            goto CLEAN_UP;
+        }
+        // fall through
+        PyErr_Clear();
     }
 
-    switch (op) {
-        case Py_EQ:
-            r = (r == 0);
-            break;
-        case Py_NE:
-            r = (r != 0);
-            break;
-        case Py_LE:
-            r = (r <= 0);
-            break;
-        case Py_GE:
-            r = (r >= 0);
-            break;
-        case Py_LT:
-            r = (r < 0);
-            break;
-        case Py_GT:
-            r = (r > 0);
-            break;
-        default:
-            Py_UNREACHABLE();
+    // Complex
+    if (PyObject_IsInstance(other, Complex)) {
+        if (op == Py_EQ || op == Py_NE) {
+            ASSIGN_AND_CHECK_NULL(t, PyObject_GetAttrString(other, "imag"));
+            if (PyObject_RichCompareBool(t, PyZERO, Py_EQ)) {
+                Py_DECREF(t);
+                ASSIGN_AND_CHECK_NULL(t, PyObject_GetAttrString(other,
+                                                                "real"));
+                ASSIGN_AND_CHECK_NULL(res, Decimal_richcompare(self, t, op));
+            }
+            else {
+                res = op == Py_EQ ? Py_False : Py_True;
+                Py_INCREF(res);
+            }
+            goto CLEAN_UP;
+        }
     }
 
-    return PyBool_FromLong(r);
+    // don't know how to compare
+    Py_INCREF(Py_NotImplemented);
+    res = Py_NotImplemented;
+    goto CLEAN_UP;
+
+ERROR:
+    assert(PyErr_Occurred());
+    Py_CLEAR(res);
+
+CLEAN_UP:
+    Py_CLEAR(t);
+    return res;
 }
 
 // unary number methods
