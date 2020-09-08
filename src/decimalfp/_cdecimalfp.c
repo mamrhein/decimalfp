@@ -836,8 +836,10 @@ Decimal_neg(PyObject *x) {
     fpdec_t *x_fpdec = &((DecimalObject *)x)->fpdec;
     error_t rc;
 
-    if (FPDEC_EQ_ZERO(x_fpdec))
+    if (FPDEC_EQ_ZERO(x_fpdec)) {
+        Py_INCREF(x);
         return x;
+    }
 
     DECIMAL_ALLOC(Py_TYPE(x), dec);
     rc = fpdec_copy(&dec->fpdec, x_fpdec);
@@ -846,7 +848,7 @@ Decimal_neg(PyObject *x) {
     return (PyObject *)dec;
 
 ERROR:
-    Decimal_dealloc(dec);
+    Py_XDECREF(dec);
     return NULL;
 }
 
