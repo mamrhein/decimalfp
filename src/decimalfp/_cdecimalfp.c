@@ -190,14 +190,11 @@ DecimalType_alloc(PyTypeObject *type) {
 
 static void
 Decimal_dealloc(DecimalObject *self) {
-    freefunc tp_free;
-    PyTypeObject *tp = Py_TYPE(self);
+    freefunc tp_free = (freefunc)PyType_GetSlot(Py_TYPE(self), Py_tp_free);
     fpdec_reset_to_zero(&self->fpdec, 0);
     Py_CLEAR(self->numerator);
     Py_CLEAR(self->denominator);
-    tp_free = (freefunc)PyType_GetSlot(tp, Py_tp_free);
     tp_free(self);
-    Py_DECREF(tp);
 }
 
 #define DECIMAL_ALLOC(type, name) \
