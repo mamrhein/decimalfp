@@ -23,7 +23,7 @@ import pytest
 @pytest.mark.parametrize(("value", "magn"),
                          (("17.8", 1),
                           (".".join(("1" * 3297, "4" * 33)), 3296),
-                          ("0.00014", -4)),
+                          ("-0.00014", -4)),
                          ids=("compact", "large", "fraction"))
 def test_magnitude(impl, value, magn):
     dec = impl.Decimal(value)
@@ -39,7 +39,7 @@ def test_magnitude_fail_on_zero(impl):
 @pytest.mark.parametrize(("num", "den"),
                          ((170, 10),
                           (9 ** 394, 10 ** 247),
-                          (19, 4000)),
+                          (-19, 4000)),
                          ids=("compact", "large", "fraction"))
 def test_numerator(impl, num, den):
     f = Fraction(num, den)
@@ -48,7 +48,7 @@ def test_numerator(impl, num, den):
 
 
 @pytest.mark.parametrize(("num", "den"),
-                         ((17, 1),
+                         ((-17, 1),
                           (9 ** 394, 10 ** 247),
                           (190, 400000)),
                          ids=("compact", "large", "fraction"))
@@ -61,7 +61,7 @@ def test_denominator(impl, num, den):
 @pytest.mark.parametrize("value",
                          ("17.8",
                           ".".join(("1" * 3297, "4" * 33)),
-                          "0.00014"),
+                          "-0.00014"),
                          ids=("compact", "large", "fraction"))
 def test_real_imag(impl, value):
     dec = impl.Decimal(value)
