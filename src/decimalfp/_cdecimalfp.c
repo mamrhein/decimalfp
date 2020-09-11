@@ -797,7 +797,7 @@ Decimal_cmp_to_int(DecimalObject *x, PyObject *y, int op) {
     ASSIGN_AND_CHECK_NULL(num, Decimal_numerator_get(x));
     ASSIGN_AND_CHECK_NULL(den, Decimal_denominator_get(x));
     ASSIGN_AND_CHECK_NULL(t, PyNumber_Multiply(y, den));
-    ASSIGN_AND_CHECK_NULL(res, PyObject_RichCompare(t, num, op));
+    ASSIGN_AND_CHECK_NULL(res, PyObject_RichCompare(num, t, op));
     goto CLEAN_UP;
 
 ERROR:
