@@ -747,13 +747,50 @@ Decimal_setstate(DecimalObject *self, PyObject *state) {
 // string representation
 
 static PyObject *
-Decimal_repr(DecimalObject *self) {
-    Py_RETURN_NOTIMPLEMENTED;
+Decimal_str(DecimalObject *self) {
+    PyObject *res = NULL;
+    char *lit = fpdec_as_ascii_literal(&self->fpdec, false);
+
+    if (lit == NULL) {
+        PyErr_SetNone(PyExc_MemoryError);
+        return NULL;
+    }
+    res = PyUnicode_InternFromString(lit);
+    fpdec_mem_free(lit);
+    return res;
 }
 
 static PyObject *
-Decimal_str(DecimalObject *self) {
-    Py_RETURN_NOTIMPLEMENTED;
+Decimal_repr(DecimalObject *self) {
+    PyObject *res = NULL;
+    char *lit = fpdec_as_ascii_literal(&self->fpdec, true);
+    char *radix_point;
+    size_t n_frac_digits;
+
+    if (lit == NULL) {
+        PyErr_SetNone(PyExc_MemoryError);
+        return NULL;
+    }
+    radix_point = strrchr(lit, '.');
+    if (radix_point == NULL)
+        n_frac_digits = 0;
+    else
+        n_frac_digits = strlen(radix_point) - 1;
+    if (n_frac_digits == FPDEC_DEC_PREC(&self->fpdec))
+        if (n_frac_digits == 0)
+            res = PyUnicode_FromFormat("Decimal(%s)", lit);
+        else
+            res = PyUnicode_FromFormat("Decimal('%s')", lit);
+    else {
+        if (n_frac_digits == 0)
+            res = PyUnicode_FromFormat("Decimal(%s, %u)",
+                                       lit, FPDEC_DEC_PREC(&self->fpdec));
+        else
+            res = PyUnicode_FromFormat("Decimal('%s', %u)",
+                                       lit, FPDEC_DEC_PREC(&self->fpdec));
+    }
+    fpdec_mem_free(lit);
+    return res;
 }
 
 static PyObject *
@@ -1141,8 +1178,8 @@ static PyType_Slot decimal_type_slots[] = {
     {Py_tp_free, PyObject_Del},
     {Py_tp_richcompare, Decimal_richcompare},
     {Py_tp_hash, Decimal_hash},
-    //{Py_tp_str, Decimal_str},
-    //{Py_tp_repr, Decimal_repr},
+    {Py_tp_str, Decimal_str},
+    {Py_tp_repr, Decimal_repr},
     /* properties */
     {Py_tp_getset, Decimal_properties},
     /* number methods */
