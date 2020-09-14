@@ -618,6 +618,211 @@ fpdec_adjusted(fpdec_t *fpdec, const fpdec_t *src,
     return fpdec_adjust(fpdec, dec_prec, rounding);
 }
 
+static inline char *
+fill_in_leading_digit(char *buf, const fpdec_digit_t digit) {
+    char dec_digits[DEC_DIGITS_PER_DIGIT];
+    char *ch = dec_digits;
+    fpdec_digit_t t = digit;
+    while (t > 0) {
+        *(ch++) = '0' + (t % 10);
+        t /= 10;
+    }
+    while (--ch >= dec_digits)
+        *(buf++) = *ch;
+    return buf;
+}
+
+static inline char *
+fill_in_digit(char *buf, const fpdec_digit_t digit, const int n) {
+    fpdec_digit_t t = digit;
+    char *ch;
+    ch = buf = buf + n;
+    for (int i = 0; i < n; i++) {
+        *(--ch) = '0' + (t % 10);
+        t /= 10;
+    }
+    return buf;
+}
+
+static inline char *
+fill_in_zeros(char *ch, const int n) {
+    for (int i = 0; i < n; i++)
+        *(ch++) = '0';
+    return ch;
+}
+
+static char *
+fpdec_dyn_as_ascii_literal(const fpdec_t *fpdec,
+                           const bool no_trailing_zeros) {
+    fpdec_sign_t sign = FPDEC_SIGN(fpdec);
+    fpdec_dec_prec_t dec_prec = FPDEC_DEC_PREC(fpdec);
+    fpdec_exp_t exp = FPDEC_DYN_EXP(fpdec);
+    fpdec_n_digits_t n_int_digits, n_frac_digits;
+    size_t n_dec_trailing_int_zeros, n_dec_trailing_frac_zeros;
+    size_t n_dec_fill_zeros;
+    size_t n_dec_frac_digits, d_adjust;
+    size_t max_n_chars;
+    char *buf;
+    char *ch;
+    fpdec_digit_t *digit =
+        FPDEC_DYN_DIGITS(fpdec) + FPDEC_DYN_N_DIGITS(fpdec) - 1;
+
+    if (exp >= 0) {
+        n_int_digits = FPDEC_DYN_N_DIGITS(fpdec);
+        n_frac_digits = 0;
+    }
+    else {
+        n_frac_digits = MIN(FPDEC_DYN_N_DIGITS(fpdec), -exp);
+        n_int_digits = FPDEC_DYN_N_DIGITS(fpdec) - n_frac_digits;
+    }
+    n_dec_trailing_int_zeros = MAX(0, exp * DEC_DIGITS_PER_DIGIT);
+    n_dec_frac_digits = MAX(0, -exp) * DEC_DIGITS_PER_DIGIT;
+    d_adjust = MAX(0, n_dec_frac_digits - dec_prec);
+    n_dec_fill_zeros = MAX(0, -exp - n_frac_digits) * DEC_DIGITS_PER_DIGIT;
+    if (no_trailing_zeros)
+        n_dec_trailing_frac_zeros = 0;
+    else
+        n_dec_trailing_frac_zeros = MAX(0, dec_prec - n_dec_frac_digits);
+    max_n_chars = (
+        // zeros to be inserted after least significant digit and after
+        // radix point
+        n_dec_trailing_frac_zeros +
+            // fractional digits in coeff
+                n_dec_frac_digits - d_adjust +
+            // zeros to inserted between fractional digits and radix point
+                n_dec_fill_zeros +
+            // zeros to be inserted after least significant digit and before
+                // radix point
+                n_dec_trailing_int_zeros +
+            // maxinum integral digits in coeff
+                n_int_digits * DEC_DIGITS_PER_DIGIT +
+            // provision for sign, radix point and leading zero
+                3
+    );
+    buf = (char *)fpdec_mem_alloc(max_n_chars + 1, 1);
+    if (buf == NULL) MEMERROR_RETVAL(NULL)
+    ch = buf;
+
+    if (sign == FPDEC_SIGN_NEG)
+        *(ch++) = '-';
+    // atleast one integral digit
+    if (n_int_digits == 0)
+        *(ch++) = '0';
+    else {
+        ch = fill_in_leading_digit(ch, *digit);
+        digit--;
+        for (fpdec_n_digits_t i = 1; i < n_int_digits; i++)
+            ch = fill_in_digit(ch, *(digit--), DEC_DIGITS_PER_DIGIT);
+        ch = fill_in_zeros(ch, n_dec_trailing_int_zeros);
+    }
+    // radix point (only if there are any fractional digits)
+    if (n_frac_digits != 0)
+        *(ch++) = '.';
+    // zeros between radix point and fractional digits
+    ch = fill_in_zeros(ch, n_dec_fill_zeros);
+    // full fractional digits
+    for (fpdec_n_digits_t i = 1; i < n_frac_digits; i++) {
+        ch = fill_in_digit(ch, *(digit--), DEC_DIGITS_PER_DIGIT);
+    }
+    // least significant fractional digit
+    if (n_frac_digits > 0) {
+        int n = DEC_DIGITS_PER_DIGIT - d_adjust;
+        fpdec_digit_t adj_digit = *digit / _10_POW_N(d_adjust);
+        if (no_trailing_zeros)
+            while ((adj_digit % 10) == 0 && n-- > 0)
+                adj_digit /= 10;
+        ch = fill_in_digit(ch, adj_digit, n);
+    }
+    // trailing fractional zeros
+    ch = fill_in_zeros(ch, n_dec_trailing_frac_zeros);
+
+    assert(*ch == 0);
+    return buf;
+}
+
+static inline char *
+fill_in_u128(char *buf, uint128_t ui) {
+    char dec_digits[MAX_N_DEC_DIGITS_IN_SHINT];
+    char *ch = dec_digits;
+    while (ui.lo != 0 || ui.hi != 0)
+        *(ch++) = '0' + u128_idiv_10(&ui);
+    while (--ch >= dec_digits)
+        *(buf++) = *ch;
+    return buf;
+}
+
+static char *
+fpdec_shint_as_ascii_literal(const fpdec_t *fpdec,
+                             const bool no_trailing_zeros) {
+    char *buf;
+
+    if (FPDEC_EQ_ZERO(fpdec)) {
+        if (no_trailing_zeros || FPDEC_DEC_PREC(fpdec) == 0) {
+            buf = fpdec_mem_alloc(2, 1);
+            if (buf == NULL) MEMERROR_RETVAL(NULL)
+            *buf = '0';
+        }
+        else {
+            buf = fpdec_mem_alloc(FPDEC_DEC_PREC(fpdec) + 3, 1);
+            if (buf == NULL) MEMERROR_RETVAL(NULL)
+            buf[0] = '0';
+            buf[1] = '.';
+            for (int i = 2; i < FPDEC_DEC_PREC(fpdec) + 2; i++)
+                buf[i] = '0';
+        }
+    }
+    else {
+        uint128_t t = U128_FROM_SHINT(fpdec);
+        uint64_t r = 0;
+        char *ch;
+
+        buf = fpdec_mem_alloc(MAX_N_DEC_DIGITS_IN_SHINT + 3, 1);
+        if (buf == NULL) MEMERROR_RETVAL(NULL)
+        ch = buf;
+
+        if (FPDEC_DEC_PREC(fpdec) > 0)
+            // split shifted int
+            r = u128_idiv_u64(&t, _10_POW_N(FPDEC_DEC_PREC(fpdec)));
+        if (FPDEC_SIGN(fpdec) == FPDEC_SIGN_NEG)
+            *(ch++) = '-';
+        // atleast one integral digit
+        if (t.lo == 0 && t.hi == 0)
+            *(ch++) = '0';
+        else
+            ch = fill_in_u128(ch, t);
+        // fractional part
+        if (FPDEC_DEC_PREC(fpdec) > 0) {
+            int n = FPDEC_DEC_PREC(fpdec);
+            if (no_trailing_zeros) {
+                while (r > 0 && (r % 10) == 0) {
+                    r /= 10;
+                    n--;
+                }
+            }
+            // radix point (only if there are any fractional digits)
+            if (r > 0) {
+                *(ch++) = '.';
+            }
+            ch = fill_in_digit(ch, (fpdec_digit_t)r, n);
+        }
+        assert(*ch == 0);
+    }
+    return buf;
+}
+
+typedef char *(*v_as_ascii_literal)(const fpdec_t *, const bool);
+
+const v_as_ascii_literal vtab_as_ascii_literal[2] = {
+    fpdec_shint_as_ascii_literal,
+    fpdec_dyn_as_ascii_literal,
+};
+
+char *
+fpdec_as_ascii_literal(const fpdec_t *fpdec,
+                       const bool no_trailing_zeros) {
+    return DISPATCH_FUNC_VA(vtab_as_ascii_literal, fpdec, no_trailing_zeros);
+}
+
 // Basic arithmetic operations
 
 static inline fpdec_dec_prec_t

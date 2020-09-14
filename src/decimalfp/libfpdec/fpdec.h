@@ -91,6 +91,9 @@ error_t
 fpdec_adjusted(fpdec_t *fpdec, const fpdec_t *src, fpdec_dec_prec_t dec_prec,
                enum FPDEC_ROUNDING_MODE rounding);
 
+char *
+fpdec_as_ascii_literal(const fpdec_t *fpdec, bool no_trailing_zeros);
+
 // Basic arithmetic operations
 
 error_t
