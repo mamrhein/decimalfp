@@ -677,7 +677,10 @@ fpdec_dyn_as_ascii_literal(const fpdec_t *fpdec,
     }
     n_dec_trailing_int_zeros = MAX(0, exp * DEC_DIGITS_PER_DIGIT);
     n_dec_frac_digits = MAX(0, -exp) * DEC_DIGITS_PER_DIGIT;
-    d_adjust = MAX(0, n_dec_frac_digits - dec_prec);
+    if (n_dec_frac_digits > dec_prec)
+        d_adjust = n_dec_frac_digits - dec_prec;
+    else
+        d_adjust = 0;
     n_dec_fill_zeros = MAX(0, -exp - n_frac_digits) * DEC_DIGITS_PER_DIGIT;
     if (no_trailing_zeros)
         n_dec_trailing_frac_zeros = 0;
