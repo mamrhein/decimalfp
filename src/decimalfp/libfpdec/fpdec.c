@@ -292,11 +292,11 @@ fpdec_shint_magnitude(const fpdec_t *fpdec) {
 static int
 fpdec_dyn_magnitude(const fpdec_t *fpdec) {
     int rel_pos_radix_point = FPDEC_DYN_N_DIGITS(fpdec) +
-        FPDEC_DYN_EXP(fpdec);
+                              FPDEC_DYN_EXP(fpdec);
     fpdec_digit_t most_signif_digit = FPDEC_DYN_MOST_SIGNIF_DIGIT(fpdec);
     assert(most_signif_digit != 0);
     return (rel_pos_radix_point - 1) * DEC_DIGITS_PER_DIGIT +
-        U64_MAGNITUDE(most_signif_digit);
+           U64_MAGNITUDE(most_signif_digit);
 }
 
 typedef int (*v_magnitude)(const fpdec_t *);
@@ -421,7 +421,7 @@ fpdec_shint_to_dyn(fpdec_t *fpdec) {
         fpdec->dyn_alloc = true;
         fpdec->normalized = true;
         fpdec->exp = n_trailing_zeros -
-            CEIL(FPDEC_DEC_PREC(fpdec), DEC_DIGITS_PER_DIGIT);
+                     CEIL(FPDEC_DEC_PREC(fpdec), DEC_DIGITS_PER_DIGIT);
     }
     return rc;
 }
@@ -445,7 +445,7 @@ fpdec_dyn_normalize(fpdec_t *fpdec) {
     assert(FPDEC_IS_DYN_ALLOC(fpdec));
 
     while (FPDEC_DYN_N_DIGITS(fpdec) > 0 &&
-        FPDEC_DYN_MOST_SIGNIF_DIGIT(fpdec) == 0)
+           FPDEC_DYN_MOST_SIGNIF_DIGIT(fpdec) == 0)
         (FPDEC_DYN_N_DIGITS(fpdec))--;
     if (FPDEC_DYN_N_DIGITS(fpdec) == 0) {
         fpdec_reset_to_zero(fpdec, dec_prec);
@@ -690,17 +690,17 @@ fpdec_dyn_as_ascii_literal(const fpdec_t *fpdec,
         // zeros to be inserted after least significant digit and after
         // radix point
         n_dec_trailing_frac_zeros +
-            // fractional digits in coeff
-                n_dec_frac_digits - d_adjust +
-            // zeros to inserted between fractional digits and radix point
-                n_dec_fill_zeros +
-            // zeros to be inserted after least significant digit and before
-                // radix point
-                n_dec_trailing_int_zeros +
-            // maxinum integral digits in coeff
-                n_int_digits * DEC_DIGITS_PER_DIGIT +
-            // provision for sign, radix point and leading zero
-                3
+        // fractional digits in coeff
+        n_dec_frac_digits - d_adjust +
+        // zeros to inserted between fractional digits and radix point
+        n_dec_fill_zeros +
+        // zeros to be inserted after least significant digit and before
+        // radix point
+        n_dec_trailing_int_zeros +
+        // maxinum integral digits in coeff
+        n_int_digits * DEC_DIGITS_PER_DIGIT +
+        // provision for sign, radix point and leading zero
+        3
     );
     buf = (char *)fpdec_mem_alloc(max_n_chars + 1, 1);
     if (buf == NULL) MEMERROR_RETVAL(NULL)
@@ -794,16 +794,19 @@ fpdec_shint_as_ascii_literal(const fpdec_t *fpdec,
         else
             ch = fill_in_u128(ch, t);
         // fractional part
-        if (FPDEC_DEC_PREC(fpdec) > 0) {
-            int n = FPDEC_DEC_PREC(fpdec);
+        int n = FPDEC_DEC_PREC(fpdec);
+        if (n > 0) {
             if (no_trailing_zeros) {
-                while (r > 0 && (r % 10) == 0) {
-                    r /= 10;
-                    n--;
-                }
+                if (r == 0)
+                    n = 0;
+                else
+                    while (r > 0 && (r % 10) == 0) {
+                        r /= 10;
+                        n--;
+                    }
             }
             // radix point (only if there are any fractional digits)
-            if (r > 0) {
+            if (n > 0) {
                 *(ch++) = '.';
             }
             ch = fill_in_digit(ch, (fpdec_digit_t)r, n);
@@ -890,8 +893,8 @@ fpdec_add_abs_dyn_to_dyn(fpdec_t *z, const fpdec_t *x, const fpdec_t *y) {
     else if (FPDEC_DYN_EXP(x) > FPDEC_DYN_EXP(y)) {
         n_shift = FPDEC_DYN_EXP(x) - FPDEC_DYN_EXP(y);
         n_add_zeros = MAX((int)FPDEC_DYN_N_DIGITS(y) -
-                              (int)FPDEC_DYN_N_DIGITS(x) -
-                              (int)n_shift + 1,
+                          (int)FPDEC_DYN_N_DIGITS(x) -
+                          (int)n_shift + 1,
                           1);
         z_digits = digits_copy(x->digit_array, n_shift, n_add_zeros);
         if (z_digits == NULL) MEMERROR
@@ -901,8 +904,8 @@ fpdec_add_abs_dyn_to_dyn(fpdec_t *z, const fpdec_t *x, const fpdec_t *y) {
     else {
         n_shift = FPDEC_DYN_EXP(y) - FPDEC_DYN_EXP(x);
         n_add_zeros = MAX((int)FPDEC_DYN_N_DIGITS(x) -
-                              (int)FPDEC_DYN_N_DIGITS(y) -
-                              (int)n_shift + 1,
+                          (int)FPDEC_DYN_N_DIGITS(y) -
+                          (int)n_shift + 1,
                           1);
         z_digits = digits_copy(y->digit_array, n_shift, n_add_zeros);
         if (z_digits == NULL) MEMERROR
@@ -1359,7 +1362,7 @@ fpdec_divmod(fpdec_t *q, fpdec_t *r, const fpdec_t *x, const fpdec_t *y) {
     FPDEC_SIGN(r) = FPDEC_SIGN(x);
     FPDEC_DEC_PREC(r) = MAX(FPDEC_DEC_PREC(x), FPDEC_DEC_PREC(y));
     rc = vtab_divmod_abs[((FPDEC_IS_DYN_ALLOC(x)) << 1U) +
-        FPDEC_IS_DYN_ALLOC(y)](q, r, x, y);
+                         FPDEC_IS_DYN_ALLOC(y)](q, r, x, y);
 
     if (FPDEC_IS_DYN_ALLOC(q))
         fpdec_dyn_normalize(q);
@@ -1493,10 +1496,10 @@ fpdec_div_abs_shint_by_shint(fpdec_t *z, const fpdec_t *x, const fpdec_t *y,
 
     if (prec_limit == -1)
         shift = MAX_DEC_PREC_FOR_SHINT - FPDEC_DEC_PREC(x) +
-            FPDEC_DEC_PREC(y);
+                FPDEC_DEC_PREC(y);
     else
         shift = MIN(prec_limit, MAX_DEC_PREC_FOR_SHINT) - FPDEC_DEC_PREC(x) +
-            FPDEC_DEC_PREC(y);
+                FPDEC_DEC_PREC(y);
     if (shift > 0)
         u128_imul_10_pow_n(&divident, shift);
     else if (shift < 0)
