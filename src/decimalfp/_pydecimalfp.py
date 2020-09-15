@@ -656,6 +656,7 @@ class Decimal:
         """Compare `self` and `other` using operator `cmp`."""
         sv = self._value
         sp = self._precision
+
         if isinstance(other, Decimal):
             ov = other._value
             op = other._precision
@@ -666,47 +667,39 @@ class Decimal:
             elif sp > op:
                 ov *= base10pow(sp - op)
             return cmp(sv, ov)
+
         elif isinstance(other, Integral):
             ov = int(other) * base10pow(sp)
             return cmp(sv, ov)
+
         elif isinstance(other, Rational):
             # cross-wise product of numerator and denominator
             sv *= other.denominator
             ov = other.numerator * base10pow(sp)
             return cmp(sv, ov)
-        elif isinstance(other, Real):
-            try:
-                num, den = other.as_integer_ratio()             # type: ignore
-            except AttributeError:
-                return NotImplemented
-            except (ValueError, OverflowError):
-                # 'nan' and 'inf'
-                return cmp(sv, other)
+
+        # float, Real, standard lib Decimal
+        try:
+            num, den = other.as_integer_ratio()             # type: ignore
+        except AttributeError:
+            # fall through
+            pass
+        except (ValueError, OverflowError):
+            # 'nan' and 'inf'
+            return cmp(sv, other)
+        else:
             # cross-wise product of numerator and denominator
             sv *= den
             ov = num * base10pow(sp)
             return cmp(sv, ov)
-        elif isinstance(other, _StdLibDecimal):
-            if other.is_finite():
-                sign, digits, exp = other.as_tuple()
-                ov = (-1) ** sign * reduce(lambda x, y: x * 10 + y, digits)
-                op = abs(exp)
-                # if sp == op, we are done, otherwise we adjust the value with
-                # the lesser precision
-                if sp < op:
-                    sv *= base10pow(op - sp)
-                elif sp > op:
-                    ov *= base10pow(sp - op)
-                return cmp(sv, ov)
-            else:
-                # 'nan' and 'inf'
-                return cmp(sv, other)
-        elif isinstance(other, Complex):
+
+        if isinstance(other, Complex):
             if cmp in (operator.eq, operator.ne):
                 if other.imag == 0:
                     return self._compare(other.real, cmp)
                 else:
                     return False if cmp is operator.eq else True
+
         # don't know how to compare
         return NotImplemented
 
