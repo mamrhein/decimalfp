@@ -1023,8 +1023,23 @@ Decimal_int(PyObject *x) {
 }
 
 static PyObject *
-Decimal_float(PyObject *x) {
-    Py_RETURN_NOTIMPLEMENTED;
+Decimal_float(DecimalObject *x) {
+    PyObject *res = NULL;
+    PyObject *num = NULL;
+    PyObject *den = NULL;
+
+    ASSIGN_AND_CHECK_NULL(num, Decimal_numerator_get(x));
+    ASSIGN_AND_CHECK_NULL(den, Decimal_denominator_get(x));
+    ASSIGN_AND_CHECK_NULL(res, PyNumber_TrueDivide(num, den));
+    goto CLEAN_UP;
+
+ERROR:
+    assert(PyErr_Occurred());
+
+CLEAN_UP:
+    Py_XDECREF(num);
+    Py_XDECREF(den);
+    return res;
 }
 
 // binary number methods
