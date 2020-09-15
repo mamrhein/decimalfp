@@ -33,15 +33,6 @@ ctx = getcontext()
 ctx.prec = 3350
 
 
-class FakeReal:
-
-    def __init__(self, value):
-        self.f = float(value)
-
-
-numbers.Real.register(FakeReal)
-
-
 @pytest.mark.parametrize("y",
                          ("17.800",
                           ".".join(("1" * 2259, "4" * 33 + "0" * 19)),
@@ -260,28 +251,6 @@ def test_eq_ops_non_number(impl, other):
                          [op for op in ORDERING_OPS],
                          ids=[op.__name__ for op in ORDERING_OPS])
 def test_ord_ops_non_number(impl, op, other):
-    dec = impl.Decimal('3.12')
-    with pytest.raises(TypeError):
-        op(dec, other)
-    with pytest.raises(TypeError):
-        op(other, dec)
-
-
-def test_eq_ops_incompat_real(impl):
-    dec = impl.Decimal('3.12')
-    other = FakeReal('1.7')
-    assert not(dec == other)
-    assert not(other == dec)
-    assert dec != other
-    assert other != dec
-
-
-@pytest.mark.parametrize("other", (FakeReal("0.5"),),
-                         ids=("other='FakeReal'",))
-@pytest.mark.parametrize("op",
-                         [op for op in ORDERING_OPS],
-                         ids=[op.__name__ for op in ORDERING_OPS])
-def test_ord_ops_incompat_real(impl, op, other):
     dec = impl.Decimal('3.12')
     with pytest.raises(TypeError):
         op(dec, other)
