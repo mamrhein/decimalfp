@@ -927,15 +927,11 @@ Decimal_richcompare(DecimalObject *self, PyObject *other, int op) {
             res = PyObject_RichCompare(t, other, op);
             goto CLEAN_UP;
         }
-        else if (exc == PyExc_AttributeError &&
-                 PyObject_IsInstance(other, Real)) {
+        else if (exc == PyExc_AttributeError)
+            // fall through
             PyErr_Clear();
-            Py_INCREF(Py_NotImplemented);
-            res = Py_NotImplemented;
-            goto CLEAN_UP;
-        }
-        // fall through
-        PyErr_Clear();
+        else
+            goto ERROR;
     }
 
     // Complex
