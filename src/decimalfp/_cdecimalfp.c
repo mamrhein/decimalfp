@@ -923,8 +923,7 @@ Decimal_richcompare(DecimalObject *self, PyObject *other, int op) {
         if (exc == PyExc_ValueError || exc == PyExc_OverflowError) {
             // 'nan' or 'inf'
             PyErr_Clear();
-            t = Decimal_numerator_get(self);
-            res = PyObject_RichCompare(t, other, op);
+            res = PyObject_RichCompare(PyZERO, other, op);
             goto CLEAN_UP;
         }
         else if (exc == PyExc_AttributeError)

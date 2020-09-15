@@ -686,7 +686,7 @@ class Decimal:
             pass
         except (ValueError, OverflowError):
             # 'nan' and 'inf'
-            return cmp(sv, other)
+            return cmp(0, other)
         else:
             # cross-wise product of numerator and denominator
             sv *= den
