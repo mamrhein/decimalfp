@@ -83,13 +83,18 @@ def test_to_float(impl, num, den):
     assert float(f) == float(dec)
 
 
-@pytest.mark.parametrize("sign", (0, 1), ids=("+", "-"))
-@pytest.mark.parametrize("coeff", (178, 9 ** 378), ids=("small", "large"))
-@pytest.mark.parametrize("exp", (0, -54, 43), ids=("0", "neg", "pos"))
+@pytest.mark.parametrize("exp", (0, -54, 43), ids=("e0", "e-", "e+"))
+@pytest.mark.parametrize("coeff", (178, 100000, 9 ** 378 * 10),
+                         ids=("small", "10pow", "large"))
+@pytest.mark.parametrize("sign", (0, 1), ids=("pos", "neg"))
 def test_as_tuple(impl, sign, coeff, exp):
     s = f"{'-' * sign}{coeff}e{exp}"
     dec = impl.Decimal(s)
-    assert dec.as_tuple() == (sign, coeff * 10 ** max(0, exp), min(exp, 0))
+    # normalize coeff
+    while coeff % 10 == 0:
+        coeff /= 10
+        exp += 1
+    assert dec.as_tuple() == (sign, coeff, exp)
 
 
 @pytest.mark.parametrize(("num", "den"),
