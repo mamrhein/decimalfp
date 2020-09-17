@@ -657,51 +657,26 @@ Decimal_as_tuple(DecimalObject *self) {
     fpdec_t *fpdec = &self->fpdec;
     PyObject *sign = NULL;
     PyObject *coeff = NULL;
-    PyObject *adj_coeff = NULL;
     PyObject *dec_prec = NULL;
     PyObject *res = NULL;
-    long exp;
-    long dec_shift;
+    int64_t exp;
 
-    sign = FPDEC_SIGN(fpdec) == FPDEC_SIGN_NEG ? PyONE : PyZERO;
     exp = fpdec_dec_coeff_exp(&coeff, fpdec);
-    if (coeff == NULL)
-        return NULL;
-    dec_shift = exp + fpdec->dec_prec;
-    if (dec_shift < 0) {
-        PyObject *divisor = PyLong_FromLong(-dec_shift);
-        if (divisor == NULL) {
-            Py_DECREF(coeff);
-            return NULL;
-        }
-        adj_coeff = PyNumber_FloorDivide(coeff, divisor);
-        if (adj_coeff == NULL) {
-            Py_DECREF(coeff);
-            Py_DECREF(divisor);
-            return NULL;
-        }
-        coeff = adj_coeff;      // stealing reference
+    if (coeff == NULL) {
+        goto ERROR;
     }
-    else if (dec_shift > 0) {
-        PyObject *factor = PyLong_FromLong(dec_shift);
-        if (factor == NULL) {
-            Py_DECREF(coeff);
-            return NULL;
-        }
-        adj_coeff = PyNumber_Multiply(coeff, factor);
-        if (adj_coeff == NULL) {
-            Py_DECREF(coeff);
-            Py_DECREF(factor);
-            return NULL;
-        }
-        coeff = adj_coeff;      // stealing reference
-    }
-    dec_prec = PyLong_FromLong(-fpdec->dec_prec);
-    if (dec_prec != NULL) {
-        res = PyTuple_Pack(3, sign, coeff, dec_prec);
-        Py_DECREF(dec_prec);
-    }
+    ASSIGN_AND_CHECK_NULL(sign, PyLong_FromLong(FPDEC_SIGN(fpdec)));
+    ASSIGN_AND_CHECK_NULL(dec_prec, PyLong_FromLong(exp));
+    ASSIGN_AND_CHECK_NULL(res, PyTuple_Pack(3, sign, coeff, dec_prec));
+    goto CLEAN_UP;
+
+ERROR:
+    assert(PyErr_Occurred());
+
+CLEAN_UP:
+    Py_DECREF(sign);
     Py_DECREF(coeff);
+    Py_DECREF(dec_prec);
     return res;
 }
 
@@ -1221,74 +1196,132 @@ static PyType_Spec DecimalType_spec = {
 
 // *** Helper functions ***
 
-static PyObject *
-digits_as_int(fpdec_digit_array_t *digit_array) {
-    PyObject *res = NULL;
-    PyObject *mult = NULL;
-    PyObject *digit = NULL;
-    ssize_t idx = digit_array->n_signif - 1;
-
-    assert(digit_array->n_signif > 0);
-
-    ASSIGN_AND_CHECK_NULL(res,
-                          PyLong_FromUnsignedLong(digit_array->digits[idx]));
-    while (--idx >= 0) {
-        ASSIGN_AND_CHECK_NULL(digit,
-                              PyLong_FromUnsignedLong(
-                                  digit_array->digits[idx]));
-        ASSIGN_AND_CHECK_NULL(mult, PyNumber_Multiply(res, PyRADIX));
-        Py_DECREF(res);
-        ASSIGN_AND_CHECK_NULL(res, PyNumber_Add(mult, digit));
-        Py_DECREF(digit);
-        Py_DECREF(mult);
-    }
-    return res;
-
-ERROR:
-    Py_XDECREF(res);
-    Py_XDECREF(mult);
-    Py_XDECREF(digit);
-    return NULL;
+static inline PyObject *
+PyLong_10_pow_exp(const uint8_t exp) {
+    return PyLong_FromUnsignedLong(_10_POW_N(exp));
 }
 
-static long
+static PyObject *
+PyLong_from_digits(const fpdec_digit_t *digits,
+                   const fpdec_n_digits_t n_digits,
+                   const uint8_t n_dec_adjust) {
+    PyObject *res = NULL;
+    PyObject *t = NULL;
+    PyObject *digit = NULL;
+    PyObject *adj_digit = NULL;
+    PyObject *adj_base = NULL;
+    uint8_t adj_base_exp;
+    ssize_t idx = n_digits - 1;
+
+    assert(n_digits > 1);
+    assert(n_dec_adjust < DEC_DIGITS_PER_DIGIT);
+
+    ASSIGN_AND_CHECK_NULL(res, PyLong_FromUnsignedLongLong(digits[idx]));
+    while (--idx > 0) {
+        ASSIGN_AND_CHECK_NULL(digit,
+                              PyLong_FromUnsignedLongLong(digits[idx]));
+        ASSIGN_AND_CHECK_NULL(t, PyNumber_Multiply(res, PyRADIX));
+        Py_DECREF(res);
+        ASSIGN_AND_CHECK_NULL(res, PyNumber_Add(t, digit));
+        Py_CLEAR(digit);
+        Py_CLEAR(t);
+    }
+    if (n_dec_adjust == 0) {
+        ASSIGN_AND_CHECK_NULL(digit, PyLong_FromUnsignedLongLong(digits[idx]));
+        ASSIGN_AND_CHECK_NULL(t, PyNumber_Multiply(res, PyRADIX));
+        Py_CLEAR(res);
+        ASSIGN_AND_CHECK_NULL(res, PyNumber_Add(t, digit));
+    }
+    else {
+        ASSIGN_AND_CHECK_NULL(digit,
+                              PyLong_FromUnsignedLongLong(digits[idx]));
+        ASSIGN_AND_CHECK_NULL(t, PyLong_10_pow_exp(n_dec_adjust));
+        ASSIGN_AND_CHECK_NULL(adj_digit, PyNumber_FloorDivide(digit, t));
+        Py_CLEAR(t);
+        adj_base_exp = DEC_DIGITS_PER_DIGIT - n_dec_adjust;
+        ASSIGN_AND_CHECK_NULL(adj_base, PyLong_10_pow_exp(adj_base_exp));
+        ASSIGN_AND_CHECK_NULL(t, PyNumber_Multiply(res, adj_base));
+        Py_CLEAR(res);
+        ASSIGN_AND_CHECK_NULL(res, PyNumber_Add(t, adj_digit));
+    }
+    goto CLEAN_UP;
+
+ERROR:
+    assert(PyErr_Occurred());
+    Py_CLEAR(res);
+
+CLEAN_UP:
+    Py_XDECREF(t);
+    Py_XDECREF(digit);
+    Py_XDECREF(adj_digit);
+    Py_XDECREF(adj_base);
+    return res;
+}
+
+static inline PyObject *
+PyLong_from_u128_lo_hi(uint64_t lo, uint64_t hi) {
+    PyObject *res = NULL;
+    PyObject *res_hi = NULL;
+    PyObject *res_lo = NULL;
+    PyObject *sh = NULL;
+    PyObject *t = NULL;
+
+    ASSIGN_AND_CHECK_NULL(res_hi, PyLong_FromUnsignedLongLong(hi));
+    ASSIGN_AND_CHECK_NULL(res_lo, PyLong_FromUnsignedLongLong(lo));
+    ASSIGN_AND_CHECK_NULL(sh, PyLong_FromSize_t(64));
+    ASSIGN_AND_CHECK_NULL(t, PyNumber_Lshift(res_hi, sh));
+    ASSIGN_AND_CHECK_NULL(res, PyNumber_Add(sh, res_lo));
+    goto CLEAN_UP;
+
+ERROR:
+    assert(PyErr_Occurred());
+
+CLEAN_UP:
+    Py_XDECREF(res_hi);
+    Py_XDECREF(res_lo);
+    Py_XDECREF(sh);
+    Py_XDECREF(t);
+    return res;
+}
+
+static inline PyObject *
+PyLong_from_u128(uint128_t *ui) {
+    if (ui->hi == 0)
+        return PyLong_FromUnsignedLongLong(ui->lo);
+    else
+        return PyLong_from_u128_lo_hi(ui->lo, ui->hi);
+}
+
+static int64_t
 fpdec_dec_coeff_exp(PyObject **coeff, const fpdec_t *fpdec) {
+    fpdec_sign_t sign;
+    uint128_t coeff128;
+    int64_t exp;
+
     assert(*coeff == NULL);
 
     if (FPDEC_EQ_ZERO(fpdec)) {
         *coeff = PyZERO;
         Py_INCREF(*coeff);
-        return 0;
+        return 0ULL;
     }
-    else if (FPDEC_IS_DYN_ALLOC(fpdec)) {
-        *coeff = digits_as_int(fpdec->digit_array);
-        if (*coeff == NULL)
-            return 0;
-        return FPDEC_DYN_EXP(fpdec) * DEC_DIGITS_PER_DIGIT;
+    else if (fpdec_as_sign_coeff128_exp(&sign, &coeff128, &exp, fpdec) == 0) {
+        *coeff = PyLong_from_u128(&coeff128);
+        return exp;
     }
     else {
-        if (fpdec->hi == 0)
-            *coeff = PyLong_FromUnsignedLong(fpdec->lo);
-        else {
-            PyObject *hi = PyLong_FromUnsignedLong(fpdec->hi);
-            if (hi == NULL)
-                return 0;
-            PyObject *lo = PyLong_FromUnsignedLong(fpdec->lo);
-            if (lo == NULL) {
-                Py_DECREF(hi);
-                return 0;
-            }
-            PyObject *sh = PyNumber_Lshift(hi, PyLong_FromSize_t(64));
-            if (sh == NULL) {
-                Py_DECREF(hi);
-                Py_DECREF(lo);
-                return 0;
-            }
-            *coeff = PyNumber_Add(sh, lo);
+        fpdec_digit_t *digits = FPDEC_DYN_DIGITS(fpdec);
+        fpdec_digit_t least_signif_digit = digits[0];
+        int8_t n_trailing_zeros = 0;
+        while (least_signif_digit % 10 == 0) {
+            least_signif_digit /= 10;
+            n_trailing_zeros++;
         }
-        if (*coeff == NULL)
-            return 0;
-        return -fpdec->dec_prec;
+        exp = FPDEC_DYN_EXP(fpdec) * DEC_DIGITS_PER_DIGIT + n_trailing_zeros;
+        *coeff = PyLong_from_digits(FPDEC_DYN_DIGITS(fpdec),
+                                    FPDEC_DYN_N_DIGITS(fpdec),
+                                    n_trailing_zeros);
+        return exp;
     }
 }
 
@@ -1335,6 +1368,7 @@ fpdec_as_integer_ratio(PyObject **numerator, PyObject **denominator,
     else {
         // *numerator = coeff, *denominator = 10 ^ -exp, but they may need
         // to be normalized!
+        // TODO: remove normalization
         ASSIGN_AND_CHECK_NULL(py_exp, PyLong_FromLong(-exp));
         ASSIGN_AND_CHECK_NULL(ten_pow_exp,
                               PyNumber_Power(PyTEN, py_exp, Py_None));
