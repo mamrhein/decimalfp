@@ -84,16 +84,20 @@ def test_to_float(impl, num, den):
 
 
 @pytest.mark.parametrize("exp", (0, -54, 43), ids=("e0", "e-", "e+"))
-@pytest.mark.parametrize("coeff", (178, 100000, 9 ** 378 * 10),
-                         ids=("small", "10pow", "large"))
-@pytest.mark.parametrize("sign", (0, 1), ids=("pos", "neg"))
+@pytest.mark.parametrize("coeff", (0, 178, 100000, 9 ** 378 * 10),
+                         ids=("zero", "small", "10pow", "large"))
+@pytest.mark.parametrize("sign", (1, -1), ids=("pos", "neg"))
 def test_as_tuple(impl, sign, coeff, exp):
-    s = f"{'-' * sign}{coeff}e{exp}"
+    s = f"{'-' if sign < 0 else ''}{coeff}e{exp}"
     dec = impl.Decimal(s)
-    # normalize coeff
-    while coeff % 10 == 0:
-        coeff //= 10
-        exp += 1
+    if coeff == 0:
+        sign = 0
+        exp = 0
+    else:
+        # normalize coeff
+        while coeff % 10 == 0:
+            coeff //= 10
+            exp += 1
     assert dec.as_tuple() == (sign, coeff, exp)
 
 
