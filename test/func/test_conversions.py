@@ -92,7 +92,7 @@ def test_as_tuple(impl, sign, coeff, exp):
     dec = impl.Decimal(s)
     # normalize coeff
     while coeff % 10 == 0:
-        coeff /= 10
+        coeff //= 10
         exp += 1
     assert dec.as_tuple() == (sign, coeff, exp)
 
