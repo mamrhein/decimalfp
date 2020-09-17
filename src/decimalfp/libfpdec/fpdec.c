@@ -829,6 +829,75 @@ fpdec_as_ascii_literal(const fpdec_t *fpdec,
     return DISPATCH_FUNC_VA(vtab_as_ascii_literal, fpdec, no_trailing_zeros);
 }
 
+int
+fpdec_as_sign_coeff128_exp(fpdec_sign_t *sign, uint128_t *coeff, int64_t *exp,
+                           const fpdec_t *fpdec) {
+    *sign = FPDEC_SIGN(fpdec);
+    if (*sign == 0) {
+        coeff->hi = 0ULL;
+        coeff->lo = 0ULL;
+        *exp = 0ULL;
+        return 0;
+    }
+    if (FPDEC_IS_DYN_ALLOC(fpdec)) {
+        fpdec_n_digits_t n = FPDEC_DYN_N_DIGITS(fpdec);
+        fpdec_digit_t *digits = FPDEC_DYN_DIGITS(fpdec);
+        uint128_t t1, t2;
+        int ntz, nsd;
+
+        *exp = FPDEC_DYN_EXP(fpdec) * DEC_DIGITS_PER_DIGIT;
+        switch (n) {
+            case 1:
+                coeff->lo = digits[0];
+                coeff->hi = 0UL;
+                break;
+            case 2:
+                coeff->lo = digits[1];
+                u128_imul_10_pow_n(coeff, DEC_DIGITS_PER_DIGIT);
+                u128_iadd_u64(coeff, digits[0]);
+                break;
+            case 3:
+                // try to fit normalized coeff into uint128
+                t1.lo = digits[0];
+                t1.hi = 0ULL;
+                ntz = u128_eliminate_trailing_zeros(&t1, DEC_DIGITS_PER_DIGIT);
+                nsd = DEC_DIGITS_PER_DIGIT - ntz;
+                coeff->lo = t1.lo;
+                coeff->hi = 0ULL;
+                t1.lo = digits[1];
+                t1.hi = 0ULL;
+                u128_imul_10_pow_n(&t1, nsd);
+                u128_iadd_u128(coeff, &t1);
+                t1.lo = digits[2];
+                t1.hi = 0ULL;
+                u128_imul_u64(&t1, RADIX);
+                t2.lo = t1.lo;
+                t2.hi = t1.hi;
+                u128_imul_10_pow_n(&t2, nsd);
+                if (u128_cmp(&t2, &t1) < 0)
+                    // overflow
+                    return -1;
+                u128_iadd_u128(coeff, &t2);
+                if (u128_cmp(coeff, &t2) < 0)
+                    // overflow
+                    return -1;
+                *exp += ntz;
+                return 0;
+            default:
+                // coeff has atleast 40 significant decimal digits
+                return -1;
+        }
+    }
+    else {
+        coeff->hi = fpdec->hi;
+        coeff->lo = fpdec->lo;
+        *exp = -FPDEC_DEC_PREC(fpdec);
+    }
+    // normalize coeff
+    *exp += u128_eliminate_trailing_zeros(coeff, MAX_N_DEC_DIGITS_IN_SHINT);
+    return 0;
+}
+
 // Basic arithmetic operations
 
 static inline fpdec_dec_prec_t

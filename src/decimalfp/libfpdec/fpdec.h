@@ -94,6 +94,10 @@ fpdec_adjusted(fpdec_t *fpdec, const fpdec_t *src, fpdec_dec_prec_t dec_prec,
 char *
 fpdec_as_ascii_literal(const fpdec_t *fpdec, bool no_trailing_zeros);
 
+int
+fpdec_as_sign_coeff128_exp(fpdec_sign_t *sign, uint128_t *coeff, int64_t *exp,
+                           const fpdec_t *fpdec);
+
 // Basic arithmetic operations
 
 error_t

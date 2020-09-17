@@ -148,13 +148,15 @@ u128_idecshift(uint128_t *ui, fpdec_sign_t sign, int n_dec_digits,
 
 unsigned
 u128_eliminate_trailing_zeros(uint128_t *ui, unsigned n_max) {
+    uint128_t t = {ui->lo, ui->hi};
     unsigned n_trailing_zeros = 0;
 
-    while (ui->lo % 10 == 0 && ui->hi != 0 && n_trailing_zeros < n_max) {
-        u128_idiv_10(ui);
+    while (ui->hi != 0 && n_trailing_zeros < n_max && u128_idiv_10(&t) == 0) {
+        ui->lo = t.lo;
+        ui->hi = t.hi;
         n_trailing_zeros++;
     }
-    while (ui->lo % 10 == 0 && n_trailing_zeros < n_max) {
+    while (n_trailing_zeros < n_max && ui->lo % 10 == 0) {
         ui->lo /= 10;
         n_trailing_zeros++;
     }
