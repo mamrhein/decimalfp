@@ -732,12 +732,46 @@ CLEAN_UP:
 
 static PyObject *
 Decimal_floor(DecimalObject *self) {
-    Py_RETURN_NOTIMPLEMENTED;
+    PyObject *res = NULL;
+    PyObject *num = NULL;
+    PyObject *den = NULL;
+
+    ASSIGN_AND_CHECK_NULL(num, Decimal_numerator_get(self));
+    ASSIGN_AND_CHECK_NULL(den, Decimal_denominator_get(self));
+    ASSIGN_AND_CHECK_NULL(res, PyNumber_FloorDivide(num, den));
+    goto CLEAN_UP;
+
+ERROR:
+    assert(PyErr_Occurred());
+
+CLEAN_UP:
+    Py_XDECREF(num);
+    Py_XDECREF(den);
+    return res;
 }
 
 static PyObject *
 Decimal_ceil(DecimalObject *self) {
-    Py_RETURN_NOTIMPLEMENTED;
+    PyObject *res = NULL;
+    PyObject *num = NULL;
+    PyObject *den = NULL;
+    PyObject *t = NULL;
+
+    ASSIGN_AND_CHECK_NULL(num, Decimal_numerator_get(self));
+    ASSIGN_AND_CHECK_NULL(den, Decimal_denominator_get(self));
+    ASSIGN_AND_CHECK_NULL(t, PyNumber_Negative(num));
+    ASSIGN_AND_CHECK_NULL(t, PyNumber_InPlaceFloorDivide(t, den));
+    ASSIGN_AND_CHECK_NULL(res, PyNumber_Negative(t));
+    goto CLEAN_UP;
+
+ERROR:
+    assert(PyErr_Occurred());
+
+CLEAN_UP:
+    Py_XDECREF(num);
+    Py_XDECREF(den);
+    Py_XDECREF(t);
+    return res;
 }
 
 static PyObject *
