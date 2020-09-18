@@ -112,15 +112,16 @@ def test_as_tuple(impl, sign, coeff, exp):
     assert dec.as_tuple() == (sign, coeff, exp)
 
 
-@pytest.mark.parametrize(("num", "den"),
-                         ((17, 1),
-                          (33000 * 17, 3 * 17),
-                          (9 ** 394, 10 ** 247),
-                          (190, 400000)),
-                         ids=("int", "compact", "large", "fraction"))
-def test_as_integer_ratio(impl, num, den):
-    f = Fraction(num, den)
-    dec = impl.Decimal(f, 250)
+@pytest.mark.parametrize("value",
+                         ("0.00000",
+                          17,
+                          "33000.17",
+                          Fraction(9 ** 394, 10 ** 247),
+                          Fraction(190, 400000)),
+                         ids=("zero", "int", "compact", "large", "fraction"))
+def test_as_integer_ratio(impl, value):
+    f = Fraction(value)
+    dec = impl.Decimal(value)
     assert dec.as_integer_ratio() == (f.numerator, f.denominator)
 
 
