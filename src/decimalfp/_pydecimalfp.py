@@ -517,13 +517,29 @@ class Decimal:
     def as_tuple(self) -> Tuple[int, int, int]:
         """Return a tuple (sign, coeff, exp) equivalent to `self`.
 
-        self == (-1) ** sign * coeff * 10 ** exp.
+        self == sign * coeff * 10 ** exp.
+
+        sign in (-1, 0, 1), for self < 0, = 0, > 0.
+        coeff = 0 only if self = 0, without trailing zeros otherwise.
 
         """
         v = self._value
-        sign = int(v < 0)
-        coeff = abs(v)
-        exp = -self._precision
+        if v == 0:
+            sign = coeff = exp = 0
+        else:
+            if v > 0:
+                sign = 1
+                coeff = v
+            else:
+                sign = -1
+                coeff = abs(v)
+            exp = -self._precision
+            # normalize coeff / exp
+            q, r = divmod(coeff, 10)
+            while r == 0:
+                coeff = q
+                exp += 1
+                q, r = divmod(coeff, 10)
         return sign, coeff, exp
 
     def as_fraction(self) -> Fraction:
