@@ -691,14 +691,43 @@ CLEAN_UP:
 
 static PyObject *
 Decimal_as_fraction(DecimalObject *self) {
-    return PyObject_CallFunctionObjArgs(Fraction, Decimal_numerator_get(self),
-                                        Decimal_denominator_get(self), NULL);
+    PyObject *res = NULL;
+    PyObject *num = NULL;
+    PyObject *den = NULL;
+
+    ASSIGN_AND_CHECK_NULL(num, Decimal_numerator_get(self));
+    ASSIGN_AND_CHECK_NULL(den, Decimal_denominator_get(self));
+    ASSIGN_AND_CHECK_NULL(res, PyObject_CallFunctionObjArgs(Fraction,
+                                                            num, den, NULL));
+    goto CLEAN_UP;
+
+ERROR:
+    assert(PyErr_Occurred());
+
+CLEAN_UP:
+    Py_XDECREF(num);
+    Py_XDECREF(den);
+    return res;
 }
 
 static PyObject *
 Decimal_as_integer_ratio(DecimalObject *self) {
-    return PyTuple_Pack(2, Decimal_numerator_get(self),
-                        Decimal_denominator_get(self));
+    PyObject *res = NULL;
+    PyObject *num = NULL;
+    PyObject *den = NULL;
+
+    ASSIGN_AND_CHECK_NULL(num, Decimal_numerator_get(self));
+    ASSIGN_AND_CHECK_NULL(den, Decimal_denominator_get(self));
+    ASSIGN_AND_CHECK_NULL(res, PyTuple_Pack(2, num, den));
+    goto CLEAN_UP;
+
+ERROR:
+    assert(PyErr_Occurred());
+
+CLEAN_UP:
+    Py_XDECREF(num);
+    Py_XDECREF(den);
+    return res;
 }
 
 static PyObject *
