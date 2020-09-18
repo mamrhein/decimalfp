@@ -38,6 +38,18 @@ def test_false(impl, value):
     assert not dec
 
 
+@pytest.mark.parametrize("value",
+                         ("0.000",
+                          "-17.03",
+                          Fraction(9 ** 394, 10 ** 247),
+                          Fraction(-19, 4000)),
+                         ids=("zero", "compact", "large", "fraction"))
+def test_int(impl, value):
+    f = Fraction(value)
+    dec = impl.Decimal(value)
+    assert int(f) == int(dec)
+
+
 @pytest.mark.parametrize(("num", "den"),
                          ((170, 10),
                           (9 ** 394, 10 ** 247),
@@ -45,8 +57,7 @@ def test_false(impl, value):
                          ids=("compact", "large", "fraction"))
 def test_trunc(impl, num, den):
     f = Fraction(num, den)
-    dec = impl.Decimal(f, 250)
-    assert int(f) == int(dec)
+    dec = impl.Decimal(f)
     assert math.trunc(f) == math.trunc(dec)
 
 
