@@ -50,37 +50,20 @@ def test_int(impl, value):
     assert int(f) == int(dec)
 
 
-@pytest.mark.parametrize(("num", "den"),
-                         ((170, 10),
-                          (9 ** 394, 10 ** 247),
-                          (-19, 4000)),
-                         ids=("compact", "large", "fraction"))
-def test_trunc(impl, num, den):
-    f = Fraction(num, den)
-    dec = impl.Decimal(f)
-    assert math.trunc(f) == math.trunc(dec)
-
-
-@pytest.mark.parametrize(("num", "den"),
-                         ((170, 10),
-                          (9 ** 394, 10 ** 247),
-                          (-19, 4000)),
-                         ids=("compact", "large", "fraction"))
-def test_floor(impl, num, den):
-    f = Fraction(num, den)
-    dec = impl.Decimal(f, 250)
-    assert math.floor(f) == math.floor(dec)
-
-
-@pytest.mark.parametrize(("num", "den"),
-                         ((170, 10),
-                          (9 ** 394, 10 ** 247),
-                          (-19, 4000)),
-                         ids=("compact", "large", "fraction"))
-def test_ceil(impl, num, den):
-    f = Fraction(num, den)
-    dec = impl.Decimal(f, 250)
-    assert math.ceil(f) == math.ceil(dec)
+@pytest.mark.parametrize("value",
+                         ("0.00000",
+                          17,
+                          "-33000.17",
+                          Fraction(9 ** 394, 10 ** 247),
+                          Fraction(-19, 400000)),
+                         ids=("zero", "int", "compact", "large", "fraction"))
+@pytest.mark.parametrize("func",
+                         (math.trunc, math.floor, math.ceil),
+                         ids=("trunc", "floor", "ceil"))
+def test_math_funcs(impl, func, value):
+    f = Fraction(value)
+    dec = impl.Decimal(value)
+    assert func(f) == func(dec)
 
 
 @pytest.mark.parametrize(("num", "den"),
