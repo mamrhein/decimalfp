@@ -21,6 +21,7 @@ $Revision$
 #include "libfpdec/fpdec.h"
 #include "libfpdec/fpdec_struct.h"
 #include "libfpdec/digit_array_struct.h"
+#include "libfpdec/basemath.h"
 
 #define ASSIGN_AND_CHECK_NULL(result, expr) \
     do { result = (expr); if (result == NULL) goto ERROR; } while (0)
@@ -127,6 +128,14 @@ static PyObject *Py2pow64 = NULL;
 static PyObject *MAX_DEC_PRECISION = NULL;
 
 // *** Helper prototypes ***
+
+static inline PyObject *
+PyLong_from_u128(uint128_t *ui);
+
+static PyObject *
+PyLong_from_digits(const fpdec_digit_t *digits,
+                   fpdec_n_digits_t n_digits,
+                   uint8_t n_dec_adjust);
 
 static long
 fpdec_dec_coeff_exp(PyObject **coeff, const fpdec_t *fpdec);
@@ -993,8 +1002,68 @@ ERROR:
 }
 
 static PyObject *
-Decimal_int(PyObject *x) {
-    Py_RETURN_NOTIMPLEMENTED;
+Decimal_int(DecimalObject *x) {
+    PyObject *res = NULL;
+    PyObject *py_exp = NULL;
+    PyObject *ten_pow_exp = NULL;
+    PyObject *t = NULL;
+    fpdec_t *fpdec= &x->fpdec;
+
+    if (FPDEC_EQ_ZERO(fpdec)) {
+        Py_INCREF(PyZERO);
+        return PyZERO;
+    }
+
+    if (FPDEC_IS_DYN_ALLOC(fpdec)) {
+        fpdec_digit_t *digits = FPDEC_DYN_DIGITS(fpdec);
+        int64_t n_digits = FPDEC_DYN_N_DIGITS(fpdec);
+        int64_t exp = FPDEC_DYN_EXP(fpdec);
+        if (-exp >= n_digits) {
+            // there is no integral part
+            Py_INCREF(PyZERO);
+            return PyZERO;
+        }
+        if (exp < 0) {
+            // exclude fractional digits
+            n_digits += exp;
+            digits += -exp;
+            exp = 0;
+        }
+        if (n_digits == 1)
+            ASSIGN_AND_CHECK_NULL(res,
+                                  PyLong_FromUnsignedLongLong(*digits));
+        else
+            ASSIGN_AND_CHECK_NULL(res,
+                                  PyLong_from_digits(digits, n_digits, 0));
+        if (exp > 0) {
+            ASSIGN_AND_CHECK_NULL(py_exp, PyLong_FromLongLong(exp));
+            ASSIGN_AND_CHECK_NULL(ten_pow_exp,
+                                  PyNumber_Power(PyTEN, py_exp, Py_None));
+            ASSIGN_AND_CHECK_NULL(res,
+                                  PyNumber_InPlaceMultiply(res, ten_pow_exp));
+        }
+    }
+    else {
+        uint128_t shint = {fpdec->lo, fpdec->hi};
+        fpdec_dec_prec_t prec = FPDEC_DEC_PREC(fpdec);
+        if (prec > 0)
+            u128_idiv_u64(&shint, _10_POW_N(prec));
+        ASSIGN_AND_CHECK_NULL(res, PyLong_from_u128(&shint));
+    }
+    if (FPDEC_LT_ZERO(fpdec)) {
+        t = res;                    // stealing reference
+        ASSIGN_AND_CHECK_NULL(res, PyNumber_Negative(t));
+    }
+    goto CLEAN_UP;
+
+ERROR:
+    assert(PyErr_Occurred());
+
+CLEAN_UP:
+    Py_XDECREF(py_exp);
+    Py_XDECREF(ten_pow_exp);
+    Py_XDECREF(t);
+    return res;
 }
 
 static PyObject *
@@ -1146,6 +1215,10 @@ static PyMethodDef Decimal_methods[] = {
      (PyCFunction)Decimal_format,
      METH_O,
      Decimal_format_doc},
+    {"__trunc__",
+     (PyCFunction)Decimal_int,
+     METH_NOARGS,
+     Decimal_trunc_doc},
     {"__floor__",
      (PyCFunction)Decimal_floor,
      METH_NOARGS,

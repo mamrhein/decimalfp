@@ -87,6 +87,10 @@ PyDoc_STRVAR(
     "TODO");
 
 PyDoc_STRVAR(
+    Decimal_trunc_doc,
+    "math.trunc(self)");
+
+PyDoc_STRVAR(
     Decimal_floor_doc,
     "TODO");
 
