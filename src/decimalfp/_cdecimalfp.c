@@ -1370,7 +1370,6 @@ fpdec_as_integer_ratio(PyObject **numerator, PyObject **denominator,
     else {
         // *numerator = coeff, *denominator = 10 ^ -exp, but they may need
         // to be normalized!
-        // TODO: remove normalization
         ASSIGN_AND_CHECK_NULL(py_exp, PyLong_FromLong(-exp));
         ASSIGN_AND_CHECK_NULL(ten_pow_exp,
                               PyNumber_Power(PyTEN, py_exp, Py_None));
