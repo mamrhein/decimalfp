@@ -1198,6 +1198,7 @@ static PyType_Spec DecimalType_spec = {
 
 static inline PyObject *
 PyLong_10_pow_exp(const uint8_t exp) {
+    assert(exp <= DEC_DIGITS_PER_DIGIT);
     return PyLong_FromUnsignedLong(_10_POW_N(exp));
 }
 
