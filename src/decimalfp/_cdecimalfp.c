@@ -1017,6 +1017,11 @@ CLEAN_UP:
     return res;
 }
 
+static int
+Decimal_bool(DecimalObject *x) {
+    return !FPDEC_EQ_ZERO(&x->fpdec);
+}
+
 // binary number methods
 
 static PyObject *
@@ -1168,6 +1173,7 @@ static PyType_Slot decimal_type_slots[] = {
     /* properties */
     {Py_tp_getset, Decimal_properties},
     /* number methods */
+    {Py_nb_bool, Decimal_bool},
     {Py_nb_add, Decimal_add},
     {Py_nb_subtract, Decimal_sub},
     {Py_nb_multiply, Decimal_mul},
