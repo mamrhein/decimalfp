@@ -1351,7 +1351,8 @@ fpdec_as_integer_ratio(PyObject **numerator, PyObject **denominator,
 
     if (exp == 0) {
         // *numerator = coeff, *denominator = 1
-        *numerator = coeff;         // stealing reference
+        Py_INCREF(coeff);
+        *numerator = coeff;
         Py_INCREF(PyONE);
         *denominator = PyONE;
         return;
