@@ -115,9 +115,9 @@ def test_as_tuple(impl, sign, coeff, exp):
 @pytest.mark.parametrize("value",
                          ("0.00000",
                           17,
-                          "33000.17",
+                          "-33000.17",
                           Fraction(9 ** 394, 10 ** 247),
-                          Fraction(190, 400000)),
+                          Fraction(-19, 400000)),
                          ids=("zero", "int", "compact", "large", "fraction"))
 def test_as_integer_ratio(impl, value):
     f = Fraction(value)
@@ -128,9 +128,9 @@ def test_as_integer_ratio(impl, value):
 @pytest.mark.parametrize("value",
                          ("0.00000",
                           17,
-                          "33000.17",
+                          "-33000.17",
                           Fraction(9 ** 394, 10 ** 247),
-                          Fraction(190, 400000)),
+                          Fraction(-19, 400000)),
                          ids=("zero", "int", "compact", "large", "fraction"))
 def test_as_fraction(impl, value):
     f = Fraction(value)
