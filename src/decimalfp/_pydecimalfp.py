@@ -751,10 +751,9 @@ class Decimal:
                 return hash(Fraction(sv, base10pow(sp)))
 
     # return 0 or 1 for truth-value testing
-    def __nonzero__(self) -> bool:
+    def __bool__(self) -> bool:
         """bool(self)"""                                        # noqa: D400
         return self._value != 0
-    __bool__ = __nonzero__
 
     # return integer portion as int
     def __int__(self) -> int:
