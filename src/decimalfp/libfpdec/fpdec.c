@@ -853,6 +853,7 @@ fpdec_as_sign_coeff128_exp(fpdec_sign_t *sign, uint128_t *coeff, int64_t *exp,
                 break;
             case 2:
                 coeff->lo = digits[1];
+                coeff->hi = 0UL;
                 u128_imul_10_pow_n(coeff, DEC_DIGITS_PER_DIGIT);
                 u128_iadd_u64(coeff, digits[0]);
                 break;
