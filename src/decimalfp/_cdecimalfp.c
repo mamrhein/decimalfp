@@ -216,6 +216,10 @@ Decimal_dealloc(DecimalObject *self) {
     DecimalObject *self; \
     DECIMAL_ALLOC(type, self)
 
+#define DECIMAL_ALLOC_RESULT(type) \
+    DecimalObject *res; \
+    DECIMAL_ALLOC(type, res)
+
 static PyObject *
 DecimalType_from_fpdec(PyTypeObject *type, fpdec_t *fpdec,
                        long adjust_to_prec) {
@@ -1156,46 +1160,151 @@ Decimal_bool(DecimalObject *x) {
 
 // binary number methods
 
+typedef PyObject *(*Decimal_binop)(DecimalObject *, PyObject *);
+
+static inline DecimalObject *
+as_decimal(PyTypeObject *type, PyObject *obj) {
+    if (Decimal_Check(obj))
+        return (DecimalObject *)obj;
+    else
+        return (DecimalObject *)DecimalType_from_obj(type, obj, -1);
+}
+
+static inline PyObject *
+Decimal_assoc_binop(PyObject *x, PyObject *y, Decimal_binop op) {
+    if (Decimal_Check(x))
+        return op((DecimalObject *)x, y);
+    else
+        return op((DecimalObject *)y, x);
+
+}
+
+static inline PyObject *
+Decimal_nonassoc_binop(PyObject *x, PyObject *y, Decimal_binop op,
+                       Decimal_binop rop) {
+    if (Decimal_Check(x))
+        return op((DecimalObject *)x, y);
+    else
+        return rop((DecimalObject *)y, x);
+
+}
+
 static PyObject *
-Decimal_add(PyObject *x, PyObject *y) {
+Decimal_add(DecimalObject *x, PyObject *y) {
     Py_RETURN_NOTIMPLEMENTED;
 }
 
 static PyObject *
-Decimal_sub(PyObject *x, PyObject *y) {
+Decimal_nb_add(PyObject *x, PyObject *y) {
+    return Decimal_assoc_binop(x, y, Decimal_add);
+}
+
+static PyObject *
+Decimal_sub(DecimalObject *x, PyObject *y) {
     Py_RETURN_NOTIMPLEMENTED;
 }
 
 static PyObject *
-Decimal_mul(PyObject *x, PyObject *y) {
+Decimal_rsub(DecimalObject *y, PyObject *x) {
     Py_RETURN_NOTIMPLEMENTED;
 }
 
 static PyObject *
-Decimal_mod(PyObject *x, PyObject *y) {
+Decimal_nb_sub(PyObject *x, PyObject *y) {
+    return Decimal_nonassoc_binop(x, y, Decimal_sub, Decimal_rsub);
+}
+
+static PyObject *
+Decimal_mul(DecimalObject *x, PyObject *y) {
     Py_RETURN_NOTIMPLEMENTED;
 }
 
 static PyObject *
-Decimal_divmod(PyObject *x, PyObject *y) {
+Decimal_nb_mul(PyObject *x, PyObject *y) {
+    return Decimal_assoc_binop(x, y, Decimal_mul);
+}
+
+static PyObject *
+Decimal_mod(DecimalObject *x, PyObject *y) {
     Py_RETURN_NOTIMPLEMENTED;
 }
 
 static PyObject *
-Decimal_floordiv(PyObject *x, PyObject *y) {
+Decimal_rmod(DecimalObject *y, PyObject *x) {
     Py_RETURN_NOTIMPLEMENTED;
 }
 
 static PyObject *
-Decimal_truediv(PyObject *x, PyObject *y) {
+Decimal_nb_mod(PyObject *x, PyObject *y) {
+    return Decimal_nonassoc_binop(x, y, Decimal_mod, Decimal_rmod);
+}
+
+static PyObject *
+Decimal_divmod(DecimalObject *x, PyObject *y) {
     Py_RETURN_NOTIMPLEMENTED;
+}
+
+static PyObject *
+Decimal_rdivmod(DecimalObject *y, PyObject *x) {
+    Py_RETURN_NOTIMPLEMENTED;
+}
+
+static PyObject *
+Decimal_nb_divmod(PyObject *x, PyObject *y) {
+    return Decimal_nonassoc_binop(x, y, Decimal_divmod, Decimal_rdivmod);
+}
+
+static PyObject *
+Decimal_floordiv(DecimalObject *x, PyObject *y) {
+    Py_RETURN_NOTIMPLEMENTED;
+}
+
+static PyObject *
+Decimal_rfloordiv(DecimalObject *y, PyObject *x) {
+    Py_RETURN_NOTIMPLEMENTED;
+}
+
+static PyObject *
+Decimal_nb_floordiv(PyObject *x, PyObject *y) {
+    return Decimal_nonassoc_binop(x, y, Decimal_floordiv, Decimal_rfloordiv);
+}
+
+static PyObject *
+Decimal_truediv(DecimalObject *x, PyObject *y) {
+    Py_RETURN_NOTIMPLEMENTED;
+}
+
+static PyObject *
+Decimal_rtruediv(DecimalObject *y, PyObject *x) {
+    Py_RETURN_NOTIMPLEMENTED;
+}
+
+static PyObject *
+Decimal_nb_truediv(PyObject *x, PyObject *y) {
+    return Decimal_nonassoc_binop(x, y, Decimal_truediv, Decimal_rtruediv);
 }
 
 // ternary number methods
 
 static PyObject *
-Decimal_pow(PyObject *x, PyObject *y, PyObject *mod) {
+Decimal_pow(DecimalObject *x, PyObject *y) {
     Py_RETURN_NOTIMPLEMENTED;
+}
+
+static PyObject *
+Decimal_rpow(DecimalObject *y, PyObject *x) {
+    Py_RETURN_NOTIMPLEMENTED;
+}
+
+static PyObject *
+Decimal_nb_pow(PyObject *x, PyObject *y, PyObject *mod) {
+    if (mod != Py_None) {
+        PyErr_SetString(PyExc_TypeError,
+                        "3rd argument not allowed unless all arguments "
+                        "are integers.");
+        return NULL;
+    }
+    return Decimal_nonassoc_binop(x, y, Decimal_pow, Decimal_rpow);
 }
 
 // Decimal type spec
@@ -1310,19 +1419,19 @@ static PyType_Slot decimal_type_slots[] = {
     {Py_tp_getset, Decimal_properties},
     /* number methods */
     {Py_nb_bool, Decimal_bool},
-    {Py_nb_add, Decimal_add},
-    {Py_nb_subtract, Decimal_sub},
-    {Py_nb_multiply, Decimal_mul},
-    {Py_nb_remainder, Decimal_mod},
-    {Py_nb_divmod, Decimal_divmod},
-    {Py_nb_power, Decimal_pow},
+    {Py_nb_add, Decimal_nb_add},
+    {Py_nb_subtract, Decimal_nb_sub},
+    {Py_nb_multiply, Decimal_nb_mul},
+    {Py_nb_remainder, Decimal_nb_mod},
+    {Py_nb_divmod, Decimal_nb_divmod},
+    {Py_nb_power, Decimal_nb_pow},
     {Py_nb_negative, Decimal_neg},
     {Py_nb_positive, Decimal_pos},
     {Py_nb_absolute, Decimal_abs},
     {Py_nb_int, Decimal_int},
     {Py_nb_float, Decimal_float},
-    {Py_nb_floor_divide, Decimal_floordiv},
-    {Py_nb_true_divide, Decimal_truediv},
+    {Py_nb_floor_divide, Decimal_nb_floordiv},
+    {Py_nb_true_divide, Decimal_nb_truediv},
     /* other methods */
     {Py_tp_methods, Decimal_methods},
     {0, NULL}
