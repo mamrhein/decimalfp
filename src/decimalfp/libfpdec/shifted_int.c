@@ -156,9 +156,11 @@ u128_eliminate_trailing_zeros(uint128_t *ui, unsigned n_max) {
         ui->hi = t.hi;
         n_trailing_zeros++;
     }
-    while (n_trailing_zeros < n_max && ui->lo % 10 == 0) {
-        ui->lo /= 10;
-        n_trailing_zeros++;
+    if (ui->hi == 0) {
+        while (n_trailing_zeros < n_max && ui->lo % 10 == 0) {
+            ui->lo /= 10;
+            n_trailing_zeros++;
+        }
     }
     return n_trailing_zeros;
 }
