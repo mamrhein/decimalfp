@@ -280,7 +280,8 @@ ERROR:
 }
 
 static PyObject *
-DecimalType_from_int(PyTypeObject *type, PyObject *val, long adjust_to_prec) {
+DecimalType_from_pylong(PyTypeObject *type, PyObject *val,
+                        long adjust_to_prec) {
     long long lval;
     error_t rc;
     fpdec_t *fpdec;
@@ -324,7 +325,7 @@ DecimalType_from_integral(PyTypeObject *type, PyObject *val,
     PyObject *i = PyNumber_Long(val);
     if (i == NULL)
         return NULL;
-    d = DecimalType_from_int(type, i, adjust_to_prec);
+    d = DecimalType_from_pylong(type, i, adjust_to_prec);
     Py_DECREF(i);
     return d;
 }
@@ -467,7 +468,7 @@ DecimalType_from_float_or_int(PyTypeObject *type, PyObject *val) {
     if (PyFloat_Check(val))
         return DecimalType_from_float(type, val, -1);
     if (PyLong_Check(val))
-        return DecimalType_from_int(type, val, -1);
+        return DecimalType_from_pylong(type, val, -1);
     return PyErr_Format(PyExc_TypeError, "%R is not a float or int.", val);
 }
 
@@ -478,7 +479,7 @@ DecimalType_from_decimal_or_int(PyTypeObject *type, PyObject *val) {
     if (PyObject_IsInstance(val, StdLibDecimal))
         return DecimalType_from_stdlib_decimal(type, val, -1);
     if (PyLong_Check(val))
-        return DecimalType_from_int(type, val, -1);
+        return DecimalType_from_pylong(type, val, -1);
     if (PyObject_IsInstance(val, Integral))
         return DecimalType_from_integral(type, val, -1);
     return PyErr_Format(PyExc_TypeError, "%R is not a Decimal.", val);
@@ -532,7 +533,7 @@ DecimalType_from_obj(PyTypeObject *type, PyObject *obj, long adjust_to_prec) {
 
     // Python <int>
     if (PyLong_Check(obj))
-        return DecimalType_from_int(type, obj, adjust_to_prec);
+        return DecimalType_from_pylong(type, obj, adjust_to_prec);
 
     // Integral
     if (PyObject_IsInstance(obj, Integral))
@@ -560,7 +561,7 @@ DecimalType_from_obj(PyTypeObject *type, PyObject *obj, long adjust_to_prec) {
         }
         num = PyNumber_Long(obj);
         if (num != NULL) {
-            PyObject *dec = DecimalType_from_int(type, num, adjust_to_prec);
+            PyObject *dec = DecimalType_from_pylong(type, num, adjust_to_prec);
             Py_DECREF(num);
             return dec;
         }
