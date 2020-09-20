@@ -282,26 +282,13 @@ ERROR:
 static PyObject *
 DecimalType_from_pylong(PyTypeObject *type, PyObject *val,
                         long adjust_to_prec) {
-    long long lval;
     error_t rc;
     fpdec_t *fpdec;
     DECIMAL_ALLOC_SELF(type);
 
     fpdec = &self->fpdec;
-    lval = PyLong_AsLongLong(val);
-    if (PyErr_Occurred() == NULL) {
-        rc = fpdec_from_long_long(fpdec, lval);
-        CHECK_FPDEC_ERROR(rc);
-    }
-    else if (PyErr_ExceptionMatches(PyExc_OverflowError)) {
-        PyErr_Clear();
-        // handle PyLong out of range of long long
-        rc = fpdec_from_pylong(fpdec, val);
-        CHECK_FPDEC_ERROR(rc);
-    }
-    else
-        // some other exception occured
-        goto ERROR;
+    rc = fpdec_from_pylong(fpdec, val);
+    CHECK_FPDEC_ERROR(rc);
 
     if (adjust_to_prec != -1 && adjust_to_prec != FPDEC_DEC_PREC(fpdec)) {
         rc = fpdec_adjust(fpdec, adjust_to_prec, FPDEC_ROUND_DEFAULT);
@@ -314,6 +301,7 @@ DecimalType_from_pylong(PyTypeObject *type, PyObject *val,
     return (PyObject *)self;
 
 ERROR:
+    assert(PyErr_Occurred());
     Decimal_dealloc(self);
     return NULL;
 }
@@ -1698,15 +1686,22 @@ PyLong_as_digit_array(fpdec_digit_t *res, const size_t n_digits,
 
 static error_t
 fpdec_from_pylong(fpdec_t *fpdec, PyObject *val) {
-    // val must be a PyLong and must not equal 0 !!!
     error_t rc;
+    long long lval;
     PyObject *n_bits = NULL;
     size_t size_base_2;
     PyObject *abs_val = NULL;
     fpdec_sign_t sign;
 
-    assert(!PyObject_RichCompareBool(val, PyZERO, Py_EQ));
+    assert(PyLong_Check(val));
 
+    lval = PyLong_AsLongLong(val);
+    if (PyErr_Occurred() == NULL)
+        return fpdec_from_long_long(fpdec, lval);
+    // fall through
+    PyErr_Clear();
+
+    // handle PyLong out of range of long long
     if (PyObject_RichCompareBool(val, PyZERO, Py_LT)) {
         abs_val = PyNumber_Absolute(val);
         if (abs_val == NULL)
