@@ -1523,7 +1523,7 @@ PyLong_from_u128_lo_hi(uint64_t lo, uint64_t hi) {
     ASSIGN_AND_CHECK_NULL(res_lo, PyLong_FromUnsignedLongLong(lo));
     ASSIGN_AND_CHECK_NULL(sh, PyLong_FromSize_t(64));
     ASSIGN_AND_CHECK_NULL(t, PyNumber_Lshift(res_hi, sh));
-    ASSIGN_AND_CHECK_NULL(res, PyNumber_Add(sh, res_lo));
+    ASSIGN_AND_CHECK_NULL(res, PyNumber_Add(t, res_lo));
     goto CLEAN_UP;
 
 ERROR:
