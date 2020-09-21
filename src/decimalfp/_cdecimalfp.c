@@ -542,13 +542,13 @@ DecimalType_from_obj(PyTypeObject *type, PyObject *obj, long adjust_to_prec) {
     // If there's a float or int equivalent to value, use it
     {
         PyObject *num = PyNumber_Float(obj);
-        if (num != NULL) {
+        if (num != NULL && PyObject_RichCompareBool(num, obj, Py_EQ) == 1) {
             PyObject *dec = DecimalType_from_float(type, num, adjust_to_prec);
             Py_DECREF(num);
             return dec;
         }
         num = PyNumber_Long(obj);
-        if (num != NULL) {
+        if (num != NULL && PyObject_RichCompareBool(num, obj, Py_EQ) == 1) {
             PyObject *dec = DecimalType_from_pylong(type, num, adjust_to_prec);
             Py_DECREF(num);
             return dec;
