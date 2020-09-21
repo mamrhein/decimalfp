@@ -74,6 +74,18 @@ class FloatWrapper:
         return self.f == f
 
 
+class Dummy:
+
+    def __init__(self, s):
+        self.s = str(s)
+
+    def __float__(self):
+        return float(len(self.s))
+
+    def __int__(self):
+        return len(self.s)
+
+
 @pytest.mark.parametrize("prec", [None, 0, 7],
                          ids=("prec=None", "prec=0", "prec=7"))
 def test_decimal_no_value(impl, prec):
@@ -82,8 +94,8 @@ def test_decimal_no_value(impl, prec):
     assert dec.precision == (prec if prec else 0)
 
 
-@pytest.mark.parametrize("value", [float, 3 + 2j],
-                         ids=("value=float", "value=3+2j"))
+@pytest.mark.parametrize("value", [float, 3 + 2j, Dummy(17)],
+                         ids=("value=float", "value=3+2j", "value=Dummy(17)"))
 def test_decimal_wrong_value_type(impl, value):
     with pytest.raises(TypeError):
         impl.Decimal(value=value)
