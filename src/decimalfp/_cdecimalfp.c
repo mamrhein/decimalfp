@@ -474,31 +474,6 @@ DecimalType_from_decimal_or_int(PyTypeObject *type, PyObject *val) {
 }
 
 static PyObject *
-DecimalType_from_real(PyTypeObject *type, PyObject *args, PyObject *kwds) {
-    static char *kw_names[] = {"r", "exact", NULL};
-    PyObject *r = Py_None;
-    PyObject *exact = Py_True;
-    PyObject *dec;
-
-    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O|O", kw_names, &r,
-                                     &exact))
-        return NULL;
-
-    if (!PyObject_IsInstance(r, Real))
-        return PyErr_Format(PyExc_TypeError, "%R is not a Real.", r);
-
-    dec = PyObject_CallFunctionObjArgs((PyObject *)type, r, Py_None, NULL);
-    if (dec == NULL && PyErr_ExceptionMatches(PyExc_ValueError)) {
-        if (!PyObject_IsTrue(exact)) {
-            PyErr_Clear();
-            dec = PyObject_CallFunctionObjArgs((PyObject *)type, r,
-                                               MAX_DEC_PRECISION, NULL);
-        }
-    }
-    return dec;
-}
-
-static PyObject *
 DecimalType_from_obj(PyTypeObject *type, PyObject *obj, long adjust_to_prec) {
 
     if (obj == Py_None) {
@@ -535,7 +510,7 @@ DecimalType_from_obj(PyTypeObject *type, PyObject *obj, long adjust_to_prec) {
     if (PyObject_IsInstance(obj, StdLibDecimal))
         return DecimalType_from_stdlib_decimal(type, obj, adjust_to_prec);
 
-    // Python <float>, standard lib Decimal, Real
+    // Python <float>, Real
     if (PyFloat_Check(obj) || PyObject_IsInstance(obj, Real))
         return DecimalType_from_float(type, obj, adjust_to_prec);
 
@@ -557,6 +532,30 @@ DecimalType_from_obj(PyTypeObject *type, PyObject *obj, long adjust_to_prec) {
 
     // unable to create Decimal
     return PyErr_Format(PyExc_TypeError, "Can't convert %R to Decimal.", obj);
+}
+
+static PyObject *
+DecimalType_from_real(PyTypeObject *type, PyObject *args, PyObject *kwds) {
+    static char *kw_names[] = {"r", "exact", NULL};
+    PyObject *r = Py_None;
+    PyObject *exact = Py_True;
+    PyObject *dec;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O|O", kw_names, &r,
+                                     &exact))
+        return NULL;
+
+    if (!PyObject_IsInstance(r, Real))
+        return PyErr_Format(PyExc_TypeError, "%R is not a Real.", r);
+
+    dec = DecimalType_from_obj(type, r, -1);
+    if (dec == NULL && PyErr_ExceptionMatches(PyExc_ValueError)) {
+        if (!PyObject_IsTrue(exact)) {
+            PyErr_Clear();
+            dec = DecimalType_from_obj(type, r, FPDEC_MAX_DEC_PREC);
+        }
+    }
+    return dec;
 }
 
 static PyObject *
