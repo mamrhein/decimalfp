@@ -318,22 +318,34 @@ DecimalType_from_integral(PyTypeObject *type, PyObject *val,
     return d;
 }
 
-static PyObject *
-DecimalType_from_num_den(PyTypeObject *type, PyObject *numerator,
-                         PyObject *denominator, long adjust_to_prec) {
+static error_t
+fpdec_from_num_den(fpdec_t *fpdec, PyObject *numerator,
+                   PyObject *denominator, long adjust_to_prec) {
     error_t rc;
-    fpdec_t *fpdec;
     fpdec_t num = FPDEC_ZERO;
     fpdec_t den = FPDEC_ZERO;
-    DECIMAL_ALLOC_SELF(type);
 
-    fpdec = &self->fpdec;
     rc = fpdec_from_pylong(&num, numerator);
     CHECK_FPDEC_ERROR(rc);
     rc = fpdec_from_pylong(&den, denominator);
     CHECK_FPDEC_ERROR(rc);
     rc = fpdec_div(fpdec, &num, &den, (int)adjust_to_prec,
                    FPDEC_ROUND_DEFAULT);
+
+ERROR:
+    fpdec_reset_to_zero(&num, 0);
+    fpdec_reset_to_zero(&den, 0);
+    return rc;
+}
+
+static PyObject *
+DecimalType_from_num_den(PyTypeObject *type, PyObject *numerator,
+                         PyObject *denominator, long adjust_to_prec) {
+    DECIMAL_ALLOC_SELF(type);
+    error_t rc;
+
+    rc = fpdec_from_num_den(&self->fpdec, numerator, denominator,
+                            adjust_to_prec);
     CHECK_FPDEC_ERROR(rc);
     if (adjust_to_prec == -1) {
         // The quotient has not been adjusted, so we can safely cache
@@ -343,13 +355,9 @@ DecimalType_from_num_den(PyTypeObject *type, PyObject *numerator,
         Py_INCREF(denominator);
         self->denominator = denominator;
     }
-    fpdec_reset_to_zero(&num, 0);
-    fpdec_reset_to_zero(&den, 0);
     return (PyObject *)self;
 
 ERROR:
-    fpdec_reset_to_zero(&num, 0);
-    fpdec_reset_to_zero(&den, 0);
     Decimal_dealloc(self);
     return NULL;
 }
