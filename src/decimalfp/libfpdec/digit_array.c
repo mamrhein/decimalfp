@@ -470,7 +470,7 @@ digits_divmod(const fpdec_digit_array_t *x, const fpdec_n_digits_t x_n_shift,
         // D4: multiply and subtract
         carry = 0;
         borrow = 0;
-        for (int i = 0; i < n + 1; ++i) {
+        for (int i = 0; i <= n; ++i) {
             u64_mul_u64(&t1, qhat, yd->digits[i]);
             u128_iadd_u64(&t1, carry);
             rhat = u128_idiv_u64(&t1, RADIX);
@@ -486,7 +486,7 @@ digits_divmod(const fpdec_digit_array_t *x, const fpdec_n_digits_t x_n_shift,
             // D6: add back
             q->digits[j] = qhat - 1;
             carry = 0;
-            for (int i = 0; i < n_1; ++i) {
+            for (int i = 0; i <= n; ++i) {
                 xd->digits[j + i] += yd->digits[i] + carry;
                 carry = (xd->digits[j + i] < yd->digits[i] ||
                     xd->digits[j + i] >= RADIX);
