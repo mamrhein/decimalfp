@@ -1298,7 +1298,7 @@ fpdec_mul(fpdec_t *z, const fpdec_t *x, const fpdec_t *y) {
 
 error_t
 fpdec_divmod_abs_dyn_by_dyn(fpdec_t *q, fpdec_t *r, const fpdec_t *x,
-                            const fpdec_t *y) {
+                            const fpdec_t *y, bool neg_quot) {
     const fpdec_n_digits_t n_shift_x =
         MAX(0, FPDEC_DYN_EXP(x) - FPDEC_DYN_EXP(y));
     const fpdec_n_digits_t n_shift_y =
@@ -1309,6 +1309,16 @@ fpdec_divmod_abs_dyn_by_dyn(fpdec_t *q, fpdec_t *r, const fpdec_t *x,
         q_digits = digits_div_digit(x->digit_array, n_shift_x,
                                     FPDEC_DYN_DIGITS(y)[0], &r->lo);
         if (q_digits == NULL) MEMERROR
+        // adjust negativ quotient?
+        if (neg_quot && r->lo != 0) {
+            // Because there is a remainder,
+            // q_digits < x->digits * RADIX ^ n_shift_x.
+            // x->digits <= RADIX ^ x->n_signif - 1, so
+            // q_digits < RADIX ^ (x->n_signif + n_shift_x) - 1.
+            // That means we can safely increment q_digits.
+            digits_iadd_digit(q_digits, 1);
+            r->lo = FPDEC_DYN_DIGITS(y)[0] - r->lo;
+        }
     }
     else {
         q_digits = digits_divmod(x->digit_array, n_shift_x, y->digit_array,
@@ -1318,6 +1328,18 @@ fpdec_divmod_abs_dyn_by_dyn(fpdec_t *q, fpdec_t *r, const fpdec_t *x,
         r->digit_array = r_digits;
         r->dyn_alloc = true;
         FPDEC_DYN_EXP(r) = MIN(FPDEC_DYN_EXP(y), FPDEC_DYN_EXP(x));
+        // adjust negativ quotient?
+        if (neg_quot && !digits_all_zero(r_digits, r_digits->n_signif)) {
+            error_t rc;
+            fpdec_t t = *r;
+            *r = FPDEC_ZERO;
+            fpdec_dyn_normalize(&t);
+            rc = fpdec_sub(r, y, &t);
+            if (rc != FPDEC_OK)
+                return rc;
+            // Safe to increment q_digits. See comment above.
+            digits_iadd_digit(q_digits, 1);
+        }
     }
     q->digit_array = q_digits;
     q->dyn_alloc = true;
@@ -1327,13 +1349,13 @@ fpdec_divmod_abs_dyn_by_dyn(fpdec_t *q, fpdec_t *r, const fpdec_t *x,
 
 error_t
 fpdec_divmod_abs_dyn_by_shint(fpdec_t *q, fpdec_t *r, const fpdec_t *x,
-                              const fpdec_t *y) {
+                              const fpdec_t *y, bool neg_quot) {
     error_t rc;
     fpdec_t y_dyn;
 
     rc = fpdec_copy_shint_as_dyn(&y_dyn, y);
     if (rc == FPDEC_OK) {
-        rc = fpdec_divmod_abs_dyn_by_dyn(q, r, x, &y_dyn);
+        rc = fpdec_divmod_abs_dyn_by_dyn(q, r, x, &y_dyn, neg_quot);
         fpdec_reset_to_zero(&y_dyn, 0);
     }
     return rc;
@@ -1341,13 +1363,13 @@ fpdec_divmod_abs_dyn_by_shint(fpdec_t *q, fpdec_t *r, const fpdec_t *x,
 
 error_t
 fpdec_divmod_abs_shint_by_dyn(fpdec_t *q, fpdec_t *r, const fpdec_t *x,
-                              const fpdec_t *y) {
+                              const fpdec_t *y, bool neg_quot) {
     error_t rc;
     fpdec_t x_dyn;
 
     rc = fpdec_copy_shint_as_dyn(&x_dyn, x);
     if (rc == FPDEC_OK) {
-        rc = fpdec_divmod_abs_dyn_by_dyn(q, r, &x_dyn, y);
+        rc = fpdec_divmod_abs_dyn_by_dyn(q, r, &x_dyn, y, neg_quot);
         fpdec_reset_to_zero(&x_dyn, 0);
     }
     return rc;
@@ -1355,7 +1377,7 @@ fpdec_divmod_abs_shint_by_dyn(fpdec_t *q, fpdec_t *r, const fpdec_t *x,
 
 error_t
 fpdec_divmod_abs_shint_by_shint(fpdec_t *q, fpdec_t *r, const fpdec_t *x,
-                                const fpdec_t *y) {
+                                const fpdec_t *y, bool neg_quot) {
     uint128_t q_shint = U128_FROM_SHINT(x);
     uint128_t y_shint = U128_FROM_SHINT(y);
     uint128_t r_shint;
@@ -1369,6 +1391,15 @@ fpdec_divmod_abs_shint_by_shint(fpdec_t *q, fpdec_t *r, const fpdec_t *x,
     }
     else
         u128_idiv_u128(&r_shint, &q_shint, &y_shint);
+    // adjust negativ quotient?
+    if (neg_quot && U128_NE_ZERO(r_shint)) {
+        u128_incr(&q_shint);
+        if (r_shint.hi == 0)
+            u128_isub_u64(&y_shint, r_shint.lo);
+        else
+            u128_isub_u128(&y_shint, &r_shint);
+        r_shint = y_shint;
+    }
     if (U128_FITS_SHINT(q_shint)) {
         q->lo = q_shint.lo;
         q->hi = q_shint.hi;
@@ -1381,7 +1412,7 @@ fpdec_divmod_abs_shint_by_shint(fpdec_t *q, fpdec_t *r, const fpdec_t *x,
         fpdec_t x_dyn;
         rc = fpdec_copy_shint_as_dyn(&x_dyn, x);
         if (rc == FPDEC_OK) {
-            rc = fpdec_divmod_abs_dyn_by_shint(q, r, &x_dyn, y);
+            rc = fpdec_divmod_abs_dyn_by_shint(q, r, &x_dyn, y, neg_quot);
             fpdec_reset_to_zero(&x_dyn, 0);
         }
         return rc;
@@ -1389,7 +1420,7 @@ fpdec_divmod_abs_shint_by_shint(fpdec_t *q, fpdec_t *r, const fpdec_t *x,
 }
 
 typedef error_t (*v_divmod_op)(fpdec_t *, fpdec_t *, const fpdec_t *,
-                               const fpdec_t *);
+                               const fpdec_t *, bool);
 
 const v_divmod_op vtab_divmod_abs[4] = {
     fpdec_divmod_abs_shint_by_shint,
@@ -1429,10 +1460,10 @@ fpdec_divmod(fpdec_t *q, fpdec_t *r, const fpdec_t *x, const fpdec_t *y) {
 
     // x > y
     FPDEC_SIGN(q) = FPDEC_SIGN(x) * FPDEC_SIGN(y);
-    FPDEC_SIGN(r) = FPDEC_SIGN(x);
+    FPDEC_SIGN(r) = FPDEC_SIGN(y);
     FPDEC_DEC_PREC(r) = MAX(FPDEC_DEC_PREC(x), FPDEC_DEC_PREC(y));
     rc = vtab_divmod_abs[((FPDEC_IS_DYN_ALLOC(x)) << 1U) +
-                         FPDEC_IS_DYN_ALLOC(y)](q, r, x, y);
+                         FPDEC_IS_DYN_ALLOC(y)](q, r, x, y, FPDEC_LT_ZERO(q));
 
     if (FPDEC_IS_DYN_ALLOC(q))
         fpdec_dyn_normalize(q);

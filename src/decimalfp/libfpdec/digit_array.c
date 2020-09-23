@@ -38,16 +38,6 @@ digits_alloc(size_t n_digits) {
     return digit_array;
 }
 
-// Tests
-
-static inline bool
-digits_all_zero(fpdec_digit_t *digits, fpdec_n_digits_t n) {
-    for (fpdec_digit_t *digit = digits; digit < digits + n; ++digit)
-        if (*digit != 0)
-            return false;
-    return true;
-}
-
 // Constructors
 
 static inline void
@@ -234,25 +224,27 @@ int digits_cmp(fpdec_digit_t *x_digits, fpdec_n_digits_t x_n_digits,
 
 // Basic arithmetic operations
 
-void
-digits_iadd_digit(fpdec_digit_array_t *x, const fpdec_digit_t y) {
+bool
+digits_iadd_digit(fpdec_digit_array_t *x, fpdec_digit_t y) {
+    bool ovfl = false;
     fpdec_digit_t *digit = x->digits;
-    fpdec_digit_t *total_carry_over_digit = x->digits + x->n_signif;
-
-    assert(x->n_signif > 0);
-    assert(x->n_alloc > x->n_signif);
-    assert(*total_carry_over_digit == 0);
+    fpdec_digit_t *sentinel_signif = x->digits + x->n_signif;
+    fpdec_digit_t *sentinel_alloc = x->digits + x->n_alloc;
 
     *digit += y;
     if (*digit < y || *digit >= RADIX) {        // carry-over?
         *digit -= RADIX;
         // propagate carry
-        while (*(++digit) == MAX_DIGIT)
+        while (++digit < sentinel_alloc && *digit == MAX_DIGIT)
             *digit = 0;
-        (*digit)++;
-        if (*total_carry_over_digit != 0)
-            x->n_signif++;
+        if (digit == sentinel_alloc)                  // overflow!
+            ovfl = true;
+        else if (digit == sentinel_signif)
+            *digit = 1;
+        else
+            (*digit)++;
     }
+    return ovfl;
 }
 
 void

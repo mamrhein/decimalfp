@@ -47,6 +47,16 @@ error_t
 digits_from_digits(fpdec_digit_array_t **digit_array,
                    const fpdec_digit_t *digits, size_t n_digits);
 
+// Tests
+
+static inline bool
+digits_all_zero(fpdec_digit_t *digits, fpdec_n_digits_t n) {
+    for (fpdec_digit_t *digit = digits; digit < digits + n; ++digit)
+        if (*digit != 0)
+            return false;
+    return true;
+}
+
 // Normalization
 
 fpdec_n_digits_t
@@ -66,7 +76,7 @@ digits_cmp(fpdec_digit_t *x_digits, fpdec_n_digits_t x_n_digits,
 
 // Basic arithmetic operations
 
-void
+bool
 digits_iadd_digit(fpdec_digit_array_t *x, fpdec_digit_t y);
 
 void
