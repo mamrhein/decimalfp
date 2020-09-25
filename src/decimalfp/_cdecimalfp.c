@@ -538,7 +538,8 @@ DecimalType_from_obj(PyTypeObject *type, PyObject *obj, long adjust_to_prec) {
         }
         num = PyNumber_Long(obj);
         if (num != NULL && PyObject_RichCompareBool(num, obj, Py_EQ) == 1) {
-            PyObject *dec = DecimalType_from_pylong(type, num, adjust_to_prec);
+            PyObject *dec = DecimalType_from_pylong(type, num,
+                                                    adjust_to_prec);
             Py_DECREF(num);
             return dec;
         }
@@ -1422,7 +1423,8 @@ PyLong_from_digits(const fpdec_digit_t *digits,
         Py_CLEAR(t);
     }
     if (n_dec_adjust == 0) {
-        ASSIGN_AND_CHECK_NULL(digit, PyLong_FromUnsignedLongLong(digits[idx]));
+        ASSIGN_AND_CHECK_NULL(digit,
+                              PyLong_FromUnsignedLongLong(digits[idx]));
         ASSIGN_AND_CHECK_NULL(t, PyNumber_Multiply(res, PyRADIX));
         Py_CLEAR(res);
         ASSIGN_AND_CHECK_NULL(res, PyNumber_Add(t, digit));
@@ -1917,6 +1919,12 @@ cdecimalfp_exec(PyObject *module) {
                           (PyTypeObject *)PyType_FromSpec(&DecimalType_spec));
     PYMOD_ADD_OBJ(module, "Decimal", (PyObject *)DecimalType);
     PYMOD_ADD_OBJ(module, EnumRounding_name, EnumRounding);
+
+    /* Register Decimal as Rational */
+    ASSIGN_AND_CHECK_NULL(DecimalType,
+                          (PyTypeObject *)PyObject_CallMethod(Rational,
+                                                              "register", "O",
+                                                              DecimalType));
 
     return 0;
 
