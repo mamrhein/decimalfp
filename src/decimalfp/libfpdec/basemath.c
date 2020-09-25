@@ -229,21 +229,21 @@ u128_idiv_u128_special(uint128_t *r, uint128_t *x, const uint128_t *y) {
     r->lo = u128_idiv_u64_special(&(t.lo), &(t.hi), yn[1]);
     assert(t.hi == 0);
     q = t.lo;
-    // D4: Multiply and subtract
+    // D4: Multiply q * y
     t.lo = y->lo;
     t.hi = y->hi;
     u128_imul_u64(&t, q);
-    u128_sub_u128(r, &t, x);
-    // D5: Test remainder
-    if (u128_cmp(r, y) <= 0) {
+    // D5: Test q * y against x
+    if (u128_cmp(&t, x) <= 0) {
+        u128_sub_u128(r, x, &t);
         x->lo = q;
         x->hi = 0;
     }
     else {
-        // D6: Add back
-        x->lo = ++q;
+        u128_isub_u128(&t, y);
+        u128_sub_u128(r, x, &t);
+        x->lo = --q;
         x->hi = 0;
-        u128_isub_u128(r, y);
     }
 }
 
