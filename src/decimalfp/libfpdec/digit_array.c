@@ -75,7 +75,7 @@ dec_digits_to_digit(const dec_digit_t *start, const dec_digit_t *stop) {
 error_t
 digits_from_dec_coeff_exp(fpdec_digit_array_t **digit_array, fpdec_exp_t *exp,
                           size_t n_dec_digits, const dec_digit_t *coeff,
-                          int dec_exp) {
+                          int64_t dec_exp) {
     size_t n_digits, n_dec_shift;
     fpdec_digit_t *digit;
     const dec_digit_t *chunk_start, *chunk_stop;
