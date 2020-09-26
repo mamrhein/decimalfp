@@ -222,10 +222,6 @@ Decimal_dealloc(DecimalObject *self) {
     DecimalObject *self; \
     DECIMAL_ALLOC(type, self)
 
-#define DECIMAL_ALLOC_RESULT(type) \
-    DecimalObject *res; \
-    DECIMAL_ALLOC(type, res)
-
 static PyObject *
 DecimalType_from_fpdec(PyTypeObject *type, fpdec_t *fpdec,
                        long adjust_to_prec) {
@@ -1104,151 +1100,386 @@ Decimal_bool(DecimalObject *x) {
 
 // binary number methods
 
-typedef PyObject *(*Decimal_binop)(DecimalObject *, PyObject *);
+static fpdec_t *
+fpdec_from_obj(fpdec_t *tmp, PyObject *obj) {
+    PyObject *ratio = NULL;
+    PyObject *num = NULL;
+    PyObject *den = NULL;
+    error_t rc;
+    fpdec_t *fpdec = NULL;
 
-static inline DecimalObject *
-as_decimal(PyTypeObject *type, PyObject *obj) {
-    if (Decimal_Check(obj))
-        return (DecimalObject *)obj;
-    else
-        return (DecimalObject *)DecimalType_from_obj(type, obj, -1);
-}
+    if (Decimal_Check(obj)) {
+        fpdec = &((DecimalObject *)obj)->fpdec;
+    }
+    else if (PyLong_Check(obj)) {
+        rc = fpdec_from_pylong(tmp, obj);
+        if (rc == FPDEC_OK)
+            fpdec = tmp;
+    }
+    else if (PyObject_IsInstance(obj, Integral)) {
+        ASSIGN_AND_CHECK_NULL(num, PyNumber_Long(obj));
+        rc = fpdec_from_pylong(tmp, num);
+        if (rc == FPDEC_OK)
+            fpdec = tmp;
+    }
+    else if (PyObject_IsInstance(obj, Rational)) {
+        ASSIGN_AND_CHECK_NULL(num, PyObject_GetAttrString(obj, "numerator"));
+        ASSIGN_AND_CHECK_NULL(den,
+                              PyObject_GetAttrString(obj, "denominator"));
+        rc = fpdec_from_num_den(tmp, num, den, -1);
+        if (rc == FPDEC_OK)
+            fpdec = tmp;
+    }
+    else if (PyObject_IsInstance(obj, Real) ||
+             PyObject_IsInstance(obj, StdLibDecimal)) {
+        ASSIGN_AND_CHECK_NULL(ratio,
+                              PyObject_CallMethod(obj, "as_integer_ratio",
+                                                  NULL));
+        ASSIGN_AND_CHECK_NULL(num, PySequence_GetItem(ratio, 0));
+        ASSIGN_AND_CHECK_NULL(den, PySequence_GetItem(ratio, 1));
+        rc = fpdec_from_num_den(tmp, num, den, -1);
+        if (rc == FPDEC_OK)
+            fpdec = tmp;
+    }
+    goto CLEAN_UP;
 
-static inline PyObject *
-Decimal_assoc_binop(PyObject *x, PyObject *y, Decimal_binop op) {
-    if (Decimal_Check(x))
-        return op((DecimalObject *)x, y);
-    else
-        return op((DecimalObject *)y, x);
+ERROR:
+    {
+        PyObject *err = PyErr_Occurred();
+        assert(err);
+        if (err == PyExc_ValueError || err == PyExc_OverflowError ||
+            err == PyExc_AttributeError) {
+            PyErr_Clear();
+            PyErr_Format(PyExc_ValueError, "Can't convert %R to Decimal.",
+                         obj);
+        }
+    }
 
-}
-
-static inline PyObject *
-Decimal_nonassoc_binop(PyObject *x, PyObject *y, Decimal_binop op,
-                       Decimal_binop rop) {
-    if (Decimal_Check(x))
-        return op((DecimalObject *)x, y);
-    else
-        return rop((DecimalObject *)y, x);
-
-}
-
-static PyObject *
-Decimal_add(DecimalObject *x, PyObject *y) {
-    Py_RETURN_NOTIMPLEMENTED;
-}
-
-static PyObject *
-Decimal_nb_add(PyObject *x, PyObject *y) {
-    return Decimal_assoc_binop(x, y, Decimal_add);
-}
-
-static PyObject *
-Decimal_sub(DecimalObject *x, PyObject *y) {
-    Py_RETURN_NOTIMPLEMENTED;
-}
-
-static PyObject *
-Decimal_rsub(DecimalObject *y, PyObject *x) {
-    Py_RETURN_NOTIMPLEMENTED;
-}
-
-static PyObject *
-Decimal_nb_sub(PyObject *x, PyObject *y) {
-    return Decimal_nonassoc_binop(x, y, Decimal_sub, Decimal_rsub);
-}
-
-static PyObject *
-Decimal_mul(DecimalObject *x, PyObject *y) {
-    Py_RETURN_NOTIMPLEMENTED;
-}
-
-static PyObject *
-Decimal_nb_mul(PyObject *x, PyObject *y) {
-    return Decimal_assoc_binop(x, y, Decimal_mul);
-}
-
-static PyObject *
-Decimal_mod(DecimalObject *x, PyObject *y) {
-    Py_RETURN_NOTIMPLEMENTED;
+CLEAN_UP:
+    Py_XDECREF(ratio);
+    Py_XDECREF(num);
+    Py_XDECREF(den);
+    return fpdec;
 }
 
 static PyObject *
-Decimal_rmod(DecimalObject *y, PyObject *x) {
-    Py_RETURN_NOTIMPLEMENTED;
+fallback_op(PyObject *x, PyObject *y, binaryfunc op) {
+    PyObject *res = NULL;
+    PyObject *fx = NULL;
+    PyObject *fy = NULL;
+
+    ASSIGN_AND_CHECK_NULL(fx, PyObject_CallFunctionObjArgs(Fraction, x,
+                                                           Py_None, NULL));
+    ASSIGN_AND_CHECK_NULL(fy, PyObject_CallFunctionObjArgs(Fraction, y,
+                                                           Py_None, NULL));
+    ASSIGN_AND_CHECK_NULL(res, op(fx, fy));
+    goto CLEAN_UP;
+
+ERROR:
+    assert(PyErr_Occurred());
+
+CLEAN_UP:
+    Py_XDECREF(fx);
+    Py_XDECREF(fy);
+    return res;
 }
 
 static PyObject *
-Decimal_nb_mod(PyObject *x, PyObject *y) {
-    return Decimal_nonassoc_binop(x, y, Decimal_mod, Decimal_rmod);
+fallback_n_convert_op(PyTypeObject *dec_type, PyObject *x, PyObject *y,
+                      binaryfunc op) {
+    PyObject *res = NULL;
+    PyObject *dec = NULL;
+
+    ASSIGN_AND_CHECK_NULL(res, fallback_op(x, y, op));
+    // try to convert result back to Decimal
+    dec = DecimalType_from_rational(dec_type, res, -1);
+    if (dec == NULL) {
+        // result is not convertable to s Decimal, so return Fraction
+        PyErr_Clear();
+    }
+    else {
+        Py_CLEAR(res);
+        res = dec;
+    }
+    return res;
+
+ERROR:
+    assert(PyErr_Occurred());
+    return NULL;
+}
+
+#define BINOP_DEC_TYPE(x, y)            \
+    PyTypeObject *dec_type =            \
+        Decimal_Check(x) ? Py_TYPE(x) : \
+        (Decimal_Check(y) ? Py_TYPE(y) : NULL)
+
+#define BINOP_ALLOC_RESULT(type)      \
+    DecimalObject *dec;               \
+    DECIMAL_ALLOC(type, dec);         \
+    PyObject *res = (PyObject *) dec
+
+#define CONVERT_AND_CHECK(fpdec, tmp, obj)         \
+    do {                                           \
+    fpdec = fpdec_from_obj(tmp, obj);              \
+    if (fpdec == NULL) {                           \
+        if (PyErr_Occurred())                      \
+            goto ERROR;                            \
+        else if (PyObject_IsInstance(obj, Number)) \
+            goto FALLBACK;                         \
+        else  {                                    \
+            res = Py_NotImplemented;               \
+            Py_INCREF(res);                        \
+            goto CLEAN_UP;                         \
+        }                                          \
+    }} while (0)
+
+static PyObject *
+Decimal_add(PyObject *x, PyObject *y) {
+    BINOP_DEC_TYPE(x, y);
+    BINOP_ALLOC_RESULT(dec_type);
+    fpdec_t *fpz = &dec->fpdec;
+    error_t rc;
+    fpdec_t tmp_x = FPDEC_ZERO;
+    fpdec_t tmp_y = FPDEC_ZERO;
+    fpdec_t *fpx, *fpy;
+
+    CONVERT_AND_CHECK(fpx, &tmp_x, x);
+    CONVERT_AND_CHECK(fpy, &tmp_y, y);
+
+    rc = fpdec_add(fpz, fpx, fpy);
+    if (rc == FPDEC_OK)
+        goto CLEAN_UP;
+
+FALLBACK:
+    Py_CLEAR(dec);
+    ASSIGN_AND_CHECK_OK(res, fallback_n_convert_op(dec_type, x, y,
+                                                   PyNumber_Add));
+
+ERROR:
+    assert(PyErr_Occurred());
+    Py_CLEAR(res);
+
+CLEAN_UP:
+    fpdec_reset_to_zero(&tmp_x, 0);
+    fpdec_reset_to_zero(&tmp_y, 0);
+    return res;
 }
 
 static PyObject *
-Decimal_divmod(DecimalObject *x, PyObject *y) {
-    Py_RETURN_NOTIMPLEMENTED;
+Decimal_sub(PyObject *x, PyObject *y) {
+    BINOP_DEC_TYPE(x, y);
+    BINOP_ALLOC_RESULT(dec_type);
+    fpdec_t *fpz = &dec->fpdec;
+    error_t rc;
+    fpdec_t tmp_x = FPDEC_ZERO;
+    fpdec_t tmp_y = FPDEC_ZERO;
+    fpdec_t *fpx, *fpy;
+
+    CONVERT_AND_CHECK(fpx, &tmp_x, x);
+    CONVERT_AND_CHECK(fpy, &tmp_y, y);
+
+    rc = fpdec_sub(fpz, fpx, fpy);
+    if (rc == FPDEC_OK)
+        goto CLEAN_UP;
+
+FALLBACK:
+    Py_CLEAR(dec);
+    ASSIGN_AND_CHECK_OK(res, fallback_n_convert_op(dec_type, x, y,
+                                                   PyNumber_Subtract));
+
+ERROR:
+    assert(PyErr_Occurred());
+    Py_CLEAR(res);
+
+CLEAN_UP:
+    fpdec_reset_to_zero(&tmp_x, 0);
+    fpdec_reset_to_zero(&tmp_y, 0);
+    return res;
 }
 
 static PyObject *
-Decimal_rdivmod(DecimalObject *y, PyObject *x) {
-    Py_RETURN_NOTIMPLEMENTED;
+Decimal_mul(PyObject *x, PyObject *y) {
+    BINOP_DEC_TYPE(x, y);
+    BINOP_ALLOC_RESULT(dec_type);
+    fpdec_t *fpz = &dec->fpdec;
+    error_t rc;
+    fpdec_t tmp_x = FPDEC_ZERO;
+    fpdec_t tmp_y = FPDEC_ZERO;
+    fpdec_t *fpx, *fpy;
+
+    CONVERT_AND_CHECK(fpx, &tmp_x, x);
+    CONVERT_AND_CHECK(fpy, &tmp_y, y);
+
+    rc = fpdec_mul(fpz, fpx, fpy);
+    if (rc == FPDEC_OK)
+        goto CLEAN_UP;
+
+FALLBACK:
+    Py_CLEAR(dec);
+    ASSIGN_AND_CHECK_OK(res, fallback_n_convert_op(dec_type, x, y,
+                                                   PyNumber_Multiply));
+
+ERROR:
+    assert(PyErr_Occurred());
+    Py_CLEAR(res);
+
+CLEAN_UP:
+    fpdec_reset_to_zero(&tmp_x, 0);
+    fpdec_reset_to_zero(&tmp_y, 0);
+    return res;
 }
 
 static PyObject *
-Decimal_nb_divmod(PyObject *x, PyObject *y) {
-    return Decimal_nonassoc_binop(x, y, Decimal_divmod, Decimal_rdivmod);
+Decimal_remainder(PyObject *x, PyObject *y) {
+    BINOP_DEC_TYPE(x, y);
+    BINOP_ALLOC_RESULT(dec_type);
+    fpdec_t *fpz = &dec->fpdec;
+    error_t rc;
+    fpdec_t tmp_x = FPDEC_ZERO;
+    fpdec_t tmp_y = FPDEC_ZERO;
+    fpdec_t q = FPDEC_ZERO;
+    fpdec_t *fpx, *fpy;
+
+    CONVERT_AND_CHECK(fpx, &tmp_x, x);
+    CONVERT_AND_CHECK(fpy, &tmp_y, y);
+
+    rc = fpdec_divmod(&q, fpz, fpx, fpy);
+    if (rc == FPDEC_OK)
+        goto CLEAN_UP;
+
+FALLBACK:
+    Py_CLEAR(dec);
+    ASSIGN_AND_CHECK_OK(res, fallback_n_convert_op(dec_type, x, y,
+                                                   PyNumber_Remainder));
+
+ERROR:
+    assert(PyErr_Occurred());
+    Py_CLEAR(res);
+
+CLEAN_UP:
+    fpdec_reset_to_zero(&tmp_x, 0);
+    fpdec_reset_to_zero(&tmp_y, 0);
+    fpdec_reset_to_zero(&q, 0);
+    return res;
 }
 
 static PyObject *
-Decimal_floordiv(DecimalObject *x, PyObject *y) {
-    Py_RETURN_NOTIMPLEMENTED;
+Decimal_divmod(PyObject *x, PyObject *y) {
+    BINOP_DEC_TYPE(x, y);
+    PyObject *res = NULL;
+    PyObject *quot = NULL;
+    PyObject *rem = NULL;
+    error_t rc;
+    fpdec_t tmp_x = FPDEC_ZERO;
+    fpdec_t tmp_y = FPDEC_ZERO;
+    fpdec_t q = FPDEC_ZERO;
+    fpdec_t r = FPDEC_ZERO;
+    fpdec_t *fpx, *fpy;
+
+    CONVERT_AND_CHECK(fpx, &tmp_x, x);
+    CONVERT_AND_CHECK(fpy, &tmp_y, y);
+
+    rc = fpdec_divmod(&q, &r, fpx, fpy);
+    if (rc != FPDEC_OK)
+        goto FALLBACK;
+    ASSIGN_AND_CHECK_NULL(quot, PyLong_from_fpdec(&q));
+    ASSIGN_AND_CHECK_NULL(rem, DecimalType_from_fpdec(dec_type, &r, -1));
+    ASSIGN_AND_CHECK_NULL(res, PyTuple_Pack(2, quot, rem));
+    goto CLEAN_UP;
+
+FALLBACK:
+    ASSIGN_AND_CHECK_OK(res, fallback_op(x, y, PyNumber_Divmod));
+
+ERROR:
+    assert(PyErr_Occurred());
+
+CLEAN_UP:
+    Py_XDECREF(quot);
+    Py_XDECREF(rem);
+    fpdec_reset_to_zero(&tmp_x, 0);
+    fpdec_reset_to_zero(&tmp_y, 0);
+    fpdec_reset_to_zero(&q, 0);
+    fpdec_reset_to_zero(&r, 0);
+    return res;
 }
 
 static PyObject *
-Decimal_rfloordiv(DecimalObject *y, PyObject *x) {
-    Py_RETURN_NOTIMPLEMENTED;
+Decimal_floordiv(PyObject *x, PyObject *y) {
+    BINOP_DEC_TYPE(x, y);
+    PyObject *res = NULL;
+    error_t rc;
+    fpdec_t tmp_x = FPDEC_ZERO;
+    fpdec_t tmp_y = FPDEC_ZERO;
+    fpdec_t q = FPDEC_ZERO;
+    fpdec_t r = FPDEC_ZERO;
+    fpdec_t *fpx, *fpy;
+
+    CONVERT_AND_CHECK(fpx, &tmp_x, x);
+    CONVERT_AND_CHECK(fpy, &tmp_y, y);
+
+    rc = fpdec_divmod(&q, &r, fpx, fpy);
+    if (rc == FPDEC_OK) {
+        ASSIGN_AND_CHECK_NULL(res, PyLong_from_fpdec(&q));
+        goto CLEAN_UP;
+    }
+
+FALLBACK:
+    ASSIGN_AND_CHECK_OK(res, fallback_op(x, y, PyNumber_FloorDivide));
+
+ERROR:
+    assert(PyErr_Occurred());
+    Py_CLEAR(res);
+
+CLEAN_UP:
+    fpdec_reset_to_zero(&tmp_x, 0);
+    fpdec_reset_to_zero(&tmp_y, 0);
+    fpdec_reset_to_zero(&r, 0);
+    return res;
 }
 
 static PyObject *
-Decimal_nb_floordiv(PyObject *x, PyObject *y) {
-    return Decimal_nonassoc_binop(x, y, Decimal_floordiv, Decimal_rfloordiv);
-}
+Decimal_truediv(PyObject *x, PyObject *y) {
+    BINOP_DEC_TYPE(x, y);
+    BINOP_ALLOC_RESULT(dec_type);
+    fpdec_t *fpz = &dec->fpdec;
+    error_t rc;
+    fpdec_t tmp_x = FPDEC_ZERO;
+    fpdec_t tmp_y = FPDEC_ZERO;
+    fpdec_t *fpx, *fpy;
 
-static PyObject *
-Decimal_truediv(DecimalObject *x, PyObject *y) {
-    Py_RETURN_NOTIMPLEMENTED;
-}
+    CONVERT_AND_CHECK(fpx, &tmp_x, x);
+    CONVERT_AND_CHECK(fpy, &tmp_y, y);
 
-static PyObject *
-Decimal_rtruediv(DecimalObject *y, PyObject *x) {
-    Py_RETURN_NOTIMPLEMENTED;
-}
+    rc = fpdec_div(fpz, fpx, fpy, -1, FPDEC_ROUND_DEFAULT);
+    if (rc == FPDEC_OK)
+        goto CLEAN_UP;
 
-static PyObject *
-Decimal_nb_truediv(PyObject *x, PyObject *y) {
-    return Decimal_nonassoc_binop(x, y, Decimal_truediv, Decimal_rtruediv);
+FALLBACK:
+    Py_CLEAR(dec);
+    ASSIGN_AND_CHECK_OK(res, fallback_n_convert_op(dec_type, x, y,
+                                                   PyNumber_TrueDivide));
+
+ERROR:
+    assert(PyErr_Occurred());
+    Py_CLEAR(res);
+
+CLEAN_UP:
+    fpdec_reset_to_zero(&tmp_x, 0);
+    fpdec_reset_to_zero(&tmp_y, 0);
+    return res;
 }
 
 // ternary number methods
 
 static PyObject *
-Decimal_pow(DecimalObject *x, PyObject *y) {
-    Py_RETURN_NOTIMPLEMENTED;
-}
-
-static PyObject *
-Decimal_rpow(DecimalObject *y, PyObject *x) {
-    Py_RETURN_NOTIMPLEMENTED;
-}
-
-static PyObject *
-Decimal_nb_pow(PyObject *x, PyObject *y, PyObject *mod) {
+Decimal_pow(PyObject *x, PyObject *y, PyObject *mod) {
     if (mod != Py_None) {
         PyErr_SetString(PyExc_TypeError,
                         "3rd argument not allowed unless all arguments "
                         "are integers.");
         return NULL;
     }
-    return Decimal_nonassoc_binop(x, y, Decimal_pow, Decimal_rpow);
+    Py_RETURN_NOTIMPLEMENTED;
 }
 
 // Decimal type spec
@@ -1363,19 +1594,19 @@ static PyType_Slot decimal_type_slots[] = {
     {Py_tp_getset, Decimal_properties},
     /* number methods */
     {Py_nb_bool, Decimal_bool},
-    {Py_nb_add, Decimal_nb_add},
-    {Py_nb_subtract, Decimal_nb_sub},
-    {Py_nb_multiply, Decimal_nb_mul},
-    {Py_nb_remainder, Decimal_nb_mod},
-    {Py_nb_divmod, Decimal_nb_divmod},
-    {Py_nb_power, Decimal_nb_pow},
+    {Py_nb_add, Decimal_add},
+    {Py_nb_subtract, Decimal_sub},
+    {Py_nb_multiply, Decimal_mul},
+    {Py_nb_remainder, Decimal_remainder},
+    {Py_nb_divmod, Decimal_divmod},
+    {Py_nb_power, Decimal_pow},
     {Py_nb_negative, Decimal_neg},
     {Py_nb_positive, Decimal_pos},
     {Py_nb_absolute, Decimal_abs},
     {Py_nb_int, Decimal_int},
     {Py_nb_float, Decimal_float},
-    {Py_nb_floor_divide, Decimal_nb_floordiv},
-    {Py_nb_true_divide, Decimal_nb_truediv},
+    {Py_nb_floor_divide, Decimal_floordiv},
+    {Py_nb_true_divide, Decimal_truediv},
     /* other methods */
     {Py_tp_methods, Decimal_methods},
     {0, NULL}
