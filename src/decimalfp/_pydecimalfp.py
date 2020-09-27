@@ -849,8 +849,8 @@ class Decimal:
         """self ** other
 
         If other is an integer (or a Rational with denominator = 1), the
-        result will be a Decimal. Otherwise, the result will be a float or
-        complex since roots are generally irrational.
+        result will be a Decimal or a Fraction. Otherwise, the result will be
+        a float or a complex.
 
         `mod` must always be None (otherwise a `TypeError` is raised).
 
@@ -1464,7 +1464,7 @@ def pow1(x: Decimal, y: Any) \
         raise ValueError("Unsupported operand: %s" % repr(y)) from None
     else:
         if exp != y:
-            # fractional power -> irrational result
+            # fractional exponent => fallback to float
             return float(x) ** float(y)
         if exp >= 0:
             result = Decimal()
@@ -1474,7 +1474,7 @@ def pow1(x: Decimal, y: Any) \
                 raise ValueError("Precision limit exceeded.")
             return result
         else:
-            # 1 / x ** -y)
+            # 1 / x ** -y
             exp = -exp
             prec = x._precision
             return _div(base10pow(prec * exp), x._value ** exp, prec)
