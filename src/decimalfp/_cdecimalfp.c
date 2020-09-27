@@ -1194,7 +1194,7 @@ fallback_n_convert_op(PyTypeObject *dec_type, PyObject *x, PyObject *y,
     // try to convert result back to Decimal
     dec = DecimalType_from_rational(dec_type, res, -1);
     if (dec == NULL) {
-        // result is not convertable to s Decimal, so return Fraction
+        // result is not convertable to a Decimal, so return Fraction
         PyErr_Clear();
     }
     else {
@@ -1472,6 +1472,106 @@ CLEAN_UP:
 // ternary number methods
 
 static PyObject *
+dec_pow_pylong(DecimalObject *x, PyObject *exp) {
+    PyObject *res = NULL;
+    PyObject *f = NULL;
+    PyObject *dec = NULL;
+
+    if (PyObject_RichCompareBool(exp, PyZERO, Py_EQ) == 1) {
+        fpdec_t *one = (fpdec_t *)&FPDEC_ONE;
+        ASSIGN_AND_CHECK_NULL(res,
+                              (PyObject *)DecimalType_from_fpdec(Py_TYPE(x),
+                                                                 one, -1));
+    }
+    else {
+        ASSIGN_AND_CHECK_NULL(f, Decimal_as_fraction(x));
+        ASSIGN_AND_CHECK_NULL(res, PyNumber_Power(f, exp, Py_None));
+        // try to convert result back to Decimal
+        dec = DecimalType_from_rational(Py_TYPE(x), res, -1);
+        if (dec == NULL) {
+            // result is not convertable to a Decimal, so return Fraction
+            PyErr_Clear();
+        }
+        else {
+            Py_CLEAR(res);
+            res = dec;
+        }
+    }
+    goto CLEAN_UP;
+
+ERROR:
+    assert(PyErr_Occurred());
+
+CLEAN_UP:
+    Py_XDECREF(f);
+    return res;
+}
+
+static PyObject *
+dec_pow_obj(DecimalObject *x, PyObject *y) {
+    PyObject *res = NULL;
+    PyObject *exp = NULL;
+    PyObject *fx = NULL;
+    PyObject *fy = NULL;
+
+    exp = PyNumber_Long(y);
+    if (exp == NULL) {
+        PyObject *exc = PyErr_Occurred();
+        if (exc == PyExc_ValueError || exc == PyExc_OverflowError) {
+            PyErr_Clear();
+            PyErr_Format(PyExc_ValueError, "Unsupported operand: %R", y);
+        }
+        goto ERROR;
+    }
+    if (PyObject_RichCompareBool(exp, y, Py_NE) == 1) {
+        // fractional exponent => fallback to float
+        ASSIGN_AND_CHECK_NULL(fx, PyNumber_Float((PyObject *)x));
+        ASSIGN_AND_CHECK_NULL(fy, PyNumber_Float(y));
+        ASSIGN_AND_CHECK_NULL(res, PyNumber_Power(fx, fy, Py_None));
+    }
+    else
+        ASSIGN_AND_CHECK_NULL(res, dec_pow_pylong(x, exp));
+    goto CLEAN_UP;
+
+ERROR:
+    assert(PyErr_Occurred());
+
+CLEAN_UP:
+    Py_XDECREF(exp);
+    Py_XDECREF(fx);
+    Py_XDECREF(fy);
+    return res;
+}
+
+static PyObject *
+obj_pow_dec(PyObject *x, DecimalObject *y) {
+    PyObject *res = NULL;
+    PyObject *num = NULL;
+    PyObject *den = NULL;
+    PyObject *f = NULL;
+
+    ASSIGN_AND_CHECK_NULL(den, Decimal_denominator_get(y));
+    if (PyObject_RichCompareBool(den, PyONE, Py_EQ) == 1) {
+        ASSIGN_AND_CHECK_NULL(num, Decimal_numerator_get(y));
+        ASSIGN_AND_CHECK_NULL(res, PyNumber_Power(x, num, Py_None));
+    }
+    else {
+        ASSIGN_AND_CHECK_NULL(f, PyNumber_Float(y));
+        ASSIGN_AND_CHECK_NULL(res, PyNumber_Power(x, f, Py_None));
+    }
+    goto CLEAN_UP;
+
+ERROR:
+    assert(PyErr_Occurred());
+
+CLEAN_UP:
+    Py_XDECREF(num);
+    Py_XDECREF(den);
+    Py_XDECREF(f);
+    return res;
+}
+
+static PyObject *
 Decimal_pow(PyObject *x, PyObject *y, PyObject *mod) {
     if (mod != Py_None) {
         PyErr_SetString(PyExc_TypeError,
@@ -1479,7 +1579,17 @@ Decimal_pow(PyObject *x, PyObject *y, PyObject *mod) {
                         "are integers.");
         return NULL;
     }
-    Py_RETURN_NOTIMPLEMENTED;
+
+    if (Decimal_Check(x)) {
+        if (PyObject_IsInstance(y, Real) ||
+            PyObject_IsInstance(y, StdLibDecimal)) {
+            return dec_pow_obj((DecimalObject *)x, y);
+        }
+        Py_RETURN_NOTIMPLEMENTED;
+    }
+    else {          // y is a Decimal
+        return obj_pow_dec(x, (DecimalObject *)y);
+    }
 }
 
 // Decimal type spec
