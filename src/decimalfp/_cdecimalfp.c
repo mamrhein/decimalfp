@@ -223,38 +223,29 @@ Decimal_dealloc(DecimalObject *self) {
     DECIMAL_ALLOC(type, self)
 
 static PyObject *
-DecimalType_from_fpdec(PyTypeObject *type, fpdec_t *fpdec,
-                       long adjust_to_prec) {
+DecimalType_from_decimal(PyTypeObject *type, PyObject *val,
+                         long adjust_to_prec) {
     error_t rc;
-    DECIMAL_ALLOC_SELF(type);
 
-    if (adjust_to_prec == -1 || adjust_to_prec == FPDEC_DEC_PREC(fpdec))
-        rc = fpdec_copy(&self->fpdec, fpdec);
-    else
-        rc = fpdec_adjusted(&self->fpdec, fpdec, adjust_to_prec,
-                            FPDEC_ROUND_DEFAULT);
+    if (type == DecimalType && (adjust_to_prec == -1 ||
+                                ((DecimalObject *)val)->fpdec.dec_prec ==
+                                adjust_to_prec)) {
+        // val is a direct instance of DecimalType, a direct instance of
+        // DecinalType is wanted and there's no need to adjust the result,
+        // so just return the given instance (ref count increased)
+        Py_INCREF(val);
+        return val;
+    }
+
+    DECIMAL_ALLOC_SELF(type);
+    rc = fpdec_adjusted(&self->fpdec, &((DecimalObject *)val)->fpdec,
+                        adjust_to_prec, FPDEC_ROUND_DEFAULT);
     CHECK_FPDEC_ERROR(rc);
     return (PyObject *)self;
 
 ERROR:
     Decimal_dealloc(self);
     return NULL;
-}
-
-static PyObject *
-DecimalType_from_decimal(PyTypeObject *type, PyObject *val,
-                         long adjust_to_prec) {
-    if (type == DecimalType && (adjust_to_prec == -1 ||
-                                ((DecimalObject *)val)->fpdec.dec_prec ==
-                                adjust_to_prec)) {
-        // obj is a direct instance of DecimalType, a direct instance of
-        // DecinalType is wanted and there's no need to adjust the result,
-        // so just return the given instance (ref count increased)
-        Py_INCREF(val);
-        return val;
-    }
-    return DecimalType_from_fpdec(type, &((DecimalObject *)val)->fpdec,
-                                  adjust_to_prec);
 }
 
 static PyObject *
@@ -1333,17 +1324,17 @@ static PyObject *
 Decimal_remainder(PyObject *x, PyObject *y) {
     BINOP_DEC_TYPE(x, y);
     BINOP_ALLOC_RESULT(dec_type);
-    fpdec_t *fpz = &dec->fpdec;
     error_t rc;
     fpdec_t tmp_x = FPDEC_ZERO;
     fpdec_t tmp_y = FPDEC_ZERO;
     fpdec_t q = FPDEC_ZERO;
+    fpdec_t *r = &dec->fpdec;
     fpdec_t *fpx, *fpy;
 
     CONVERT_AND_CHECK(fpx, &tmp_x, x);
     CONVERT_AND_CHECK(fpy, &tmp_y, y);
 
-    rc = fpdec_divmod(&q, fpz, fpx, fpy);
+    rc = fpdec_divmod(&q, r, fpx, fpy);
     if (rc == FPDEC_OK)
         goto CLEAN_UP;
 
@@ -1368,22 +1359,21 @@ Decimal_divmod(PyObject *x, PyObject *y) {
     BINOP_DEC_TYPE(x, y);
     PyObject *res = NULL;
     PyObject *quot = NULL;
-    PyObject *rem = NULL;
+    DecimalObject *rem = NULL;
     error_t rc;
     fpdec_t tmp_x = FPDEC_ZERO;
     fpdec_t tmp_y = FPDEC_ZERO;
     fpdec_t q = FPDEC_ZERO;
-    fpdec_t r = FPDEC_ZERO;
     fpdec_t *fpx, *fpy;
 
     CONVERT_AND_CHECK(fpx, &tmp_x, x);
     CONVERT_AND_CHECK(fpy, &tmp_y, y);
+    ASSIGN_AND_CHECK_NULL(rem, DecimalType_alloc(dec_type));
 
-    rc = fpdec_divmod(&q, &r, fpx, fpy);
+    rc = fpdec_divmod(&q, &rem->fpdec, fpx, fpy);
     if (rc != FPDEC_OK)
         goto FALLBACK;
     ASSIGN_AND_CHECK_NULL(quot, PyLong_from_fpdec(&q));
-    ASSIGN_AND_CHECK_NULL(rem, DecimalType_from_fpdec(dec_type, &r, -1));
     ASSIGN_AND_CHECK_NULL(res, PyTuple_Pack(2, quot, rem));
     goto CLEAN_UP;
 
@@ -1394,12 +1384,11 @@ ERROR:
     assert(PyErr_Occurred());
 
 CLEAN_UP:
-    Py_XDECREF(quot);
-    Py_XDECREF(rem);
     fpdec_reset_to_zero(&tmp_x, 0);
     fpdec_reset_to_zero(&tmp_y, 0);
     fpdec_reset_to_zero(&q, 0);
-    fpdec_reset_to_zero(&r, 0);
+    Py_XDECREF(quot);
+    Py_XDECREF(rem);
     return res;
 }
 
@@ -1433,6 +1422,7 @@ ERROR:
 CLEAN_UP:
     fpdec_reset_to_zero(&tmp_x, 0);
     fpdec_reset_to_zero(&tmp_y, 0);
+    fpdec_reset_to_zero(&q, 0);
     fpdec_reset_to_zero(&r, 0);
     return res;
 }
@@ -1474,27 +1464,27 @@ CLEAN_UP:
 static PyObject *
 dec_pow_pylong(DecimalObject *x, PyObject *exp) {
     PyObject *res = NULL;
+    error_t rc;
     PyObject *f = NULL;
-    PyObject *dec = NULL;
+    DecimalObject *dec = NULL;
 
     if (PyObject_RichCompareBool(exp, PyZERO, Py_EQ) == 1) {
-        fpdec_t *one = (fpdec_t *)&FPDEC_ONE;
-        ASSIGN_AND_CHECK_NULL(res,
-                              (PyObject *)DecimalType_from_fpdec(Py_TYPE(x),
-                                                                 one, -1));
+        ASSIGN_AND_CHECK_NULL(dec, DecimalType_alloc(Py_TYPE(x)));
+        fpdec_copy(&dec->fpdec, &FPDEC_ONE);
+        res = (PyObject *)dec;
     }
     else {
         ASSIGN_AND_CHECK_NULL(f, Decimal_as_fraction(x));
         ASSIGN_AND_CHECK_NULL(res, PyNumber_Power(f, exp, Py_None));
         // try to convert result back to Decimal
-        dec = DecimalType_from_rational(Py_TYPE(x), res, -1);
+        dec = (DecimalObject *)DecimalType_from_rational(Py_TYPE(x), res, -1);
         if (dec == NULL) {
             // result is not convertable to a Decimal, so return Fraction
             PyErr_Clear();
         }
         else {
             Py_CLEAR(res);
-            res = dec;
+            res = (PyObject *)dec;
         }
     }
     goto CLEAN_UP;
