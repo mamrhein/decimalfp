@@ -84,6 +84,9 @@ error_t
 fpdec_neg(fpdec_t *fpdec, const fpdec_t *src);
 
 error_t
+fpdec_normalize_prec(fpdec_t *fpdec);
+
+error_t
 fpdec_adjust(fpdec_t *fpdec, int32_t dec_prec,
              enum FPDEC_ROUNDING_MODE rounding);
 
