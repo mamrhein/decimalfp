@@ -129,21 +129,30 @@ u128_idivr_10_pow_n(uint128_t *x, const fpdec_sign_t sign, const uint8_t n,
         rem = x->lo % divisor;
         x->lo /= divisor;
     }
-    if (round_qr(sign, x->lo, rem, false, divisor, rounding) > 0)
+    if (rem > 0 && round_qr(sign, x->lo, rem, false, divisor, rounding) > 0)
         u128_incr(x);
 }
 
 void
-u128_idecshift(uint128_t *ui, fpdec_sign_t sign, int n_dec_digits,
+u128_idecshift(uint128_t *ui, fpdec_sign_t sign, int32_t n_dec_digits,
                enum FPDEC_ROUNDING_MODE rounding) {
-    assert(n_dec_digits != 0);
-    assert(n_dec_digits > -MAX_N_DEC_DIGITS_IN_SHINT);
-    assert(n_dec_digits < MAX_N_DEC_DIGITS_IN_SHINT);
+    assert(n_dec_digits >= -MAX_N_DEC_DIGITS_IN_SHINT);
+    assert(n_dec_digits <= UINT64_10_POW_N_CUTOFF);
 
-    if (n_dec_digits >= 0)
+    if (n_dec_digits > 0) {
         u128_imul_10_pow_n(ui, n_dec_digits);
-    else
-        u128_idivr_10_pow_n(ui, sign, -n_dec_digits, rounding);
+        return;
+    }
+
+    if (n_dec_digits < 0)  {
+        n_dec_digits = -n_dec_digits;
+        int32_t dec_shift = MIN(n_dec_digits, UINT64_10_POW_N_CUTOFF);
+        if (dec_shift < n_dec_digits) {
+            u128_idivr_10_pow_n(ui, sign, dec_shift, FPDEC_ROUND_DOWN);
+            dec_shift = n_dec_digits - dec_shift;
+        }
+        u128_idivr_10_pow_n(ui, sign, dec_shift, rounding);
+    }
 }
 
 unsigned

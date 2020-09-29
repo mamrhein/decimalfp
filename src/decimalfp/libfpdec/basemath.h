@@ -104,12 +104,11 @@ u128_imul_u64(uint128_t *x, uint64_t y);
 
 static inline void
 u128_imul_10_pow_n(uint128_t *x, const uint8_t n) {
-    for (uint64_t k = MIN(n, UINT64_10_POW_N_CUTOFF); k > 0; k = n - k) {
-        if (x->hi == 0)
-            u64_mul_u64(x, x->lo, _10_POW_N(k));
-        else
-            u128_imul_u64(x, _10_POW_N(k));
-    }
+    assert(n <= UINT64_10_POW_N_CUTOFF);
+    if (x->hi == 0)
+        u64_mul_u64(x, x->lo, _10_POW_N(n));
+    else
+        u128_imul_u64(x, _10_POW_N(n));
 }
 
 // Division

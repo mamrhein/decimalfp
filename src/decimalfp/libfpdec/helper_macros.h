@@ -35,7 +35,8 @@ $Revision$
 // int compare
 #define CMP(a, b) (((a) > (b)) - ((a) < (b)))
 
-// max / min
+// abs / max / min
+#define ABS(a) ((a) >= 0 ? (a) : (-a))
 #define MAX(a, b) ((a) >= (b) ? (a) : (b))
 #define MIN(a, b) ((a) <= (b) ? (a) : (b))
 

@@ -61,7 +61,7 @@ shint_to_digits(fpdec_digit_t *digit, int *n_trailing_zeros_skipped,
 // Decimal shift
 
 void
-u128_idecshift(uint128_t *ui, fpdec_sign_t sign, int n_dec_digits,
+u128_idecshift(uint128_t *ui, fpdec_sign_t sign, int32_t n_dec_digits,
                enum FPDEC_ROUNDING_MODE rounding);
 
 unsigned
