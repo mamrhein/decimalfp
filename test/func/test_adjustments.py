@@ -97,9 +97,8 @@ def test_adjust_wrong_precision_type(impl, prec):
                          ids=("max+1", "-max-1"))
 def test_adjust_limits_exceeded(impl, prec):
     dec = impl.Decimal("4.83")
-    if "fpnum" in impl.__name__:
-        with pytest.raises(ValueError):
-            dec.adjusted(prec)
+    with pytest.raises(ValueError):
+        dec.adjusted(prec)
 
 
 @pytest.mark.parametrize("quant", (Fraction(1, 40),
