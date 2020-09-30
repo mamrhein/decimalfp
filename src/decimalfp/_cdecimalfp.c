@@ -156,6 +156,9 @@ n_digits_needed(size_t n, uint64_t fb, uint64_t tb);
 static error_t
 fpdec_from_pylong(fpdec_t *fpdec, PyObject *val);
 
+static enum FPDEC_ROUNDING_MODE
+py_rnd_2_fpdec_rnd(PyObject *py_rnd);
+
 // *** Decimal type ***
 
 typedef struct {
@@ -588,6 +591,37 @@ DecimalType_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
     }
 }
 
+// helper macros
+
+#define DECIMAL_ALLOC_RESULT(type) \
+    DecimalObject *res; \
+    DECIMAL_ALLOC(type, res)
+
+#define BINOP_DEC_TYPE(x, y)            \
+    PyTypeObject *dec_type =            \
+        Decimal_Check(x) ? Py_TYPE(x) : \
+        (Decimal_Check(y) ? Py_TYPE(y) : NULL)
+
+#define BINOP_ALLOC_RESULT(type)      \
+    DecimalObject *dec;               \
+    DECIMAL_ALLOC(type, dec);         \
+    PyObject *res = (PyObject *) dec
+
+#define CONVERT_AND_CHECK(fpdec, tmp, obj)         \
+    do {                                           \
+    fpdec = fpdec_from_obj(tmp, obj);              \
+    if (fpdec == NULL) {                           \
+        if (PyErr_Occurred())                      \
+            goto ERROR;                            \
+        else if (PyObject_IsInstance(obj, Number)) \
+            goto FALLBACK;                         \
+        else  {                                    \
+            res = Py_NotImplemented;               \
+            Py_INCREF(res);                        \
+            goto CLEAN_UP;                         \
+        }                                          \
+    }} while (0)
+
 // properties
 
 static PyObject *
@@ -644,10 +678,67 @@ Decimal_imag_get(DecimalObject *self) {
 
 // converting methods
 
+#define DEF_N_CONV_RND_MODE(rounding)                            \
+    enum FPDEC_ROUNDING_MODE rnd = py_rnd_2_fpdec_rnd(rounding); \
+    if (rnd == -1)                                               \
+        goto ERROR
+
 static PyObject *
-Decimal_adjusted(DecimalObject *self, PyObject *precision,
-                 PyObject *rounding) {
-    Py_RETURN_NOTIMPLEMENTED;
+Decimal_adjusted(DecimalObject *self, PyObject *args, PyObject *kwds) {
+    static char *kw_names[] = {"precision", "rounding", NULL};
+    PyTypeObject *dec_type = Py_TYPE(self);
+    DECIMAL_ALLOC_RESULT(dec_type);
+    PyObject *precision = Py_None;
+    PyObject *rounding = Py_None;
+    error_t rc;
+    PyObject *pylong_prec = NULL;
+    long prec;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "|OO", kw_names,
+                                     &precision, &rounding))
+        return NULL;
+
+    if (precision == Py_None) {
+        rc = fpdec_copy(&res->fpdec, &self->fpdec);
+        CHECK_FPDEC_ERROR(rc);
+        rc = fpdec_normalize_prec(&res->fpdec);
+        CHECK_FPDEC_ERROR(rc);
+        goto CLEAN_UP;
+    }
+
+    if (PyLong_Check(precision)) {
+        Py_INCREF(precision);
+        pylong_prec = precision;
+    }
+    else if (PyObject_IsInstance(precision, Integral))
+        ASSIGN_AND_CHECK_NULL(pylong_prec, PyNumber_Long(precision));
+    else {
+        PyErr_SetString(PyExc_TypeError,
+                        "Precision must be of type 'Integral'.");
+        goto ERROR;
+    }
+    prec = PyLong_AsLong(pylong_prec);
+    if (PyErr_Occurred())
+        goto ERROR;
+
+    if (prec < -FPDEC_MAX_DEC_PREC || prec > FPDEC_MAX_DEC_PREC) {
+        PyErr_Format(PyExc_ValueError, "Precision limit exceed: %ld", prec);
+        goto ERROR;
+    }
+
+    DEF_N_CONV_RND_MODE(rounding);
+    rc = fpdec_adjusted(&res->fpdec, &self->fpdec, prec, rnd);
+    CHECK_FPDEC_ERROR(rc);
+
+    goto CLEAN_UP;
+
+ERROR:
+    assert(PyErr_Occurred());
+    Py_CLEAR(res);
+
+CLEAN_UP:
+    Py_XDECREF(pylong_prec);
+    return (PyObject *)res;
 }
 
 static PyObject *
@@ -1198,31 +1289,6 @@ ERROR:
     assert(PyErr_Occurred());
     return NULL;
 }
-
-#define BINOP_DEC_TYPE(x, y)            \
-    PyTypeObject *dec_type =            \
-        Decimal_Check(x) ? Py_TYPE(x) : \
-        (Decimal_Check(y) ? Py_TYPE(y) : NULL)
-
-#define BINOP_ALLOC_RESULT(type)      \
-    DecimalObject *dec;               \
-    DECIMAL_ALLOC(type, dec);         \
-    PyObject *res = (PyObject *) dec
-
-#define CONVERT_AND_CHECK(fpdec, tmp, obj)         \
-    do {                                           \
-    fpdec = fpdec_from_obj(tmp, obj);              \
-    if (fpdec == NULL) {                           \
-        if (PyErr_Occurred())                      \
-            goto ERROR;                            \
-        else if (PyObject_IsInstance(obj, Number)) \
-            goto FALLBACK;                         \
-        else  {                                    \
-            res = Py_NotImplemented;               \
-            Py_INCREF(res);                        \
-            goto CLEAN_UP;                         \
-        }                                          \
-    }} while (0)
 
 static PyObject *
 Decimal_add(PyObject *x, PyObject *y) {
@@ -2122,6 +2188,9 @@ static enum FPDEC_ROUNDING_MODE
 py_rnd_2_fpdec_rnd(PyObject *py_rnd) {
     long fpdec_rnd = -1;
     PyObject *val = NULL;
+
+    if (py_rnd == Py_None)
+        return FPDEC_ROUND_DEFAULT;
 
     CHECK_TYPE(py_rnd, EnumRounding);
     ASSIGN_AND_CHECK_NULL(val, PyObject_GetAttrString(py_rnd, "value"));
