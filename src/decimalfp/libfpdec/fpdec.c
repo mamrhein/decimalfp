@@ -507,15 +507,17 @@ fpdec_normalize_prec(fpdec_t *fpdec) {
 
     if (FPDEC_IS_DYN_ALLOC(fpdec)) {
         int32_t exp = FPDEC_DYN_EXP(fpdec);
-        if (exp >= 0 || -exp * DEC_DIGITS_PER_DIGIT < dec_prec)
+        if (exp >= 0)
             FPDEC_DEC_PREC(fpdec) = 0;
         else {
-            int32_t n_dec_shift = dec_prec % DEC_DIGITS_PER_DIGIT;
-            fpdec_digit_t digit = *FPDEC_DYN_DIGITS(fpdec) /
-                                  _10_POW_N(n_dec_shift);
-            while (digit % 10 > 0) {
-                --FPDEC_DEC_PREC(fpdec);
-                digit /= 10;
+            int32_t n_dec_frac_digits = -exp * DEC_DIGITS_PER_DIGIT;
+            if (n_dec_frac_digits < dec_prec) {
+                FPDEC_DEC_PREC(fpdec) = n_dec_frac_digits;
+                fpdec_digit_t digit = *FPDEC_DYN_DIGITS(fpdec);
+                while (digit % 10 == 0) {
+                    --FPDEC_DEC_PREC(fpdec);
+                    digit /= 10;
+                }
             }
         }
     }
