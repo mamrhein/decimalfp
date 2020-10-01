@@ -161,7 +161,7 @@ py_rnd_2_fpdec_rnd(PyObject *py_rnd);
 
 // *** Decimal type ***
 
-typedef struct {
+typedef struct _fpdec_object {
     PyObject_HEAD
     Py_hash_t hash;
     PyObject *numerator;
