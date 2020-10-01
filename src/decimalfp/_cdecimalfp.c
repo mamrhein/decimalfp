@@ -159,7 +159,9 @@ fpdec_from_pylong(fpdec_t *fpdec, PyObject *val);
 static enum FPDEC_ROUNDING_MODE
 py_rnd_2_fpdec_rnd(PyObject *py_rnd);
 
-// *** Decimal type ***
+/*============================================================================
+* Decimal type
+* ==========================================================================*/
 
 typedef struct _fpdec_object {
     PyObject_HEAD
@@ -171,7 +173,12 @@ typedef struct _fpdec_object {
 
 static PyTypeObject *DecimalType;
 
-// type checks
+// Method prototypes
+
+static PyObject *
+Decimal_int(DecimalObject *x);
+
+// Type checks
 
 static inline int
 Decimal_Check_Exact(PyObject *obj) {
@@ -183,7 +190,7 @@ Decimal_Check(PyObject *obj) {
     return PyObject_TypeCheck(obj, DecimalType);
 }
 
-// constructors / destructors
+// Constructors / destructors
 
 static DecimalObject *
 DecimalType_alloc(PyTypeObject *type) {
@@ -591,7 +598,7 @@ DecimalType_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
     }
 }
 
-// helper macros
+// Helper macros
 
 #define DECIMAL_ALLOC_RESULT(type) \
     DecimalObject *res; \
@@ -622,7 +629,7 @@ DecimalType_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
         }                                          \
     }} while (0)
 
-// properties
+// Properties
 
 static PyObject *
 Decimal_precision_get(DecimalObject *self) {
@@ -676,7 +683,7 @@ Decimal_imag_get(DecimalObject *self) {
     return PyZERO;
 }
 
-// converting methods
+// Converting methods
 
 #define DEF_N_CONV_RND_MODE(rounding)                            \
     enum FPDEC_ROUNDING_MODE rnd = py_rnd_2_fpdec_rnd(rounding); \
@@ -867,11 +874,35 @@ CLEAN_UP:
 }
 
 static PyObject *
-Decimal_round(DecimalObject *self, PyObject *precision) {
-    Py_RETURN_NOTIMPLEMENTED;
+Decimal_round(DecimalObject *self, PyObject *args, PyObject *kwds) {
+    static char *kw_names[] = {"precision", NULL};
+    PyObject *precision = Py_None;
+    PyObject *adj = NULL;
+    PyObject *res = NULL;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "|O", kw_names,
+                                     &precision))
+        return NULL;
+
+    if (precision == Py_None) {
+        ASSIGN_AND_CHECK_NULL(adj, Decimal_adj_to_prec(self, PyZERO,
+                                                       Py_None));
+        ASSIGN_AND_CHECK_NULL(res, Decimal_int((DecimalObject *)adj));
+    }
+    else
+        ASSIGN_AND_CHECK_NULL(res, Decimal_adj_to_prec(self, precision,
+                                                       Py_None));
+    goto CLEAN_UP;
+
+ERROR:
+    assert(PyErr_Occurred());
+
+CLEAN_UP:
+    Py_XDECREF(adj);
+    return res;
 }
 
-// pickle helper
+// Pickle helper
 
 static PyObject *
 Decimal_reduce(DecimalObject *self) {
@@ -883,7 +914,7 @@ Decimal_setstate(DecimalObject *self, PyObject *state) {
     Py_RETURN_NOTIMPLEMENTED;
 }
 
-// string representation
+// String representation
 
 static PyObject *
 Decimal_str(DecimalObject *self) {
@@ -937,7 +968,7 @@ Decimal_format(DecimalObject *self, PyObject *fmt_spec) {
     Py_RETURN_NOTIMPLEMENTED;
 }
 
-// special methods
+// Special methods
 
 static Py_hash_t
 Decimal_hash(DecimalObject *self) {
@@ -1104,7 +1135,7 @@ CLEAN_UP:
     return res;
 }
 
-// unary number methods
+// Unary number methods
 
 static PyObject *
 Decimal_neg(PyObject *x) {
@@ -1187,7 +1218,7 @@ Decimal_bool(DecimalObject *x) {
     return !FPDEC_EQ_ZERO(&x->fpdec);
 }
 
-// binary number methods
+// Binary number methods
 
 static fpdec_t *
 fpdec_from_obj(fpdec_t *tmp, PyObject *obj) {
@@ -1532,7 +1563,7 @@ CLEAN_UP:
     return res;
 }
 
-// ternary number methods
+// Ternary number methods
 
 static PyObject *
 dec_pow_pylong(DecimalObject *x, PyObject *exp) {
@@ -2165,7 +2196,9 @@ fpdec_from_pylong(fpdec_t *fpdec, PyObject *val) {
     }
 }
 
-// *** Enum ROUNDING type ***
+/*============================================================================
+* Enum ROUNDING type
+* ==========================================================================*/
 
 static const char EnumRounding_name[] = "ROUNDING";
 static PyObject *EnumRounding;  // will be imported from rounding.py
@@ -2216,7 +2249,9 @@ CLEAN_UP:
     return (enum FPDEC_ROUNDING_MODE)fpdec_rnd;
 }
 
-// *** _cdecimalfp module ***
+/*============================================================================
+* _cdecimalfp module
+* ==========================================================================*/
 
 static PyObject *
 get_dflt_rounding_mode(PyObject *mod) {
