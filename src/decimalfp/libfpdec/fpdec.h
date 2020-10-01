@@ -94,6 +94,14 @@ error_t
 fpdec_adjusted(fpdec_t *fpdec, const fpdec_t *src, int32_t dec_prec,
                enum FPDEC_ROUNDING_MODE rounding);
 
+error_t
+fpdec_quantize(fpdec_t *fpdec, fpdec_t *quant,
+                enum FPDEC_ROUNDING_MODE rounding);
+
+error_t
+fpdec_quantized(fpdec_t *fpdec, const fpdec_t *src, fpdec_t *quant,
+                enum FPDEC_ROUNDING_MODE rounding);
+
 char *
 fpdec_as_ascii_literal(const fpdec_t *fpdec, bool no_trailing_zeros);
 

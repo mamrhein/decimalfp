@@ -664,6 +664,39 @@ fpdec_adjusted(fpdec_t *fpdec, const fpdec_t *src, int32_t dec_prec,
     return rc;
 }
 
+error_t
+fpdec_quantize(fpdec_t *fpdec, fpdec_t *quant,
+               enum FPDEC_ROUNDING_MODE rounding) {
+    error_t rc;
+    fpdec_t t1 = FPDEC_ZERO;
+    fpdec_t t2 = FPDEC_ZERO;
+
+    rc = fpdec_div(&t1, fpdec, quant, 0, rounding);
+    if (rc != FPDEC_OK)
+        return rc;
+    rc = fpdec_mul(&t2, &t1, quant);
+    if (rc == FPDEC_OK)
+        *fpdec = t2;
+    fpdec_reset_to_zero(&t1, 0);
+    return rc;
+}
+
+error_t
+fpdec_quantized(fpdec_t *fpdec, const fpdec_t *src, fpdec_t *quant,
+                enum FPDEC_ROUNDING_MODE rounding) {
+    error_t rc;
+
+    ASSERT_FPDEC_IS_ZEROED(fpdec);
+
+    rc = fpdec_copy(fpdec, src);
+    if (rc == ENOMEM) MEMERROR
+
+    rc = fpdec_quantize(fpdec, quant, rounding);
+    if (rc != FPDEC_OK)
+        fpdec_reset_to_zero(fpdec, 0);
+    return rc;
+}
+
 static inline char *
 fill_in_leading_digit(char *buf, const fpdec_digit_t digit) {
     char dec_digits[DEC_DIGITS_PER_DIGIT];
