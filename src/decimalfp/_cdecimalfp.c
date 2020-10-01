@@ -176,7 +176,7 @@ static PyTypeObject *DecimalType;
 // Method prototypes
 
 static PyObject *
-Decimal_int(DecimalObject *x);
+Decimal_as_fraction(DecimalObject *self);
 
 // Type checks
 
@@ -681,237 +681,6 @@ static PyObject *
 Decimal_imag_get(DecimalObject *self) {
     Py_INCREF(PyZERO);
     return PyZERO;
-}
-
-// Converting methods
-
-#define DEF_N_CONV_RND_MODE(rounding)                            \
-    enum FPDEC_ROUNDING_MODE rnd = py_rnd_2_fpdec_rnd(rounding); \
-    if (rnd == -1)                                               \
-        goto ERROR
-
-static PyObject *
-Decimal_adj_to_prec(DecimalObject *self, PyObject *precision,
-                    PyObject *rounding) {
-    PyTypeObject *dec_type = Py_TYPE(self);
-    DECIMAL_ALLOC_RESULT(dec_type);
-    error_t rc;
-    PyObject *pylong_prec = NULL;
-    long prec;
-
-    if (precision == Py_None) {
-        rc = fpdec_copy(&res->fpdec, &self->fpdec);
-        CHECK_FPDEC_ERROR(rc);
-        rc = fpdec_normalize_prec(&res->fpdec);
-        CHECK_FPDEC_ERROR(rc);
-        goto CLEAN_UP;
-    }
-
-    if (PyLong_Check(precision)) {
-        Py_INCREF(precision);
-        pylong_prec = precision;
-    }
-    else if (PyObject_IsInstance(precision, Integral))
-        ASSIGN_AND_CHECK_NULL(pylong_prec, PyNumber_Long(precision));
-    else {
-        PyErr_SetString(PyExc_TypeError,
-                        "Precision must be of type 'Integral'.");
-        goto ERROR;
-    }
-    prec = PyLong_AsLong(pylong_prec);
-    if (PyErr_Occurred())
-        goto ERROR;
-
-    if (prec < -FPDEC_MAX_DEC_PREC || prec > FPDEC_MAX_DEC_PREC) {
-        PyErr_Format(PyExc_ValueError, "Precision limit exceed: %ld", prec);
-        goto ERROR;
-    }
-
-    DEF_N_CONV_RND_MODE(rounding);
-    rc = fpdec_adjusted(&res->fpdec, &self->fpdec, prec, rnd);
-    CHECK_FPDEC_ERROR(rc);
-
-    goto CLEAN_UP;
-
-ERROR:
-    assert(PyErr_Occurred());
-    Py_CLEAR(res);
-
-CLEAN_UP:
-    Py_XDECREF(pylong_prec);
-    return (PyObject *)res;
-}
-
-static PyObject *
-Decimal_adjusted(DecimalObject *self, PyObject *args, PyObject *kwds) {
-    static char *kw_names[] = {"precision", "rounding", NULL};
-    PyObject *precision = Py_None;
-    PyObject *rounding = Py_None;
-
-    if (!PyArg_ParseTupleAndKeywords(args, kwds, "|OO", kw_names,
-                                     &precision, &rounding))
-        return NULL;
-
-    return Decimal_adj_to_prec(self, precision, rounding);
-}
-
-static PyObject *
-Decimal_quantize(DecimalObject *self, PyObject *quant, PyObject *rounding) {
-    Py_RETURN_NOTIMPLEMENTED;
-}
-
-static PyObject *
-Decimal_as_tuple(DecimalObject *self) {
-    fpdec_t *fpdec = &self->fpdec;
-    PyObject *sign = NULL;
-    PyObject *coeff = NULL;
-    PyObject *dec_prec = NULL;
-    PyObject *res = NULL;
-    int64_t exp;
-
-    exp = fpdec_dec_coeff_exp(&coeff, fpdec);
-    if (coeff == NULL) {
-        goto ERROR;
-    }
-    ASSIGN_AND_CHECK_NULL(sign, PyLong_FromLong(FPDEC_SIGN(fpdec)));
-    ASSIGN_AND_CHECK_NULL(dec_prec, PyLong_FromLong(exp));
-    ASSIGN_AND_CHECK_NULL(res, PyTuple_Pack(3, sign, coeff, dec_prec));
-    goto CLEAN_UP;
-
-ERROR:
-    assert(PyErr_Occurred());
-
-CLEAN_UP:
-    Py_DECREF(sign);
-    Py_DECREF(coeff);
-    Py_DECREF(dec_prec);
-    return res;
-}
-
-static PyObject *
-Decimal_as_fraction(DecimalObject *self) {
-    PyObject *res = NULL;
-    PyObject *num = NULL;
-    PyObject *den = NULL;
-
-    ASSIGN_AND_CHECK_NULL(num, Decimal_numerator_get(self));
-    ASSIGN_AND_CHECK_NULL(den, Decimal_denominator_get(self));
-    ASSIGN_AND_CHECK_NULL(res, PyObject_CallFunctionObjArgs(Fraction,
-                                                            num, den, NULL));
-    goto CLEAN_UP;
-
-ERROR:
-    assert(PyErr_Occurred());
-
-CLEAN_UP:
-    Py_XDECREF(num);
-    Py_XDECREF(den);
-    return res;
-}
-
-static PyObject *
-Decimal_as_integer_ratio(DecimalObject *self) {
-    PyObject *res = NULL;
-    PyObject *num = NULL;
-    PyObject *den = NULL;
-
-    ASSIGN_AND_CHECK_NULL(num, Decimal_numerator_get(self));
-    ASSIGN_AND_CHECK_NULL(den, Decimal_denominator_get(self));
-    ASSIGN_AND_CHECK_NULL(res, PyTuple_Pack(2, num, den));
-    goto CLEAN_UP;
-
-ERROR:
-    assert(PyErr_Occurred());
-
-CLEAN_UP:
-    Py_XDECREF(num);
-    Py_XDECREF(den);
-    return res;
-}
-
-static PyObject *
-Decimal_floor(DecimalObject *self) {
-    PyObject *res = NULL;
-    PyObject *num = NULL;
-    PyObject *den = NULL;
-
-    ASSIGN_AND_CHECK_NULL(num, Decimal_numerator_get(self));
-    ASSIGN_AND_CHECK_NULL(den, Decimal_denominator_get(self));
-    ASSIGN_AND_CHECK_NULL(res, PyNumber_FloorDivide(num, den));
-    goto CLEAN_UP;
-
-ERROR:
-    assert(PyErr_Occurred());
-
-CLEAN_UP:
-    Py_XDECREF(num);
-    Py_XDECREF(den);
-    return res;
-}
-
-static PyObject *
-Decimal_ceil(DecimalObject *self) {
-    PyObject *res = NULL;
-    PyObject *num = NULL;
-    PyObject *den = NULL;
-    PyObject *t = NULL;
-
-    ASSIGN_AND_CHECK_NULL(num, Decimal_numerator_get(self));
-    ASSIGN_AND_CHECK_NULL(den, Decimal_denominator_get(self));
-    ASSIGN_AND_CHECK_NULL(t, PyNumber_Negative(num));
-    ASSIGN_AND_CHECK_NULL(t, PyNumber_InPlaceFloorDivide(t, den));
-    ASSIGN_AND_CHECK_NULL(res, PyNumber_Negative(t));
-    goto CLEAN_UP;
-
-ERROR:
-    assert(PyErr_Occurred());
-
-CLEAN_UP:
-    Py_XDECREF(num);
-    Py_XDECREF(den);
-    Py_XDECREF(t);
-    return res;
-}
-
-static PyObject *
-Decimal_round(DecimalObject *self, PyObject *args, PyObject *kwds) {
-    static char *kw_names[] = {"precision", NULL};
-    PyObject *precision = Py_None;
-    PyObject *adj = NULL;
-    PyObject *res = NULL;
-
-    if (!PyArg_ParseTupleAndKeywords(args, kwds, "|O", kw_names,
-                                     &precision))
-        return NULL;
-
-    if (precision == Py_None) {
-        ASSIGN_AND_CHECK_NULL(adj, Decimal_adj_to_prec(self, PyZERO,
-                                                       Py_None));
-        ASSIGN_AND_CHECK_NULL(res, Decimal_int((DecimalObject *)adj));
-    }
-    else
-        ASSIGN_AND_CHECK_NULL(res, Decimal_adj_to_prec(self, precision,
-                                                       Py_None));
-    goto CLEAN_UP;
-
-ERROR:
-    assert(PyErr_Occurred());
-
-CLEAN_UP:
-    Py_XDECREF(adj);
-    return res;
-}
-
-// Pickle helper
-
-static PyObject *
-Decimal_reduce(DecimalObject *self) {
-    Py_RETURN_NOTIMPLEMENTED;
-}
-
-static PyObject *
-Decimal_setstate(DecimalObject *self, PyObject *state) {
-    Py_RETURN_NOTIMPLEMENTED;
 }
 
 // String representation
@@ -1684,6 +1453,237 @@ Decimal_pow(PyObject *x, PyObject *y, PyObject *mod) {
     else {          // y is a Decimal
         return obj_pow_dec(x, (DecimalObject *)y);
     }
+}
+
+// Converting methods
+
+#define DEF_N_CONV_RND_MODE(rounding)                            \
+    enum FPDEC_ROUNDING_MODE rnd = py_rnd_2_fpdec_rnd(rounding); \
+    if (rnd == -1)                                               \
+        goto ERROR
+
+static PyObject *
+Decimal_adj_to_prec(DecimalObject *self, PyObject *precision,
+                    PyObject *rounding) {
+    PyTypeObject *dec_type = Py_TYPE(self);
+    DECIMAL_ALLOC_RESULT(dec_type);
+    error_t rc;
+    PyObject *pylong_prec = NULL;
+    long prec;
+
+    if (precision == Py_None) {
+        rc = fpdec_copy(&res->fpdec, &self->fpdec);
+        CHECK_FPDEC_ERROR(rc);
+        rc = fpdec_normalize_prec(&res->fpdec);
+        CHECK_FPDEC_ERROR(rc);
+        goto CLEAN_UP;
+    }
+
+    if (PyLong_Check(precision)) {
+        Py_INCREF(precision);
+        pylong_prec = precision;
+    }
+    else if (PyObject_IsInstance(precision, Integral))
+        ASSIGN_AND_CHECK_NULL(pylong_prec, PyNumber_Long(precision));
+    else {
+        PyErr_SetString(PyExc_TypeError,
+                        "Precision must be of type 'Integral'.");
+        goto ERROR;
+    }
+    prec = PyLong_AsLong(pylong_prec);
+    if (PyErr_Occurred())
+        goto ERROR;
+
+    if (prec < -FPDEC_MAX_DEC_PREC || prec > FPDEC_MAX_DEC_PREC) {
+        PyErr_Format(PyExc_ValueError, "Precision limit exceed: %ld", prec);
+        goto ERROR;
+    }
+
+    DEF_N_CONV_RND_MODE(rounding);
+    rc = fpdec_adjusted(&res->fpdec, &self->fpdec, prec, rnd);
+    CHECK_FPDEC_ERROR(rc);
+
+    goto CLEAN_UP;
+
+ERROR:
+    assert(PyErr_Occurred());
+    Py_CLEAR(res);
+
+CLEAN_UP:
+    Py_XDECREF(pylong_prec);
+    return (PyObject *)res;
+}
+
+static PyObject *
+Decimal_adjusted(DecimalObject *self, PyObject *args, PyObject *kwds) {
+    static char *kw_names[] = {"precision", "rounding", NULL};
+    PyObject *precision = Py_None;
+    PyObject *rounding = Py_None;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "|OO", kw_names,
+                                     &precision, &rounding))
+        return NULL;
+
+    return Decimal_adj_to_prec(self, precision, rounding);
+}
+
+static PyObject *
+Decimal_quantize(DecimalObject *self, PyObject *quant, PyObject *rounding) {
+    Py_RETURN_NOTIMPLEMENTED;
+}
+
+static PyObject *
+Decimal_as_tuple(DecimalObject *self) {
+    fpdec_t *fpdec = &self->fpdec;
+    PyObject *sign = NULL;
+    PyObject *coeff = NULL;
+    PyObject *dec_prec = NULL;
+    PyObject *res = NULL;
+    int64_t exp;
+
+    exp = fpdec_dec_coeff_exp(&coeff, fpdec);
+    if (coeff == NULL) {
+        goto ERROR;
+    }
+    ASSIGN_AND_CHECK_NULL(sign, PyLong_FromLong(FPDEC_SIGN(fpdec)));
+    ASSIGN_AND_CHECK_NULL(dec_prec, PyLong_FromLong(exp));
+    ASSIGN_AND_CHECK_NULL(res, PyTuple_Pack(3, sign, coeff, dec_prec));
+    goto CLEAN_UP;
+
+ERROR:
+    assert(PyErr_Occurred());
+
+CLEAN_UP:
+    Py_DECREF(sign);
+    Py_DECREF(coeff);
+    Py_DECREF(dec_prec);
+    return res;
+}
+
+static PyObject *
+Decimal_as_fraction(DecimalObject *self) {
+    PyObject *res = NULL;
+    PyObject *num = NULL;
+    PyObject *den = NULL;
+
+    ASSIGN_AND_CHECK_NULL(num, Decimal_numerator_get(self));
+    ASSIGN_AND_CHECK_NULL(den, Decimal_denominator_get(self));
+    ASSIGN_AND_CHECK_NULL(res, PyObject_CallFunctionObjArgs(Fraction,
+                                                            num, den, NULL));
+    goto CLEAN_UP;
+
+ERROR:
+    assert(PyErr_Occurred());
+
+CLEAN_UP:
+    Py_XDECREF(num);
+    Py_XDECREF(den);
+    return res;
+}
+
+static PyObject *
+Decimal_as_integer_ratio(DecimalObject *self) {
+    PyObject *res = NULL;
+    PyObject *num = NULL;
+    PyObject *den = NULL;
+
+    ASSIGN_AND_CHECK_NULL(num, Decimal_numerator_get(self));
+    ASSIGN_AND_CHECK_NULL(den, Decimal_denominator_get(self));
+    ASSIGN_AND_CHECK_NULL(res, PyTuple_Pack(2, num, den));
+    goto CLEAN_UP;
+
+ERROR:
+    assert(PyErr_Occurred());
+
+CLEAN_UP:
+    Py_XDECREF(num);
+    Py_XDECREF(den);
+    return res;
+}
+
+static PyObject *
+Decimal_floor(DecimalObject *self) {
+    PyObject *res = NULL;
+    PyObject *num = NULL;
+    PyObject *den = NULL;
+
+    ASSIGN_AND_CHECK_NULL(num, Decimal_numerator_get(self));
+    ASSIGN_AND_CHECK_NULL(den, Decimal_denominator_get(self));
+    ASSIGN_AND_CHECK_NULL(res, PyNumber_FloorDivide(num, den));
+    goto CLEAN_UP;
+
+ERROR:
+    assert(PyErr_Occurred());
+
+CLEAN_UP:
+    Py_XDECREF(num);
+    Py_XDECREF(den);
+    return res;
+}
+
+static PyObject *
+Decimal_ceil(DecimalObject *self) {
+    PyObject *res = NULL;
+    PyObject *num = NULL;
+    PyObject *den = NULL;
+    PyObject *t = NULL;
+
+    ASSIGN_AND_CHECK_NULL(num, Decimal_numerator_get(self));
+    ASSIGN_AND_CHECK_NULL(den, Decimal_denominator_get(self));
+    ASSIGN_AND_CHECK_NULL(t, PyNumber_Negative(num));
+    ASSIGN_AND_CHECK_NULL(t, PyNumber_InPlaceFloorDivide(t, den));
+    ASSIGN_AND_CHECK_NULL(res, PyNumber_Negative(t));
+    goto CLEAN_UP;
+
+ERROR:
+    assert(PyErr_Occurred());
+
+CLEAN_UP:
+    Py_XDECREF(num);
+    Py_XDECREF(den);
+    Py_XDECREF(t);
+    return res;
+}
+
+static PyObject *
+Decimal_round(DecimalObject *self, PyObject *args, PyObject *kwds) {
+    static char *kw_names[] = {"precision", NULL};
+    PyObject *precision = Py_None;
+    PyObject *adj = NULL;
+    PyObject *res = NULL;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "|O", kw_names,
+                                     &precision))
+        return NULL;
+
+    if (precision == Py_None) {
+        ASSIGN_AND_CHECK_NULL(adj, Decimal_adj_to_prec(self, PyZERO,
+                                                       Py_None));
+        ASSIGN_AND_CHECK_NULL(res, Decimal_int((DecimalObject *)adj));
+    }
+    else
+        ASSIGN_AND_CHECK_NULL(res, Decimal_adj_to_prec(self, precision,
+                                                       Py_None));
+    goto CLEAN_UP;
+
+ERROR:
+    assert(PyErr_Occurred());
+
+CLEAN_UP:
+    Py_XDECREF(adj);
+    return res;
+}
+
+// Pickle helper
+
+static PyObject *
+Decimal_reduce(DecimalObject *self) {
+    Py_RETURN_NOTIMPLEMENTED;
+}
+
+static PyObject *
+Decimal_setstate(DecimalObject *self, PyObject *state) {
+    Py_RETURN_NOTIMPLEMENTED;
 }
 
 // Decimal type spec
