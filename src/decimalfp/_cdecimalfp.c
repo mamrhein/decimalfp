@@ -684,19 +684,13 @@ Decimal_imag_get(DecimalObject *self) {
         goto ERROR
 
 static PyObject *
-Decimal_adjusted(DecimalObject *self, PyObject *args, PyObject *kwds) {
-    static char *kw_names[] = {"precision", "rounding", NULL};
+Decimal_adj_to_prec(DecimalObject *self, PyObject *precision,
+                    PyObject *rounding) {
     PyTypeObject *dec_type = Py_TYPE(self);
     DECIMAL_ALLOC_RESULT(dec_type);
-    PyObject *precision = Py_None;
-    PyObject *rounding = Py_None;
     error_t rc;
     PyObject *pylong_prec = NULL;
     long prec;
-
-    if (!PyArg_ParseTupleAndKeywords(args, kwds, "|OO", kw_names,
-                                     &precision, &rounding))
-        return NULL;
 
     if (precision == Py_None) {
         rc = fpdec_copy(&res->fpdec, &self->fpdec);
@@ -739,6 +733,19 @@ ERROR:
 CLEAN_UP:
     Py_XDECREF(pylong_prec);
     return (PyObject *)res;
+}
+
+static PyObject *
+Decimal_adjusted(DecimalObject *self, PyObject *args, PyObject *kwds) {
+    static char *kw_names[] = {"precision", "rounding", NULL};
+    PyObject *precision = Py_None;
+    PyObject *rounding = Py_None;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "|OO", kw_names,
+                                     &precision, &rounding))
+        return NULL;
+
+    return Decimal_adj_to_prec(self, precision, rounding);
 }
 
 static PyObject *
@@ -1612,7 +1619,7 @@ obj_pow_dec(PyObject *x, DecimalObject *y) {
         ASSIGN_AND_CHECK_NULL(res, PyNumber_Power(x, num, Py_None));
     }
     else {
-        ASSIGN_AND_CHECK_NULL(f, PyNumber_Float(y));
+        ASSIGN_AND_CHECK_NULL(f, PyNumber_Float((PyObject *)y));
         ASSIGN_AND_CHECK_NULL(res, PyNumber_Power(x, f, Py_None));
     }
     goto CLEAN_UP;
