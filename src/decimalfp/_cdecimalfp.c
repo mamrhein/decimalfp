@@ -614,13 +614,13 @@ DecimalType_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
     DECIMAL_ALLOC(type, dec);         \
     PyObject *res = (PyObject *) dec
 
-#define CONVERT_AND_CHECK(fpdec, tmp, obj)         \
+#define CONVERT_AND_CHECK(fpdec, tmp, num)         \
     do {                                           \
-    fpdec = fpdec_from_obj(tmp, obj);              \
+    fpdec = fpdec_from_number(tmp, num);           \
     if (fpdec == NULL) {                           \
         if (PyErr_Occurred())                      \
             goto ERROR;                            \
-        else if (PyObject_IsInstance(obj, Number)) \
+        else if (PyObject_IsInstance(num, Number)) \
             goto FALLBACK;                         \
         else  {                                    \
             res = Py_NotImplemented;               \
@@ -990,7 +990,8 @@ Decimal_bool(DecimalObject *x) {
 // Binary number methods
 
 static fpdec_t *
-fpdec_from_obj(fpdec_t *tmp, PyObject *obj) {
+fpdec_from_number(
+    fpdec_t *tmp, PyObject *obj) {
     PyObject *ratio = NULL;
     PyObject *num = NULL;
     PyObject *den = NULL;
@@ -1039,7 +1040,7 @@ ERROR:
         if (err == PyExc_ValueError || err == PyExc_OverflowError ||
             err == PyExc_AttributeError) {
             PyErr_Clear();
-            PyErr_Format(PyExc_ValueError, "Can't convert %R to Decimal.",
+            PyErr_Format(PyExc_ValueError, "Unsupported operand: %R.",
                          obj);
         }
     }
