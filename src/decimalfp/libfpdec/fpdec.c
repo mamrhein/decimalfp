@@ -1792,19 +1792,16 @@ fpdec_div(fpdec_t *z, const fpdec_t *x, const fpdec_t *y,
     if (FPDEC_EQ_ZERO(x))
         return FPDEC_OK;
 
+    FPDEC_SIGN(z) = FPDEC_SIGN(x) * FPDEC_SIGN(y);
     rc = DISPATCH_BIN_OP_VA(vtab_div_abs, z, x, y, prec_limit, rounding);
     if (rc != FPDEC_OK)
         return rc;
 
-    if (FPDEC_IS_DYN_ALLOC(z)) {
-        FPDEC_SIGN(z) = FPDEC_SIGN(x) * FPDEC_SIGN(y);
+    if (FPDEC_IS_DYN_ALLOC(z))
         fpdec_dyn_normalize(z);
-    }
     else {
         if (z->lo == 0 && z->hi == 0)
             FPDEC_SIGN(z) = FPDEC_SIGN_ZERO;
-        else
-            FPDEC_SIGN(z) = FPDEC_SIGN(x) * FPDEC_SIGN(y);
     }
     return FPDEC_OK;
 }
