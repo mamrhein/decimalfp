@@ -103,12 +103,12 @@ def test_adjust_limits_exceeded(impl, prec):
 
 @pytest.mark.parametrize("quant", (Fraction(1, 40),
                                    StdLibDecimal("-0.3"),
-                                   "0.4",
+                                   0.4,
                                    3,
                                    1),
-                         ids=("Fraction 1/4",
+                         ids=("Fraction 1/40",
                               "StdLibDecimal -0.3",
-                              "str 0.4",
+                              "0.4",
                               "3",
                               "1"))
 @pytest.mark.parametrize("value",
@@ -131,12 +131,12 @@ def test_quantize_dflt_round(impl, value, quant):
 
 @pytest.mark.parametrize("quant", (Fraction(1, 40),
                                    StdLibDecimal("-0.3"),
-                                   "0.4",
+                                   0.4,
                                    3,
                                    1),
                          ids=("Fraction 1/4",
                               "StdLibDecimal -0.3",
-                              "str 0.4",
+                              "0.4",
                               "3",
                               "1"))
 @pytest.mark.parametrize("value",
@@ -157,8 +157,8 @@ def test_quantize_round(impl, rnd, value, quant):
     assert adj.as_fraction() == Fraction(eq_dec)
 
 
-@pytest.mark.parametrize("quant", ["1/5", 7.5 + 3j, Fraction],
-                         ids=("quant='1/5'", "quant=7.5+3j",
+@pytest.mark.parametrize("quant", ["0.5", 7.5 + 3j, Fraction],
+                         ids=("quant='0.5'", "quant=7.5+3j",
                               "quant=Fraction"))
 def test_quantize_wrong_quant_type(impl, quant):
     dec = impl.Decimal('3.12')
@@ -167,7 +167,7 @@ def test_quantize_wrong_quant_type(impl, quant):
 
 
 @pytest.mark.parametrize("value",
-                         ("17.849",
+                         ("-17.849",
                           ".".join(("1" * 3297, "4" * 33)),
                           "0.00015"),
                          ids=("compact", "large", "fraction"))
@@ -182,7 +182,7 @@ def test_round(impl, value, prec):
 
 
 @pytest.mark.parametrize("value",
-                         ("17.849",
+                         ("-17.849",
                           ".".join(("1" * 3297, "4" * 33)),
                           "0.00015",
                           "999999999999999999.67",),
