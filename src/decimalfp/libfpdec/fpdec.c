@@ -328,8 +328,8 @@ fpdec_cmp_abs_shint_to_dyn(const fpdec_t *x, const fpdec_t *y) {
     int n_trailing_zeros_skipped;
     fpdec_n_digits_t x_n_digits;
 
-    x_n_digits = shint_to_digits(x_digits, &n_trailing_zeros_skipped, RADIX,
-                                 x->lo, x->hi, FPDEC_DEC_PREC(x));
+    x_n_digits = u128_to_digits(x_digits, &n_trailing_zeros_skipped, RADIX,
+                                x->lo, x->hi, FPDEC_DEC_PREC(x));
     return digits_cmp(x_digits, x_n_digits,
                       FPDEC_DYN_DIGITS(y), FPDEC_DYN_N_DIGITS(y));
 }
@@ -341,8 +341,8 @@ fpdec_cmp_abs_dyn_to_shint(const fpdec_t *x, const fpdec_t *y) {
     int n_trailing_zeros_skipped;
     fpdec_n_digits_t y_n_digits;
 
-    y_n_digits = shint_to_digits(y_digits, &n_trailing_zeros_skipped, RADIX,
-                                 y->lo, y->hi, FPDEC_DEC_PREC(y));
+    y_n_digits = u128_to_digits(y_digits, &n_trailing_zeros_skipped, RADIX,
+                                y->lo, y->hi, FPDEC_DEC_PREC(y));
     return digits_cmp(FPDEC_DYN_DIGITS(x), FPDEC_DYN_N_DIGITS(x),
                       y_digits, y_n_digits);
 }
@@ -404,16 +404,14 @@ fpdec_neg(fpdec_t *fpdec, const fpdec_t *src) {
 }
 
 static error_t
-fpdec_shint_to_dyn(fpdec_t *fpdec) {
+fpdec_dyn_from_u128(fpdec_t *fpdec, uint128_t* ui) {
     fpdec_digit_t digits[3];
     int n_trailing_zeros;
     fpdec_n_digits_t n_digits;
     error_t rc;
 
-    assert(!FPDEC_IS_DYN_ALLOC(fpdec));
-
-    n_digits = shint_to_digits(digits, &n_trailing_zeros, RADIX, fpdec->lo,
-                               fpdec->hi, FPDEC_DEC_PREC(fpdec));
+    n_digits = u128_to_digits(digits, &n_trailing_zeros, RADIX, ui->lo,
+                              ui->hi, FPDEC_DEC_PREC(fpdec));
     rc = digits_from_digits(&fpdec->digit_array, digits, n_digits);
     if (rc == FPDEC_OK) {
         fpdec->dyn_alloc = true;
@@ -422,6 +420,16 @@ fpdec_shint_to_dyn(fpdec_t *fpdec) {
                      CEIL(FPDEC_DEC_PREC(fpdec), DEC_DIGITS_PER_DIGIT);
     }
     return rc;
+}
+
+static error_t
+fpdec_shint_to_dyn(fpdec_t *fpdec) {
+    uint128_t ui = U128_FROM_SHINT(fpdec);
+    error_t rc;
+
+    assert(!FPDEC_IS_DYN_ALLOC(fpdec));
+
+    return fpdec_dyn_from_u128(fpdec, &ui);
 }
 
 static error_t
@@ -1671,10 +1679,30 @@ fpdec_div_abs_shint_by_dyn(fpdec_t *z, const fpdec_t *x, const fpdec_t *y,
 }
 
 error_t
+fpdec_div_shints_as_dyn(fpdec_t *z, const fpdec_t *x, const fpdec_t *y,
+                        const int prec_limit,
+                        const enum FPDEC_ROUNDING_MODE rounding) {
+    error_t rc;
+    fpdec_t x_dyn;
+    fpdec_t y_dyn;
+
+    rc = fpdec_copy_shint_as_dyn(&x_dyn, x);
+    if (rc == FPDEC_OK) {
+        rc = fpdec_copy_shint_as_dyn(&y_dyn, y);
+        if (rc == FPDEC_OK) {
+            rc = fpdec_div_abs_dyn_by_dyn(z, &x_dyn, &y_dyn, prec_limit,
+                                          rounding);
+            fpdec_reset_to_zero(&y_dyn, 0);
+        }
+        fpdec_reset_to_zero(&x_dyn, 0);
+    }
+    return rc;
+}
+
+error_t
 fpdec_div_abs_shint_by_shint(fpdec_t *z, const fpdec_t *x, const fpdec_t *y,
                              const int prec_limit,
                              const enum FPDEC_ROUNDING_MODE rounding) {
-    error_t rc;
     uint128_t divident = U128_FROM_SHINT(x);
     uint128_t divisor = U128_FROM_SHINT(y);
     uint128_t rem = {0, 0};
@@ -1687,9 +1715,14 @@ fpdec_div_abs_shint_by_shint(fpdec_t *z, const fpdec_t *x, const fpdec_t *y,
     else
         shift = MIN(prec_limit, MAX_DEC_PREC_FOR_SHINT) - FPDEC_DEC_PREC(x) +
                 FPDEC_DEC_PREC(y);
-    if (shift > 0)
+    if (shift > 0) {
         u128_imul_10_pow_n(&divident, shift);
+        if (UINT128_CHECK_MAX(&divident))
+            // divident possibly overflowed
+            return fpdec_div_shints_as_dyn(z, x, y, prec_limit, rounding);
+    }
     else if (shift < 0)
+        // divisor < 2^96 and shift >= -9 => divisor * 10^-shift < 2^128
         u128_imul_10_pow_n(&divisor, -shift);
     if (divisor.hi == 0)
         rem.lo = u128_idiv_u64(&divident, divisor.lo);
@@ -1698,14 +1731,7 @@ fpdec_div_abs_shint_by_shint(fpdec_t *z, const fpdec_t *x, const fpdec_t *y,
     if (U128_NE_ZERO(rem)) {
         if (prec_limit == -1 || prec_limit > MAX_DEC_PREC_FOR_SHINT) {
             // result is not exact enough
-            fpdec_t x_dyn;
-            rc = fpdec_copy_shint_as_dyn(&x_dyn, x);
-            if (rc == FPDEC_OK) {
-                rc = fpdec_div_abs_dyn_by_shint(z, &x_dyn, y, prec_limit,
-                                                rounding);
-                fpdec_reset_to_zero(&x_dyn, 0);
-            }
-            return rc;
+            return fpdec_div_shints_as_dyn(z, x, y, prec_limit, rounding);
         }
         else {
             // result (in divident) truncated to prec_limit, check rounding
@@ -1717,6 +1743,7 @@ fpdec_div_abs_shint_by_shint(fpdec_t *z, const fpdec_t *x, const fpdec_t *y,
     }
     else {
         if (prec_limit == -1 && shift > 0) {
+            shift = MIN(shift, MAX_DEC_PREC_FOR_SHINT);
             n_trailing_zeros = u128_eliminate_trailing_zeros(&divident,
                                                              shift);
             FPDEC_DEC_PREC(z) = MAX_DEC_PREC_FOR_SHINT - n_trailing_zeros;
@@ -1732,9 +1759,13 @@ fpdec_div_abs_shint_by_shint(fpdec_t *z, const fpdec_t *x, const fpdec_t *y,
         else
             FPDEC_DEC_PREC(z) = prec_limit;
     }
-    z->lo = divident.lo;
-    z->hi = divident.hi;
-    return FPDEC_OK;
+    if (U128_FITS_SHINT(divident)) {
+        z->lo = divident.lo;
+        z->hi = divident.hi;
+        return FPDEC_OK;
+    }
+    else
+        return fpdec_dyn_from_u128(z, &divident);
 }
 
 typedef error_t (*v_div_op)(fpdec_t *, const fpdec_t *, const fpdec_t *,

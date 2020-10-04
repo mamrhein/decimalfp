@@ -73,8 +73,8 @@ shint_from_dec_coeff(uint64_t *lo, uint32_t *hi, const dec_digit_t *coeff,
 }
 
 fpdec_n_digits_t
-shint_to_digits(fpdec_digit_t *digit, int *n_trailing_zeros_skipped,
-                uint64_t b, uint64_t lo, uint32_t hi, int prec) {
+u128_to_digits(fpdec_digit_t *digit, int *n_trailing_zeros_skipped,
+               uint64_t b, uint64_t lo, uint64_t hi, int prec) {
     uint128_t t = {lo, hi};
     fpdec_n_digits_t n_digits = 0;
 

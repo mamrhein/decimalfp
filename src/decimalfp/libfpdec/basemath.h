@@ -25,8 +25,9 @@ $Revision$
 
 #define UINT64_10_POW_N_CUTOFF 19
 
-#define UINT128_SET_MAX(x) {x->lo = UINT64_MAX; x->hi = UINT64_MAX;}
-#define SIGNAL_OVERFLOW(x) UINT128_SET_MAX(x)
+#define UINT128_SET_MAX(x) {(x)->lo = UINT64_MAX; (x)->hi = UINT64_MAX;}
+#define UINT128_CHECK_MAX(x) ((x)->lo == UINT64_MAX && (x)->hi == UINT64_MAX)
+#define SIGNAL_OVERFLOW(x) UINT128_SET_MAX((x))
 
 #define U64_HI(x) (((uint64_t)x) >> 32U)
 #define U64_LO(x) (((uint64_t)x) & 0xFFFFFFFF)
