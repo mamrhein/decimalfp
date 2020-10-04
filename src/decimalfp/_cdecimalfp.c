@@ -1529,8 +1529,73 @@ Decimal_adjusted(DecimalObject *self, PyObject *args, PyObject *kwds) {
 }
 
 static PyObject *
-Decimal_quantize(DecimalObject *self, PyObject *quant, PyObject *rounding) {
-    Py_RETURN_NOTIMPLEMENTED;
+Decimal_quantize(DecimalObject *self, PyObject *args, PyObject *kwds) {
+    static char *kw_names[] = {"quant", "rounding", NULL};
+    PyObject *quant = Py_None;
+    PyObject *rounding = Py_None;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O|O", kw_names, &quant,
+                                     &rounding))
+        return NULL;
+
+    DEF_N_CONV_RND_MODE(rounding);
+    BINOP_ALLOC_RESULT(Py_TYPE(self));
+    PyObject *t = NULL;
+    PyObject *num = NULL;
+    PyObject *den = NULL;
+    fpdec_t *fpz = &dec->fpdec;
+    error_t rc;
+    fpdec_t tmp_q = FPDEC_ZERO;
+    fpdec_t *fpq;
+
+    fpq = fpdec_from_number(&tmp_q, quant);
+    if (fpq == NULL) {
+        if (PyErr_Occurred())
+            goto ERROR;
+        else if (PyObject_IsInstance(quant, Number))
+            goto FALLBACK;
+        else {
+            PyErr_Format(PyExc_TypeError, "Can't quantize to a '%S': %S.",
+                         Py_TYPE(quant), quant);
+            goto ERROR;
+        }
+    }
+    rc = fpdec_quantized(fpz, &self->fpdec, fpq, rnd);
+    if (rc == FPDEC_OK)
+        goto CLEAN_UP;
+
+FALLBACK:
+    fpdec_reset_to_zero(&dec->fpdec, 0);
+    res = NULL;
+    ASSIGN_AND_CHECK_NULL(t, PyObject_CallFunctionObjArgs(Fraction, quant,
+                                                          NULL));
+    Py_DECREF(quant);
+    quant = t;
+    ASSIGN_AND_CHECK_NULL(num, PyObject_GetAttrString(quant, "numerator"));
+    ASSIGN_AND_CHECK_NULL(den, PyObject_GetAttrString(quant, "denominator"));
+    t = NULL;
+    ASSIGN_AND_CHECK_NULL(t, Decimal_mul((PyObject *)self, num));
+    tmp_q = FPDEC_ZERO;
+    rc = fpdec_from_pylong(&tmp_q, den);
+    CHECK_FPDEC_ERROR(rc);
+    rc = fpdec_div(&dec->fpdec, &((DecimalObject *)t)->fpdec, &tmp_q, 0, rnd);
+    CHECK_FPDEC_ERROR(rc);
+    ASSIGN_AND_CHECK_NULL(res, fallback_op((PyObject *)dec, quant,
+                                           PyNumber_Multiply));
+    Py_CLEAR(dec);
+    goto CLEAN_UP;
+
+ERROR:
+    assert(PyErr_Occurred());
+    Py_CLEAR(dec);
+    res = NULL;
+
+CLEAN_UP:
+    fpdec_reset_to_zero(&tmp_q, 0);
+    Py_XDECREF(t);
+    Py_XDECREF(num);
+    Py_XDECREF(den);
+    return res;
 }
 
 static PyObject *
