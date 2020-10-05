@@ -3,6 +3,7 @@
 
 import os
 from setuptools import setup, Extension
+import sysconfig
 
 
 LIBFPDEC_PATH = 'src/decimalfp/libfpdec'
@@ -11,11 +12,20 @@ LIBFPDEC_SRC_FILES = sorted(f"{LIBFPDEC_PATH}/{fn}"
                             if fn.endswith(('.c',)))
 
 
+DEBUG = os.getenv("DEBUG", 0)
+extra_compile_args = sysconfig.get_config_var('CFLAGS').split()
+extra_compile_args += ["-Wall", "-Wextra"]
+if DEBUG:
+    extra_compile_args += ["-g3", "-O0", f"-DDEBUG={DEBUG}", "-UNDEBUG"]
+else:
+    extra_compile_args += ["-DNDEBUG", "-O3"]
+
 ext_modules = [
     Extension(
         'decimalfp._cdecimalfp',
         ['src/decimalfp/_cdecimalfp.c'] + LIBFPDEC_SRC_FILES,
         include_dirs=['src/decimalfp', LIBFPDEC_PATH],
+        extra_compile_args=extra_compile_args,
         # extra_link_args="",
         language='c',
     ),
