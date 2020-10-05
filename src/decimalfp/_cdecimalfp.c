@@ -45,6 +45,19 @@ $Revision$
     } while (0)
 #endif
 
+// In Python 3.8 PyMem_Calloc has been removed from the stable C-API and
+// is no longer included in Python.h
+
+#ifndef PyMem_Calloc
+void *
+PyMem_Calloc(size_t nelem, size_t elsize)
+{
+    if (elsize != 0 && nelem > UINT64_MAX / elsize)
+        return NULL;
+    return PyMem_Malloc(nelem * elsize);
+}
+#endif
+
 // Macros to simplify error checking
 
 #define ASSIGN_AND_CHECK_NULL(result, expr) \
