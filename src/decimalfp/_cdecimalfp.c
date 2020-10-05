@@ -23,6 +23,30 @@ $Revision$
 #include "libfpdec/digit_array_struct.h"
 #include "libfpdec/basemath.h"
 
+// Macro defs to be compatible with Python 3.6 (incl PyPy3):
+
+#ifndef Py_UNREACHABLE
+#define Py_UNREACHABLE() abort()
+#endif
+
+#ifndef Py_RETURN_RICHCOMPARE
+#define Py_RETURN_RICHCOMPARE(val1, val2, op)                               \
+    do {                                                                    \
+        switch (op) {                                                       \
+        case Py_EQ: if ((val1) == (val2)) Py_RETURN_TRUE; Py_RETURN_FALSE;  \
+        case Py_NE: if ((val1) != (val2)) Py_RETURN_TRUE; Py_RETURN_FALSE;  \
+        case Py_LT: if ((val1) < (val2)) Py_RETURN_TRUE; Py_RETURN_FALSE;   \
+        case Py_GT: if ((val1) > (val2)) Py_RETURN_TRUE; Py_RETURN_FALSE;   \
+        case Py_LE: if ((val1) <= (val2)) Py_RETURN_TRUE; Py_RETURN_FALSE;  \
+        case Py_GE: if ((val1) >= (val2)) Py_RETURN_TRUE; Py_RETURN_FALSE;  \
+        default:                                                            \
+            Py_UNREACHABLE();                                               \
+        }                                                                   \
+    } while (0)
+#endif
+
+// Macros to simplify error checking
+
 #define ASSIGN_AND_CHECK_NULL(result, expr) \
     do { result = (expr); if (result == NULL) goto ERROR; } while (0)
 
