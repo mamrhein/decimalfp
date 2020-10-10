@@ -12,7 +12,7 @@ LIBFPDEC_SRC_FILES = sorted(f"{LIBFPDEC_PATH}/{fn}"
                             if fn.endswith(('.c',)))
 
 
-DEBUG = os.getenv("DEBUG", 0)
+DEBUG = int(os.getenv("DEBUG", 0))
 extra_compile_args = sysconfig.get_config_var('CFLAGS').split()
 extra_compile_args += ["-Wall", "-Wextra"]
 if DEBUG:
