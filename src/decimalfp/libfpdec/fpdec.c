@@ -425,7 +425,6 @@ fpdec_dyn_from_u128(fpdec_t *fpdec, uint128_t* ui) {
 static error_t
 fpdec_shint_to_dyn(fpdec_t *fpdec) {
     uint128_t ui = U128_FROM_SHINT(fpdec);
-    error_t rc;
 
     assert(!FPDEC_IS_DYN_ALLOC(fpdec));
 
@@ -476,7 +475,7 @@ fpdec_dyn_normalize(fpdec_t *fpdec) {
             fpdec_n_digits_t n_digits = FPDEC_DYN_N_DIGITS(fpdec);
             fpdec_n_digits_t digit_idx = 0;
             fpdec_digit_t *digits = FPDEC_DYN_DIGITS(fpdec);
-            uint64_t dec_shift = _10_POW_N(dec_prec);
+            uint64_t dec_shift = u64_10_pow_n(dec_prec);
             switch FPDEC_DYN_EXP(fpdec) {
                 case -1:
                     u64_mul_u64(&shint, digits[digit_idx], dec_shift);
@@ -557,7 +556,7 @@ fpdec_dyn_adjust_to_prec(fpdec_t *fpdec, int32_t dec_prec,
             fpdec_digit_t quant;
             FPDEC_DYN_EXP(fpdec) += dec_shift / DEC_DIGITS_PER_DIGIT;
             dec_shift %= DEC_DIGITS_PER_DIGIT;
-            quant = _10_POW_N(dec_shift);
+            quant = u64_10_pow_n(dec_shift);
             if (round_qr(FPDEC_SIGN(fpdec), 0UL, 0UL, true, quant,
                          rounding) == 0UL) {
                 FPDEC_DYN_N_DIGITS(fpdec) = 0;
@@ -601,7 +600,7 @@ fpdec_shint_adjust_to_prec(fpdec_t *fpdec, const int32_t dec_prec,
     while (adj_to < 0) {
         // shift back
         dec_shift = MIN(-adj_to, UINT64_10_POW_N_CUTOFF);
-        u128_imul_u64(&shifted, _10_POW_N(dec_shift));
+        u128_imul_u64(&shifted, u64_10_pow_n(dec_shift));
         adj_to += dec_shift;
     }
 
@@ -816,7 +815,7 @@ fpdec_dyn_as_ascii_literal(const fpdec_t *fpdec,
     // least significant fractional digit
     if (n_frac_digits > 0) {
         int n = DEC_DIGITS_PER_DIGIT - d_adjust;
-        fpdec_digit_t adj_digit = *digit / _10_POW_N(d_adjust);
+        fpdec_digit_t adj_digit = *digit / u64_10_pow_n(d_adjust);
         if (no_trailing_zeros)
             while ((adj_digit % 10) == 0 && n-- > 0)
                 adj_digit /= 10;
@@ -871,7 +870,7 @@ fpdec_shint_as_ascii_literal(const fpdec_t *fpdec,
 
         if (FPDEC_DEC_PREC(fpdec) > 0)
             // split shifted int
-            r = u128_idiv_u64(&t, _10_POW_N(FPDEC_DEC_PREC(fpdec)));
+            r = u128_idiv_u64(&t, u64_10_pow_n(FPDEC_DEC_PREC(fpdec)));
         if (FPDEC_SIGN(fpdec) == FPDEC_SIGN_NEG)
             *(ch++) = '-';
         // atleast one integral digit
@@ -962,11 +961,11 @@ fpdec_as_sign_coeff128_exp(fpdec_sign_t *sign, uint128_t *coeff, int64_t *exp,
                 t2.lo = t1.lo;
                 t2.hi = t1.hi;
                 u128_imul_10_pow_n(&t2, nsd);
-                if (u128_cmp(&t2, &t1) < 0)
+                if (u128_cmp(t2, t1) < 0)
                     // overflow
                     return -1;
                 u128_iadd_u128(coeff, &t2);
-                if (u128_cmp(coeff, &t2) < 0)
+                if (u128_cmp(*coeff, t2) < 0)
                     // overflow
                     return -1;
                 *exp += ntz;

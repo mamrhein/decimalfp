@@ -36,7 +36,7 @@ shint_cmp_abs(uint128_t x, fpdec_dec_prec_t x_prec,
         u128_imul_10_pow_n(&x, y_prec - x_prec);
     else if (y_prec < x_prec)
         u128_imul_10_pow_n(&y, x_prec - y_prec);
-    return u128_cmp(&x, &y);
+    return u128_cmp(x, y);
 }
 
 // Converter
@@ -83,9 +83,9 @@ u128_to_digits(fpdec_digit_t *digit, int *n_trailing_zeros_skipped,
 
     *n_trailing_zeros_skipped = 0;
     if (prec > 0) {
-        *digit = u128_idiv_u64(&t, _10_POW_N(prec));
+        *digit = u128_idiv_u64(&t, u64_10_pow_n(prec));
         if (*digit != 0) {
-            *digit *= _10_POW_N(UINT64_10_POW_N_CUTOFF - prec);
+            *digit *= u64_10_pow_n(UINT64_10_POW_N_CUTOFF - prec);
             n_digits++;
             digit++;
         }
@@ -122,7 +122,7 @@ u128_idivr_10_pow_n(uint128_t *x, const fpdec_sign_t sign, const uint8_t n,
 
     assert(n <= UINT64_10_POW_N_CUTOFF);
 
-    divisor = _10_POW_N(n);
+    divisor = u64_10_pow_n(n);
     if (x->hi != 0)
         rem = u128_idiv_u64(x, divisor);
     else {

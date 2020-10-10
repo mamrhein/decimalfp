@@ -17,6 +17,7 @@ $Revision$
 #ifndef FPDEC_DIGIT_ARRAY_H
 #define FPDEC_DIGIT_ARRAY_H
 
+#include "common.h"
 #include "helper_macros.h"
 #include "mem.h"
 #include "rounding.h"

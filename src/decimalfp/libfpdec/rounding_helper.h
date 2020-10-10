@@ -99,7 +99,7 @@ round_u128(fpdec_sign_t sign, uint128_t *quot, uint128_t *rem,
     int cmp;
 
     assert(rem->lo != 0 || rem->hi != 0);
-    assert(u128_cmp(rem, divisor) < 0);
+    assert(u128_cmp(*rem, *divisor) < 0);
     assert(0 <= rounding && rounding <= FPDEC_MAX_ROUNDING_MODE);
 
     if (rounding == FPDEC_ROUND_DEFAULT) {
@@ -129,14 +129,14 @@ round_u128(fpdec_sign_t sign, uint128_t *quot, uint128_t *rem,
             // Round 5 down, rest to nearest
             tie.hi = divisor->hi >> 1U;
             tie.lo = ((divisor->hi % 2) << 63) + (divisor->lo >> 1UL);
-            if (u128_cmp(rem, &tie) > 0)
+            if (u128_cmp(*rem, tie) > 0)
                 return true;
             break;
         case FPDEC_ROUND_HALF_EVEN:
             // Round 5 to nearest even, rest to nearest
             tie.hi = divisor->hi >> 1U;
             tie.lo = ((divisor->hi % 2) << 63) + (divisor->lo >> 1UL);
-            cmp = u128_cmp(rem, &tie);
+            cmp = u128_cmp(*rem, tie);
             if (cmp > 0 || cmp == 0 && divisor->lo % 2 == 0 &&
                 quot->lo % 2 != 0)
                 return true;
@@ -145,7 +145,7 @@ round_u128(fpdec_sign_t sign, uint128_t *quot, uint128_t *rem,
             // Round 5 up (away from 0), rest to nearest
             tie.hi = divisor->hi >> 1U;
             tie.lo = ((divisor->hi % 2) << 63) + (divisor->lo >> 1UL);
-            cmp = u128_cmp(rem, &tie);
+            cmp = u128_cmp(*rem, tie);
             if (cmp > 0 || cmp == 0 && divisor->lo % 2 == 0)
                 return true;
             break;

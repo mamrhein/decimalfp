@@ -1,5 +1,5 @@
 /* ---------------------------------------------------------------------------
-Name:        basemath.h
+Name:        uint128_type.h
 
 Author:      Michael Amrhein (michael@adrhinum.de)
 
@@ -12,13 +12,21 @@ $Source$
 $Revision$
 */
 
-#ifndef FPDEC_BASEMATH_H
-#define FPDEC_BASEMATH_H
+#ifndef FPDEC_UINT128_TYPE_H
+#define FPDEC_UINT128_TYPE_H
 
-#include <assert.h>
 #include <stdint.h>
 
-#include "uint64_math.h"
-#include "uint128_math.h"
+/*****************************************************************************
+*  Types
+*****************************************************************************/
 
-#endif //FPDEC_BASEMATH_H
+// large unsigned int
+typedef struct uint128 {
+    uint64_t lo;
+    uint64_t hi;
+} uint128_t;
+
+static const uint128_t UINT128_MAX = {UINT64_MAX, UINT64_MAX};
+
+#endif //FPDEC_UINT128_TYPE_H

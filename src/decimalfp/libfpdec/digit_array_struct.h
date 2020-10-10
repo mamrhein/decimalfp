@@ -17,11 +17,6 @@ $Revision$
 #ifndef FPDEC_DIGIT_ARRAY_STRUCT_H
 #define FPDEC_DIGIT_ARRAY_STRUCT_H
 
-#include "helper_macros.h"
-#include "mem.h"
-#include "rounding.h"
-
-
 /*****************************************************************************
 *  Types
 *****************************************************************************/

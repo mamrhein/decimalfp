@@ -18,9 +18,10 @@ $Revision$
 #define FPDEC_SHIFTED_INT_H
 
 #include <math.h>
+#include <stddef.h>
 
-#include "helper_macros.h"
 #include "basemath.h"
+#include "helper_macros.h"
 #include "rounding_helper.h"
 
 /*****************************************************************************

@@ -1932,7 +1932,7 @@ static PyType_Spec DecimalType_spec = {
 static inline PyObject *
 PyLong_10_pow_exp(const uint8_t exp) {
     assert(exp <= DEC_DIGITS_PER_DIGIT);
-    return PyLong_FromUnsignedLong(_10_POW_N(exp));
+    return PyLong_FromUnsignedLong(u64_10_pow_n(exp));
 }
 
 static PyObject *
@@ -2072,7 +2072,7 @@ PyLong_from_fpdec(const fpdec_t *fpdec) {
         uint128_t shint = {fpdec->lo, fpdec->hi};
         fpdec_dec_prec_t prec = FPDEC_DEC_PREC(fpdec);
         if (prec > 0)
-            u128_idiv_u64(&shint, _10_POW_N(prec));
+            u128_idiv_u64(&shint, u64_10_pow_n(prec));
         ASSIGN_AND_CHECK_NULL(res, PyLong_from_u128(&shint));
     }
     if (FPDEC_LT_ZERO(fpdec)) {
