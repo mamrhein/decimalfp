@@ -27,6 +27,7 @@ typedef struct uint128 {
     uint64_t hi;
 } uint128_t;
 
+static const uint128_t UINT128_ZERO = {0, 0};
 static const uint128_t UINT128_MAX = {UINT64_MAX, UINT64_MAX};
 
 #endif //FPDEC_UINT128_TYPE_H

@@ -35,6 +35,12 @@ $Revision$
 #define U128P_HI(x) (((uint128_t *)x)->hi)
 #define U128P_LO(x) (((uint128_t *)x)->lo)
 
+// tests
+#define U128_EQ_ZERO(x) (x.lo == 0 && x.hi == 0)
+#define U128_NE_ZERO(x) (x.lo != 0 || x.hi != 0)
+#define U128P_EQ_ZERO(x) (x->lo == 0 && x->hi == 0)
+#define U128P_NE_ZERO(x) (x->lo != 0 || x->hi != 0)
+
 // overflow handling
 #define SIGNAL_OVERFLOW(x) *x = UINT128_MAX
 #define UINT128_CHECK_MAX(x) (U128P_LO(x) == UINT64_MAX && \
@@ -127,7 +133,7 @@ u128_sub_u128(uint128_t *z, const uint128_t *x, const uint128_t *y) {
 
 // Multiplication
 
-static void
+static inline void
 u64_mul_u64(uint128_t *z, const uint64_t x, const uint64_t y) {
     const uint64_t xl = U64_LO(x);
     const uint64_t xh = U64_HI(x);
@@ -144,11 +150,17 @@ u64_mul_u64(uint128_t *z, const uint64_t x, const uint64_t y) {
     U128P_HI(z) += xh * yh + U64_HI(t);
 }
 
-static void
+static inline void
 u128_imul_u64(uint128_t *x, const uint64_t y) {
-    uint128_t t;
+    uint64_t xhi = U128P_HI(x);
+    uint128_t t = UINT128_ZERO;
 
-    u64_mul_u64(&t, U128P_HI(x), y);
+    if (xhi == 0) {
+        u64_mul_u64(x, U128P_LO(x), y);
+        return;
+    }
+
+    u64_mul_u64(&t, xhi, y);
     if (U128_HI(t) != 0) {
         SIGNAL_OVERFLOW(x);
         return;
@@ -165,10 +177,7 @@ u128_imul_u64(uint128_t *x, const uint64_t y) {
 
 static inline void
 u128_imul_10_pow_n(uint128_t *x, const uint8_t n) {
-    if (U128P_HI(x) == 0)
-        u64_mul_u64(x, U128P_LO(x), u64_10_pow_n(n));
-    else
-        u128_imul_u64(x, u64_10_pow_n(n));
+    u128_imul_u64(x, u64_10_pow_n(n));
 }
 
 // Division
@@ -176,7 +185,7 @@ u128_imul_10_pow_n(uint128_t *x, const uint8_t n) {
 // adapted from
 // D. E. Knuth, The Art of Computer Programming, Vol. 2, Ch. 4.3.1,
 // Exercise 16
-static uint64_t
+static inline uint64_t
 u128_idiv_u32(uint128_t *x, uint32_t y) {
     uint64_t th, tl, r;
 
@@ -204,7 +213,7 @@ u128_idiv_u32(uint128_t *x, uint32_t y) {
 // adapted to the special case m = 4 and n = 2 and U128P_HI(x) < y (!).
 // The link given above does not exist anymore, but the code can still be
 // found at https://github.com/hcs0/Hackers-Delight/blob/master/divlu.c.txt.
-static uint64_t
+static inline uint64_t
 u128_idiv_u64_special(uint128_t *x, uint64_t y) {
     const uint64_t b = 1UL << 32U;
     unsigned n_bits;
@@ -265,17 +274,24 @@ u128_idiv_u64_special(uint128_t *x, uint64_t y) {
     return (t * b + xn0 - q0 * y) >> n_bits;
 }
 
-static uint64_t
+static inline uint64_t
 u128_idiv_u64(uint128_t *x, const uint64_t y) {
+    uint64_t xhi = U128P_HI(x);
     uint64_t r;
     uint128_t t;
 
     assert(y != 0);
 
+    if (xhi == 0) {
+        r = U128P_LO(x) % y;
+        U128P_LO(x) /= y;
+        return r;
+    }
+
     if (U64_HI(y) == 0)
         return u128_idiv_u32(x, U64_LO(y));
 
-    if (U128P_HI(x) < y)
+    if (xhi < y)
         return u128_idiv_u64_special(x, y);
 
     U128P_HI(&t) = U128P_HI(x) % y;
@@ -289,11 +305,11 @@ u128_idiv_u64(uint128_t *x, const uint64_t y) {
 // The following code is based on Algorithm D from
 // D. E. Knuth, The Art of Computer Programming, Vol. 2, Ch. 4.3.1,
 // adapted to base 2^64 and special case m = n = 2
-static void
+static inline void
 u128_idiv_u128_special(uint128_t *r, uint128_t *x, const uint128_t *y) {
     unsigned n_bits_left, n_bits_right;
     uint64_t xn[3], yn[2], q;
-    uint128_t t = {0, 0};
+    uint128_t t = UINT128_ZERO;
 
     assert(U128P_HI(y) != 0);
     assert(u128_cmp(*x, *y) >= 0);
@@ -335,11 +351,14 @@ u128_idiv_u128_special(uint128_t *r, uint128_t *x, const uint128_t *y) {
     }
 }
 
-static void
+static inline void
 u128_idiv_u128(uint128_t *r, uint128_t *x, const uint128_t *y) {
     int cmp;
 
-    assert(U128P_HI(y) != 0);
+    if (U128P_HI(y) == 0) {
+        U128_FROM_LO_HI(r, u128_idiv_u64(x, U128P_LO(y)), 0);
+        return;
+    }
 
     cmp = u128_cmp(*x, *y);
 
@@ -374,6 +393,36 @@ u128_idiv_10(uint128_t *x) {
     tl = (r << 32U) + U64_LO(U128P_LO(x));
     U128P_LO(x) = ((th / 10) << 32U) + tl / 10;
     return tl % 10;
+}
+
+static inline uint128_t
+u128_shift_right(uint128_t *x, unsigned n_bits) {
+    assert(n_bits < 64U);
+    uint128_t t;
+
+    U128P_HI(&t) = U128P_HI(x) >> n_bits;
+    U128P_LO(&t) = ((U128P_HI(x) % (1U << n_bits)) << (64U - n_bits)) +
+                   (U128P_LO(x) >> n_bits);
+    return t;
+}
+
+static inline unsigned
+u128_eliminate_trailing_zeros(uint128_t *ui, unsigned n_max) {
+    uint128_t t = U128_RHS(U128P_LO(ui), U128P_HI(ui));
+    unsigned n_trailing_zeros = 0;
+
+    while (U128P_HI(ui) != 0 &&
+           n_trailing_zeros < n_max && u128_idiv_10(&t) == 0) {
+        *ui = t;
+        n_trailing_zeros++;
+    }
+    if (U128P_HI(ui) == 0) {
+        while (n_trailing_zeros < n_max && U128P_LO(ui) % 10 == 0) {
+            U128P_LO(ui) /= 10;
+            n_trailing_zeros++;
+        }
+    }
+    return n_trailing_zeros;
 }
 
 #endif // FPDEC_UINT128_MATH_H

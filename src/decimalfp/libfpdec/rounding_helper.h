@@ -98,7 +98,7 @@ round_u128(fpdec_sign_t sign, uint128_t *quot, uint128_t *rem,
     uint128_t tie;
     int cmp;
 
-    assert(rem->lo != 0 || rem->hi != 0);
+    assert(U128P_NE_ZERO(rem));
     assert(u128_cmp(*rem, *divisor) < 0);
     assert(0 <= rounding && rounding <= FPDEC_MAX_ROUNDING_MODE);
 
@@ -109,7 +109,7 @@ round_u128(fpdec_sign_t sign, uint128_t *quot, uint128_t *rem,
     switch (rounding) {
         case FPDEC_ROUND_05UP:
             // Round down unless last digit is 0 or 5
-            if (quot->lo % 5 == 0)
+            if (U128P_LO(quot) % 5 == 0)
                 return true;
             break;
         case FPDEC_ROUND_CEILING:
@@ -127,26 +127,23 @@ round_u128(fpdec_sign_t sign, uint128_t *quot, uint128_t *rem,
             break;
         case FPDEC_ROUND_HALF_DOWN:
             // Round 5 down, rest to nearest
-            tie.hi = divisor->hi >> 1U;
-            tie.lo = ((divisor->hi % 2) << 63) + (divisor->lo >> 1UL);
+            tie = u128_shift_right(divisor, 1UL);
             if (u128_cmp(*rem, tie) > 0)
                 return true;
             break;
         case FPDEC_ROUND_HALF_EVEN:
             // Round 5 to nearest even, rest to nearest
-            tie.hi = divisor->hi >> 1U;
-            tie.lo = ((divisor->hi % 2) << 63) + (divisor->lo >> 1UL);
+            tie = u128_shift_right(divisor, 1UL);
             cmp = u128_cmp(*rem, tie);
-            if (cmp > 0 || cmp == 0 && divisor->lo % 2 == 0 &&
-                quot->lo % 2 != 0)
+            if (cmp > 0 || cmp == 0 && U128P_LO(divisor) % 2 == 0 &&
+                U128P_LO(quot) % 2 != 0)
                 return true;
             break;
         case FPDEC_ROUND_HALF_UP:
             // Round 5 up (away from 0), rest to nearest
-            tie.hi = divisor->hi >> 1U;
-            tie.lo = ((divisor->hi % 2) << 63) + (divisor->lo >> 1UL);
+            tie = u128_shift_right(divisor, 1UL);
             cmp = u128_cmp(*rem, tie);
-            if (cmp > 0 || cmp == 0 && divisor->lo % 2 == 0)
+            if (cmp > 0 || cmp == 0 && U128P_LO(divisor) % 2 == 0)
                 return true;
             break;
         case FPDEC_ROUND_UP:
