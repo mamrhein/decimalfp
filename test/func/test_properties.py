@@ -24,8 +24,9 @@ import pytest
                          (("17.8", 1),
                           (".".join(("1" * 3297, "4" * 33)), 3296),
                           ("-0.00014", -4),
+                          (0.4, -1),
                           ("0.1", -1)),
-                         ids=("compact", "large", "fraction", "0.1"))
+                         ids=("compact", "large", "fraction", "0.4", "0.1"))
 def test_magnitude(impl, value, magn):
     dec = impl.Decimal(value)
     assert dec.magnitude == magn
