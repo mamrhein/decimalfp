@@ -679,6 +679,7 @@ Decimal_magnitude_get(DecimalObject *self) {
     long magn = fpdec_magnitude(&self->fpdec);
     if (magn == -1 && errno != 0) {
         PyErr_SetString(PyExc_OverflowError, "Result would be '-Infinity'.");
+        errno = 0;
         return NULL;
     }
     return PyLong_FromLong(magn);
