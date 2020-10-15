@@ -23,8 +23,9 @@ import pytest
 @pytest.mark.parametrize(("value", "magn"),
                          (("17.8", 1),
                           (".".join(("1" * 3297, "4" * 33)), 3296),
-                          ("-0.00014", -4)),
-                         ids=("compact", "large", "fraction"))
+                          ("-0.00014", -4),
+                          ("0.1", -1)),
+                         ids=("compact", "large", "fraction", "0.1"))
 def test_magnitude(impl, value, magn):
     dec = impl.Decimal(value)
     assert dec.magnitude == magn
@@ -34,6 +35,8 @@ def test_magnitude_fail_on_zero(impl):
     dec = impl.Decimal()
     with pytest.raises(OverflowError):
         m = dec.magnitude
+    dec = impl.Decimal("0.1")
+    assert dec.magnitude == -1
 
 
 @pytest.mark.parametrize(("num", "den"),
