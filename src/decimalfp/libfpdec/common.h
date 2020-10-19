@@ -23,8 +23,12 @@ extern "C" {
 #include <errno.h>
 #include <stdbool.h>
 #include <stdint.h>
-    
+
+#ifdef __SIZEOF_INT128__
+#include "uint128_type_native.h"
+#else
 #include "uint128_type.h"
+#endif // __int128
 
 
 /*****************************************************************************

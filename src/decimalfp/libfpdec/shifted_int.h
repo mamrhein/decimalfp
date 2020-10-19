@@ -32,7 +32,7 @@ $Revision$
 #define MAX_DEC_PREC_FOR_SHINT 9
 
 #define U128_FROM_SHINT(x) U128_RHS(x->lo, x->hi)
-#define U128_FITS_SHINT(x) (U64_HI(x.hi) == 0)
+#define U128_FITS_SHINT(x) (U64_HI(U128_HI(x)) == 0)
 
 #define U64_MAGNITUDE(x) ((int) log10(x))
 #define U128_MAGNITUDE(lo, hi) ((int) log10(((double) hi) * 0x100000000UL \

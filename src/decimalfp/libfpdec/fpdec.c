@@ -390,17 +390,29 @@ fpdec_dyn_normalize(fpdec_t *fpdec) {
                 case -1:
                     u64_mul_u64(&shint, digits[digit_idx], dec_shift);
                     u128_idiv_radix(&shint);
+                    // shint < RADIX
                     if (++digit_idx == n_digits)
                         break;
                 case 0:
                     u64_mul_u64(&f, digits[digit_idx], dec_shift);
+                    // f < RADIX * 10^9
                     u128_iadd_u128(&shint, &f);
+                    // shint < RADIX + RADIX * 10^9 < 2^96
                     if (++digit_idx == n_digits)
                         break;
                 case 1:
                     u64_mul_u64(&f, digits[digit_idx], dec_shift);
+                    // f < RADIX * 10^9
                     u128_imul_u64(&f, RADIX);
+                    if (UINT128_CHECK_MAX(&f)) {
+                        SIGNAL_OVERFLOW(&shint);
+                        break;
+                    }
                     u128_iadd_u128(&shint, &f);
+                    if (u128_cmp(shint, f) < 0) {
+                        SIGNAL_OVERFLOW(&shint);
+                        break;
+                    }
                     if (++digit_idx == n_digits)
                         break;
                 default:
@@ -444,6 +456,7 @@ const v_magnitude vtab_magnitude[2] = {fpdec_shint_magnitude,
 int
 fpdec_magnitude(const fpdec_t *fpdec) {
     if (FPDEC_EQ_ZERO(fpdec)) ERROR_RETVAL(ERANGE, -1)
+    errno = 0;
     return DISPATCH_FUNC(vtab_magnitude, fpdec);
 }
 
@@ -631,7 +644,7 @@ fpdec_shint_adjust_to_prec(fpdec_t *fpdec, const int32_t dec_prec,
     }
 
     u128_idecshift(&shifted, FPDEC_SIGN(fpdec), dec_shift, rounding);
-    while (adj_to < 0) {
+    while (adj_to < 0 && U128_FITS_SHINT(shifted)) {
         // shift back
         dec_shift = MIN(-adj_to, UINT64_10_POW_N_CUTOFF);
         u128_imul_u64(&shifted, u64_10_pow_n(dec_shift));
@@ -960,7 +973,7 @@ fpdec_as_sign_coeff128_exp(fpdec_sign_t *sign, uint128_t *coeff, int64_t *exp,
     if (FPDEC_IS_DYN_ALLOC(fpdec)) {
         fpdec_n_digits_t n = FPDEC_DYN_N_DIGITS(fpdec);
         fpdec_digit_t *digits = FPDEC_DYN_DIGITS(fpdec);
-        uint128_t t1, t2;
+        uint128_t t1;
         int ntz, nsd;
 
         *exp = FPDEC_DYN_EXP(fpdec) * DEC_DIGITS_PER_DIGIT;
@@ -970,8 +983,11 @@ fpdec_as_sign_coeff128_exp(fpdec_sign_t *sign, uint128_t *coeff, int64_t *exp,
                 break;
             case 2:
                 U128_FROM_LO_HI(coeff, digits[1], 0UL);
+                // coeff < RADIX
                 u128_imul_10_pow_n(coeff, DEC_DIGITS_PER_DIGIT);
+                // coeff < RADIX * RADIX
                 u128_iadd_u64(coeff, digits[0]);
+                // coeff < RADIX * RADIX + RADIX < 2^128
                 break;
             case 3:
                 // try to fit normalized coeff into uint128
@@ -980,18 +996,20 @@ fpdec_as_sign_coeff128_exp(fpdec_sign_t *sign, uint128_t *coeff, int64_t *exp,
                                                     DEC_DIGITS_PER_DIGIT);
                 nsd = DEC_DIGITS_PER_DIGIT - ntz;
                 U128_FROM_LO_HI(coeff, U128_LO(t1), 0UL);
+                // coeff < RADIX
                 U128_FROM_LO_HI(&t1, digits[1], 0UL);
                 u128_imul_10_pow_n(&t1, nsd);
+                // t1 < RADIX * RADIX
                 u128_iadd_u128(coeff, &t1);
+                // coeff < RADIX * RADIX + RADIX < 2^128
                 U128_FROM_LO_HI(&t1, digits[2], 0UL);
                 u128_imul_u64(&t1, RADIX);
-                t2 = t1;
-                u128_imul_10_pow_n(&t2, nsd);
-                if (u128_cmp(t2, t1) < 0)
+                u128_imul_10_pow_n(&t1, nsd);
+                if (UINT128_CHECK_MAX(&t1))
                     // overflow
                     return -1;
-                u128_iadd_u128(coeff, &t2);
-                if (u128_cmp(*coeff, t2) < 0)
+                u128_iadd_u128(coeff, &t1);
+                if (u128_cmp(*coeff, t1) < 0)
                     // overflow
                     return -1;
                 *exp += ntz;
@@ -1023,7 +1041,9 @@ make_adjusted_shints(uint128_t *x_shint, uint128_t *y_shint,
         prec = x_dec_prec;
     else if (shift > 0) {
         prec = x_dec_prec;
+        // y_shint < 2^96 and 0 <= shift <= 9
         u128_imul_10_pow_n(y_shint, shift);
+        // y_shint < 2^96 * 10^9 < 2^128
     }
     else {
         prec = y_dec_prec;

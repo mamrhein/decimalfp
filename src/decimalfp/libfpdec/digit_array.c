@@ -406,7 +406,7 @@ digits_div_digit(const fpdec_digit_array_t *x,
         u64_mul_u64(&t, r, RADIX);
         u128_iadd_u64(&t, xhat->digits[i]);
         r = u128_idiv_u64(&t, y);
-        assert(t.hi == 0);
+        assert(U128_HI(t) == 0);
         q->digits[i] = U128_LO(t);
     }
     q->n_signif = q->n_alloc;

@@ -20,7 +20,12 @@ $Revision$
 
 #include "common.h"
 #include "uint64_math.h"
+#ifdef __SIZEOF_INT128__
+#include "uint128_math_native.h"
+#else
 #include "uint128_math.h"
+#endif // __int128
+
 
 /* Algorithm adopted from
  * Torbjörn Granlund and Peter L. Montgomery

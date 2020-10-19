@@ -32,9 +32,15 @@ $Revision$
 int
 shint_cmp_abs(uint128_t x, fpdec_dec_prec_t x_prec,
               uint128_t y, fpdec_dec_prec_t y_prec) {
+    // Based on the limits of the shifted int representation:
+    // x < 2^96, y < 2^96, 0 <= x_prec <= 9, 0 <= y_prec <= 9
     if (x_prec < y_prec)
+        // 0 <= y_prec - x_prec <= 9
+        // => x * 10^(y_prec - x_prec) <= 2^96 * 10^9 < 2^128
         u128_imul_10_pow_n(&x, y_prec - x_prec);
     else if (y_prec < x_prec)
+        // 0 <= x_prec - y_prec <= 9
+        // => y * 10^(x_prec - y_prec) <= 2^96 * 10^9 < 2^128
         u128_imul_10_pow_n(&y, x_prec - y_prec);
     return u128_cmp(x, y);
 }
@@ -75,7 +81,7 @@ shint_from_dec_coeff(uint64_t *lo, uint32_t *hi, const dec_digit_t *coeff,
         while (n_left_to_shift > 0) {
             n_shift = MIN(n_left_to_shift, UINT64_10_POW_N_CUTOFF);
             u128_imul_10_pow_n(&sh, n_shift);
-            if (U64_HI(U128_HI(sh)))
+            if (UINT128_CHECK_MAX(&sh) || U64_HI(U128_HI(sh)))
                 goto OVERFLOW;
             n_left_to_shift -= n_shift;
         }
