@@ -163,7 +163,9 @@ runtime_error_ptr(const char *msg) {
 static PyObject *PyZERO = NULL;
 static PyObject *PyONE = NULL;
 static PyObject *PyTEN = NULL;
+static PyObject *Py64 = NULL;
 static PyObject *PyRADIX = NULL;
+static PyObject *PyUInt64Max = NULL;
 static PyObject *Py2pow64 = NULL;
 static PyObject *MAX_DEC_PRECISION = NULL;
 
@@ -2206,16 +2208,14 @@ static inline uint128_t
 PyLong_as_u128(PyObject *val) {
     // val must be a PyLong and must be >= 0 and < 2 ^ 96 !!!
     uint128_t res;
-    PyObject *t, *q, *r;
+    PyObject *hi, *lo;
 
-    t = PyNumber_Divmod(val, Py2pow64);
-    q = PySequence_GetItem(t, 0);
-    r = PySequence_GetItem(t, 1);
-    Py_DECREF(t);
-    U128_FROM_LO_HI(&res, PyLong_AsUnsignedLongLong(r),
-                    PyLong_AsUnsignedLongLong(q));
-    Py_DECREF(r);
-    Py_DECREF(q);
+    hi = PyNumber_Rshift(val, Py64);
+    lo = PyNumber_And(val, PyUInt64Max);
+    U128_FROM_LO_HI(&res, PyLong_AsUnsignedLongLong(lo),
+                    PyLong_AsUnsignedLongLong(hi));
+    Py_DECREF(hi);
+    Py_DECREF(lo);
     return res;
 }
 
@@ -2450,10 +2450,10 @@ cdecimalfp_exec(PyObject *module) {
     PyZERO = PyLong_FromLong(0L);
     PyONE = PyLong_FromLong(1L);
     PyTEN = PyLong_FromLong(10L);
-    PyRADIX = PyLong_FromUnsignedLong(RADIX);
-    PyObject *Py2pow32 = PyLong_FromLong(4294967296L);
-    Py2pow64 = PyNumber_Multiply(Py2pow32, Py2pow32);
-    Py_CLEAR(Py2pow32);
+    Py64 = PyLong_FromLong(64L);
+    PyRADIX = PyLong_FromUnsignedLongLong(RADIX);
+    PyUInt64Max = PyLong_FromUnsignedLongLong(UINT64_MAX);
+    Py2pow64 = PyNumber_Lshift(PyONE, Py64);
 
     /* Init global vars */
     MAX_DEC_PRECISION = PyLong_FromLong(FPDEC_MAX_DEC_PREC);
@@ -2488,7 +2488,9 @@ ERROR:
     Py_CLEAR(PyZERO);
     Py_CLEAR(PyONE);
     Py_CLEAR(PyTEN);
+    Py_CLEAR(Py64);
     Py_CLEAR(PyRADIX);
+    Py_CLEAR(PyUInt64Max);
     Py_CLEAR(Py2pow64);
     Py_CLEAR(MAX_DEC_PRECISION);
     return -1;
