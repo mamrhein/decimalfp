@@ -1028,8 +1028,7 @@ Decimal_bool(DecimalObject *x) {
 // Binary number methods
 
 static fpdec_t *
-fpdec_from_number(
-    fpdec_t *tmp, PyObject *obj) {
+fpdec_from_number(fpdec_t *tmp, PyObject *obj) {
     PyObject *ratio = NULL;
     PyObject *num = NULL;
     PyObject *den = NULL;
@@ -2022,10 +2021,10 @@ CLEAN_UP:
 
 static inline PyObject *
 PyLong_from_u128(uint128_t *ui) {
-    if (ui->hi == 0)
-        return PyLong_FromUnsignedLongLong(ui->lo);
+    if (U128P_HI(ui) == 0)
+        return PyLong_FromUnsignedLongLong(U128P_LO(ui));
     else
-        return PyLong_from_u128_lo_hi(ui->lo, ui->hi);
+        return PyLong_from_u128_lo_hi(U128P_LO(ui), U128P_HI(ui));
 }
 
 static PyObject *
@@ -2070,7 +2069,7 @@ PyLong_from_fpdec(const fpdec_t *fpdec) {
         }
     }
     else {
-        uint128_t shint = {fpdec->lo, fpdec->hi};
+        uint128_t shint = U128_RHS(fpdec->lo, fpdec->hi);
         fpdec_dec_prec_t prec = FPDEC_DEC_PREC(fpdec);
         if (prec > 0)
             u128_idiv_u64(&shint, u64_10_pow_n(prec));
@@ -2213,9 +2212,9 @@ PyLong_as_u128(PyObject *val) {
     q = PySequence_GetItem(t, 0);
     r = PySequence_GetItem(t, 1);
     Py_DECREF(t);
-    res.lo = PyLong_AsUnsignedLongLong(r);
+    U128_FROM_LO_HI(&res, PyLong_AsUnsignedLongLong(r),
+                    PyLong_AsUnsignedLongLong(q));
     Py_DECREF(r);
-    res.hi = PyLong_AsUnsignedLongLong(q);
     Py_DECREF(q);
     return res;
 }
@@ -2278,8 +2277,8 @@ fpdec_from_pylong(fpdec_t *fpdec, PyObject *val) {
     if (size_base_2 <= 96) {
         uint128_t i = PyLong_as_u128(abs_val);
         Py_DECREF(abs_val);
-        fpdec->lo = i.lo;
-        fpdec->hi = i.hi;
+        fpdec->lo = U128_LO(i);
+        fpdec->hi = U128_HI(i);
         FPDEC_SIGN(fpdec) = sign;
         return FPDEC_OK;
     }
