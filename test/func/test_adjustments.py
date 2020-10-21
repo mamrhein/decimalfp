@@ -166,6 +166,16 @@ def test_quantize_wrong_quant_type(impl, quant):
         dec.quantize(quant)
 
 
+@pytest.mark.parametrize("quant", [float('inf'), StdLibDecimal('-inf'),
+                                   float('nan'), StdLibDecimal('NaN')],
+                         ids=("quant='inf'", "quant='-inf'",
+                              "quant='nan'", "quant='NaN'"))
+def test_quantize_incompat_quant_value(impl, quant):
+    dec = impl.Decimal('3.12')
+    with pytest.raises(ValueError):
+        dec.quantize(quant)
+
+
 @pytest.mark.parametrize("value",
                          ("-17.849",
                           ".".join(("1" * 3297, "4" * 33)),
