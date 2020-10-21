@@ -86,7 +86,8 @@ digits_from_dec_coeff_exp(fpdec_digit_array_t **digit_array, fpdec_exp_t *exp,
     n_dec_shift = (size_t)MOD(dec_exp, DEC_DIGITS_PER_DIGIT);
     n_digits = CEIL(n_dec_digits + n_dec_shift, DEC_DIGITS_PER_DIGIT);
     *digit_array = digits_alloc(n_digits);
-    if (*digit_array == NULL) MEMERROR
+    if (*digit_array == NULL)
+        MEMERROR;
 
     digit = (*digit_array)->digits;
     chunk_stop = coeff + n_dec_digits;
@@ -121,7 +122,8 @@ digits_from_digits(fpdec_digit_array_t **digit_array,
     for (; n_digits > 0 && digits[n_digits - 1] == 0; --n_digits);
 
     *digit_array = digits_alloc(n_digits);
-    if (*digit_array == NULL) MEMERROR
+    if (*digit_array == NULL)
+        MEMERROR;
 
     (*digit_array)->n_signif = n_digits;
     for (size_t i = 0; i < n_digits; ++i)
@@ -352,7 +354,8 @@ digits_mul(const fpdec_digit_array_t *x, const fpdec_digit_array_t *y) {
     assert(y->n_signif > 0);
 
     z = digits_alloc(x->n_signif + y->n_signif);
-    if (z == NULL) MEMERROR_RETVAL(NULL)
+    if (z == NULL)
+        MEMERROR_RETVAL(NULL);
 
     z_carry = z->digits + x->n_signif;
     for (int j = 0; j < y->n_signif; ++j) {
@@ -394,11 +397,15 @@ digits_div_digit(const fpdec_digit_array_t *x,
     assert(y > 0);
 
     q = digits_alloc(x->n_signif + x_n_shift);
-    if (q == NULL) MEMERROR_RETVAL(NULL)
+    if (q == NULL)
+        MEMERROR_RETVAL(NULL);
 
     if (x_n_shift > 0) {
         xhat = digits_copy(x, x_n_shift, 0);
-        if (xhat == NULL) MEMERROR_RETVAL(NULL)
+        if (xhat == NULL) {
+            fpdec_mem_free((void *)q);
+            MEMERROR_RETVAL(NULL);
+        }
     }
     else
         xhat = x;
@@ -436,15 +443,23 @@ digits_divmod(const fpdec_digit_array_t *x, const fpdec_n_digits_t x_n_shift,
     assert(y->digits[y->n_signif - 1] > 0);
 
     q = digits_alloc(m - n + 1);
-    if (q == NULL) MEMERROR_RETVAL(NULL)
+    if (q == NULL)
+        MEMERROR_RETVAL(NULL);
 
     // D1: normalize, so that yd[n - 1] >= RADIX / 2
     d = RADIX / (y->digits[y->n_signif - 1] + 1);
     xd = digits_copy(x, x_n_shift, 1);
-    if (xd == NULL) MEMERROR_RETVAL(NULL)
+    if (xd == NULL) {
+        fpdec_mem_free((void *)q);
+        MEMERROR_RETVAL(NULL);
+    }
     digits_imul_digit(xd, d);
     yd = digits_copy(y, y_n_shift, 1);
-    if (yd == NULL) MEMERROR_RETVAL(NULL)
+    if (yd == NULL) {
+        fpdec_mem_free((void *)q);
+        fpdec_mem_free((void *)xd);
+        MEMERROR_RETVAL(NULL);
+    }
     digits_imul_digit(yd, d);
 
     // D2: loop j from m - n to 0
@@ -527,6 +542,7 @@ digits_div_max_prec(const fpdec_digit_array_t *x,
             q = digits_div_digit(x, x_n_shift, d, &r);
             if (x_n_shift >= max_x_n_shift || r == 0)
                 break;
+            fpdec_mem_free(q);
             accel++;
             x_n_shift = MIN(x_n_shift + accel * accel, max_x_n_shift);
         }
@@ -539,9 +555,11 @@ digits_div_max_prec(const fpdec_digit_array_t *x,
         fpdec_digit_array_t *r;
         while (true) {
             q = digits_divmod(x, x_n_shift, y, 0, &r);
-            if (x_n_shift >= max_x_n_shift ||
-                digits_all_zero(r->digits, r->n_signif))
+            if (x_n_shift >= max_x_n_shift || digits_all_zero(r->digits,
+                                                              r->n_signif))
                 break;
+            fpdec_mem_free(q);
+            fpdec_mem_free(r);
             accel++;
             x_n_shift = MIN(x_n_shift + accel * accel, max_x_n_shift);
         }
@@ -549,6 +567,7 @@ digits_div_max_prec(const fpdec_digit_array_t *x,
             *exp -= x_n_shift;
         else
             *exp = FPDEC_MIN_EXP - 1;       // signal precision limit exceeded
+        fpdec_mem_free(r);
     }
     return q;
 }

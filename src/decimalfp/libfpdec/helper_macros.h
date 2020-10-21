@@ -22,8 +22,8 @@ $Revision$
 *****************************************************************************/
 
 // error return
-#define ERROR(err) {errno = err; return err;}
-#define ERROR_RETVAL(err, retval) {errno = err; return retval;}
+#define ERROR(err) do {errno = err; return err;} while (0)
+#define ERROR_RETVAL(err, retval) do {errno = err; return retval;} while (0)
 #define MEMERROR ERROR(ENOMEM)
 #define MEMERROR_RETVAL(retval) ERROR_RETVAL(ENOMEM, retval)
 
