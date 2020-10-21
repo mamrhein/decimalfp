@@ -1589,9 +1589,12 @@ Decimal_quantize(DecimalObject *self, PyObject *args, PyObject *kwds) {
 
     fpq = fpdec_from_number(&tmp_q, quant);
     if (fpq == NULL) {
-        if (PyErr_Occurred())
+        if (PyErr_Occurred()) {
+            PyErr_Format(PyExc_ValueError, "Can't quantize to '%R'.",
+                         quant);
             goto ERROR;
-        else if (PyObject_IsInstance(quant, Number))
+        }
+        else if (PyObject_HasAttrString(quant, "as_integer_ratio"))
             goto FALLBACK;
         else {
             PyErr_Format(PyExc_TypeError, "Can't quantize to a '%S': %S.",

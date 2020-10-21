@@ -479,8 +479,9 @@ class Decimal:
         """Return integer multiple of `quant` closest to `self`.
 
         Args:
-            quant (Any): quantum to get a multiple from; must be a `Rational`
-                or convertable to :class:`Decimal`
+            quant (Number): quantum to get a multiple from; must be a
+                `Rational` or a number which is convertable to a `Rational`
+                (i. e. must support 'as_integer_ratio')
             rounding (ROUNDING): rounding mode (default: None)
 
         If no `rounding` mode is given, the default mode from the current
@@ -493,8 +494,9 @@ class Decimal:
                 `Fraction` is returned
 
         Raises:
-            TypeError: `quant` is not a Rational number or can not be
-                converted to a :class:`Decimal`
+            TypeError: `quant` is not a number or does not support
+                'as_integer_ratio'
+            ValueError: `quant` is not convertable to a `Rational`
 
         """
         try:
@@ -503,12 +505,12 @@ class Decimal:
             try:
                 num, den = quant.as_integer_ratio()
             except AttributeError:
-                try:
-                    quant = Decimal(quant)
-                except (TypeError, ValueError):
-                    raise TypeError("Can't quantize to a '%s': %s."
-                                    % (quant.__class__.__name__, quant))
-                num, den = quant.as_integer_ratio()
+                raise TypeError("Can't quantize to a '%s': %s."
+                                % (quant.__class__.__name__, quant)) \
+                    from None
+            except (OverflowError, ValueError):
+                raise ValueError("Can't quantize to '%r'." % quant) \
+                    from None
         mult = _floordiv_rounded(self._value * den,
                                  base10pow(self._precision) * num,
                                  rounding)
