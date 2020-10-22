@@ -134,7 +134,7 @@ def test_quantize_dflt_round(impl, value, quant):
                                    0.4,
                                    3,
                                    1),
-                         ids=("Fraction 1/4",
+                         ids=("Fraction 1/40",
                               "StdLibDecimal -0.3",
                               "0.4",
                               "3",
@@ -155,6 +155,22 @@ def test_quantize_round(impl, rnd, value, quant):
         q = StdLibDecimal(quant)
     eq_dec = (StdLibDecimal(value) / q).quantize(1, rnd.name) * q
     assert adj.as_fraction() == Fraction(eq_dec)
+
+
+@pytest.mark.parametrize("quant", (Fraction(1, 3),
+                                   Fraction(5, 7)),
+                         ids=("Fraction 1/3",
+                              "Fraction 5/7"))
+@pytest.mark.parametrize("value",
+                         ("17.5",
+                          "15"),
+                         ids=("17.5", "15"))
+def test_quantize_to_non_decimal(impl, value, quant):
+    dec = impl.Decimal(value)
+    adj = dec.quantize(quant)
+    # compute equivalent Fraction
+    equiv = round(Fraction(value) / quant) * quant
+    assert adj == equiv
 
 
 @pytest.mark.parametrize("quant", ["0.5", 7.5 + 3j, Fraction],
