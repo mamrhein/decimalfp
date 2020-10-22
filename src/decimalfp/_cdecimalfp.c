@@ -1594,7 +1594,8 @@ Decimal_quantize(DecimalObject *self, PyObject *args, PyObject *kwds) {
                          quant);
             goto ERROR;
         }
-        else if (PyObject_HasAttrString(quant, "as_integer_ratio"))
+        else if (PyObject_IsInstance(quant, Real) ||
+                 PyObject_IsInstance(quant, StdLibDecimal))
             goto FALLBACK;
         else {
             PyErr_Format(PyExc_TypeError, "Can't quantize to a '%S': %S.",
@@ -1616,14 +1617,13 @@ FALLBACK:
     ASSIGN_AND_CHECK_NULL(num, PyObject_GetAttrString(quant, "numerator"));
     ASSIGN_AND_CHECK_NULL(den, PyObject_GetAttrString(quant, "denominator"));
     t = NULL;
-    ASSIGN_AND_CHECK_NULL(t, Decimal_mul((PyObject *)self, num));
+    ASSIGN_AND_CHECK_NULL(t, Decimal_mul((PyObject *)self, den));
     tmp_q = FPDEC_ZERO;
-    rc = fpdec_from_pylong(&tmp_q, den);
+    rc = fpdec_from_pylong(&tmp_q, num);
     CHECK_FPDEC_ERROR(rc);
     rc = fpdec_div(&dec->fpdec, &((DecimalObject *)t)->fpdec, &tmp_q, 0, rnd);
     CHECK_FPDEC_ERROR(rc);
-    ASSIGN_AND_CHECK_NULL(res, fallback_op((PyObject *)dec, quant,
-                                           PyNumber_Multiply));
+    ASSIGN_AND_CHECK_NULL(res, Decimal_mul((PyObject *)dec, quant));
     Py_CLEAR(dec);
     goto CLEAN_UP;
 
