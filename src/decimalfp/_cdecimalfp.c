@@ -49,13 +49,14 @@ $Revision$
 // is no longer included in Python.h
 
 #ifndef PyMem_Calloc
+
 void *
-PyMem_Calloc(size_t nelem, size_t elsize)
-{
+PyMem_Calloc(size_t nelem, size_t elsize) {
     if (elsize != 0 && nelem > UINT64_MAX / elsize)
         return NULL;
     return PyMem_Malloc(nelem * elsize);
 }
+
 #endif
 
 // Macros to simplify error checking
@@ -1785,13 +1786,37 @@ CLEAN_UP:
 // Pickle helper
 
 static PyObject *
-Decimal_reduce(DecimalObject *self) {
-    Py_RETURN_NOTIMPLEMENTED;
+Decimal_getstate(DecimalObject *self) {
+    PyObject *state = NULL;
+    char *buf = NULL;
+    error_t rc;
+
+    buf = fpdec_as_ascii_literal(&self->fpdec, false);
+    if (buf == NULL) {
+        PyErr_SetNone(PyExc_MemoryError);                               \
+        return NULL;                                                     \
+    }
+    state = PyBytes_FromString(buf);
+    fpdec_mem_free(buf);
+    return state;
 }
 
 static PyObject *
 Decimal_setstate(DecimalObject *self, PyObject *state) {
-    Py_RETURN_NOTIMPLEMENTED;
+    char *buf = NULL;
+    error_t rc;
+
+    ASSIGN_AND_CHECK_NULL(buf, PyBytes_AsString(state));
+    rc = fpdec_from_ascii_literal(&self->fpdec, buf);
+    CHECK_FPDEC_ERROR(rc);
+    goto CLEAN_UP;
+
+ERROR:
+    assert(PyErr_Occurred());
+
+CLEAN_UP:
+    Py_INCREF(Py_None);
+    return Py_None;
 }
 
 // Decimal type spec
@@ -1862,8 +1887,8 @@ static PyMethodDef Decimal_methods[] = {
      (PyCFunction)Decimal_deepcopy,
      METH_O,
      Decimal_copy_doc},
-    {"__reduce__",
-     (PyCFunction)Decimal_reduce,
+    {"__getstate__",
+     (PyCFunction)Decimal_getstate,
      METH_NOARGS,
      Decimal_reduce_doc},
     {"__setstate__",
@@ -1925,7 +1950,7 @@ static PyType_Slot decimal_type_slots[] = {
 };
 
 static PyType_Spec DecimalType_spec = {
-    "_cdecimalfp.Decimal",                  /* name */
+    "decimalfp._cdecimalfp.Decimal",        /* name */
     sizeof(DecimalObject),                  /* basicsize */
     0,                                      /* itemsize */
     0,                                      /* flags */
@@ -2506,7 +2531,7 @@ static PyModuleDef_Slot cdecimalfp_slots[] = {
 
 static struct PyModuleDef cdecimalfp_module = {
     PyModuleDef_HEAD_INIT,              /* m_base */
-    "_cdecimalfp",                      /* m_name */
+    "decimalfp._cdecimalfp",            /* m_name */
     cdecimalfp_doc,                     /* m_doc */
     0,                                  /* m_size */
     cdecimalfp_methods,                /* m_methods */

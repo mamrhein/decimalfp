@@ -574,7 +574,7 @@ class Decimal:
 
     def __reduce__(self) -> Tuple[type, Tuple, Tuple[int, int]]:
         """Return pickle helper tuple."""
-        return (Decimal, (), (self._value, self._precision))
+        return Decimal, (), (self._value, self._precision)
 
     def __setstate__(self, state: Tuple[int, int]):
         """Set state of `self` from `state`."""
