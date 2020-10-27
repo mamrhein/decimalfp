@@ -572,14 +572,6 @@ class Decimal:
         """Return self (Decimal instances are immutable)."""
         return self.__copy__()
 
-    def __reduce__(self) -> Tuple[type, Tuple, Tuple[int, int]]:
-        """Return pickle helper tuple."""
-        return Decimal, (), (self._value, self._precision)
-
-    def __setstate__(self, state: Tuple[int, int]):
-        """Set state of `self` from `state`."""
-        self._value, self._precision = state
-
     # string representation
     def __repr__(self) -> str:
         """repr(self)"""                                        # noqa: D400
@@ -684,6 +676,15 @@ class Decimal:
                 return format(raw, fmt)
             else:
                 return raw
+
+    __getstate__ = __bytes__
+
+    def __setstate__(self, state: bytes):
+        """Set state of `self` from `state`."""
+        lit = state.decode('ascii')
+        int_lit, frac_lit = lit.split('.')
+        self._precision = len(frac_lit)
+        self._value = int(int_lit + frac_lit)
 
     def _compare(self, other: Any, cmp: Callable) -> bool:
         """Compare `self` and `other` using operator `cmp`."""

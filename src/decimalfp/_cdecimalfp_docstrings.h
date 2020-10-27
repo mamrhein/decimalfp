@@ -74,12 +74,12 @@ PyDoc_STRVAR(
     "TODO");
 
 PyDoc_STRVAR(
-    Decimal_reduce_doc,
-    "TODO");
+    Decimal_getstate_doc,
+    "Return state representation of `self`.");
 
 PyDoc_STRVAR(
     Decimal_setstate_doc,
-    "TODO");
+    "Set state of `self` from `state`.");
 
 PyDoc_STRVAR(
     Decimal_bytes_doc,

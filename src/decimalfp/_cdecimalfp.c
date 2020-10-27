@@ -1799,22 +1799,6 @@ CLEAN_UP:
 // Pickle helper
 
 static PyObject *
-Decimal_getstate(DecimalObject *self) {
-    PyObject *state = NULL;
-    char *buf = NULL;
-    error_t rc;
-
-    buf = fpdec_as_ascii_literal(&self->fpdec, false);
-    if (buf == NULL) {
-        PyErr_NoMemory();
-        return NULL;
-    }
-    state = PyBytes_FromString(buf);
-    fpdec_mem_free(buf);
-    return state;
-}
-
-static PyObject *
 Decimal_setstate(DecimalObject *self, PyObject *state) {
     char *buf = NULL;
     error_t rc;
@@ -1901,9 +1885,9 @@ static PyMethodDef Decimal_methods[] = {
      METH_O,
      Decimal_copy_doc},
     {"__getstate__",
-     (PyCFunction)Decimal_getstate,
+     (PyCFunction)Decimal_bytes,
      METH_NOARGS,
-     Decimal_reduce_doc},
+     Decimal_getstate_doc},
     {"__setstate__",
      (PyCFunction)Decimal_setstate,
      METH_O,
