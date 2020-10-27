@@ -604,13 +604,15 @@ class Decimal:
         """str(self)"""                                         # noqa: D400
         sp = self._precision
         if sp == 0:
-            return "%i" % self._value
+            return '%i' % self._value
         else:
-            sv = self._value
-            i = _vp_to_int(sv, sp)
-            f = sv - i * base10pow(sp)
-            s = (i == 0 and f < 0) * '-'  # -1 < self < 0 => i = 0 and f < 0 !
-            return '%s%i.%0*i' % (s, i, sp, abs(f))
+            s, v = self._value < 0, abs(self._value)
+            lit = f"{v}"
+            if len(lit) > sp:
+                return f"{s * '-'}{lit[:-sp]}.{lit[-sp:]}"
+            else:
+                # here an f-string would be slower because of nested width
+                return '%s0.%0*i' % (s * '-', sp, v)
 
     def __format__(self, fmt_spec: str) -> str:
         """Return `self` converted to a string according to `fmt_spec`.
