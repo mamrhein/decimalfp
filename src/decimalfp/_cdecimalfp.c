@@ -137,7 +137,7 @@ runtime_error_ptr(const char *msg) {
         case FPDEC_OK:                                                      \
             break;                                                          \
         case ENOMEM:                                                        \
-            PyErr_SetNone(PyExc_MemoryError);                               \
+            PyErr_NoMemory();                               \
             goto ERROR;                                                     \
         case FPDEC_PREC_LIMIT_EXCEEDED:                                     \
             PyErr_SetString(PyExc_ValueError, "Precision limit exceeded."); \
@@ -732,7 +732,7 @@ Decimal_str(DecimalObject *self) {
     char *lit = fpdec_as_ascii_literal(&self->fpdec, false);
 
     if (lit == NULL) {
-        PyErr_SetNone(PyExc_MemoryError);
+        PyErr_NoMemory();
         return NULL;
     }
     res = PyUnicode_InternFromString(lit);
@@ -748,7 +748,7 @@ Decimal_repr(DecimalObject *self) {
     size_t n_frac_digits;
 
     if (lit == NULL) {
-        PyErr_SetNone(PyExc_MemoryError);
+        PyErr_NoMemory();
         return NULL;
     }
     radix_point = strrchr(lit, '.');
@@ -1080,8 +1080,7 @@ ERROR:
         if (err == PyExc_ValueError || err == PyExc_OverflowError ||
             err == PyExc_AttributeError) {
             PyErr_Clear();
-            PyErr_Format(PyExc_ValueError, "Unsupported operand: %R.",
-                         obj);
+            PyErr_Format(PyExc_ValueError, "Unsupported operand: %R.", obj);
         }
     }
 
@@ -1793,8 +1792,8 @@ Decimal_getstate(DecimalObject *self) {
 
     buf = fpdec_as_ascii_literal(&self->fpdec, false);
     if (buf == NULL) {
-        PyErr_SetNone(PyExc_MemoryError);                               \
-        return NULL;                                                     \
+        PyErr_NoMemory();
+        return NULL;
     }
     state = PyBytes_FromString(buf);
     fpdec_mem_free(buf);
