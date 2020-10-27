@@ -614,6 +614,19 @@ class Decimal:
                 # here an f-string would be slower because of nested width
                 return '%s0.%0*i' % (s * '-', sp, v)
 
+    def __bytes__(self) -> bytes:
+        """bytes(self)"""                                       # noqa: D400
+        sp = self._precision
+        if sp == 0:
+            return b'%i' % self._value
+        else:
+            s, v = self._value < 0, abs(self._value)
+            lit = b'%i' % v
+            if len(lit) > sp:
+                return b'%s%s.%s' % (s * b'-', lit[:-sp], lit[-sp:])
+            else:
+                return b'%s0.%0*i' % (s * b'-', sp, v)
+
     def __format__(self, fmt_spec: str) -> str:
         """Return `self` converted to a string according to `fmt_spec`.
 

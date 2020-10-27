@@ -34,7 +34,6 @@ PyDoc_STRVAR(
 );
 
 PyDoc_STRVAR(
-
     DecimalType_from_decimal_doc,
     "Convert a finite decimal number to a :class:`Decimal`.\n\n"
     "Args:\n"
@@ -81,6 +80,10 @@ PyDoc_STRVAR(
 PyDoc_STRVAR(
     Decimal_setstate_doc,
     "TODO");
+
+PyDoc_STRVAR(
+    Decimal_bytes_doc,
+    "bytes(self)");
 
 PyDoc_STRVAR(
     Decimal_format_doc,

@@ -727,6 +727,20 @@ Decimal_imag_get(DecimalObject *self) {
 // String representation
 
 static PyObject *
+Decimal_bytes(DecimalObject *self) {
+    PyObject *res = NULL;
+    char *lit = fpdec_as_ascii_literal(&self->fpdec, false);
+
+    if (lit == NULL) {
+        PyErr_NoMemory();
+        return NULL;
+    }
+    res = PyBytes_FromString(lit);
+    fpdec_mem_free(lit);
+    return res;
+}
+
+static PyObject *
 Decimal_str(DecimalObject *self) {
     PyObject *res = NULL;
     char *lit = fpdec_as_ascii_literal(&self->fpdec, false);
@@ -1894,6 +1908,10 @@ static PyMethodDef Decimal_methods[] = {
      (PyCFunction)Decimal_setstate,
      METH_O,
      Decimal_setstate_doc},
+    {"__bytes__",
+     (PyCFunction)Decimal_bytes,
+     METH_NOARGS,
+     Decimal_bytes_doc},
     {"__format__",
      (PyCFunction)Decimal_format,
      METH_O,

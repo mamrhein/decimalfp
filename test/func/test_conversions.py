@@ -132,6 +132,17 @@ def test_str(impl, value, prec, str_):
     assert str(dec) == str_
 
 
+@pytest.mark.parametrize(("value", "prec", "bstr"),
+                         ((None, None, b"0"),
+                          (None, 2, b"0.00"),
+                          ("-20.7e-3", 5, b"-0.02070"),
+                          ("0.0000000000207", None, b"0.0000000000207"),
+                          (887 * 10 ** 14, 0, b"887" + b"0" * 14)))
+def test_bytes(impl, value, prec, bstr):
+    dec = impl.Decimal(value, prec)
+    assert bytes(dec) == bstr
+
+
 @pytest.mark.parametrize(("value", "prec", "repr_"),
                          ((None, None, "Decimal(0)"),
                           (None, 2, "Decimal(0, 2)"),
