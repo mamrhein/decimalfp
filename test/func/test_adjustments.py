@@ -167,7 +167,7 @@ def test_quantize_round(impl, rnd, value, quant):
                          ids=("17.5", "15"))
 def test_quantize_to_non_decimal(impl, value, quant):
     dec = impl.Decimal(value)
-    adj = dec.quantize(quant)
+    adj = dec.quantize(quant, rounding=impl.ROUNDING.ROUND_HALF_EVEN)
     # compute equivalent Fraction
     equiv = round(Fraction(value) / quant) * quant
     assert adj == equiv
