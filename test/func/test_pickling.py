@@ -23,8 +23,10 @@ import pytest
 @pytest.mark.parametrize("value",
                          ("17.800",
                           ".".join(("1" * 3097, "4" * 33 + "0" * 19)),
-                          "-0.00014"),
-                         ids=("compact", "large", "fraction"))
+                          "-0.00014",
+                          "12345678",
+                          None),
+                         ids=("compact", "large", "fraction", "int", "zero"))
 def test_pickling(impl, value):
     dec = impl.Decimal(value)
     assert loads(dumps(dec)) == dec
