@@ -1951,7 +1951,7 @@ static PyType_Slot decimal_type_slots[] = {
 };
 
 static PyType_Spec DecimalType_spec = {
-    "decimalfp._cdecimalfp.Decimal",        /* name */
+    "decimalfp.Decimal",                    /* name */
     sizeof(DecimalObject),                  /* basicsize */
     0,                                      /* itemsize */
     0,                                      /* flags */
@@ -2532,10 +2532,10 @@ static PyModuleDef_Slot cdecimalfp_slots[] = {
 
 static struct PyModuleDef cdecimalfp_module = {
     PyModuleDef_HEAD_INIT,              /* m_base */
-    "decimalfp._cdecimalfp",            /* m_name */
+    "decimalfp",                        /* m_name */
     cdecimalfp_doc,                     /* m_doc */
     0,                                  /* m_size */
-    cdecimalfp_methods,                /* m_methods */
+    cdecimalfp_methods,                 /* m_methods */
     cdecimalfp_slots,                   /* m_slots */
     NULL,                               /* m_traverse */
     NULL,                               /* m_clear */

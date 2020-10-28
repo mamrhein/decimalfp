@@ -18,6 +18,9 @@
 """Decimal fixed-point arithmetic."""
 
 
+__name__ = 'decimalfp'      # for pickling
+
+
 # standard lib imports
 
 from decimal import Decimal as _StdLibDecimal

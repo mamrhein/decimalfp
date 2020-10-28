@@ -40,7 +40,11 @@ else:
                 params=IMPLS,
                 ids=IDS)
 def impl(request):
-    mod = import_module(request.param)
+    mod = import_module('decimalfp')
+    submod = import_module(request.param)
+    if mod.Decimal is not submod.Decimal:
+        for attr in mod.__all__:
+            setattr(mod, attr, getattr(submod, attr))
     return mod
 
 
