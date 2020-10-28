@@ -685,7 +685,7 @@ class Decimal:
     def __setstate__(self, state: bytes):
         """Set state of `self` from `state`."""
         lit = state.decode('ascii')
-        int_lit, frac_lit = lit.split('.')
+        int_lit, _, frac_lit = lit.partition('.')
         self._precision = len(frac_lit)
         self._value = int(int_lit + frac_lit)
 
