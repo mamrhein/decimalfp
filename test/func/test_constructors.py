@@ -51,6 +51,8 @@ class IntWrapper:
         """int(self)"""
         return self.i
 
+    __index__ = __int__
+
     def __eq__(self, i):
         """self == i"""
         return self.i == i
