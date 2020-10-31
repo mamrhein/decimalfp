@@ -231,13 +231,13 @@ __version__ = 0, 11, 0
 # In addition, the import of the Python implementation can be forced by
 # setting the environment variable DECIMALFP_FORCE_PYTHON_IMPL
 import platform  # noqa: I100, I202
-
 _impl = platform.python_implementation()
 del platform
-import os  # noqa: I100, I202
 
+import os  # noqa: I100, I202
 _force_python_impl = os.getenv('DECIMALFP_FORCE_PYTHON_IMPL')
 del os
+
 if _impl == 'PyPy' or _force_python_impl:
     from ._pydecimalfp import (
         Decimal, get_dflt_rounding_mode, ROUNDING, set_dflt_rounding_mode,
