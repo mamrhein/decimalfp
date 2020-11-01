@@ -1838,6 +1838,8 @@ static PyGetSetDef Decimal_properties[] = {
     {"imag", (getter)Decimal_imag_get, 0,
      "Return imaginary part of `self`.\n\n"
      "Returns 0 (Real numbers have no imaginary component).\n\n", 0},
+    {"__module__", (getter)Decimal_imag_get, 0,
+     "Hack to avoid deprecation warning. Will be overwritten.\n\n", 0},
     {0, 0, 0, 0, 0}};
 
 static PyMethodDef Decimal_methods[] = {
@@ -1951,7 +1953,7 @@ static PyType_Slot decimal_type_slots[] = {
 };
 
 static PyType_Spec DecimalType_spec = {
-    "decimalfp.Decimal",                    /* name */
+    "Decimal",                              /* name */
     sizeof(DecimalObject),                  /* basicsize */
     0,                                      /* itemsize */
     0,                                      /* flags */
@@ -2412,6 +2414,31 @@ static PyMethodDef cdecimalfp_methods[] = {
     {0, 0, 0, 0}
 };
 
+static PyTypeObject *
+PyType_FromModuleAndSpecH(PyObject *module, PyType_Spec *spec) {
+    // This is a hack to set the __module__ attribute of the created type!!!
+    PyTypeObject *res = NULL;
+    PyObject *mod_name = NULL;
+    int rc;
+
+    ASSIGN_AND_CHECK_NULL(mod_name, PyObject_GetAttrString(module,
+                                                           "__name__"));
+    ASSIGN_AND_CHECK_NULL(res, (PyTypeObject *)PyType_FromSpec(spec));
+    rc = PyObject_SetAttrString((PyObject *)res, "__module__", mod_name);
+    if (rc != 0) {
+        Py_DECREF(res);
+        goto ERROR;
+    }
+    goto CLEAN_UP;
+
+ERROR:
+    assert(PyErr_Occurred());
+
+CLEAN_UP:
+    Py_XDECREF(mod_name);
+    return res;
+}
+
 #define PYMOD_ADD_OBJ(module, name, obj)                    \
     do {                                                    \
         Py_INCREF(obj);                                     \
@@ -2490,7 +2517,8 @@ cdecimalfp_exec(PyObject *module) {
 
     /* Add types */
     ASSIGN_AND_CHECK_NULL(DecimalType,
-                          (PyTypeObject *)PyType_FromSpec(&DecimalType_spec));
+                          PyType_FromModuleAndSpecH(module,
+                                                    &DecimalType_spec));
     PYMOD_ADD_OBJ(module, "Decimal", (PyObject *)DecimalType);
     PYMOD_ADD_OBJ(module, EnumRounding_name, EnumRounding);
 
