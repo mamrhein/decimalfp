@@ -24,6 +24,7 @@ $Revision$
 #include "fpdec_struct.h"
 #include "digit_array.h"
 #include "digit_array_struct.h"
+#include "format_spec.h"
 #include "parser.h"
 #include "shifted_int.h"
 #include "rounding_helper.h"
@@ -57,6 +58,14 @@ const fpdec_t FPDEC_MINUS_ONE = {
     .dec_prec = 0,
     .hi = 0,
     .lo = 1,
+};
+const fpdec_t FPDEC_ONE_HUNDRED = {
+    .dyn_alloc = false,
+    .normalized = false,
+    .sign = 1,
+    .dec_prec = 0,
+    .hi = 0,
+    .lo = 100,
 };
 
 
@@ -741,7 +750,7 @@ fpdec_quantize(fpdec_t *fpdec, fpdec_t *quant,
     rc = fpdec_mul(&t2, &t1, quant);
     if (rc == FPDEC_OK)
         fpdec_reset_to_zero(fpdec, 0);
-        *fpdec = t2;
+    *fpdec = t2;
     fpdec_reset_to_zero(&t1, 0);
     return rc;
 }
@@ -763,65 +772,430 @@ fpdec_quantized(fpdec_t *fpdec, const fpdec_t *src, fpdec_t *quant,
     return rc;
 }
 
-static inline char *
-fill_in_leading_digit(char *buf, const fpdec_digit_t digit) {
-    char dec_digits[DEC_DIGITS_PER_DIGIT];
-    char *ch = dec_digits;
-    fpdec_digit_t t = digit;
-    while (t > 0) {
-        *(ch++) = '0' + (t % 10);
-        t /= 10;
-    }
-    while (--ch >= dec_digits)
-        *(buf++) = *ch;
+static inline uint8_t *
+fill_in_zeros(uint8_t *ch, const int n) {
+    uint8_t *stop = ch + n;
+    for (; ch < stop; *ch++ = '0');
+    return stop;
+}
+
+
+static inline uint8_t *
+fillin_n_bytes_to_the_left(uint8_t *buf, const uint8_t *src,
+                           const uint8_t n) {
+    buf -= n;
+    memcpy(buf, src, n);
     return buf;
 }
 
-static inline char *
-fill_in_digit(char *buf, const fpdec_digit_t digit, const int n) {
-    fpdec_digit_t t = digit;
-    char *ch;
-    ch = buf = buf + n;
-    for (int i = 0; i < n; i++) {
-        *(--ch) = '0' + (t % 10);
-        t /= 10;
-    }
+struct grouping_iter {
+    const uint8_t *next;
+};
+
+static inline struct grouping_iter
+init_grouping_iter(const uint8_t *grouping) {
+    assert(grouping[4] == 0);
+    struct grouping_iter it = {grouping};
+    return it;
+}
+
+static inline uint8_t
+iter_grouping(struct grouping_iter *it) {
+    const uint8_t *next = it->next;
+    uint8_t l = *next;
+    if (l > 0 && *(next + 1) > 0)
+        it->next += 1;
+    if (l == CHAR_MAX)
+        return 0;
+    return l;
+}
+
+static inline uint8_t *
+copy_utf8c(uint8_t *buf, utf8c_t utf8c) {
+    for (uint8_t *ch = utf8c.bytes; ch < utf8c.bytes + utf8c.n_bytes;
+         *buf++ = *ch++);
     return buf;
 }
 
-static inline char *
-fill_in_zeros(char *ch, const int n) {
-    for (int i = 0; i < n; i++)
-        *(ch++) = '0';
+static inline uint8_t *
+buf_align(uint8_t *buf, size_t n_char, size_t min_width, char sign,
+          char align, utf8c_t fill) {
+    assert(n_char < min_width);
+    size_t n_to_fill = min_width - n_char;
+    size_t n_lpad, n_rpad;
+    uint8_t *ch, *offset;
+
+    switch (align) {
+        case '=':
+            ch = buf + (sign == '\0' ? 0 : 1);
+            n_lpad = n_to_fill;
+            n_rpad = 0;
+            break;
+        case '>':
+            ch = buf;
+            n_lpad = n_to_fill;
+            n_rpad = 0;
+            break;
+        case '<':
+            ch = buf + n_char;
+            n_lpad = 0;
+            n_rpad = n_to_fill;
+            break;
+        case '^':
+            ch = n_to_fill > 1 ? buf : buf + n_char;
+            n_lpad = n_to_fill / 2;
+            n_rpad = n_to_fill - n_lpad;
+            break;
+    }
+    if (n_lpad > 0) {
+        offset = ch + n_lpad * fill.n_bytes;
+        memmove(offset, ch, n_char);
+        for (; ch < offset; ch = copy_utf8c(ch, fill));
+        ch += n_char;
+    }
+    if (n_rpad > 0) {
+        offset = ch + n_rpad * fill.n_bytes;
+        for (; ch < offset; ch = copy_utf8c(ch, fill));
+    }
     return ch;
 }
 
-static char *
-fpdec_dyn_as_ascii_literal(const fpdec_t *fpdec,
-                           const bool no_trailing_zeros) {
-    fpdec_sign_t sign = FPDEC_SIGN(fpdec);
+static inline uint8_t *
+fill_in_digit(uint8_t *buf, fpdec_digit_t digit, const int n) {
+    uint8_t *t = buf + n;
+    for (uint8_t *ch = t - 1; ch >= buf; --ch) {
+        *ch = '0' + (digit % 10);
+        digit /= 10;
+    }
+    return t;
+}
+
+static inline uint8_t *
+fill_in_u128(uint8_t *buf, uint128_t ui) {
+    uint8_t dec_digits[MAX_N_DEC_DIGITS_IN_SHINT];
+    uint8_t *ch = dec_digits;
+    while (U128_NE_ZERO(ui))
+        *ch++ = '0' + u128_idiv_10(&ui);
+    while (--ch >= dec_digits)
+        *buf++ = *ch;
+    return buf;
+}
+
+static inline uint8_t *
+fill_in_u128_padded(uint8_t *buf, uint128_t ui, utf8c_t sep,
+                    struct grouping_iter *it, size_t min_width) {
+    size_t len = MAX(MAX_N_DEC_DIGITS_IN_SHINT, min_width + 1) *
+                 (1 + sep.n_bytes) + 1;
+    uint8_t r2l_buf[len];
+    uint8_t *ch = r2l_buf + len - 1;
+    size_t n_char = 0;
+    uint8_t i, n;
+
+    *ch = '\0';
+    i = n = iter_grouping(it);
+    while (U128_NE_ZERO(ui) || n_char < min_width) {
+        *(--ch) = '0' + u128_idiv_10(&ui);
+        ++n_char;
+        if (n > 0) {
+            --i;
+            if (i == 0 && (U128_NE_ZERO(ui) || n_char < min_width)) {
+                ch = fillin_n_bytes_to_the_left(ch, sep.bytes, sep.n_bytes);
+                ++n_char;
+                i = n = iter_grouping(it);
+            }
+        }
+    }
+    if (*ch < '0' || *ch > '9')       // last char was a seperator
+        *(--ch) = '0';
+    // copy bytes to target buffer
+    while (*ch != '\0')
+        *buf++ = *ch++;
+    return buf;
+}
+
+static uint8_t *
+fpdec_shint_formatted(const fpdec_t *fpdec, const format_spec_t *fmt_spec,
+                      const bool no_trailing_zeros) {
+    uint8_t *buf;
+    uint8_t *ch;
+    size_t max_n_bytes;
+    size_t n_char;
+    uint8_t len_decimal_point = fmt_spec->decimal_point.n_bytes;
+    size_t len_thousands_sep = fmt_spec->thousands_sep.n_bytes;
+    size_t len_fill = fmt_spec->fill.n_bytes;
+    uint8_t dec_point_shift = 0;
+    error_t rc;
+    fpdec_t adj = FPDEC_ZERO;
     fpdec_dec_prec_t dec_prec = FPDEC_DEC_PREC(fpdec);
-    fpdec_exp_t exp = FPDEC_DYN_EXP(fpdec);
+
+    // shift decimal point for %-format
+    if (fmt_spec->type == '%') {
+        dec_point_shift = 2;
+        dec_prec = dec_prec > 2 ? dec_prec - 2 : 0;
+    }
+
+    if (fmt_spec->precision < dec_prec) {
+        // need to adjust value
+        int32_t adj_prec = fmt_spec->precision + dec_point_shift;
+        rc = fpdec_adjusted(&adj, fpdec, adj_prec, FPDEC_ROUND_DEFAULT);
+        if (rc != FPDEC_OK)
+            return NULL;
+        fpdec = &adj;
+        dec_prec = fmt_spec->precision;
+    }
+
+    max_n_bytes = MAX(
+        (fmt_spec->sign == '\0' ? 0 : 1) +
+        // maximum number of integral decimal digits (incl. provision for
+        // multi-byte thousands sep character)
+        (MAX_N_DEC_DIGITS_IN_SHINT - dec_prec) * (1 + len_thousands_sep) +
+        // radix point
+        len_decimal_point +
+        // fractional digits
+        fmt_spec->precision +
+        // percent sign
+        (fmt_spec->type == '%' ? 1 : 0),
+    // min width (incl. provision for multi-byte fill character) +
+    // provision for additional zero infront of a thousands separator
+        fmt_spec->min_width * (1 + len_fill) + 1);
+    ch = buf = fpdec_mem_alloc(max_n_bytes + 1, 1);
+    if (buf == NULL)
+        MEMERROR_RETVAL(NULL);
+
+    // separate integral and fractional part
+    uint128_t int_part = U128_FROM_SHINT(fpdec);
+    uint64_t frac_part = 0;
+    if (dec_prec > 0)
+        // split shifted int
+        frac_part = u128_idiv_u64(&int_part, u64_10_pow_n(dec_prec));
+
+    if (fmt_spec->sign != '\0')
+        *ch++ = fmt_spec->sign;
+    // integral part
+    if (len_thousands_sep == 0) {
+        if (U128_EQ_ZERO(int_part)) {
+            // atleast one integral digit
+            *ch++ = '0';
+        }
+        else
+            ch = fill_in_u128(ch, int_part);
+    }
+    else {
+        struct grouping_iter it = init_grouping_iter(fmt_spec->grouping);
+        size_t min_width_int_part = 0;
+        if (fmt_spec->fill.bytes[0] == '0' && fmt_spec->align == '=') {
+            // zero padding
+            size_t n_non_int_part = fmt_spec->precision + len_decimal_point +
+                                    (fmt_spec->sign == 0 ? 0 : 1) +
+                                    (fmt_spec->type == '%' ? 1 : 0);
+            if (fmt_spec->min_width > n_non_int_part)
+                min_width_int_part = fmt_spec->min_width - n_non_int_part;
+        }
+        ch = fill_in_u128_padded(ch, int_part, fmt_spec->thousands_sep, &it,
+                                 min_width_int_part);
+    }
+    // fractional part
+    size_t n = fmt_spec->precision;
+    if (no_trailing_zeros) {
+        if (frac_part == 0)
+            n = 0;
+        else
+            while (frac_part > 0 && (frac_part % 10) == 0) {
+                frac_part /= 10;
+                n--;
+            }
+        dec_prec = n;
+    }
+    // radix point (only if there are any fractional digits)
+    if (n > 0) {
+        ch = copy_utf8c(ch, fmt_spec->decimal_point);
+        ch = fill_in_digit(ch, (fpdec_digit_t)frac_part, dec_prec);
+        if (n > dec_prec)
+            ch = fill_in_zeros(ch, n - dec_prec);
+    }
+
+    if (fmt_spec->type == '%')
+        *ch++ = '%';
+
+    if (fmt_spec->min_width > 0) {
+        n_char = utf8_strlen(buf);
+        if (n_char == SIZE_MAX) {
+            fpdec_mem_free(buf);
+            ERROR_RETVAL(FPDEC_INVALID_FORMAT, NULL);
+        }
+        if (fmt_spec->min_width > n_char) {
+            ch = buf_align(buf, n_char, fmt_spec->min_width, fmt_spec->sign,
+                           fmt_spec->align, fmt_spec->fill);
+        }
+    }
+
+    fpdec_reset_to_zero(&adj, 0);
+    assert(ch <= buf + max_n_bytes);
+    assert(*ch == 0);
+    return buf;
+}
+
+static inline uint8_t *
+fill_in_leading_digit(uint8_t *buf, fpdec_digit_t digit) {
+    uint8_t dec_digits[DEC_DIGITS_PER_DIGIT];
+    uint8_t *ch = dec_digits;
+    while (digit > 0) {
+        *ch++ = '0' + (digit % 10);
+        digit /= 10;
+    }
+    while (--ch >= dec_digits)
+        *buf++ = *ch;
+    return buf;
+}
+
+static inline uint8_t *
+fill_in_digits_padded(uint8_t *buf, const fpdec_digit_t *most_signif_digit,
+                      fpdec_n_digits_t n_digits, size_t n_trailing_zeros,
+                      utf8c_t sep, struct grouping_iter *it,
+                      size_t min_width) {
+    const fpdec_digit_t *digit = most_signif_digit - n_digits + 1;
+    size_t len = MAX(n_digits * DEC_DIGITS_PER_DIGIT + n_trailing_zeros,
+                     min_width + 1) * (1 + sep.n_bytes) + 1;
+    uint8_t r2l_buf[len];
+    uint8_t *ch = r2l_buf + len - 1;
+    size_t n_char = 0;
+    uint8_t i, n;
+    fpdec_digit_t t;
+
+    *ch = '\0';
+    i = n = iter_grouping(it);
+
+    for (int j = 0; j < n_trailing_zeros; ++j) {
+        *(--ch) = '0';
+        if (n > 0) {
+            --i;
+            if (i == 0) {
+                ch = fillin_n_bytes_to_the_left(ch, sep.bytes, sep.n_bytes);
+                ++n_char;
+                i = n = iter_grouping(it);
+            }
+        }
+    }
+    n_char += n_trailing_zeros;
+
+    for (; digit < most_signif_digit; ++digit) {
+        t = *digit;
+        for (int j = 0; j < DEC_DIGITS_PER_DIGIT; ++j) {
+            *(--ch) = '0' + (t % 10);
+            t /= 10;
+            if (n > 0) {
+                --i;
+                if (i == 0) {
+                    ch = fillin_n_bytes_to_the_left(ch, sep.bytes,
+                                                    sep.n_bytes);
+                    ++n_char;
+                    i = n = iter_grouping(it);
+                }
+            }
+        }
+        n_char += DEC_DIGITS_PER_DIGIT;
+    }
+
+    // most significant digit and zero padding
+    if (n_digits > 0)
+        t = *digit;
+    else
+        t = 0;
+    while (t > 0 || n_char < min_width) {
+        *(--ch) = '0' + (t % 10);
+        t /= 10;
+        ++n_char;
+        if (n > 0) {
+            --i;
+            if (i == 0 && (t > 0 || n_char < min_width)) {
+                ch = fillin_n_bytes_to_the_left(ch, sep.bytes, sep.n_bytes);
+                ++n_char;
+                i = n = iter_grouping(it);
+            }
+        }
+    }
+    if (*ch < '0' || *ch > '9')       // last char was a seperator
+        *(--ch) = '0';
+    // copy bytes to target buffer
+    while (*ch != '\0')
+        *buf++ = *ch++;
+    return buf;
+}
+
+static uint8_t *
+fpdec_dyn_formatted(const fpdec_t *fpdec, const format_spec_t *fmt_spec,
+                    const bool no_trailing_zeros) {
+    uint8_t *buf;
+    uint8_t *ch;
+    size_t max_n_bytes;
+    size_t n_char;
+    uint8_t len_decimal_point = fmt_spec->decimal_point.n_bytes;
+    size_t len_thousands_sep = fmt_spec->thousands_sep.n_bytes;
+    size_t len_fill = fmt_spec->fill.n_bytes;
+    error_t rc;
+    fpdec_t adj = FPDEC_ZERO;
+    fpdec_dec_prec_t dec_prec;
+    fpdec_exp_t exp;
     fpdec_n_digits_t n_int_digits, n_frac_digits;
     size_t n_dec_trailing_int_zeros, n_dec_trailing_frac_zeros;
-    size_t n_dec_fill_zeros;
+    size_t n_dec_frac_fill_zeros;
     size_t n_dec_frac_digits, d_adjust;
-    size_t max_n_chars;
-    char *buf;
-    char *ch;
+
+    if (fmt_spec->type == '%') {
+        rc = fpdec_mul(&adj, fpdec, &FPDEC_ONE_HUNDRED);
+        if (rc != FPDEC_OK)
+            return NULL;
+        FPDEC_DEC_PREC(&adj) = FPDEC_DEC_PREC(&adj) > 2 ?
+                               FPDEC_DEC_PREC(&adj) - 2 : 0;
+        fpdec = &adj;
+    }
+
+    if (fmt_spec->precision < FPDEC_DEC_PREC(fpdec)) {
+        // need to adjust value
+        if (fpdec == &adj)
+            rc = fpdec_adjust(&adj, fmt_spec->precision, FPDEC_ROUND_DEFAULT);
+        else {
+            rc = fpdec_adjusted(&adj, fpdec, fmt_spec->precision,
+                                FPDEC_ROUND_DEFAULT);
+            if (!FPDEC_IS_DYN_ALLOC(&adj)) {
+                buf = fpdec_shint_formatted(&adj, fmt_spec,
+                                            no_trailing_zeros);
+                fpdec_reset_to_zero(&adj, 0);
+                return buf;
+            }
+            fpdec = &adj;
+        }
+        if (rc != FPDEC_OK)
+            return NULL;
+    }
+
+    dec_prec = FPDEC_DEC_PREC(fpdec);
+    exp = FPDEC_DYN_EXP(fpdec);
     fpdec_digit_t *digit =
         FPDEC_DYN_DIGITS(fpdec) + FPDEC_DYN_N_DIGITS(fpdec) - 1;
 
     if (exp >= 0) {
         n_int_digits = FPDEC_DYN_N_DIGITS(fpdec);
+        n_dec_trailing_int_zeros = exp * DEC_DIGITS_PER_DIGIT;
         n_frac_digits = 0;
+        n_dec_frac_digits = 0;
+        n_dec_frac_fill_zeros = 0;
     }
     else {
-        n_frac_digits = MIN(FPDEC_DYN_N_DIGITS(fpdec), -exp);
-        n_int_digits = FPDEC_DYN_N_DIGITS(fpdec) - n_frac_digits;
+        if (-exp > FPDEC_DYN_N_DIGITS(fpdec)) {
+            n_int_digits = 0;
+            n_frac_digits = FPDEC_DYN_N_DIGITS(fpdec);
+            n_dec_frac_fill_zeros =
+                (-exp - n_frac_digits) * DEC_DIGITS_PER_DIGIT;
+        }
+        else {
+            n_int_digits = FPDEC_DYN_N_DIGITS(fpdec) + exp;
+            n_frac_digits = -exp;
+            n_dec_frac_fill_zeros = 0;
+        }
+        n_dec_trailing_int_zeros = 0;
+        n_dec_frac_digits = -exp * DEC_DIGITS_PER_DIGIT;
     }
-    n_dec_trailing_int_zeros = MAX(0, exp * DEC_DIGITS_PER_DIGIT);
-    n_dec_frac_digits = MAX(0, -exp) * DEC_DIGITS_PER_DIGIT;
     if (n_dec_frac_digits > dec_prec) {
         d_adjust = n_dec_frac_digits - dec_prec;
         n_dec_trailing_frac_zeros = 0;
@@ -833,152 +1207,164 @@ fpdec_dyn_as_ascii_literal(const fpdec_t *fpdec,
         else
             n_dec_trailing_frac_zeros = dec_prec - n_dec_frac_digits;
     }
-    n_dec_fill_zeros = MAX(0, -exp - n_frac_digits) * DEC_DIGITS_PER_DIGIT;
-    max_n_chars =
-        // zeros to be inserted after least significant digit and after
+    max_n_bytes = MAX(
+        (fmt_spec->sign == '\0' ? 0 : 1) +
+        // maximum number of integral decimal digits (incl. provision for
+        // multi-byte thousands sep character)
+        MAX((// maxinum integral digits in coeff
+                n_int_digits * DEC_DIGITS_PER_DIGIT +
+                // zeros to be inserted after least significant digit and
+                // before radix point
+                n_dec_trailing_int_zeros) * (1 + len_thousands_sep),
+            1) +
         // radix point
-        n_dec_trailing_frac_zeros +
-        // fractional digits in coeff
-        n_dec_frac_digits - d_adjust +
-        // zeros to inserted between fractional digits and radix point
-        n_dec_fill_zeros +
-        // zeros to be inserted after least significant digit and before
-        // radix point
-        n_dec_trailing_int_zeros +
-        // maxinum integral digits in coeff
-        n_int_digits * DEC_DIGITS_PER_DIGIT +
-        // provision for sign, radix point and leading zero
-        3;
-    buf = (char *)fpdec_mem_alloc(max_n_chars + 1, 1);
+        len_decimal_point +
+        // fractional digits
+        fmt_spec->precision +
+        // percent sign
+        (fmt_spec->type == '%' ? 1 : 0),
+    // min width (incl. provision for multi-byte fill character) +
+    // provision for additional zero infront of a thousands separator
+        fmt_spec->min_width * (1 + len_fill) + 1);
+    ch = buf = fpdec_mem_alloc(max_n_bytes + 1, 1);
     if (buf == NULL)
         MEMERROR_RETVAL(NULL);
-    ch = buf;
 
-    if (sign == FPDEC_SIGN_NEG)
-        *(ch++) = '-';
-    // atleast one integral digit
-    if (n_int_digits == 0)
-        *(ch++) = '0';
-    else {
-        ch = fill_in_leading_digit(ch, *digit);
-        digit--;
-        for (fpdec_n_digits_t i = 1; i < n_int_digits; i++)
-            ch = fill_in_digit(ch, *(digit--), DEC_DIGITS_PER_DIGIT);
-        ch = fill_in_zeros(ch, n_dec_trailing_int_zeros);
-    }
-    // radix point (only if there are any fractional digits)
-    if (n_frac_digits != 0)
-        *(ch++) = '.';
-    // zeros between radix point and fractional digits
-    ch = fill_in_zeros(ch, n_dec_fill_zeros);
-    // full fractional digits
-    for (fpdec_n_digits_t i = 1; i < n_frac_digits; i++) {
-        ch = fill_in_digit(ch, *(digit--), DEC_DIGITS_PER_DIGIT);
-    }
-    // least significant fractional digit
-    if (n_frac_digits > 0) {
-        int n = DEC_DIGITS_PER_DIGIT - d_adjust;
-        fpdec_digit_t adj_digit = *digit / u64_10_pow_n(d_adjust);
-        if (no_trailing_zeros)
-            while ((adj_digit % 10) == 0 && n-- > 0)
-                adj_digit /= 10;
-        ch = fill_in_digit(ch, adj_digit, n);
-    }
-    // trailing fractional zeros
-    ch = fill_in_zeros(ch, n_dec_trailing_frac_zeros);
-
-    assert(*ch == 0);
-    assert(strlen(buf) <= max_n_chars);
-    return buf;
-}
-
-static inline char *
-fill_in_u128(char *buf, uint128_t ui) {
-    char dec_digits[MAX_N_DEC_DIGITS_IN_SHINT];
-    char *ch = dec_digits;
-    while (U128_NE_ZERO(ui))
-        *(ch++) = '0' + u128_idiv_10(&ui);
-    while (--ch >= dec_digits)
-        *(buf++) = *ch;
-    return buf;
-}
-
-static char *
-fpdec_shint_as_ascii_literal(const fpdec_t *fpdec,
-                             const bool no_trailing_zeros) {
-    char *buf;
-
-    if (FPDEC_EQ_ZERO(fpdec)) {
-        if (no_trailing_zeros || FPDEC_DEC_PREC(fpdec) == 0) {
-            buf = fpdec_mem_alloc(2, 1);
-            if (buf == NULL)
-                MEMERROR_RETVAL(NULL);
-            *buf = '0';
+    if (fmt_spec->sign != '\0')
+        *ch++ = fmt_spec->sign;
+    // integral part
+    if (len_thousands_sep == 0) {
+        if (n_int_digits == 0) {
+            // atleast one integral digit
+            *ch++ = '0';
         }
         else {
-            buf = fpdec_mem_alloc(FPDEC_DEC_PREC(fpdec) + 3, 1);
-            if (buf == NULL)
-                MEMERROR_RETVAL(NULL);
-            buf[0] = '0';
-            buf[1] = '.';
-            for (int i = 2; i < FPDEC_DEC_PREC(fpdec) + 2; i++)
-                buf[i] = '0';
+            ch = fill_in_leading_digit(ch, *digit--);
+            for (; digit >= FPDEC_DYN_DIGITS(fpdec) + n_frac_digits; --digit)
+                ch = fill_in_digit(ch, *digit, DEC_DIGITS_PER_DIGIT);
+            ch = fill_in_zeros(ch, n_dec_trailing_int_zeros);
         }
     }
     else {
-        uint128_t t = U128_FROM_SHINT(fpdec);
-        uint64_t r = 0;
-        char *ch;
-
-        buf = fpdec_mem_alloc(MAX_N_DEC_DIGITS_IN_SHINT + 3, 1);
-        if (buf == NULL)
-            MEMERROR_RETVAL(NULL);
-        ch = buf;
-
-        if (FPDEC_DEC_PREC(fpdec) > 0)
-            // split shifted int
-            r = u128_idiv_u64(&t, u64_10_pow_n(FPDEC_DEC_PREC(fpdec)));
-        if (FPDEC_SIGN(fpdec) == FPDEC_SIGN_NEG)
-            *(ch++) = '-';
-        // atleast one integral digit
-        if (U128_EQ_ZERO(t))
-            *(ch++) = '0';
-        else
-            ch = fill_in_u128(ch, t);
-        // fractional part
-        int n = FPDEC_DEC_PREC(fpdec);
-        if (n > 0) {
-            if (no_trailing_zeros) {
-                if (r == 0)
-                    n = 0;
-                else
-                    while (r > 0 && (r % 10) == 0) {
-                        r /= 10;
-                        n--;
-                    }
-            }
-            // radix point (only if there are any fractional digits)
-            if (n > 0) {
-                *(ch++) = '.';
-            }
-            ch = fill_in_digit(ch, (fpdec_digit_t)r, n);
+        struct grouping_iter it = init_grouping_iter(fmt_spec->grouping);
+        size_t min_width_int_part = 0;
+        if (fmt_spec->fill.bytes[0] == '0' && fmt_spec->align == '=') {
+            // zero padding
+            size_t n_non_int_part = fmt_spec->precision + len_decimal_point +
+                                    (fmt_spec->sign == 0 ? 0 : 1) +
+                                    (fmt_spec->type == '%' ? 1 : 0);
+            if (fmt_spec->min_width > n_non_int_part)
+                min_width_int_part = fmt_spec->min_width - n_non_int_part;
         }
-        assert(*ch == 0);
+        ch = fill_in_digits_padded(ch, digit, n_int_digits,
+                                   n_dec_trailing_int_zeros,
+                                   fmt_spec->thousands_sep, &it,
+                                   min_width_int_part);
     }
+    // fractional part
+    size_t n = (no_trailing_zeros && n_frac_digits == 0) ? 0 :
+               fmt_spec->precision;
+    // radix point (only if there are any fractional digits)
+    if (n > 0) {
+        ch = copy_utf8c(ch, fmt_spec->decimal_point);
+        // zeros between radix point and fractional digits
+        ch = fill_in_zeros(ch, n_dec_frac_fill_zeros);
+        // full fractional digits
+        for (digit = FPDEC_DYN_DIGITS(fpdec) + n_frac_digits - 1;
+             digit > FPDEC_DYN_DIGITS(fpdec); --digit) {
+            ch = fill_in_digit(ch, *digit, DEC_DIGITS_PER_DIGIT);
+        }
+        // least significant fractional digit
+        if (n_frac_digits > 0) {
+            digit = FPDEC_DYN_DIGITS(fpdec);
+            int t = DEC_DIGITS_PER_DIGIT - d_adjust;
+            fpdec_digit_t adj_digit = *digit / u64_10_pow_n(d_adjust);
+            if (no_trailing_zeros)
+                while ((adj_digit % 10) == 0 && t-- > 0)
+                    adj_digit /= 10;
+            ch = fill_in_digit(ch, adj_digit, t);
+        }
+        // trailing fractional zeros
+        if (n > dec_prec)
+            n_dec_trailing_frac_zeros += n - dec_prec;
+        ch = fill_in_zeros(ch, n_dec_trailing_frac_zeros);
+    }
+
+    if (fmt_spec->type == '%')
+        *ch++ = '%';
+
+    if (fmt_spec->min_width > 0) {
+        n_char = utf8_strlen(buf);
+        if (n_char == SIZE_MAX) {
+            fpdec_mem_free(buf);
+            ERROR_RETVAL(FPDEC_INVALID_FORMAT, NULL);
+        }
+        if (fmt_spec->min_width > n_char) {
+            ch = buf_align(buf, n_char, fmt_spec->min_width, fmt_spec->sign,
+                           fmt_spec->align, fmt_spec->fill);
+        }
+    }
+
+    fpdec_reset_to_zero(&adj, 0);
+    assert(ch <= buf + max_n_bytes);
+    assert(*ch == 0);
     return buf;
 }
 
-typedef char *(*v_as_ascii_literal)(const fpdec_t *, const bool);
+typedef uint8_t *(*v_formatted)(const fpdec_t *, const format_spec_t *,
+                                const bool);
 
-const v_as_ascii_literal vtab_as_ascii_literal[2] = {
-    fpdec_shint_as_ascii_literal,
-    fpdec_dyn_as_ascii_literal,
+const v_formatted vtab_formatted[2] = {
+    fpdec_shint_formatted,
+    fpdec_dyn_formatted,
 };
+
+uint8_t *
+fpdec_formatted(const fpdec_t *fpdec, const uint8_t *format) {
+    format_spec_t fmt_spec;
+    uint8_t dec_point_shift = 0;
+    int rc;
+
+    rc = parse_format_spec(&fmt_spec, format);
+    if (rc == -1)
+        ERROR_RETVAL(FPDEC_INVALID_FORMAT, NULL);
+    if (rc == -2)
+        ERROR_RETVAL(FPDEC_INCOMPAT_LOCALE, NULL);
+
+    // sign to be shown?
+    if (FPDEC_LT_ZERO(fpdec))
+        fmt_spec.sign = '-';        // always show sign for negative numbers
+    else if (fmt_spec.sign == '-')
+        fmt_spec.sign = '\0';       // suppress positive sign
+
+    // precision and decimal point
+    if (fmt_spec.type == '%')
+        dec_point_shift = 2;
+    if (fmt_spec.precision == SIZE_MAX)
+        fmt_spec.precision = FPDEC_DEC_PREC(fpdec) > dec_point_shift ?
+                             FPDEC_DEC_PREC(fpdec) - dec_point_shift : 0;
+    if (fmt_spec.precision == 0)                    // if number is integral
+        fmt_spec.decimal_point.n_bytes = 0;         // suppress decimal point
+
+    return DISPATCH_FUNC_VA(vtab_formatted, fpdec, &fmt_spec, false);
+}
 
 char *
 fpdec_as_ascii_literal(const fpdec_t *fpdec,
                        const bool no_trailing_zeros) {
-    return DISPATCH_FUNC_VA(vtab_as_ascii_literal, fpdec, no_trailing_zeros);
+    format_spec_t fmt_spec = {
+        .fill = {0, ""},
+        .align = '<',
+        .sign = FPDEC_LT_ZERO(fpdec) ? '-' : '\0',
+        .min_width = 0,
+        .thousands_sep = {0, ""},
+        .grouping = {3, 0, 0, 0, 0},
+        .decimal_point = {FPDEC_DEC_PREC(fpdec) == 0 ? 0 : 1, '.'},
+        .precision = FPDEC_DEC_PREC(fpdec),
+        .type = 'f'
+    };
+    return (char *)DISPATCH_FUNC_VA(vtab_formatted, fpdec, &fmt_spec,
+                                    no_trailing_zeros);
 }
 
 int

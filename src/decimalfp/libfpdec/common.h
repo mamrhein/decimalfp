@@ -86,6 +86,8 @@ typedef struct fpdec_struct fpdec_t;
 #define FPDEC_N_DIGITS_LIMIT_EXCEEDED 3
 #define FPDEC_INVALID_DECIMAL_LITERAL 4
 #define FPDEC_DIVIDE_BY_ZERO 5
+#define FPDEC_INVALID_FORMAT 6
+#define FPDEC_INCOMPAT_LOCALE 7
 
 #ifdef __cplusplus
 }

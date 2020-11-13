@@ -33,6 +33,7 @@ extern "C" {
 extern const fpdec_t FPDEC_ZERO;
 extern const fpdec_t FPDEC_ONE;
 extern const fpdec_t FPDEC_MINUS_ONE;
+extern const fpdec_t FPDEC_ONE_HUNDRED;
 
 /*****************************************************************************
 *  Functions
@@ -104,6 +105,9 @@ fpdec_quantized(fpdec_t *fpdec, const fpdec_t *src, fpdec_t *quant,
 
 char *
 fpdec_as_ascii_literal(const fpdec_t *fpdec, bool no_trailing_zeros);
+
+uint8_t *
+fpdec_formatted(const fpdec_t *fpdec, const uint8_t *format);
 
 int
 fpdec_as_sign_coeff128_exp(fpdec_sign_t *sign, uint128_t *coeff, int64_t *exp,
