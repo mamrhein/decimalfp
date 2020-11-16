@@ -153,6 +153,12 @@ runtime_error_ptr(const char *msg) {
         case FPDEC_DIVIDE_BY_ZERO:                                          \
             PyErr_SetString(PyExc_ZeroDivisionError, "Division by zero.");  \
             goto ERROR;                                                     \
+        case FPDEC_INVALID_FORMAT:                                          \
+            PyErr_SetString(PyExc_ValueError, "Invalid format spec.");      \
+            goto ERROR;                                                     \
+        case FPDEC_INCOMPAT_LOCALE:                                         \
+            PyErr_SetString(PyExc_ValueError, "Incompatible locale.");      \
+            goto ERROR;                                                     \
         default:                                                            \
             PyErr_SetString(PyExc_SystemError, "Unknown error code.");      \
             goto ERROR;                                                     \
@@ -789,7 +795,25 @@ Decimal_repr(DecimalObject *self) {
 
 static PyObject *
 Decimal_format(DecimalObject *self, PyObject *fmt_spec) {
-    Py_RETURN_NOTIMPLEMENTED;
+    PyObject *res = NULL;
+    PyObject *utf8_fmt_spec = NULL;
+    uint8_t *formatted = NULL;
+
+    ASSIGN_AND_CHECK_NULL(utf8_fmt_spec, PyUnicode_AsUTF8String(fmt_spec));
+    formatted = fpdec_formatted(&self->fpdec,
+                                (uint8_t *)PyBytes_AsString(utf8_fmt_spec));
+    if (formatted == NULL)
+        CHECK_FPDEC_ERROR(errno);
+    ASSIGN_AND_CHECK_NULL(res, PyUnicode_FromString((char *)formatted));
+    goto CLEAN_UP;
+
+ERROR:
+    assert(PyErr_Occurred());
+
+CLEAN_UP:
+    Py_XDECREF(utf8_fmt_spec);
+    fpdec_mem_free(formatted);
+    return res;
 }
 
 // Special methods
