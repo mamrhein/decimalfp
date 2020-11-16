@@ -924,6 +924,7 @@ fpdec_shint_formatted(const fpdec_t *fpdec, const format_spec_t *fmt_spec,
     size_t len_thousands_sep = fmt_spec->thousands_sep.n_bytes;
     size_t len_fill = fmt_spec->fill.n_bytes;
     uint8_t dec_point_shift = 0;
+    uint8_t n_add_int_zeros = 0;
     error_t rc;
     fpdec_t adj = FPDEC_ZERO;
     fpdec_dec_prec_t dec_prec = FPDEC_DEC_PREC(fpdec);
@@ -931,7 +932,12 @@ fpdec_shint_formatted(const fpdec_t *fpdec, const format_spec_t *fmt_spec,
     // shift decimal point for %-format
     if (fmt_spec->type == '%') {
         dec_point_shift = 2;
-        dec_prec = dec_prec > 2 ? dec_prec - 2 : 0;
+        if (dec_prec > 2)
+            dec_prec -= 2;
+        else {
+            n_add_int_zeros = 2 - dec_prec;
+            dec_prec = 0;
+        }
     }
 
     if (fmt_spec->precision < dec_prec) {
@@ -968,9 +974,16 @@ fpdec_shint_formatted(const fpdec_t *fpdec, const format_spec_t *fmt_spec,
     if (dec_prec > 0)
         // split shifted int
         frac_part = u128_idiv_u64(&int_part, u64_10_pow_n(dec_prec));
+    else if (n_add_int_zeros > 0)
+        // shift int part
+        u128_imul_u64(&int_part, u64_10_pow_n(n_add_int_zeros));
 
-    if (fmt_spec->sign != '\0')
+    // sign to be shown?
+    if (FPDEC_LT_ZERO(fpdec))       // always show sign for negative numbers
+        *ch++ = '-';
+    else if (fmt_spec->sign != '-') // otherwise show only '+' or ' '
         *ch++ = fmt_spec->sign;
+
     // integral part
     if (len_thousands_sep == 0) {
         if (U128_EQ_ZERO(int_part)) {
@@ -986,7 +999,7 @@ fpdec_shint_formatted(const fpdec_t *fpdec, const format_spec_t *fmt_spec,
         if (fmt_spec->fill.bytes[0] == '0' && fmt_spec->align == '=') {
             // zero padding
             size_t n_non_int_part = fmt_spec->precision + len_decimal_point +
-                                    (fmt_spec->sign == 0 ? 0 : 1) +
+                                    (ch > buf) +    // sign
                                     (fmt_spec->type == '%' ? 1 : 0);
             if (fmt_spec->min_width > n_non_int_part)
                 min_width_int_part = fmt_spec->min_width - n_non_int_part;
@@ -1132,6 +1145,8 @@ fpdec_dyn_formatted(const fpdec_t *fpdec, const format_spec_t *fmt_spec,
     uint8_t len_decimal_point = fmt_spec->decimal_point.n_bytes;
     size_t len_thousands_sep = fmt_spec->thousands_sep.n_bytes;
     size_t len_fill = fmt_spec->fill.n_bytes;
+    uint8_t dec_point_shift = fmt_spec->type == '%' ? 2 : 0;
+    fpdec_dec_prec_t needed_dec_prec = fmt_spec->precision + dec_point_shift;
     error_t rc;
     fpdec_t adj = FPDEC_ZERO;
     fpdec_dec_prec_t dec_prec;
@@ -1141,32 +1156,44 @@ fpdec_dyn_formatted(const fpdec_t *fpdec, const format_spec_t *fmt_spec,
     size_t n_dec_frac_fill_zeros;
     size_t n_dec_frac_digits, d_adjust;
 
-    if (fmt_spec->type == '%') {
-        rc = fpdec_mul(&adj, fpdec, &FPDEC_ONE_HUNDRED);
+    if (needed_dec_prec < FPDEC_DEC_PREC(fpdec)) {
+        // need to adjust value
+        rc = fpdec_adjusted(&adj, fpdec, needed_dec_prec,
+                            FPDEC_ROUND_DEFAULT);
         if (rc != FPDEC_OK)
             return NULL;
-        FPDEC_DEC_PREC(&adj) = FPDEC_DEC_PREC(&adj) > 2 ?
-                               FPDEC_DEC_PREC(&adj) - 2 : 0;
+        if (!FPDEC_IS_DYN_ALLOC(&adj)) {
+            buf = fpdec_shint_formatted(&adj, fmt_spec, no_trailing_zeros);
+            fpdec_reset_to_zero(&adj, 0);
+            return buf;
+        }
         fpdec = &adj;
     }
 
-    if (fmt_spec->precision < FPDEC_DEC_PREC(fpdec)) {
-        // need to adjust value
-        if (fpdec == &adj)
-            rc = fpdec_adjust(&adj, fmt_spec->precision, FPDEC_ROUND_DEFAULT);
-        else {
-            rc = fpdec_adjusted(&adj, fpdec, fmt_spec->precision,
-                                FPDEC_ROUND_DEFAULT);
-            if (!FPDEC_IS_DYN_ALLOC(&adj)) {
-                buf = fpdec_shint_formatted(&adj, fmt_spec,
-                                            no_trailing_zeros);
-                fpdec_reset_to_zero(&adj, 0);
-                return buf;
+    if (fmt_spec->type == '%') {
+        if (fpdec == &adj) {
+            fpdec_digit_array_t *digits = adj.digit_array;
+            if (digits->n_alloc == digits->n_signif) {
+                fpdec_digit_t most_signif_digit =
+                    FPDEC_DYN_MOST_SIGNIF_DIGIT(fpdec);
+                if (most_signif_digit > MAX_DIGIT / 100) {
+                    // multiplication below would overflow, so need to
+                    // realloc the digit array
+                    digits = digits_copy(adj.digit_array, 0, 1);
+                    fpdec_mem_free(adj.digit_array);
+                    adj.digit_array = digits;
+                }
             }
+            digits_imul_digit(digits, 100);
+        }
+        else {
+            rc = fpdec_mul(&adj, fpdec, &FPDEC_ONE_HUNDRED);
+            if (rc != FPDEC_OK)
+                return NULL;
             fpdec = &adj;
         }
-        if (rc != FPDEC_OK)
-            return NULL;
+        FPDEC_DEC_PREC(fpdec) = FPDEC_DEC_PREC(fpdec) > 2 ?
+                                FPDEC_DEC_PREC(fpdec) - 2 : 0;
     }
 
     dec_prec = FPDEC_DEC_PREC(fpdec);
@@ -1230,8 +1257,12 @@ fpdec_dyn_formatted(const fpdec_t *fpdec, const format_spec_t *fmt_spec,
     if (buf == NULL)
         MEMERROR_RETVAL(NULL);
 
-    if (fmt_spec->sign != '\0')
+    // sign to be shown?
+    if (FPDEC_LT_ZERO(fpdec))       // always show sign for negative numbers
+        *ch++ = '-';
+    else if (fmt_spec->sign != '-') // otherwise show only '+' or ' '
         *ch++ = fmt_spec->sign;
+
     // integral part
     if (len_thousands_sep == 0) {
         if (n_int_digits == 0) {
@@ -1251,7 +1282,7 @@ fpdec_dyn_formatted(const fpdec_t *fpdec, const format_spec_t *fmt_spec,
         if (fmt_spec->fill.bytes[0] == '0' && fmt_spec->align == '=') {
             // zero padding
             size_t n_non_int_part = fmt_spec->precision + len_decimal_point +
-                                    (fmt_spec->sign == 0 ? 0 : 1) +
+                                    (ch > buf) +    // sign
                                     (fmt_spec->type == '%' ? 1 : 0);
             if (fmt_spec->min_width > n_non_int_part)
                 min_width_int_part = fmt_spec->min_width - n_non_int_part;
@@ -1331,18 +1362,9 @@ fpdec_formatted(const fpdec_t *fpdec, const uint8_t *format) {
     if (rc == -2)
         ERROR_RETVAL(FPDEC_INCOMPAT_LOCALE, NULL);
 
-    // sign to be shown?
-    if (FPDEC_LT_ZERO(fpdec))
-        fmt_spec.sign = '-';        // always show sign for negative numbers
-    else if (fmt_spec.sign == '-')
-        fmt_spec.sign = '\0';       // suppress positive sign
-
     // precision and decimal point
-    if (fmt_spec.type == '%')
-        dec_point_shift = 2;
     if (fmt_spec.precision == SIZE_MAX)
-        fmt_spec.precision = FPDEC_DEC_PREC(fpdec) > dec_point_shift ?
-                             FPDEC_DEC_PREC(fpdec) - dec_point_shift : 0;
+        fmt_spec.precision = FPDEC_DEC_PREC(fpdec);
     if (fmt_spec.precision == 0)                    // if number is integral
         fmt_spec.decimal_point.n_bytes = 0;         // suppress decimal point
 

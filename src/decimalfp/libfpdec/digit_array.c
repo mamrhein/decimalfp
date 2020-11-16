@@ -321,7 +321,6 @@ digits_imul_digit(fpdec_digit_array_t *x, fpdec_digit_t y) {
     fpdec_digit_t k = 0;
 
     assert(x->n_signif > 0);
-    assert(x->n_alloc > x->n_signif);
 
     for (fpdec_digit_t *d = x->digits; d < x_over; ++d) {
         // *d <= RADIX - 1 and y <= RADIX - 1 and k <= RADIX - 1
@@ -336,6 +335,7 @@ digits_imul_digit(fpdec_digit_array_t *x, fpdec_digit_t y) {
         // k <=RADIX - 1
     }
     if (k > 0) {
+        assert(x->n_alloc > x->n_signif);
         *x_over = k;
         x->n_signif++;
     }
