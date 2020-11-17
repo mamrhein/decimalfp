@@ -61,16 +61,16 @@ utf8c_len(const uint8_t *cp) {
         return 0;
     if (*cp < 128)
         return 1;
-    if ((*cp >> 5) == 6)
+    if ((*cp >> 5U) == 6)
         n = 2;
-    else if ((*cp >> 4) == 14)
+    else if ((*cp >> 4U) == 14)
         n = 3;
-    else if ((*cp >> 3) == 30)
+    else if ((*cp >> 3U) == 30)
         n = 4;
     else
         return -1;
     for (const uint8_t *stop = cp + n; ++cp < stop;)
-        if ((*cp >> 6) != 2)
+        if ((*cp >> 6U) != 2)
             return -1;
     return n;
 }
@@ -85,16 +85,16 @@ utf8_strlen(const uint8_t *cp) {
             ++cp;
         }
         else {
-            if ((*cp >> 5) == 6)
+            if ((*cp >> 5U) == 6)
                 l = 2;
-            else if ((*cp >> 4) == 14)
+            else if ((*cp >> 4U) == 14)
                 l = 3;
-            else if ((*cp >> 3) == 30)
+            else if ((*cp >> 3U) == 30)
                 l = 4;
             else
                 return SIZE_MAX;
             for (const uint8_t *stop = cp + l; ++cp < stop;)
-                if ((*cp >> 6) != 2)
+                if ((*cp >> 6U) != 2)
                     return SIZE_MAX;
             n += l;
         }
