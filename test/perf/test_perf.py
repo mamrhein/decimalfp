@@ -22,20 +22,20 @@ import operator
 
 
 ctx = getcontext()
-ctx.prec = 390
+ctx.prec = 1250
 
 
 def test_decimal_from_str(benchmark, str_value, impl):
     benchmark(impl.Decimal, str_value)
 
 
-def test_decimal_add(benchmark, dec_value):
-    benchmark(operator.add, dec_value, dec_value)
+def test_decimal_add(benchmark, dec_value_1, dec_value_2):
+    benchmark(operator.add, dec_value_1, dec_value_2)
 
 
-def test_decimal_mul(benchmark, dec_value):
-    benchmark(operator.mul, dec_value, dec_value)
+def test_decimal_mul(benchmark, dec_value_1, dec_value_2):
+    benchmark(operator.mul, dec_value_1, dec_value_2)
 
 
-def test_decimal_div(benchmark, dec_value):
-    benchmark(operator.truediv, dec_value, dec_value)
+def test_decimal_div(benchmark, dec_value_1, dec_value_2):
+    benchmark(operator.truediv, dec_value_1, dec_value_2)
