@@ -804,11 +804,11 @@ class Decimal:
             result._value += int(other) * 10 ** p
             return result
         elif isinstance(other, Rational):
-            y_numerator, y_denominator = (other.numerator, other.denominator)
+            onum, oden = (other.numerator, other.denominator)
         elif isinstance(other, Real):
             try:
                 # noinspection PyUnresolvedReferences
-                y_numerator, y_denominator = other.as_integer_ratio()
+                onum, oden = other.as_integer_ratio()
             except (ValueError, OverflowError, AttributeError):
                 raise ValueError("Unsupported operand: %s" % repr(other))
         elif isinstance(other, _StdLibDecimal):
@@ -816,9 +816,9 @@ class Decimal:
         else:
             return NotImplemented
         # handle Rational and Real
-        x_denominator = 10 ** self._precision
-        num = self._value * y_denominator + x_denominator * y_numerator
-        den = y_denominator * x_denominator
+        sden = 10 ** self._precision
+        num = self._value * oden + sden * onum
+        den = oden * sden
         min_prec = self._precision
         # return num / den as Decimal or as Fraction
         return _div(num, den, min_prec)
@@ -846,11 +846,11 @@ class Decimal:
             result._value -= int(other) * 10 ** p
             return result
         elif isinstance(other, Rational):
-            y_numerator, y_denominator = (other.numerator, other.denominator)
+            onum, oden = (other.numerator, other.denominator)
         elif isinstance(other, Real):
             try:
                 # noinspection PyUnresolvedReferences
-                y_numerator, y_denominator = other.as_integer_ratio()
+                onum, oden = other.as_integer_ratio()
             except (ValueError, OverflowError, AttributeError):
                 raise ValueError("Unsupported operand: %s" % repr(other))
         elif isinstance(other, _StdLibDecimal):
@@ -858,9 +858,9 @@ class Decimal:
         else:
             return NotImplemented
         # handle Rational and Real
-        x_denominator = 10 ** self._precision
-        num = self._value * y_denominator - x_denominator * y_numerator
-        den = y_denominator * x_denominator
+        sden = 10 ** self._precision
+        num = self._value * oden - sden * onum
+        den = oden * sden
         min_prec = self._precision
         # return num / den as Decimal or as Fraction
         return _div(num, den, min_prec)
@@ -883,11 +883,11 @@ class Decimal:
             result._value *= other
             return result
         elif isinstance(other, Rational):
-            y_numerator, y_denominator = (other.numerator, other.denominator)
+            onum, oden = (other.numerator, other.denominator)
         elif isinstance(other, Real):
             try:
                 # noinspection PyUnresolvedReferences
-                y_numerator, y_denominator = other.as_integer_ratio()
+                onum, oden = other.as_integer_ratio()
             except (ValueError, OverflowError, AttributeError):
                 raise ValueError("Unsupported operand: %s" % repr(other))
         elif isinstance(other, _StdLibDecimal):
@@ -895,8 +895,8 @@ class Decimal:
         else:
             return NotImplemented
         # handle Rational and Real
-        num = self._value * y_numerator
-        den = y_denominator * 10 ** self._precision
+        num = self._value * onum
+        den = oden * 10 ** self._precision
         min_prec = self._precision
         # return num / den as Decimal or as Fraction
         return _div(num, den, min_prec)
@@ -924,11 +924,11 @@ class Decimal:
             # return num / den as Decimal or as Fraction
             return _div(num, den, min_prec)
         elif isinstance(other, Rational):  # includes Integral
-            y_numerator, y_denominator = (other.numerator, other.denominator)
+            onum, oden = (other.numerator, other.denominator)
         elif isinstance(other, Real):
             try:
                 # noinspection PyUnresolvedReferences
-                y_numerator, y_denominator = other.as_integer_ratio()
+                onum, oden = other.as_integer_ratio()
             except (ValueError, OverflowError, AttributeError):
                 raise ValueError("Unsupported operand: %s" % repr(other))
         elif isinstance(other, _StdLibDecimal):
@@ -936,10 +936,10 @@ class Decimal:
         else:
             return NotImplemented
         # handle Rational and Real
-        if y_numerator == 0:
+        if onum == 0:
             raise ZeroDivisionError("division by zero")
-        num = self._value * y_denominator
-        den = y_numerator * 10 ** self._precision
+        num = self._value * oden
+        den = onum * 10 ** self._precision
         min_prec = self._precision
         # return num / den as Decimal or as Fraction
         return _div(num, den, min_prec)
@@ -947,11 +947,11 @@ class Decimal:
     def __rdiv__(self, other: Any) -> Union["Decimal", Fraction]:
         """other / self"""  # noqa: D400, D403
         if isinstance(other, Rational):
-            x_numerator, x_denominator = (other.numerator, other.denominator)
+            onum, oden = (other.numerator, other.denominator)
         elif isinstance(other, Real):
             try:
                 # noinspection PyUnresolvedReferences
-                x_numerator, x_denominator = other.as_integer_ratio()
+                onum, oden = other.as_integer_ratio()
             except (ValueError, OverflowError, AttributeError):
                 raise ValueError("Unsupported operand: %s" % repr(other))
         elif isinstance(other, _StdLibDecimal):
@@ -961,8 +961,8 @@ class Decimal:
         # handle Rational and Real
         if self._value == 0:
             raise ZeroDivisionError("division by zero")
-        num = x_numerator * 10 ** self._precision
-        den = self._value * x_denominator
+        num = onum * 10 ** self._precision
+        den = self._value * oden
         min_prec = self._precision
         # return num / den as Decimal or as Fraction
         return _div(num, den, min_prec)
