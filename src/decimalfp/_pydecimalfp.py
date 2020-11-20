@@ -997,11 +997,17 @@ class Decimal:
 
     def __mod__(self, other: Any) -> Union["Decimal", Fraction]:
         """self % other"""  # noqa: D400, D403
-        return mod1(self, other)
+        if isinstance(other, (Decimal, Integral, _StdLibDecimal)):
+            return divmod1(self, other)[1]
+        else:
+            return self - other * Decimal(self // other)
 
     def __rmod__(self, other: Any) -> Union["Decimal", Fraction]:
         """other % self"""  # noqa: D400, D403
-        return mod2(other, self)
+        if isinstance(other, (Integral, _StdLibDecimal)):
+            return divmod2(other, self)[1]
+        else:
+            return other - self * Decimal(other // self)
 
     def __pow__(self, other: Any, mod: Any = None) \
             -> Union["Decimal", float, complex]:
@@ -1382,30 +1388,6 @@ def divmod2(x: Any, y: Decimal) -> Tuple[int, Union[Decimal, Fraction]]:
         return divmod1(Decimal(x), y)
     else:
         return x // y, x % y
-
-
-def mod1(x: Decimal, y: Any) -> Union[Decimal, Fraction]:
-    """x % y                                                # noqa: D400, D403
-
-    x must be a Decimal.
-
-    """
-    if isinstance(y, (Decimal, Integral, _StdLibDecimal)):
-        return divmod1(x, y)[1]
-    else:
-        return x - y * Decimal(x // y)
-
-
-def mod2(x: Any, y: Decimal) -> Union[Decimal, Fraction]:
-    """x % y                                                # noqa: D400, D403
-
-    y must be a Decimal.
-
-    """
-    if isinstance(x, (Integral, _StdLibDecimal)):
-        return divmod2(x, y)[1]
-    else:
-        return x - y * Decimal(x // y)
 
 
 def pow1(x: Decimal, y: Any) \
