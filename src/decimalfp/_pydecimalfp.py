@@ -974,38 +974,119 @@ class Decimal:
     def __divmod__(self, other: Any) \
             -> Tuple[int, Union["Decimal", Fraction]]:
         """self // other, self % other"""  # noqa: D400, D403
-        return divmod1(self, other)
+        # noinspection DuplicatedCode
+        if isinstance(other, Decimal):
+            sp, op = self._precision, other._precision
+            if sp >= op:
+                r = Decimal(precision=sp)
+                sv = self._value
+                ov = other._value * 10 ** (sp - op)
+            else:
+                r = Decimal(precision=op)
+                sv = self._value * 10 ** (op - sp)
+                ov = other._value
+            q = sv // ov
+            r._value = sv - q * ov
+            return q, r
+        elif isinstance(other, Integral):
+            sp = self._precision
+            r = Decimal(precision=sp)
+            sv = self._value
+            ov = other * 10 ** sp
+            q = sv // ov
+            r._value = sv - q * ov
+            return q, r
+        elif isinstance(other, _StdLibDecimal):
+            return divmod(self, Decimal(other))
+        else:
+            return self // other, self % other
 
     def __rdivmod__(self, other: Any) \
             -> Tuple[int, Union["Decimal", Fraction]]:
         """other // self, other % self"""  # noqa: D400, D403
-        return divmod2(other, self)
+        # noinspection DuplicatedCode
+        if isinstance(other, Integral):
+            sp = self._precision
+            r = Decimal(precision=sp)
+            sv = self._value
+            ov = other * 10 ** sp
+            q = ov // sv
+            r._value = ov - q * sv
+            return q, r
+        elif isinstance(other, _StdLibDecimal):
+            return divmod(Decimal(other), self)
+        else:
+            return other // self, other % self
 
     def __floordiv__(self, other: Any) -> int:
         """self // other"""  # noqa: D400, D403
-        if isinstance(other, (Decimal, Integral, _StdLibDecimal)):
-            return divmod1(self, other)[0]
+        if isinstance(other, Decimal):
+            sp, op = self._precision, other._precision
+            if sp >= op:
+                sv = self._value
+                ov = other._value * 10 ** (sp - op)
+            else:
+                sv = self._value * 10 ** (op - sp)
+                ov = other._value
+            return sv // ov
+        elif isinstance(other, Integral):
+            sv = self._value
+            ov = other * 10 ** self._precision
+            return sv // ov
+        elif isinstance(other, _StdLibDecimal):
+            return self // Decimal(other)
         else:
             return floor(self / other)
 
     def __rfloordiv__(self, other: Any) -> int:
         """other // self"""  # noqa: D400, D403
-        if isinstance(other, (Integral, _StdLibDecimal)):
-            return divmod2(other, self)[0]
+        if isinstance(other, Integral):
+            sv = self._value
+            ov = other * 10 ** self._precision
+            return ov // sv
+        elif isinstance(other, _StdLibDecimal):
+            return Decimal(other) // self
         else:
             return floor(other / self)
 
     def __mod__(self, other: Any) -> Union["Decimal", Fraction]:
         """self % other"""  # noqa: D400, D403
-        if isinstance(other, (Decimal, Integral, _StdLibDecimal)):
-            return divmod1(self, other)[1]
+        # noinspection DuplicatedCode
+        if isinstance(other, Decimal):
+            sp, op = self._precision, other._precision
+            if sp >= op:
+                r = Decimal(precision=sp)
+                sv = self._value
+                ov = other._value * 10 ** (sp - op)
+            else:
+                r = Decimal(precision=op)
+                sv = self._value * 10 ** (op - sp)
+                ov = other._value
+            r._value = sv - (sv // ov) * ov
+            return r
+        elif isinstance(other, Integral):
+            sp = self._precision
+            r = Decimal(precision=sp)
+            sv = self._value
+            ov = other * 10 ** sp
+            r._value = sv - (sv // ov) * ov
+            return r
+        elif isinstance(other, _StdLibDecimal):
+            return self % Decimal(other)
         else:
             return self - other * Decimal(self // other)
 
     def __rmod__(self, other: Any) -> Union["Decimal", Fraction]:
         """other % self"""  # noqa: D400, D403
-        if isinstance(other, (Integral, _StdLibDecimal)):
-            return divmod2(other, self)[1]
+        if isinstance(other, Integral):
+            sp = self._precision
+            r = Decimal(precision=sp)
+            sv = self._value
+            ov = other * 10 ** sp
+            r._value = ov - (ov // sv) * sv
+            return r
+        elif isinstance(other, _StdLibDecimal):
+            return Decimal(other) % self
         else:
             return other - self * Decimal(other // self)
 
@@ -1357,59 +1438,6 @@ def _div(num: int, den: int, min_prec: int) -> Union[Decimal, Fraction]:
         return dec
     else:
         return Fraction(num, den)
-
-
-def divmod1(x: Decimal, y: Any) -> Tuple[int, Union[Decimal, Fraction]]:
-    """x // y, x % y                                        # noqa: D400, D403
-
-    x must be a Decimal.
-
-    """
-    if isinstance(y, Decimal):
-        xp, yp = x._precision, y._precision
-        if xp >= yp:
-            r = Decimal(x)
-            xv = x._value
-            yv = y._value * 10 ** (xp - yp)
-        else:
-            r = Decimal(y)
-            xv = x._value * 10 ** (yp - xp)
-            yv = y._value
-        q = xv // yv
-        r._value = xv - q * yv
-        return q, r
-    elif isinstance(y, Integral):
-        r = Decimal(x)
-        xv = x._value
-        xp = x._precision
-        yv = y * 10 ** xp
-        q = xv // yv
-        r._value = xv - q * yv
-        return q, r
-    elif isinstance(y, _StdLibDecimal):
-        return divmod1(x, Decimal(y))
-    else:
-        return x // y, x % y
-
-
-def divmod2(x: Any, y: Decimal) -> Tuple[int, Union[Decimal, Fraction]]:
-    """x // y, x % y                                        # noqa: D400, D403
-
-    y must be a Decimal.
-
-    """
-    if isinstance(x, Integral):
-        r = Decimal(y)
-        yv = y._value
-        yp = y._precision
-        xv = x * 10 ** yp
-        q = xv // yv
-        r._value = xv - q * yv
-        return q, r
-    elif isinstance(x, _StdLibDecimal):
-        return divmod1(Decimal(x), y)
-    else:
-        return x // y, x % y
 
 
 # get / set default rounding mode
