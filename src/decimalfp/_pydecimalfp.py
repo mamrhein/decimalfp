@@ -786,7 +786,42 @@ class Decimal:
 
     def __add__(self, other: Any) -> Union["Decimal", Fraction]:
         """self + other"""  # noqa: D400, D403
-        return add(self, other)
+        if isinstance(other, Decimal):
+            p = self._precision - other._precision
+            if p == 0:
+                result = Decimal(self)
+                result._value += other._value
+            elif p > 0:
+                result = Decimal(self)
+                result._value += other._value * 10 ** p
+            else:
+                result = Decimal(other)
+                result._value += self._value * 10 ** -p
+            return result
+        elif isinstance(other, Integral):
+            p = self._precision
+            result = Decimal(self)
+            result._value += int(other) * 10 ** p
+            return result
+        elif isinstance(other, Rational):
+            y_numerator, y_denominator = (other.numerator, other.denominator)
+        elif isinstance(other, Real):
+            try:
+                # noinspection PyUnresolvedReferences
+                y_numerator, y_denominator = other.as_integer_ratio()
+            except (ValueError, OverflowError, AttributeError):
+                raise ValueError("Unsupported operand: %s" % repr(other))
+        elif isinstance(other, _StdLibDecimal):
+            return self + Decimal(other)
+        else:
+            return NotImplemented
+        # handle Rational and Real
+        x_denominator = 10 ** self._precision
+        num = self._value * y_denominator + x_denominator * y_numerator
+        den = y_denominator * x_denominator
+        min_prec = self._precision
+        # return num / den as Decimal or as Fraction
+        return _div(num, den, min_prec)
 
     # other + self
     __radd__ = __add__
@@ -797,7 +832,7 @@ class Decimal:
 
     def __rsub__(self, other: Any) -> Union["Decimal", Fraction]:
         """other - self"""  # noqa: D400, D403
-        return add(-self, other)
+        return -self + other
 
     def __mul__(self, other: Any) -> Union["Decimal", Fraction]:
         """self * other"""  # noqa: D400, D403
@@ -1170,49 +1205,6 @@ def _div(num: int, den: int, min_prec: int) -> Union[Decimal, Fraction]:
         return dec
     else:
         return Fraction(num, den)
-
-
-def add(x: Decimal, y: Any) -> Union[Decimal, Fraction]:
-    """x + y                                                # noqa: D400, D403
-
-    x must be a Decimal.
-
-    """
-    if isinstance(y, Decimal):
-        p = x._precision - y._precision
-        if p == 0:
-            result = Decimal(x)
-            result._value += y._value
-        elif p > 0:
-            result = Decimal(x)
-            result._value += y._value * 10 ** p
-        else:
-            result = Decimal(y)
-            result._value += x._value * 10 ** -p
-        return result
-    elif isinstance(y, Integral):
-        p = x._precision
-        result = Decimal(x)
-        result._value += int(y) * 10 ** p
-        return result
-    elif isinstance(y, Rational):
-        y_numerator, y_denominator = (y.numerator, y.denominator)
-    elif isinstance(y, Real):
-        try:
-            y_numerator, y_denominator = y.as_integer_ratio()
-        except (ValueError, OverflowError, AttributeError):
-            raise ValueError("Unsupported operand: %s" % repr(y))
-    elif isinstance(y, _StdLibDecimal):
-        return add(x, Decimal(y))
-    else:
-        return NotImplemented
-    # handle Rational and Real
-    x_denominator = 10 ** x._precision
-    num = x._value * y_denominator + x_denominator * y_numerator
-    den = y_denominator * x_denominator
-    min_prec = x._precision
-    # return num / den as Decimal or as Fraction
-    return _div(num, den, min_prec)
 
 
 def sub(x: Decimal, y: Any) -> Union[Decimal, Fraction]:
