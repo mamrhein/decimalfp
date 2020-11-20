@@ -1024,7 +1024,27 @@ class Decimal:
             raise TypeError("3rd argument not allowed unless all arguments "
                             "are integers")
         if isinstance(other, (Real, _StdLibDecimal)):
-            return pow1(self, other)
+            try:
+                exp = int(other)
+            except (ValueError, OverflowError):
+                raise ValueError("Unsupported operand: %s" % repr(other)) \
+                    from None
+            else:
+                if exp != other:
+                    # fractional exponent => fallback to float
+                    return float(self) ** float(other)
+                if exp >= 0:
+                    result = Decimal()
+                    result._value = self._value ** exp
+                    result._precision = self._precision * exp
+                    if result._precision > MAX_DEC_PRECISION:
+                        raise ValueError("Precision limit exceeded.")
+                    return result
+                else:
+                    # 1 / x ** -y
+                    exp = -exp
+                    prec = self._precision
+                    return _div(10 ** (prec * exp), self._value ** exp, prec)
         return NotImplemented
 
     def __rpow__(self, other: Any, mod: Any = None) \
@@ -1036,7 +1056,9 @@ class Decimal:
         if mod is not None:  # pragma: no cover
             raise TypeError("3rd argument not allowed unless all arguments "
                             "are integers")
-        return pow2(other, self)
+        if self.denominator == 1:
+            return other ** self.numerator
+        return other ** float(self)
 
     def __floor__(self) -> int:
         """math.floor(self)"""  # noqa: D400
@@ -1388,47 +1410,6 @@ def divmod2(x: Any, y: Decimal) -> Tuple[int, Union[Decimal, Fraction]]:
         return divmod1(Decimal(x), y)
     else:
         return x // y, x % y
-
-
-def pow1(x: Decimal, y: Any) \
-        -> Union["Decimal", float, complex]:
-    """x ** y                                               # noqa: D400, D403
-
-    x must be a Decimal.
-
-    """
-    try:
-        exp = int(y)
-    except (ValueError, OverflowError):
-        raise ValueError("Unsupported operand: %s" % repr(y)) from None
-    else:
-        if exp != y:
-            # fractional exponent => fallback to float
-            return float(x) ** float(y)
-        if exp >= 0:
-            result = Decimal()
-            result._value = x._value ** exp
-            result._precision = x._precision * exp
-            if result._precision > MAX_DEC_PRECISION:
-                raise ValueError("Precision limit exceeded.")
-            return result
-        else:
-            # 1 / x ** -y
-            exp = -exp
-            prec = x._precision
-            return _div(10 ** (prec * exp), x._value ** exp, prec)
-
-
-def pow2(x: Any, y: Decimal) \
-        -> Union["Decimal", float, complex]:
-    """x ** y                                               # noqa: D400, D403
-
-    y must be a Decimal.
-
-    """
-    if y.denominator == 1:
-        return x ** y.numerator
-    return x ** float(y)
 
 
 # get / set default rounding mode
