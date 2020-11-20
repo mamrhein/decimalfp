@@ -871,7 +871,35 @@ class Decimal:
 
     def __mul__(self, other: Any) -> Union["Decimal", Fraction]:
         """self * other"""  # noqa: D400, D403
-        return mul(self, other)
+        if isinstance(other, Decimal):
+            result = Decimal(self)
+            result._value *= other._value
+            result._precision += other._precision
+            if result._precision > MAX_DEC_PRECISION:
+                return Fraction(result._value, 10 ** result._precision)
+            return result
+        elif isinstance(other, Integral):
+            result = Decimal(self)
+            result._value *= other
+            return result
+        elif isinstance(other, Rational):
+            y_numerator, y_denominator = (other.numerator, other.denominator)
+        elif isinstance(other, Real):
+            try:
+                # noinspection PyUnresolvedReferences
+                y_numerator, y_denominator = other.as_integer_ratio()
+            except (ValueError, OverflowError, AttributeError):
+                raise ValueError("Unsupported operand: %s" % repr(other))
+        elif isinstance(other, _StdLibDecimal):
+            return self * Decimal(other)
+        else:
+            return NotImplemented
+        # handle Rational and Real
+        num = self._value * y_numerator
+        den = y_denominator * 10 ** self._precision
+        min_prec = self._precision
+        # return num / den as Decimal or as Fraction
+        return _div(num, den, min_prec)
 
     # other * self
     __rmul__ = __mul__
@@ -1240,42 +1268,6 @@ def _div(num: int, den: int, min_prec: int) -> Union[Decimal, Fraction]:
         return dec
     else:
         return Fraction(num, den)
-
-
-def mul(x: Decimal, y: Any) -> Union[Decimal, Fraction]:
-    """x * y                                                # noqa: D400, D403
-
-    x must be a Decimal.
-
-    """
-    if isinstance(y, Decimal):
-        result = Decimal(x)
-        result._value *= y._value
-        result._precision += y._precision
-        if result._precision > MAX_DEC_PRECISION:
-            return Fraction(result._value, 10 ** result._precision)
-        return result
-    elif isinstance(y, Integral):
-        result = Decimal(x)
-        result._value *= y
-        return result
-    elif isinstance(y, Rational):
-        y_numerator, y_denominator = (y.numerator, y.denominator)
-    elif isinstance(y, Real):
-        try:
-            y_numerator, y_denominator = y.as_integer_ratio()
-        except (ValueError, OverflowError, AttributeError):
-            raise ValueError("Unsupported operand: %s" % repr(y))
-    elif isinstance(y, _StdLibDecimal):
-        return x.__mul__(Decimal(y))
-    else:
-        return NotImplemented
-    # handle Rational and Real
-    num = x._value * y_numerator
-    den = y_denominator * 10 ** x._precision
-    min_prec = x._precision
-    # return num / den as Decimal or as Fraction
-    return _div(num, den, min_prec)
 
 
 def div1(x: Decimal, y: Any) -> Union[Decimal, Fraction]:
