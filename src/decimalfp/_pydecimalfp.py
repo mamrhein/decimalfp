@@ -27,7 +27,7 @@ from decimal import Decimal as _StdLibDecimal
 from fractions import Fraction
 from functools import reduce
 import locale
-from math import floor, gcd, log10
+from math import ceil, floor, gcd, log10
 from numbers import Complex, Integral, Rational, Real
 import operator
 from typing import Any, Callable, Optional, Sequence, Tuple, Union
@@ -1162,19 +1162,20 @@ def _approx_rational(num: int, den: int, min_prec: int = 0) \
     # Approximate num / den as internal Decimal representation.
     # Returns v, p, r, so that
     # v * 10 ** -p + r == num / den
-    # and p <= max(min_prec, MAX_DEC_PRECISION) and r -> 0.
-    max_prec = max(min_prec, MAX_DEC_PRECISION)
+    # and p <= MAX_DEC_PRECISION and r -> 0.
+    if num == 0:
+        return 0, min_prec, 0
+    accel = 1
+    p = max(min_prec, ceil(log10(abs(den))-log10(abs(num))))
     while True:
-        p = (min_prec + max_prec) // 2
-        v, r = divmod(num * base10pow(p), den)
-        if p == max_prec:
+        v, r = divmod(num * 10 ** p, den)
+        if p >= MAX_DEC_PRECISION or r == 0:
             break
-        if r == 0:
-            max_prec = p
-        elif min_prec >= max_prec - 2:
-            min_prec = max_prec
-        else:
-            min_prec = p
+        accel += 1
+        p = min(p + accel ** 2, MAX_DEC_PRECISION)
+    while v % 10 == 0 and p > 0:
+        p -= 1
+        v //= 10
     return v, p, r
 
 
@@ -1321,10 +1322,20 @@ def div1(x: Decimal, y: Any) -> Union[Decimal, Fraction]:
 
     """
     if isinstance(y, Decimal):
+        if y._value == 0:
+            raise ZeroDivisionError("division by zero")
         xp, yp = x._precision, y._precision
-        num = x._value * base10pow(yp)
-        den = y._value * base10pow(xp)
-        min_prec = max(0, xp - yp)
+        if xp == yp:
+            min_prec = xp
+            num, den = x._value, y._value
+        elif xp > yp:
+            min_prec = xp - yp
+            num = x._value
+            den = y._value * base10pow(xp - yp)
+        else:
+            min_prec = 0
+            num = x._value * base10pow(yp - xp)
+            den = y._value
         # return num / den as Decimal or as Fraction
         return _div(num, den, min_prec)
     elif isinstance(y, Rational):       # includes Integral
@@ -1339,6 +1350,8 @@ def div1(x: Decimal, y: Any) -> Union[Decimal, Fraction]:
     else:
         return NotImplemented
     # handle Rational and Real
+    if y_numerator == 0:
+        raise ZeroDivisionError("division by zero")
     num = x._value * y_denominator
     den = y_numerator * base10pow(x._precision)
     min_prec = x._precision
@@ -1364,6 +1377,8 @@ def div2(x: Any, y: Decimal) -> Union[Decimal, Fraction]:
     else:
         return NotImplemented
     # handle Rational and Real
+    if y._value == 0:
+        raise ZeroDivisionError("division by zero")
     num = x_numerator * base10pow(y._precision)
     den = y._value * x_denominator
     min_prec = y._precision
