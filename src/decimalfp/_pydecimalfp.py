@@ -906,11 +906,66 @@ class Decimal:
 
     def __div__(self, other: Any) -> Union["Decimal", Fraction]:
         """self / other"""  # noqa: D400, D403
-        return div1(self, other)
+        if isinstance(other, Decimal):
+            if other._value == 0:
+                raise ZeroDivisionError("division by zero")
+            xp, yp = self._precision, other._precision
+            if xp == yp:
+                min_prec = xp
+                num, den = self._value, other._value
+            elif xp > yp:
+                min_prec = xp - yp
+                num = self._value
+                den = other._value * 10 ** (xp - yp)
+            else:
+                min_prec = 0
+                num = self._value * 10 ** (yp - xp)
+                den = other._value
+            # return num / den as Decimal or as Fraction
+            return _div(num, den, min_prec)
+        elif isinstance(other, Rational):  # includes Integral
+            y_numerator, y_denominator = (other.numerator, other.denominator)
+        elif isinstance(other, Real):
+            try:
+                # noinspection PyUnresolvedReferences
+                y_numerator, y_denominator = other.as_integer_ratio()
+            except (ValueError, OverflowError, AttributeError):
+                raise ValueError("Unsupported operand: %s" % repr(other))
+        elif isinstance(other, _StdLibDecimal):
+            return self / Decimal(other)
+        else:
+            return NotImplemented
+        # handle Rational and Real
+        if y_numerator == 0:
+            raise ZeroDivisionError("division by zero")
+        num = self._value * y_denominator
+        den = y_numerator * 10 ** self._precision
+        min_prec = self._precision
+        # return num / den as Decimal or as Fraction
+        return _div(num, den, min_prec)
 
     def __rdiv__(self, other: Any) -> Union["Decimal", Fraction]:
         """other / self"""  # noqa: D400, D403
-        return div2(other, self)
+        if isinstance(other, Rational):
+            x_numerator, x_denominator = (other.numerator, other.denominator)
+        elif isinstance(other, Real):
+            try:
+                # noinspection PyUnresolvedReferences
+                x_numerator, x_denominator = other.as_integer_ratio()
+            except (ValueError, OverflowError, AttributeError):
+                raise ValueError("Unsupported operand: %s" % repr(other))
+        elif isinstance(other, _StdLibDecimal):
+            return Decimal(other) / self
+        else:
+            return NotImplemented
+        # handle Rational and Real
+        if self._value == 0:
+            raise ZeroDivisionError("division by zero")
+        num = x_numerator * 10 ** self._precision
+        den = self._value * x_denominator
+        min_prec = self._precision
+        # return num / den as Decimal or as Fraction
+        return _div(num, den, min_prec)
 
     # Decimal division is true division
     __truediv__ = __div__
@@ -1268,77 +1323,6 @@ def _div(num: int, den: int, min_prec: int) -> Union[Decimal, Fraction]:
         return dec
     else:
         return Fraction(num, den)
-
-
-def div1(x: Decimal, y: Any) -> Union[Decimal, Fraction]:
-    """x / y                                                # noqa: D400, D403
-
-    x must be a Decimal.
-
-    """
-    if isinstance(y, Decimal):
-        if y._value == 0:
-            raise ZeroDivisionError("division by zero")
-        xp, yp = x._precision, y._precision
-        if xp == yp:
-            min_prec = xp
-            num, den = x._value, y._value
-        elif xp > yp:
-            min_prec = xp - yp
-            num = x._value
-            den = y._value * 10 ** (xp - yp)
-        else:
-            min_prec = 0
-            num = x._value * 10 ** (yp - xp)
-            den = y._value
-        # return num / den as Decimal or as Fraction
-        return _div(num, den, min_prec)
-    elif isinstance(y, Rational):  # includes Integral
-        y_numerator, y_denominator = (y.numerator, y.denominator)
-    elif isinstance(y, Real):
-        try:
-            y_numerator, y_denominator = y.as_integer_ratio()
-        except (ValueError, OverflowError, AttributeError):
-            raise ValueError("Unsupported operand: %s" % repr(y))
-    elif isinstance(y, _StdLibDecimal):
-        return div1(x, Decimal(y))
-    else:
-        return NotImplemented
-    # handle Rational and Real
-    if y_numerator == 0:
-        raise ZeroDivisionError("division by zero")
-    num = x._value * y_denominator
-    den = y_numerator * 10 ** x._precision
-    min_prec = x._precision
-    # return num / den as Decimal or as Fraction
-    return _div(num, den, min_prec)
-
-
-def div2(x: Any, y: Decimal) -> Union[Decimal, Fraction]:
-    """x / y                                                # noqa: D400, D403
-
-    y must be a Decimal.
-
-    """
-    if isinstance(x, Rational):
-        x_numerator, x_denominator = (x.numerator, x.denominator)
-    elif isinstance(x, Real):
-        try:
-            x_numerator, x_denominator = x.as_integer_ratio()
-        except (ValueError, OverflowError, AttributeError):
-            raise ValueError("Unsupported operand: %s" % repr(x))
-    elif isinstance(x, _StdLibDecimal):
-        return div1(Decimal(x), y)
-    else:
-        return NotImplemented
-    # handle Rational and Real
-    if y._value == 0:
-        raise ZeroDivisionError("division by zero")
-    num = x_numerator * 10 ** y._precision
-    den = y._value * x_denominator
-    min_prec = y._precision
-    # return num / den as Decimal or as Fraction
-    return _div(num, den, min_prec)
 
 
 def divmod1(x: Decimal, y: Any) -> Tuple[int, Union[Decimal, Fraction]]:
