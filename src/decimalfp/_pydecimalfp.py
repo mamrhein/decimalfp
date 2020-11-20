@@ -983,11 +983,17 @@ class Decimal:
 
     def __floordiv__(self, other: Any) -> int:
         """self // other"""  # noqa: D400, D403
-        return floordiv1(self, other)
+        if isinstance(other, (Decimal, Integral, _StdLibDecimal)):
+            return divmod1(self, other)[0]
+        else:
+            return floor(self / other)
 
     def __rfloordiv__(self, other: Any) -> int:
         """other // self"""  # noqa: D400, D403
-        return floordiv2(other, self)
+        if isinstance(other, (Integral, _StdLibDecimal)):
+            return divmod2(other, self)[0]
+        else:
+            return floor(other / self)
 
     def __mod__(self, other: Any) -> Union["Decimal", Fraction]:
         """self % other"""  # noqa: D400, D403
@@ -1376,30 +1382,6 @@ def divmod2(x: Any, y: Decimal) -> Tuple[int, Union[Decimal, Fraction]]:
         return divmod1(Decimal(x), y)
     else:
         return x // y, x % y
-
-
-def floordiv1(x: Decimal, y: Any) -> int:
-    """x // y                                               # noqa: D400, D403
-
-    x must be a Decimal.
-
-    """
-    if isinstance(y, (Decimal, Integral, _StdLibDecimal)):
-        return divmod1(x, y)[0]
-    else:
-        return floor(x / y)
-
-
-def floordiv2(x: Any, y: Decimal) -> int:
-    """x // y                                               # noqa: D400, D403
-
-    y must be a Decimal.
-
-    """
-    if isinstance(x, (Integral, _StdLibDecimal)):
-        return divmod2(x, y)[0]
-    else:
-        return floor(x / y)
 
 
 def mod1(x: Decimal, y: Any) -> Union[Decimal, Fraction]:
