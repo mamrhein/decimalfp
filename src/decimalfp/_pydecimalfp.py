@@ -28,7 +28,7 @@ import locale
 from math import ceil, floor, gcd, log10
 from numbers import Complex, Integral, Rational, Real
 import operator
-from typing import Any, Callable, Optional, Sequence, Tuple, Union
+from typing import Any, Callable, Generator, Optional, Sequence, Tuple, Union
 
 # local imports
 
@@ -76,50 +76,51 @@ del re, _pattern
 
 
 class Decimal:
+    # noinspection PyUnresolvedReferences
     """Decimal number with a given number of fractional digits.
 
-    Args:
-        value (see below): numerical value (default: None)
-        precision (numbers.Integral): number of fractional digits (default:
-            None)
+        Args:
+            value (see below): numerical value (default: None)
+            precision (numbers.Integral): number of fractional digits (default:
+                None)
 
-    If `value` is given, it must either be a string, an instance of
-    `numbers.Integral`, `number.Rational` (for example `fractions.Fraction`),
-    `decimal.Decimal`, a finite instance of `numbers.Real` (for example
-    `float`) or be convertable to a `float` or an `int`.
+        If `value` is given, it must either be a string, an instance of
+        `numbers.Integral`, `number.Rational` (for example `fractions.Fraction`),
+        `decimal.Decimal`, a finite instance of `numbers.Real` (for example
+        `float`) or be convertable to a `float` or an `int`.
 
-    If a string is given as value, it must be a string in one of two formats:
+        If a string is given as value, it must be a string in one of two formats:
 
-    * [+|-]<int>[.<frac>][<e|E>[+|-]<exp>] or
-    * [+|-].<frac>[<e|E>[+|-]<exp>].
+        * [+|-]<int>[.<frac>][<e|E>[+|-]<exp>] or
+        * [+|-].<frac>[<e|E>[+|-]<exp>].
 
-    If given value is `None`, Decimal(0) is returned.
+        If given value is `None`, Decimal(0) is returned.
 
-    Returns:
-        :class:`Decimal` instance derived from `value` according
-            to `precision`
+        Returns:
+            :class:`Decimal` instance derived from `value` according
+                to `precision`
 
-    The value is always adjusted to the given precision or the precision is
-    calculated from the given value, if no precision is given.
+        The value is always adjusted to the given precision or the precision is
+        calculated from the given value, if no precision is given.
 
-    Raises:
-        TypeError: `precision` is given, but not of type `Integral`.
-        TypeError: `value` is not an instance of the types listed above and
-            not convertable to `float` or `int`.
-        ValueError: `precision` is given, but not >= 0.
-        ValueError: `value` can not be converted to a `Decimal` (with a number
-            of fractional digits <= `MAX_DEC_PRECISION`).
+        Raises:
+            TypeError: `precision` is given, but not of type `Integral`.
+            TypeError: `value` is not an instance of the types listed above and
+                not convertable to `float` or `int`.
+            ValueError: `precision` is given, but not >= 0.
+            ValueError: `value` can not be converted to a `Decimal` (with a number
+                of fractional digits <= `MAX_DEC_PRECISION`).
 
-    :class:`Decimal` instances are immutable.
+        :class:`Decimal` instances are immutable.
 
-    """
+        """
 
     __slots__ = ('_value', '_precision',
                  # used for caching values only:
                  '_hash', '_numerator', '_denominator'
                  )
 
-    def __new__(cls, value = None, precision = None):
+    def __new__(cls, value = None, precision = None) -> "Decimal":
         """Create and return new `Decimal` instance."""
         self = object.__new__(cls)
 
@@ -234,9 +235,11 @@ class Decimal:
         # Real (incl. Rational)
         if isinstance(value, Real):
             try:
+                # noinspection PyUnresolvedReferences
                 num, den = value.numerator, value.denominator
             except AttributeError:
                 try:
+                    # noinspection PyUnresolvedReferences
                     num, den = value.as_integer_ratio()
                 except (ValueError, OverflowError, AttributeError):
                     raise ValueError("Can't convert %s to Decimal."
@@ -292,6 +295,7 @@ class Decimal:
         """
         if not isinstance(f, (float, Integral)):
             raise TypeError("%s is not a float." % repr(f))
+        # noinspection PyArgumentList
         return cls(f)
 
     # to be compatible to fractions.Fraction
@@ -317,6 +321,7 @@ class Decimal:
         """
         if not isinstance(d, (Decimal, Integral, _StdLibDecimal)):
             raise TypeError("%s is not a Decimal." % repr(d))
+        # noinspection PyArgumentList
         return cls(d)
 
     @classmethod
@@ -344,11 +349,13 @@ class Decimal:
         if not isinstance(r, Real):
             raise TypeError("%s is not a Real." % repr(r))
         try:
+            # noinspection PyArgumentList
             return cls(r)
         except ValueError:
             if exact:
                 raise
             else:
+                # noinspection PyArgumentList
                 return cls(r, MAX_DEC_PRECISION)
 
     @property
@@ -379,6 +386,7 @@ class Decimal:
         try:
             return self._numerator
         except AttributeError:
+            # noinspection PyAttributeOutsideInit
             self._numerator, self._denominator = self.as_integer_ratio()
             return self._numerator
 
@@ -393,6 +401,7 @@ class Decimal:
         try:
             return self._denominator
         except AttributeError:
+            # noinspection PyAttributeOutsideInit
             self._numerator, self._denominator = self.as_integer_ratio()
             return self._denominator
 
@@ -569,7 +578,7 @@ class Decimal:
             else:
                 s = "'%s0.%s%s'" % ((rv < 0) * '-', (rp - n) * '0', s)
         if sp == rp:
-            return "Decimal(%s)" % (s)
+            return "Decimal(%s)" % s
         else:
             return "Decimal(%s, %s)" % (s, sp)
 
@@ -1169,6 +1178,7 @@ class Decimal:
 
 
 # register Decimal as Rational
+# noinspection PyUnresolvedReferences
 Rational.register(Decimal)
 
 # helper functions for formatting:
@@ -1257,7 +1267,7 @@ def _pad_digits(digits: str, min_width: int, fill: str,
         return (min_width - n_digits) * fill + digits
 
 
-def _iter_grouping(grouping):
+def _iter_grouping(grouping: Sequence[int]) -> Generator[int, None, None]:
     # From Python docs: 'grouping' is a sequence of numbers specifying which
     # relative positions the 'thousands_sep' is expected. If the sequence is
     # terminated with CHAR_MAX, no further grouping is performed. If the
