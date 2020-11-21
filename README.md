@@ -1,6 +1,6 @@
 The module _decimalfp_ provides a _Decimal_ number type which can represent
-decimal numbers of arbitrary magnitude and arbitrary precision, i.e. any
-number of fractional digits.
+decimal numbers of (nearly) arbitrary magnitude and very large precision, i.e. 
+with a very large number of fractional digits.
 
 ### Usage
 
@@ -23,14 +23,13 @@ calculated from the given value, if no precision is given.
 
 When the given _precision_ is lower than the precision of the given _value_,
 the result is rounded, according to the current default rounding mode (which 
-defaults to ROUND_HALF_EVEN).
+itself defaults to ROUND_HALF_EVEN).
 
 When no _precision_ is given and the given _value_ is a _float_ or a
 _numbers.Rational_ (but no _Decimal_), the _Decimal_ constructor tries to
-convert _value_ exactly. But, for performance reasons, this is done only up a
-fixed limit of fractional digits (imposed by the implementation, currently 
-2295). If _value_ can not be represented as a _Decimal_ within this limit, an 
-exception is raised.
+convert _value_ exactly. But this is done only up a fixed limit of fractional 
+digits (imposed by the implementation, currently 65535). If _value_ can not be 
+represented as a _Decimal_ within this limit, an exception is raised.
 
 _Decimal_ does not deal with infinity, division by 0 always raises a
 _ZeroDivisionError_. Likewise, infinite instances of type _float_ or
@@ -40,9 +39,9 @@ true for the 'not a number' instances of these types.
 ### Computations
 
 When importing _decimalfp_, its _Decimal_ type is registered in Pythons
-numerical stack as _number.Rational_. It supports all operations defined for
-that base class and its instances can be mixed in computations with instances
-of all numeric types mentioned above.
+numerical stack as subclass of _number.Rational_. It supports all operations 
+defined for that base class and its instances can be mixed in computations 
+with instances of all numeric types mentioned above.
 
 All numerical operations give an exact result, i.e. they are not automatically
 constraint to the precision of the operands or to a number of significant
@@ -52,7 +51,10 @@ instance within the limit of fractional digits, an instance of
 _fractions.Fraction_ is returned.
 
 _Decimal_ supports rounding via the built-in function _round_ using the same
-rounding mode as the _float_ type by default (ROUND_HALF_EVEN in Python 3). In addition, via the method _adjusted_ a _Decimal_ with a different precision can be derived, supporting all rounding modes defined by the standard library module _decimal_.
+rounding mode as the _float_ type by default (ROUND_HALF_EVEN in Python 3). In 
+addition, via the method _adjusted_, a _Decimal_ with a different precision 
+can be derived, supporting all rounding modes defined by the standard library 
+module _decimal_.
 
 For more details see the documentation provided with the source distribution
 or [here](https://decimalfp.readthedocs.io/en/latest).
