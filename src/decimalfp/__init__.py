@@ -14,11 +14,12 @@
 # $Revision$
 
 
+# noinspection PyUnresolvedReferences
 """Decimal fixed-point arithmetic.
 
 The package `decimalfp` provides a :class:`Decimal` number type which can
-represent decimal numbers of arbitrary magnitude and arbitrary precision, i.e.
-any number of fractional digits.
+represent decimal numbers of (nearly) arbitrary magnitude and very large
+precision, i.e. with a very large number of fractional digits.
 
 Usage
 =====
@@ -71,7 +72,7 @@ calculated from the given value, if no precision is given.
 
 When the given `precision` is lower than the precision of the given `value`,
 the result is rounded, according to the current default rounding mode (which
-defaults to ROUND_HALF_EVEN).
+itself defaults to ROUND_HALF_EVEN).
 
     >>> Decimal(u'12.345', 2)
     Decimal('12.34')
@@ -86,13 +87,11 @@ defaults to ROUND_HALF_EVEN).
 
 When no `precision` is given and the given `value` is a `float` or a
 `numbers.Rational` (but no :class:`Decimal`), the :class:`Decimal` constructor
-tries to convert `value` exactly. But, for performance reasons, this is done
-only up a fixed limit of fractional digits (imposed by the implementation,
-currently 2295). If `value` can not be represented as a :class:`Decimal`
-within this limit, an exception is raised.
+tries to convert `value` exactly. But this is done only up a fixed limit of
+fractional digits (imposed by the implementation, currently 65535). If `value`
+can not be represented as a :class:`Decimal` within this limit, an exception
+is raised.
 
-    >>> Decimal(0.2)
-    ValueError: Can't convert 0.2 exactly to Decimal.
     >>> Decimal(Fraction(1, 7))
     ValueError: Can't convert Fraction(1, 7) exactly to Decimal.
 
@@ -138,7 +137,7 @@ fractional digits, an instance of `fractions.Fraction` is returned.
     >>> 0.25 - Decimal(-3, 5)
     Decimal('3.25', 5)
     >>> 0.725 + Decimal('3')
-    Fraction(33551817223910195, 9007199254740992)
+    Decimal('3.72499999999999997779553950749686919152736663818359375')
     >>> Decimal('3') + Fraction(1, 7)
     Fraction(22, 7)
 
