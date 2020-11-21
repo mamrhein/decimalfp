@@ -1,5 +1,16 @@
 Version     Changes
 ------------------------------------------------------------------------------
+0.11.0      Complete re-implementation in C replaces Cython implementation.
+            Refactored pickle support.
+                The representation of the state of the pickled Decimal instance
+                is now a byte string containing the decimal literal equivalent
+                to the pickled value.
+                Because the representation has changed a value pickled by an older
+                version can not be unpickled by this version, and vice versa.
+            Added conversion to byte string.
+            Changed semantic of `Decimal.as_tuple`.
+            Introduced fixed internal precision limit.
+
 0.10.1      Changed default 'align' for formatting to right-aligned.
 
 0.10.0      Removed compatibility with Python 2.x.
