@@ -179,7 +179,7 @@ static PyObject *MAX_DEC_PRECISION = NULL;
 // *** Helper prototypes ***
 
 static inline PyObject *
-PyLong_from_u128(uint128_t *ui);
+PyLong_from_u128(const uint128_t *ui);
 
 static PyObject *
 PyLong_from_digits(const fpdec_digit_t *digits,
@@ -209,7 +209,7 @@ py_rnd_2_fpdec_rnd(PyObject *py_rnd);
 * Decimal type
 * ==========================================================================*/
 
-typedef struct _fpdec_object {
+typedef struct fpdec_object {
     PyObject_HEAD
     Py_hash_t hash;
     PyObject *numerator;
@@ -512,7 +512,7 @@ static PyObject *
 DecimalType_from_float_or_int(PyTypeObject *type, PyObject *val) {
     if (PyFloat_Check(val))
         return DecimalType_from_float(type, val, -1);
-    if (PyLong_Check(val))
+    if (PyLong_Check(val)) // NOLINT(hicpp-signed-bitwise)
         return DecimalType_from_pylong(type, val, -1);
     return PyErr_Format(PyExc_TypeError, "%R is not a float or int.", val);
 }
@@ -523,7 +523,7 @@ DecimalType_from_decimal_or_int(PyTypeObject *type, PyObject *val) {
         return DecimalType_from_decimal(type, val, -1);
     if (PyObject_IsInstance(val, StdLibDecimal))
         return DecimalType_from_stdlib_decimal(type, val, -1);
-    if (PyLong_Check(val))
+    if (PyLong_Check(val)) // NOLINT(hicpp-signed-bitwise)
         return DecimalType_from_pylong(type, val, -1);
     if (PyObject_IsInstance(val, Integral))
         return DecimalType_from_integral(type, val, -1);
@@ -548,11 +548,11 @@ DecimalType_from_obj(PyTypeObject *type, PyObject *obj, long adjust_to_prec) {
         return DecimalType_from_decimal(type, obj, adjust_to_prec);
 
     // String
-    if (PyUnicode_Check(obj))
+    if (PyUnicode_Check(obj)) // NOLINT(hicpp-signed-bitwise)
         return DecimalType_from_str(type, obj, adjust_to_prec);
 
     // Python <int>
-    if (PyLong_Check(obj))
+    if (PyLong_Check(obj)) // NOLINT(hicpp-signed-bitwise)
         return DecimalType_from_pylong(type, obj, adjust_to_prec);
 
     // Integral
@@ -912,7 +912,7 @@ Decimal_richcompare(DecimalObject *self, PyObject *other, int op) {
     }
 
     // Python <int>
-    if (PyLong_Check(other))
+    if (PyLong_Check(other)) // NOLINT(hicpp-signed-bitwise)
         return Decimal_cmp_to_int(self, other, op);
 
     // Integral
@@ -1079,7 +1079,7 @@ fpdec_from_number(fpdec_t *tmp, PyObject *obj) {
     if (Decimal_Check(obj)) {
         fpdec = &((DecimalObject *)obj)->fpdec;
     }
-    else if (PyLong_Check(obj)) {
+    else if (PyLong_Check(obj)) { // NOLINT(hicpp-signed-bitwise)
         rc = fpdec_from_pylong(tmp, obj);
         if (rc == FPDEC_OK)
             fpdec = tmp;
@@ -1557,7 +1557,7 @@ Decimal_adj_to_prec(DecimalObject *self, PyObject *precision,
         goto CLEAN_UP;
     }
 
-    if (PyLong_Check(precision)) {
+    if (PyLong_Check(precision)) { // NOLINT(hicpp-signed-bitwise)
         Py_INCREF(precision);
         pylong_prec = precision;
     }
@@ -1870,24 +1870,24 @@ static PyMethodDef Decimal_methods[] = {
     /* class methods */
     {"from_float",
      (PyCFunction)DecimalType_from_float_or_int,
-     METH_O | METH_CLASS,
+     METH_O | METH_CLASS, // NOLINT(hicpp-signed-bitwise)
      DecimalType_from_float_doc},
     {"from_decimal",
      (PyCFunction)DecimalType_from_decimal_or_int,
-     METH_O | METH_CLASS,
+     METH_O | METH_CLASS, // NOLINT(hicpp-signed-bitwise)
      DecimalType_from_decimal_doc},
     {"from_real",
      (PyCFunction)(void *)(PyCFunctionWithKeywords)DecimalType_from_real,
-     METH_CLASS | METH_VARARGS | METH_KEYWORDS,
+     METH_CLASS | METH_VARARGS | METH_KEYWORDS, // NOLINT(hicpp-signed-bitwise)
      DecimalType_from_real_doc},
     // other methods
     {"adjusted",
      (PyCFunction)(void *)(PyCFunctionWithKeywords)Decimal_adjusted,
-     METH_VARARGS | METH_KEYWORDS,
+     METH_VARARGS | METH_KEYWORDS, // NOLINT(hicpp-signed-bitwise)
      Decimal_adjusted_doc},
     {"quantize",
      (PyCFunction)(void *)(PyCFunctionWithKeywords)Decimal_quantize,
-     METH_VARARGS | METH_KEYWORDS,
+     METH_VARARGS | METH_KEYWORDS, // NOLINT(hicpp-signed-bitwise)
      Decimal_quantize_doc},
     {"as_tuple",
      (PyCFunction)Decimal_as_tuple,
@@ -1940,7 +1940,7 @@ static PyMethodDef Decimal_methods[] = {
      Decimal_ceil_doc},
     {"__round__",
      (PyCFunction)(void *)(PyCFunctionWithKeywords)Decimal_round,
-     METH_VARARGS | METH_KEYWORDS,
+     METH_VARARGS | METH_KEYWORDS, // NOLINT(hicpp-signed-bitwise)
      Decimal_round_doc},
     {0, 0, 0, 0}
 };
@@ -2077,7 +2077,7 @@ CLEAN_UP:
 }
 
 static inline PyObject *
-PyLong_from_u128(uint128_t *ui) {
+PyLong_from_u128(const uint128_t *ui) {
     if (U128P_HI(ui) == 0)
         return PyLong_FromUnsignedLongLong(U128P_LO(ui));
     else
@@ -2306,7 +2306,7 @@ fpdec_from_pylong(fpdec_t *fpdec, PyObject *val) {
     PyObject *abs_val = NULL;
     fpdec_sign_t sign;
 
-    assert(PyLong_Check(val));
+    assert(PyLong_Check(val)); // NOLINT(hicpp-signed-bitwise)
 
     lval = PyLong_AsLongLong(val);
     if (PyErr_Occurred() == NULL)
