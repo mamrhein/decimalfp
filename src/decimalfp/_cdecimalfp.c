@@ -422,16 +422,27 @@ DecimalType_from_rational(PyTypeObject *type, PyObject *val,
                           PyObject_GetAttrString(val, "numerator"));
     ASSIGN_AND_CHECK_NULL(denominator,
                           PyObject_GetAttrString(val, "denominator"));
-    dec = DecimalType_from_num_den(type, numerator, denominator,
-                                   adjust_to_prec);
-    Py_DECREF(numerator);
-    Py_DECREF(denominator);
-    return dec;
+    ASSIGN_AND_CHECK_NULL(dec, DecimalType_from_num_den(type, numerator,
+                                                        denominator,
+                                                        adjust_to_prec));
+    goto CLEAN_UP;
 
 ERROR:
+    {
+        PyObject *err = PyErr_Occurred();
+        assert(err);
+        if (err == PyExc_ValueError) {
+            PyErr_Clear();
+            PyErr_Format(PyExc_ValueError,
+                         "Can't convert %R exactly to Decimal.",
+                         val);
+        }
+    }
+
+CLEAN_UP:
     Py_XDECREF(numerator);
     Py_XDECREF(denominator);
-    return NULL;
+    return dec;
 }
 
 static PyObject *
