@@ -12,6 +12,12 @@ $Source$
 $Revision$
 */
 
+#if defined(__GNUC__) || defined(__clang__)
+#define UNUSED __attribute__((unused))
+#else
+#define UNUSED
+#endif
+
 #define PY_SSIZE_T_CLEAN
 #define Py_LIMITED_API 0x03060000
 
@@ -95,39 +101,15 @@ static PyObject *PyLong_bit_length = NULL;
 
 // *** error handling ***
 
-static int
-value_error_int(const char *msg) {
-    PyErr_SetString(PyExc_ValueError, msg);
-    return -1;
-}
-
 static PyObject *
 value_error_ptr(const char *msg) {
     PyErr_SetString(PyExc_ValueError, msg);
     return NULL;
 }
 
-static int
-type_error_int(const char *msg) {
-    PyErr_SetString(PyExc_TypeError, msg);
-    return -1;
-}
-
 static PyObject *
 type_error_ptr(const char *msg) {
     PyErr_SetString(PyExc_TypeError, msg);
-    return NULL;
-}
-
-static int
-runtime_error_int(const char *msg) {
-    PyErr_SetString(PyExc_RuntimeError, msg);
-    return -1;
-}
-
-static PyObject *
-runtime_error_ptr(const char *msg) {
-    PyErr_SetString(PyExc_RuntimeError, msg);
     return NULL;
 }
 
@@ -736,7 +718,7 @@ Decimal_real_get(DecimalObject *self) {
 }
 
 static PyObject *
-Decimal_imag_get(DecimalObject *self) {
+Decimal_imag_get(DecimalObject *self UNUSED) {
     Py_INCREF(PyZERO);
     return PyZERO;
 }
@@ -848,7 +830,7 @@ Decimal_copy(DecimalObject *self) {
 }
 
 static PyObject *
-Decimal_deepcopy(DecimalObject *self, PyObject *memo) {
+Decimal_deepcopy(DecimalObject *self, PyObject *memo UNUSED) {
     Py_INCREF(self);
     return (PyObject *)self;
 }
@@ -1356,7 +1338,6 @@ CLEAN_UP:
 
 static PyObject *
 Decimal_floordiv(PyObject *x, PyObject *y) {
-    BINOP_DEC_TYPE(x, y);
     PyObject *res = NULL;
     error_t rc;
     fpdec_t tmp_x = FPDEC_ZERO;
@@ -1426,7 +1407,6 @@ CLEAN_UP:
 static PyObject *
 dec_pow_pylong(DecimalObject *x, PyObject *exp) {
     PyObject *res = NULL;
-    error_t rc;
     PyObject *f = NULL;
     DecimalObject *dec = NULL;
 
@@ -2286,8 +2266,7 @@ PyLong_as_u128(PyObject *val) {
 }
 
 static inline error_t
-PyLong_as_digit_array(fpdec_digit_t *res, const size_t n_digits,
-                      PyObject *val) {
+PyLong_as_digit_array(fpdec_digit_t *res, PyObject *val) {
     // val must be a PyLong and must be > 0 !!!
     fpdec_digit_t *digit = res;
     PyObject *t, *q, *r;
@@ -2356,7 +2335,7 @@ fpdec_from_pylong(fpdec_t *fpdec, PyObject *val) {
             Py_DECREF(abs_val);
             return ENOMEM;
         }
-        rc = PyLong_as_digit_array(digits, n_digits, abs_val);
+        rc = PyLong_as_digit_array(digits, abs_val);
         Py_DECREF(abs_val);
         if (rc == FPDEC_OK)
             rc = fpdec_from_sign_digits_exp(fpdec, sign, n_digits, digits, 0);
@@ -2423,13 +2402,13 @@ CLEAN_UP:
 * ==========================================================================*/
 
 static PyObject *
-get_dflt_rounding_mode(PyObject *mod) {
+get_dflt_rounding_mode(PyObject *mod UNUSED) {
     enum FPDEC_ROUNDING_MODE dflt = fpdec_get_default_rounding_mode();
     return fpdec_rnd_2_py_rnd(dflt);
 }
 
 static PyObject *
-set_dflt_rounding_mode(PyObject *mod, PyObject *py_rnd) {
+set_dflt_rounding_mode(PyObject *mod UNUSED, PyObject *py_rnd) {
     enum FPDEC_ROUNDING_MODE new_dflt = py_rnd_2_fpdec_rnd(py_rnd);
     if (new_dflt < 0)
         return NULL;
