@@ -25,17 +25,19 @@ import sys
 
 import pytest
 
+# noinspection PyUnresolvedReferences,PyProtectedMember
 from decimalfp._pydecimalfp import MAX_DEC_PRECISION
 
 
 @pytest.fixture(scope="module")
 def dflt_rounding(impl):
     rnd = impl.get_dflt_rounding_mode()
-    impl.set_dflt_rounding_mode(impl.ROUNDING.ROUND_HALF_UP);
+    impl.set_dflt_rounding_mode(impl.ROUNDING.ROUND_HALF_UP)
     yield
     impl.set_dflt_rounding_mode(rnd)
 
 
+# noinspection PyUnusedLocal
 def test_dflt_rounding(dflt_rounding):
     """Activate fixture to set default rounding"""
     pass
@@ -58,6 +60,7 @@ class IntWrapper:
         return self.i == i
 
 
+# noinspection PyUnresolvedReferences
 Integral.register(IntWrapper)
 
 
@@ -392,13 +395,8 @@ def test_decimal_from_float_no_adj(impl, value, prec, ratio):
 @pytest.mark.parametrize(("value", "prec"),
                          ((float('inf'), compact_prec),
                           (float('-inf'), None),
-                          (float('nan'), large_prec),
-                                 # (0.3, None),
-                                 # (sys.float_info.min, None)
-                          ),
-                         ids=("inf", "-inf", "nan",
-                                 # "0.3", "float.min"
-                              ))
+                          (float('nan'), large_prec),),
+                         ids=("inf", "-inf", "nan",))
 def test_decimal_from_incompat_float(impl, value, prec):
     with pytest.raises(ValueError):
         impl.Decimal(value, prec)
@@ -472,12 +470,8 @@ def test_decimal_from_fraction_no_adj(impl, prec, ratio):
 
 
 @pytest.mark.parametrize(("value", "prec"),
-                         ((Fraction(1, 3), None),
-                                 # (Fraction.from_float(sys.float_info.min), None)
-                          ),
-                         ids=("1/3",
-                                 # "float.min"
-                              ))
+                         ((Fraction(1, 3), None),),
+                         ids=("1/3",))
 def test_decimal_from_incompat_fraction(impl, value, prec):
     with pytest.raises(ValueError):
         impl.Decimal(value, prec)
@@ -539,12 +533,8 @@ def test_copy(impl, value):
 
 
 @pytest.mark.parametrize("value",
-                         (# "17.800e2305",
-                          # ".".join(("1" * 2260, "4" * 33 + "0" * 19)),
-                          "-0." + "7" * (MAX_DEC_PRECISION + 1),),
-                         ids=(# "exp > 127",
-                              # "coeff too large",
-                              f"prec > {MAX_DEC_PRECISION}",))
+                         ("-0." + "7" * (MAX_DEC_PRECISION + 1),),
+                         ids=(f"prec > {MAX_DEC_PRECISION}",))
 def test_limits_exceeded(impl, value):
     with pytest.raises(ValueError):
         impl.Decimal(value)
