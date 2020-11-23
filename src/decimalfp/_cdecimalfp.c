@@ -246,13 +246,10 @@ Decimal_dealloc(DecimalObject *self) {
 }
 
 #define DECIMAL_ALLOC(type, name) \
-    do {name = DecimalType_alloc(type); \
-        if (name == NULL) \
-            return NULL;  \
-        } while (0)
+    DecimalObject *name = DecimalType_alloc(type); \
+    do {if (name == NULL) return NULL; } while (0)
 
 #define DECIMAL_ALLOC_SELF(type) \
-    DecimalObject *self; \
     DECIMAL_ALLOC(type, self)
 
 static PyObject *
@@ -635,7 +632,6 @@ DecimalType_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
 // Helper macros
 
 #define DECIMAL_ALLOC_RESULT(type) \
-    DecimalObject *res; \
     DECIMAL_ALLOC(type, res)
 
 #define BINOP_DEC_TYPE(x, y)            \
@@ -644,7 +640,6 @@ DecimalType_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
         (Decimal_Check(y) ? Py_TYPE(y) : NULL)
 
 #define BINOP_ALLOC_RESULT(type)      \
-    DecimalObject *dec;               \
     DECIMAL_ALLOC(type, dec);         \
     PyObject *res = (PyObject *) dec
 
@@ -975,7 +970,7 @@ CLEAN_UP:
 
 static PyObject *
 Decimal_neg(PyObject *x) {
-    DecimalObject *dec;
+    DECIMAL_ALLOC(Py_TYPE(x), dec);
     fpdec_t *x_fpdec = &((DecimalObject *)x)->fpdec;
     error_t rc;
 
@@ -984,7 +979,6 @@ Decimal_neg(PyObject *x) {
         return x;
     }
 
-    DECIMAL_ALLOC(Py_TYPE(x), dec);
     rc = fpdec_copy(&dec->fpdec, x_fpdec);
     CHECK_FPDEC_ERROR(rc);
     dec->fpdec.sign *= -1;
@@ -1003,7 +997,7 @@ Decimal_pos(PyObject *x) {
 
 static PyObject *
 Decimal_abs(PyObject *x) {
-    DecimalObject *dec;
+    DECIMAL_ALLOC(Py_TYPE(x), dec);
     fpdec_t *x_fpdec = &((DecimalObject *)x)->fpdec;
     error_t rc;
 
@@ -1012,7 +1006,6 @@ Decimal_abs(PyObject *x) {
         return x;
     }
 
-    DECIMAL_ALLOC(Py_TYPE(x), dec);
     rc = fpdec_copy(&dec->fpdec, x_fpdec);
     CHECK_FPDEC_ERROR(rc);
     dec->fpdec.sign = 1;
@@ -1601,7 +1594,6 @@ Decimal_quantize(DecimalObject *self, PyObject *args, PyObject *kwds) {
                                      &rounding))
         return NULL;
 
-    DEF_N_CONV_RND_MODE(rounding);
     BINOP_ALLOC_RESULT(Py_TYPE(self));
     PyObject *t = NULL;
     PyObject *num = NULL;
@@ -1610,6 +1602,7 @@ Decimal_quantize(DecimalObject *self, PyObject *args, PyObject *kwds) {
     error_t rc;
     fpdec_t tmp_q = FPDEC_ZERO;
     fpdec_t *fpq;
+    DEF_N_CONV_RND_MODE(rounding);
 
     fpq = fpdec_from_number(&tmp_q, quant);
     if (fpq == NULL) {
