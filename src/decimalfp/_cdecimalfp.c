@@ -12,12 +12,6 @@ $Source$
 $Revision$
 */
 
-#if defined(__GNUC__) || defined(__clang__)
-#define UNUSED __attribute__((unused))
-#else
-#define UNUSED
-#endif
-
 #define PY_SSIZE_T_CLEAN
 #define Py_LIMITED_API 0x03060000
 
@@ -28,6 +22,7 @@ $Revision$
 #include "libfpdec/fpdec_struct.h"
 #include "libfpdec/digit_array_struct.h"
 #include "libfpdec/basemath.h"
+#include "libfpdec/compiler_macros.h"
 
 // Macro defs to be compatible with Python 3.6 (incl PyPy3):
 
@@ -204,7 +199,7 @@ static PyTypeObject *DecimalType;
 // Method prototypes
 
 static PyObject *
-Decimal_as_fraction(DecimalObject *self);
+Decimal_as_fraction(DecimalObject *self, PyObject *args UNUSED);
 
 // Type checks
 
@@ -671,13 +666,13 @@ DecimalType_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
 // Properties
 
 static PyObject *
-Decimal_precision_get(DecimalObject *self) {
+Decimal_precision_get(DecimalObject *self, void *closure UNUSED) {
     long prec = FPDEC_DEC_PREC(&self->fpdec);
     return PyLong_FromLong(prec);
 }
 
 static PyObject *
-Decimal_magnitude_get(DecimalObject *self) {
+Decimal_magnitude_get(DecimalObject *self, void *closure UNUSED) {
     long magn = fpdec_magnitude(&self->fpdec);
     if (magn == -1 && errno != 0) {
         PyErr_SetString(PyExc_OverflowError, "Result would be '-Infinity'.");
@@ -688,7 +683,7 @@ Decimal_magnitude_get(DecimalObject *self) {
 }
 
 static PyObject *
-Decimal_numerator_get(DecimalObject *self) {
+Decimal_numerator_get(DecimalObject *self, void *closure UNUSED) {
     if (self->numerator == NULL) {
         fpdec_as_integer_ratio(&self->numerator, &self->denominator,
                                &self->fpdec);
@@ -700,7 +695,7 @@ Decimal_numerator_get(DecimalObject *self) {
 }
 
 static PyObject *
-Decimal_denominator_get(DecimalObject *self) {
+Decimal_denominator_get(DecimalObject *self, void *closure UNUSED) {
     if (self->denominator == NULL) {
         fpdec_as_integer_ratio(&self->numerator, &self->denominator,
                                &self->fpdec);
@@ -712,13 +707,13 @@ Decimal_denominator_get(DecimalObject *self) {
 }
 
 static PyObject *
-Decimal_real_get(DecimalObject *self) {
+Decimal_real_get(DecimalObject *self, void *closure UNUSED) {
     Py_INCREF(self);
     return (PyObject *)self;
 }
 
 static PyObject *
-Decimal_imag_get(DecimalObject *self UNUSED) {
+Decimal_imag_get(DecimalObject *self UNUSED, void *closure UNUSED) {
     Py_INCREF(PyZERO);
     return PyZERO;
 }
@@ -726,7 +721,7 @@ Decimal_imag_get(DecimalObject *self UNUSED) {
 // String representation
 
 static PyObject *
-Decimal_bytes(DecimalObject *self) {
+Decimal_bytes(DecimalObject *self, PyObject *args UNUSED) {
     PyObject *res = NULL;
     char *lit = fpdec_as_ascii_literal(&self->fpdec, false);
 
@@ -814,17 +809,17 @@ CLEAN_UP:
 static Py_hash_t
 Decimal_hash(DecimalObject *self) {
     if (self->hash == -1) {
-        if (PyObject_RichCompareBool(Decimal_denominator_get(self), PyONE,
-                                     Py_EQ))
-            self->hash = PyObject_Hash(Decimal_numerator_get(self));
+        if (PyObject_RichCompareBool(Decimal_denominator_get(self, NULL),
+                                     PyONE, Py_EQ))
+            self->hash = PyObject_Hash(Decimal_numerator_get(self, NULL));
         else
-            self->hash = PyObject_Hash(Decimal_as_fraction(self));
+            self->hash = PyObject_Hash(Decimal_as_fraction(self, NULL));
     }
     return self->hash;
 }
 
 static PyObject *
-Decimal_copy(DecimalObject *self) {
+Decimal_copy(DecimalObject *self, PyObject *args UNUSED) {
     Py_INCREF(self);
     return (PyObject *)self;
 }
@@ -842,8 +837,8 @@ Decimal_cmp_to_int(DecimalObject *x, PyObject *y, int op) {
     PyObject *den = NULL;
     PyObject *t = NULL;
 
-    ASSIGN_AND_CHECK_NULL(num, Decimal_numerator_get(x));
-    ASSIGN_AND_CHECK_NULL(den, Decimal_denominator_get(x));
+    ASSIGN_AND_CHECK_NULL(num, Decimal_numerator_get(x, NULL));
+    ASSIGN_AND_CHECK_NULL(den, Decimal_denominator_get(x, NULL));
     ASSIGN_AND_CHECK_NULL(t, PyNumber_Multiply(y, den));
     ASSIGN_AND_CHECK_NULL(res, PyObject_RichCompare(num, t, op));
     goto CLEAN_UP;
@@ -869,8 +864,8 @@ Decimal_cmp_to_ratio(DecimalObject *x, PyObject *y, int op) {
     PyObject *lhs = NULL;
     PyObject *rhs = NULL;
 
-    ASSIGN_AND_CHECK_NULL(x_num, Decimal_numerator_get(x));
-    ASSIGN_AND_CHECK_NULL(x_den, Decimal_denominator_get(x));
+    ASSIGN_AND_CHECK_NULL(x_num, Decimal_numerator_get(x, NULL));
+    ASSIGN_AND_CHECK_NULL(x_den, Decimal_denominator_get(x, NULL));
     ASSIGN_AND_CHECK_NULL(y_num, PySequence_GetItem(y, 0));
     ASSIGN_AND_CHECK_NULL(y_den, PySequence_GetItem(y, 1));
     ASSIGN_AND_CHECK_NULL(lhs, PyNumber_Multiply(x_num, y_den));
@@ -917,7 +912,7 @@ Decimal_richcompare(DecimalObject *self, PyObject *other, int op) {
 
     // Rational
     if (PyObject_IsInstance(other, Rational)) {
-        ASSIGN_AND_CHECK_NULL(t, Decimal_as_fraction(self));
+        ASSIGN_AND_CHECK_NULL(t, Decimal_as_fraction(self, NULL));
         ASSIGN_AND_CHECK_NULL(res, PyObject_RichCompare(t, other, op));
         goto CLEAN_UP;
     }
@@ -1029,7 +1024,7 @@ ERROR:
 }
 
 static PyObject *
-Decimal_int(DecimalObject *x) {
+Decimal_int(DecimalObject *x, PyObject *args UNUSED) {
     fpdec_t *fpdec = &x->fpdec;
     return PyLong_from_fpdec(fpdec);
 }
@@ -1040,8 +1035,8 @@ Decimal_float(DecimalObject *x) {
     PyObject *num = NULL;
     PyObject *den = NULL;
 
-    ASSIGN_AND_CHECK_NULL(num, Decimal_numerator_get(x));
-    ASSIGN_AND_CHECK_NULL(den, Decimal_denominator_get(x));
+    ASSIGN_AND_CHECK_NULL(num, Decimal_numerator_get(x, NULL));
+    ASSIGN_AND_CHECK_NULL(den, Decimal_denominator_get(x, NULL));
     ASSIGN_AND_CHECK_NULL(res, PyNumber_TrueDivide(num, den));
     goto CLEAN_UP;
 
@@ -1416,7 +1411,7 @@ dec_pow_pylong(DecimalObject *x, PyObject *exp) {
         res = (PyObject *)dec;
     }
     else {
-        ASSIGN_AND_CHECK_NULL(f, Decimal_as_fraction(x));
+        ASSIGN_AND_CHECK_NULL(f, Decimal_as_fraction(x, NULL));
         ASSIGN_AND_CHECK_NULL(res, PyNumber_Power(f, exp, Py_None));
         // try to convert result back to Decimal
         dec = (DecimalObject *)DecimalType_from_rational(Py_TYPE(x), res, -1);
@@ -1482,9 +1477,9 @@ obj_pow_dec(PyObject *x, DecimalObject *y) {
     PyObject *den = NULL;
     PyObject *f = NULL;
 
-    ASSIGN_AND_CHECK_NULL(den, Decimal_denominator_get(y));
+    ASSIGN_AND_CHECK_NULL(den, Decimal_denominator_get(y, NULL));
     if (PyObject_RichCompareBool(den, PyONE, Py_EQ) == 1) {
-        ASSIGN_AND_CHECK_NULL(num, Decimal_numerator_get(y));
+        ASSIGN_AND_CHECK_NULL(num, Decimal_numerator_get(y, NULL));
         ASSIGN_AND_CHECK_NULL(res, PyNumber_Power(x, num, Py_None));
     }
     else {
@@ -1670,7 +1665,7 @@ CLEAN_UP:
 }
 
 static PyObject *
-Decimal_as_tuple(DecimalObject *self) {
+Decimal_as_tuple(DecimalObject *self, PyObject *args UNUSED) {
     fpdec_t *fpdec = &self->fpdec;
     PyObject *sign = NULL;
     PyObject *coeff = NULL;
@@ -1698,13 +1693,13 @@ CLEAN_UP:
 }
 
 static PyObject *
-Decimal_as_fraction(DecimalObject *self) {
+Decimal_as_fraction(DecimalObject *self, PyObject *args UNUSED) {
     PyObject *res = NULL;
     PyObject *num = NULL;
     PyObject *den = NULL;
 
-    ASSIGN_AND_CHECK_NULL(num, Decimal_numerator_get(self));
-    ASSIGN_AND_CHECK_NULL(den, Decimal_denominator_get(self));
+    ASSIGN_AND_CHECK_NULL(num, Decimal_numerator_get(self, NULL));
+    ASSIGN_AND_CHECK_NULL(den, Decimal_denominator_get(self, NULL));
     ASSIGN_AND_CHECK_NULL(res, PyObject_CallFunctionObjArgs(Fraction,
                                                             num, den, NULL));
     goto CLEAN_UP;
@@ -1719,13 +1714,13 @@ CLEAN_UP:
 }
 
 static PyObject *
-Decimal_as_integer_ratio(DecimalObject *self) {
+Decimal_as_integer_ratio(DecimalObject *self, PyObject *args UNUSED) {
     PyObject *res = NULL;
     PyObject *num = NULL;
     PyObject *den = NULL;
 
-    ASSIGN_AND_CHECK_NULL(num, Decimal_numerator_get(self));
-    ASSIGN_AND_CHECK_NULL(den, Decimal_denominator_get(self));
+    ASSIGN_AND_CHECK_NULL(num, Decimal_numerator_get(self, NULL));
+    ASSIGN_AND_CHECK_NULL(den, Decimal_denominator_get(self, NULL));
     ASSIGN_AND_CHECK_NULL(res, PyTuple_Pack(2, num, den));
     goto CLEAN_UP;
 
@@ -1739,13 +1734,13 @@ CLEAN_UP:
 }
 
 static PyObject *
-Decimal_floor(DecimalObject *self) {
+Decimal_floor(DecimalObject *self, PyObject *args UNUSED) {
     PyObject *res = NULL;
     PyObject *num = NULL;
     PyObject *den = NULL;
 
-    ASSIGN_AND_CHECK_NULL(num, Decimal_numerator_get(self));
-    ASSIGN_AND_CHECK_NULL(den, Decimal_denominator_get(self));
+    ASSIGN_AND_CHECK_NULL(num, Decimal_numerator_get(self, NULL));
+    ASSIGN_AND_CHECK_NULL(den, Decimal_denominator_get(self, NULL));
     ASSIGN_AND_CHECK_NULL(res, PyNumber_FloorDivide(num, den));
     goto CLEAN_UP;
 
@@ -1759,14 +1754,14 @@ CLEAN_UP:
 }
 
 static PyObject *
-Decimal_ceil(DecimalObject *self) {
+Decimal_ceil(DecimalObject *self, PyObject *args UNUSED) {
     PyObject *res = NULL;
     PyObject *num = NULL;
     PyObject *den = NULL;
     PyObject *t = NULL;
 
-    ASSIGN_AND_CHECK_NULL(num, Decimal_numerator_get(self));
-    ASSIGN_AND_CHECK_NULL(den, Decimal_denominator_get(self));
+    ASSIGN_AND_CHECK_NULL(num, Decimal_numerator_get(self, NULL));
+    ASSIGN_AND_CHECK_NULL(den, Decimal_denominator_get(self, NULL));
     ASSIGN_AND_CHECK_NULL(t, PyNumber_Negative(num));
     ASSIGN_AND_CHECK_NULL(t, PyNumber_InPlaceFloorDivide(t, den));
     ASSIGN_AND_CHECK_NULL(res, PyNumber_Negative(t));
@@ -1796,7 +1791,7 @@ Decimal_round(DecimalObject *self, PyObject *args, PyObject *kwds) {
     if (precision == Py_None) {
         ASSIGN_AND_CHECK_NULL(adj, Decimal_adj_to_prec(self, PyZERO,
                                                        Py_None));
-        ASSIGN_AND_CHECK_NULL(res, Decimal_int((DecimalObject *)adj));
+        ASSIGN_AND_CHECK_NULL(res, Decimal_int((DecimalObject *)adj, NULL));
     }
     else
         ASSIGN_AND_CHECK_NULL(res, Decimal_adj_to_prec(self, precision,
@@ -2402,7 +2397,7 @@ CLEAN_UP:
 * ==========================================================================*/
 
 static PyObject *
-get_dflt_rounding_mode(PyObject *mod UNUSED) {
+get_dflt_rounding_mode(PyObject *mod UNUSED, PyObject *args UNUSED) {
     enum FPDEC_ROUNDING_MODE dflt = fpdec_get_default_rounding_mode();
     return fpdec_rnd_2_py_rnd(dflt);
 }
