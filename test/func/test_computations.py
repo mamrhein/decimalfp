@@ -209,6 +209,17 @@ def test_decimal_div_zero(impl, op, operand, zero):
     with pytest.raises(ZeroDivisionError):
         op(dec, zero)
 
+@pytest.mark.parametrize("operand",
+                         (17.8, Fraction(3, 5)),
+                         ids=("float", "fraction"))
+@pytest.mark.parametrize("op",
+                         [op for op in DIV_MOD_OPS],
+                         ids=[op.__name__ for op in DIV_MOD_OPS])
+def test_number_div_decimal_zero(impl, op, operand):
+    zero = impl.Decimal()
+    with pytest.raises(ZeroDivisionError):
+        op(operand, zero)
+
 
 @pytest.mark.parametrize("operand2",
                          (44, 2.0, Fraction(-34, 1),

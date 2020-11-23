@@ -113,9 +113,11 @@ def test_decimal_wrong_precision_type(impl, prec):
         impl.Decimal(precision=prec)
 
 
-def test_decimal_wrong_precision_value(impl):
+@pytest.mark.parametrize("prec", [-1, MAX_DEC_PRECISION + 1],
+                         ids=("prec=-1", "prec>MAX_DEC_PRECISION"))
+def test_decimal_wrong_precision_value(impl, prec):
     with pytest.raises(ValueError):
-        impl.Decimal(precision=-7)
+        impl.Decimal(precision=prec)
 
 
 compact_coeff = 174
