@@ -1528,7 +1528,7 @@ Decimal_pow(PyObject *x, PyObject *y, PyObject *mod) {
 
 #define DEF_N_CONV_RND_MODE(rounding)                            \
     enum FPDEC_ROUNDING_MODE rnd = py_rnd_2_fpdec_rnd(rounding); \
-    if (rnd == -1)                                               \
+    if (rnd > FPDEC_MAX_ROUNDING_MODE)                                               \
         goto ERROR
 
 static PyObject *
@@ -2374,7 +2374,7 @@ CLEAN_UP:
 
 static enum FPDEC_ROUNDING_MODE
 py_rnd_2_fpdec_rnd(PyObject *py_rnd) {
-    long fpdec_rnd = -1;
+    long fpdec_rnd;
     PyObject *val = NULL;
 
     if (py_rnd == Py_None)
@@ -2390,7 +2390,7 @@ py_rnd_2_fpdec_rnd(PyObject *py_rnd) {
 
 ERROR:
     PyErr_Format(PyExc_TypeError, "Illegal rounding mode: %R", py_rnd);
-    fpdec_rnd = -1;
+    fpdec_rnd = FPDEC_MAX_ROUNDING_MODE + 1;
 
 CLEAN_UP:
     Py_XDECREF(val);
