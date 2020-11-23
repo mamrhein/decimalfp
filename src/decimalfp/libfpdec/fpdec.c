@@ -824,31 +824,31 @@ static inline uint8_t *
 buf_align(uint8_t *buf, size_t n_char, size_t min_width, uint8_t len_sign,
           char align, utf8c_t fill) {
     assert(n_char < min_width);
+    uint8_t *ch = buf;
     size_t n_to_fill = min_width - n_char;
-    size_t n_lpad, n_rpad;
-    uint8_t *ch, *offset;
+    size_t n_lpad = 0;
+    size_t n_rpad = 0;
+    uint8_t *offset;
 
     switch (align) {
         case '=':
-            ch = buf + len_sign;
+            ch += len_sign;
             n_lpad = n_to_fill;
-            n_rpad = 0;
             break;
         case '>':
-            ch = buf;
             n_lpad = n_to_fill;
-            n_rpad = 0;
             break;
         case '<':
-            ch = buf + n_char;
-            n_lpad = 0;
+            ch += n_char;
             n_rpad = n_to_fill;
             break;
         case '^':
-            ch = n_to_fill > 1 ? buf : buf + n_char;
+            ch += n_to_fill > 1 ? 0 : n_char;
             n_lpad = n_to_fill / 2;
             n_rpad = n_to_fill - n_lpad;
             break;
+        default:
+            assert(false);
     }
     if (n_lpad > 0) {
         offset = ch + n_lpad * fill.n_bytes;

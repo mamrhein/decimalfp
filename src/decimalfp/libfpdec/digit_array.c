@@ -17,6 +17,7 @@ $Revision$
 #include <string.h>
 
 #include "basemath.h"
+#include "compiler_macros.h"
 #include "digit_array.h"
 #include "digit_array_struct.h"
 #include "rounding_helper.h"
@@ -577,7 +578,7 @@ digits_div_limit_prec(const fpdec_digit_array_t *x,
                       const fpdec_n_digits_t x_n_shift,
                       const fpdec_digit_array_t *y,
                       const fpdec_n_digits_t y_n_shift) {
-    fpdec_n_digits_t x_n_digits = x->n_signif + x_n_shift;
+    fpdec_n_digits_t UNUSED x_n_digits = x->n_signif + x_n_shift;
     fpdec_n_digits_t y_n_digits = y->n_signif + y_n_shift;
 
     assert(x_n_digits >= y_n_digits);
