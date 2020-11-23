@@ -115,7 +115,7 @@ fpdec_dump(const fpdec_t *fpdec) {
         printf("exp: %d\n", FPDEC_DYN_EXP(fpdec));
         printf("n digits: %u\n", FPDEC_DYN_N_DIGITS(fpdec));
         printf("digits: ");
-        for (int i = 0; i < FPDEC_DYN_N_DIGITS(fpdec); ++i) {
+        for (uint32_t i = 0; i < FPDEC_DYN_N_DIGITS(fpdec); ++i) {
             printf("%lu, ", FPDEC_DYN_DIGITS(fpdec)[i]);
         }
     }
@@ -316,7 +316,7 @@ du64_to_digits(fpdec_digit_t *digit, int *n_trailing_zeros_skipped,
         }
     }
     *digit = u128_idiv_radix(&t);
-    if (*digit != 0 || U128_NE_ZERO(t) && n_digits > 0) {
+    if (*digit != 0 || (U128_NE_ZERO(t) && n_digits > 0)) {
         n_digits++;
         digit++;
     }
@@ -408,6 +408,7 @@ fpdec_dyn_normalize(fpdec_t *fpdec) {
                     // shint < RADIX
                     if (++digit_idx == n_digits)
                         break;
+                    FALLTHROUGH;
                 case 0:
                     u64_mul_u64(&f, digits[digit_idx], dec_shift);
                     // f < RADIX * 10^9
@@ -415,6 +416,7 @@ fpdec_dyn_normalize(fpdec_t *fpdec) {
                     // shint < RADIX + RADIX * 10^9 < 2^96
                     if (++digit_idx == n_digits)
                         break;
+                    FALLTHROUGH;
                 case 1:
                     u64_mul_u64(&f, digits[digit_idx], dec_shift);
                     // f < RADIX * 10^9
@@ -430,6 +432,7 @@ fpdec_dyn_normalize(fpdec_t *fpdec) {
                     }
                     if (++digit_idx == n_digits)
                         break;
+                    FALLTHROUGH;
                 default:
                     assert(digit_idx == n_digits);
             }
@@ -1083,7 +1086,7 @@ fill_in_digits_padded(uint8_t *buf, const fpdec_digit_t *most_signif_digit,
     *ch = '\0';
     i = n = iter_grouping(it);
 
-    for (int j = 0; j < n_trailing_zeros; ++j) {
+    for (size_t j = 0; j < n_trailing_zeros; ++j) {
         *(--ch) = '0';
         if (n > 0) {
             --i;
@@ -1215,7 +1218,7 @@ fpdec_dyn_formatted(const fpdec_t *fpdec, const format_spec_t *fmt_spec,
         n_dec_frac_fill_zeros = 0;
     }
     else {
-        if (-exp > FPDEC_DYN_N_DIGITS(fpdec)) {
+        if ((uint32_t)-exp > FPDEC_DYN_N_DIGITS(fpdec)) {
             n_int_digits = 0;
             n_frac_digits = FPDEC_DYN_N_DIGITS(fpdec);
             n_dec_frac_fill_zeros =
@@ -1363,7 +1366,6 @@ const v_formatted vtab_formatted[2] = {
 uint8_t *
 fpdec_formatted(const fpdec_t *fpdec, const uint8_t *format) {
     format_spec_t fmt_spec;
-    uint8_t dec_point_shift = 0;
     int rc;
 
     rc = parse_format_spec(&fmt_spec, format);
@@ -1391,7 +1393,7 @@ fpdec_as_ascii_literal(const fpdec_t *fpdec,
         .min_width = 0,
         .thousands_sep = {0, ""},
         .grouping = {3, 0, 0, 0, 0},
-        .decimal_point = {FPDEC_DEC_PREC(fpdec) == 0 ? 0 : 1, '.'},
+        .decimal_point = {FPDEC_DEC_PREC(fpdec) == 0 ? 0 : 1, {'.'}},
         .precision = FPDEC_DEC_PREC(fpdec),
         .type = 'f'
     };
@@ -1758,20 +1760,6 @@ fpdec_sub(fpdec_t *z, const fpdec_t *x, const fpdec_t *y) {
     }
     // ... and |x| = |y| => x - y = 0
     return FPDEC_OK;
-
-}
-
-static error_t
-fpdec_mul_abs_dyn_by_u64(fpdec_t *z, const fpdec_t *x, const uint64_t y) {
-    fpdec_digit_array_t *z_digits = digits_copy(x->digit_array, 0, 1);
-
-    if (z_digits == NULL)
-        MEMERROR;
-
-    digits_imul_digit(z_digits, y);
-    z->digit_array = z_digits;
-    FPDEC_IS_DYN_ALLOC(z) = true;
-    return FPDEC_OK;
 }
 
 static error_t
@@ -1819,15 +1807,10 @@ fpdec_mul_abs_shint_by_dyn(fpdec_t *z, const fpdec_t *x, const fpdec_t *y) {
     return rc;
 }
 
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "ArgumentSelectionDefects"
-
 static error_t
 fpdec_mul_abs_dyn_by_shint(fpdec_t *z, const fpdec_t *x, const fpdec_t *y) {
     return fpdec_mul_abs_shint_by_dyn(z, y, x);
 }
-
-#pragma clang diagnostic pop
 
 static error_t
 fpdec_mul_abs_shint_by_shint(fpdec_t *z, const fpdec_t *x, const fpdec_t *y) {

@@ -15,7 +15,7 @@ $Revision$
 #include <ctype.h>
 #include <stddef.h>
 
-#include "helper_macros.h"
+#include "compiler_macros.h"
 #include "parser.h"
 
 /*****************************************************************************
@@ -43,7 +43,7 @@ parse_ascii_dec_literal(dec_repr_t *result, const char *literal) {
     const char *curr_char = literal;
     const char *int_part = NULL;
     const char *signif_int_part = NULL;
-    ptrdiff_t len_int_part = 0;
+    ptrdiff_t len_int_part;
     const char *frac_part = NULL;
     ptrdiff_t len_frac_part = 0;
     int64_t t;
@@ -60,6 +60,7 @@ parse_ascii_dec_literal(dec_repr_t *result, const char *literal) {
     switch (*curr_char) {
         case '-':
             result->negative = true;
+            FALLTHROUGH;
         case '+':
             curr_char++;
     }
@@ -95,6 +96,7 @@ parse_ascii_dec_literal(dec_repr_t *result, const char *literal) {
         switch (*curr_char) {
             case '-':
                 sign = -1;
+                FALLTHROUGH;
             case '+':
                 curr_char++;
                 break;

@@ -150,7 +150,7 @@ digits_eliminate_trailing_zeros(fpdec_digit_array_t *digit_array) {
 
     if (n_trailing_zeros > 0) {
         digit_array->n_signif -= n_trailing_zeros;
-        for (int i = 0; i < digit_array->n_signif; ++i) {
+        for (fpdec_n_digits_t i = 0; i < digit_array->n_signif; ++i) {
             digit_array->digits[i] = lsd[i];
         }
     }
@@ -174,9 +174,9 @@ digits_round(fpdec_digit_array_t *digit_array, fpdec_sign_t sign,
 
     /* digit points to the digit to be rounded, n_dec_digits is the number
        of decimal digits to be rounded */
-    digit_idx = FLOOR(n_dec_shift, DEC_DIGITS_PER_DIGIT);
+    digit_idx = n_dec_shift / DEC_DIGITS_PER_DIGIT;
     digit = digit_array->digits + digit_idx;
-    n_dec_digits = MOD(n_dec_shift, DEC_DIGITS_PER_DIGIT);
+    n_dec_digits = n_dec_shift % DEC_DIGITS_PER_DIGIT;
     if (n_dec_digits == 0) {
         // need to round the previous digit ...
         fpdec_digit_t quot = (digit_idx < digit_array->n_signif) ? *digit : 0;
@@ -358,9 +358,9 @@ digits_mul(const fpdec_digit_array_t *x, const fpdec_digit_array_t *y) {
         MEMERROR_RETVAL(NULL);
 
     z_carry = z->digits + x->n_signif;
-    for (int j = 0; j < y->n_signif; ++j) {
+    for (fpdec_n_digits_t j = 0; j < y->n_signif; ++j) {
         z_digit = z->digits + j;
-        for (int i = 0; i < x->n_signif; ++i) {
+        for (fpdec_n_digits_t i = 0; i < x->n_signif; ++i) {
             // x->digits[i] <= RADIX - 1 and y->digits[j] <= RADIX - 1 and
             // *z_digit <= RADIX - 1 and *z_carry <= RADIX - 1
             u64_mul_u64(&t, x->digits[i], y->digits[j]);
@@ -409,7 +409,7 @@ digits_div_digit(const fpdec_digit_array_t *x,
     }
     else
         xhat = x;
-    for (int i = xhat->n_signif - 1; i >= 0; --i) {
+    for (int64_t i = xhat->n_signif - 1; i >= 0; --i) {
         u64_mul_u64(&t, r, RADIX);
         u128_iadd_u64(&t, xhat->digits[i]);
         r = u128_idiv_u64(&t, y);
@@ -463,7 +463,7 @@ digits_divmod(const fpdec_digit_array_t *x, const fpdec_n_digits_t x_n_shift,
     digits_imul_digit(yd, d);
 
     // D2: loop j from m - n to 0
-    for (int j = m - n; j >= 0; --j) {
+    for (int64_t j = m - n; j >= 0; --j) {
         // D3: calculate qhat and rhat
         u64_mul_u64(&t1, xd->digits[j + n], RADIX);
         u128_iadd_u64(&t1, xd->digits[j + n_1]);
@@ -485,7 +485,7 @@ digits_divmod(const fpdec_digit_array_t *x, const fpdec_n_digits_t x_n_shift,
         // D4: multiply and subtract
         carry = 0;
         borrow = 0;
-        for (int i = 0; i <= n; ++i) {
+        for (fpdec_n_digits_t i = 0; i <= n; ++i) {
             u64_mul_u64(&t1, qhat, yd->digits[i]);
             u128_iadd_u64(&t1, carry);
             rhat = u128_idiv_radix(&t1);
@@ -501,7 +501,7 @@ digits_divmod(const fpdec_digit_array_t *x, const fpdec_n_digits_t x_n_shift,
             // D6: add back
             q->digits[j] = qhat - 1;
             carry = 0;
-            for (int i = 0; i <= n; ++i) {
+            for (fpdec_n_digits_t i = 0; i <= n; ++i) {
                 xd->digits[j + i] += yd->digits[i] + carry;
                 carry = (xd->digits[j + i] < yd->digits[i] ||
                     xd->digits[j + i] >= RADIX);

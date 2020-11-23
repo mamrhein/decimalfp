@@ -16,11 +16,12 @@ $Revision$
 #define FPDEC_MEM_H
 
 #include <malloc.h>
+#include "compiler_macros.h"
 
 typedef void * (*mem_alloc_func)(size_t num, size_t size);
 typedef void (*mem_free_func)(void *);
 
-static mem_alloc_func fpdec_mem_alloc = calloc;
-static mem_free_func fpdec_mem_free = free;
+static mem_alloc_func fpdec_mem_alloc UNUSED = calloc;
+static mem_free_func fpdec_mem_free UNUSED = free;
 
 #endif //FPDEC_MEM_H

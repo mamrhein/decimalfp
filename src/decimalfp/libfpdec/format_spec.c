@@ -30,7 +30,7 @@ const format_spec_t DFLT_FORMAT = {
     .min_width = 0,
     .thousands_sep = {0, ""},
     .grouping = {3, 0, 0, 0, 0},
-    .decimal_point = {1, '.'},
+    .decimal_point = {1, "."},
     .precision = SIZE_MAX,
     .type = 'f'
 };
@@ -48,6 +48,7 @@ parse_format_spec(format_spec_t *spec, const uint8_t *fmt) {
     const uint8_t *cp = fmt;
     bool got_fill = false;
     int t;
+    size_t n;
 
     *spec = DFLT_FORMAT;
 
@@ -55,13 +56,14 @@ parse_format_spec(format_spec_t *spec, const uint8_t *fmt) {
     t = utf8c_len(cp);
     if (t <= 0)
         return t;
-    assert(t <= 4);
-    if (*(cp + t) == '<' || *(cp + t) == '>' || *(cp + t) == '=' ||
-            *(cp + t) == '^') {
+    n = (size_t)t;
+    assert(n <= 4);
+    if (*(cp + n) == '<' || *(cp + n) == '>' || *(cp + n) == '=' ||
+        *(cp + n) == '^') {
         // fill + align
-        memcpy(spec->fill.bytes, cp, t);
-        spec->fill.n_bytes = t;
-        cp += t;
+        memcpy(spec->fill.bytes, cp, n);
+        spec->fill.n_bytes = n;
+        cp += n;
         spec->align = *cp++;
         got_fill = true;
     }
@@ -139,24 +141,24 @@ parse_format_spec(format_spec_t *spec, const uint8_t *fmt) {
     if (spec->type == 'n') {
         struct lconv *lc = localeconv();
         if (spec->thousands_sep.n_bytes != 0) {
-            t = strlen(lc->thousands_sep);
-            if (t > 4)
+            n = strlen(lc->thousands_sep);
+            if (n > 4)
                 return -2;
-            if (t > 0)
-                memcpy(spec->thousands_sep.bytes, lc->thousands_sep, t);
-            spec->thousands_sep.n_bytes = t;
+            if (n > 0)
+                memcpy(spec->thousands_sep.bytes, lc->thousands_sep, n);
+            spec->thousands_sep.n_bytes = n;
         }
-        t = strlen(lc->grouping);
-        if (t >= sizeof(spec->grouping) / sizeof(spec->grouping[0]))
+        n = strlen(lc->grouping);
+        if (n >= sizeof(spec->grouping))
             return -2;
-        for (int i = 0; i < t; ++i)
+        for (size_t i = 0; i < n; ++i)
             spec->grouping[i] = lc->grouping[i];
-        spec->grouping[t] = 0;
-        t = strlen(lc->decimal_point);
-        if (t == 0 || t > 4)
+        spec->grouping[n] = 0;
+        n = strlen(lc->decimal_point);
+        if (n == 0 || n > 4)
             return -2;
-        memcpy(spec->decimal_point.bytes, lc->decimal_point, t);
-        spec->decimal_point.n_bytes = t;
+        memcpy(spec->decimal_point.bytes, lc->decimal_point, n);
+        spec->decimal_point.n_bytes = n;
     }
 
     return 0;
