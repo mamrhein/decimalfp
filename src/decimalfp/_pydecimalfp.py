@@ -79,41 +79,42 @@ class Decimal:
     # noinspection PyUnresolvedReferences
     """Decimal number with a given number of fractional digits.
 
-        Args:
-            value (see below): numerical value (default: None)
-            precision (numbers.Integral): number of fractional digits (default:
-                None)
+    Args:
+        value (see below): numerical value (default: None)
+        precision (numbers.Integral): number of fractional digits (default:
+            None)
 
-        If `value` is given, it must either be a string, an instance of
-        `numbers.Integral`, `number.Rational` (for example `fractions.Fraction`),
-        `decimal.Decimal`, a finite instance of `numbers.Real` (for example
-        `float`) or be convertable to a `float` or an `int`.
+    If `value` is given, it must either be a string, an instance of
+    `numbers.Integral`, `number.Rational` (for example `fractions.Fraction`),
+    `decimal.Decimal`, a finite instance of `numbers.Real` (for example
+    `float`) or be convertable to a `float` or an `int`.
 
-        If a string is given as value, it must be a string in one of two formats:
+    If a string is given as value, it must be a string in one of two formats:
 
-        * [+|-]<int>[.<frac>][<e|E>[+|-]<exp>] or
-        * [+|-].<frac>[<e|E>[+|-]<exp>].
+    * [+|-]<int>[.<frac>][<e|E>[+|-]<exp>] or
+    * [+|-].<frac>[<e|E>[+|-]<exp>].
 
-        If given value is `None`, Decimal(0) is returned.
+    If given value is `None`, Decimal(0) is returned.
 
-        Returns:
-            :class:`Decimal` instance derived from `value` according
-                to `precision`
+    Returns:
+        :class:`Decimal` instance derived from `value` according
+            to `precision`
 
-        The value is always adjusted to the given precision or the precision is
-        calculated from the given value, if no precision is given.
+    The value is always adjusted to the given precision or the precision is
+    calculated from the given value, if no precision is given.
 
-        Raises:
-            TypeError: `precision` is given, but not of type `Integral`.
-            TypeError: `value` is not an instance of the types listed above and
-                not convertable to `float` or `int`.
-            ValueError: `precision` is given, but not >= 0.
-            ValueError: `value` can not be converted to a `Decimal` (with a number
-                of fractional digits <= `MAX_DEC_PRECISION`).
+    Raises:
+        TypeError: `precision` is given, but not of type `Integral`.
+        TypeError: `value` is not an instance of the types listed above and
+            not convertable to `float` or `int`.
+        ValueError: `precision` is given, but not >= 0.
+        ValueError: `precision` is given, but not <= `MAX_DEC_PRECISION`.
+        ValueError: `value` can not be converted to a `Decimal` (with a number
+            of fractional digits <= `MAX_DEC_PRECISION`).
 
-        :class:`Decimal` instances are immutable.
+    :class:`Decimal` instances are immutable.
 
-        """
+    """
 
     __slots__ = ('_value', '_precision',
                  # used for caching values only:
@@ -326,7 +327,7 @@ class Decimal:
 
     @classmethod
     def from_real(cls, r: Real, exact: bool = True) -> "Decimal":
-        """Convert a Real number to a :class:`Decimal`.
+        """Convert a finite Real number to a :class:`Decimal`.
 
         Args:
             r (`numbers.Real`): number to be converted to a :class:`Decimal`
@@ -342,8 +343,8 @@ class Decimal:
                 to a :class:`Decimal` with a precision <= `MAX_DEC_PRECISION`.
 
         If `exact` is `False` and `r` can not exactly be represented by a
-        `Decimal` with a precision <= `MAX_DEC_PRECISION`, the result is rounded to a
-        precision = `MAX_DEC_PRECISION`.
+        `Decimal` with a precision <= `MAX_DEC_PRECISION`, the result is
+        rounded to a precision = `MAX_DEC_PRECISION`.
 
         """
         if not isinstance(r, Real):
@@ -439,8 +440,8 @@ class Decimal:
         If no `precision` is given, the result is adjusted to the minimum
         precision preserving x == x.adjusted().
 
-        If no `rounding` mode is given, the default mode from the current
-        context (from module `decimal`) is used.
+        If no `rounding` mode is given, the current default rounding mode is
+        used.
 
         If the given `precision` is less than the precision of `self`, the
         result is rounded and thus information may be lost.
@@ -474,8 +475,8 @@ class Decimal:
                 (i. e. must support 'as_integer_ratio')
             rounding (ROUNDING): rounding mode (default: None)
 
-        If no `rounding` mode is given, the default mode from the current
-        context (from module `decimal`) is used.
+        If no `rounding` mode is given, the current default rounding mode is
+        used.
 
         Returns:
             :class:`Decimal` instance that is the integer multiple of `quant`
@@ -485,7 +486,7 @@ class Decimal:
 
         Raises:
             TypeError: `quant` is not a number or does not support
-                'as_integer_ratio'
+                `as_integer_ratio`
             ValueError: `quant` is not convertable to a `Rational`
 
         """
@@ -1410,8 +1411,8 @@ def _vp_to_int(v: int, p: int) -> int:
             return v // 10 ** p
         else:
             return -(-v // 10 ** p)
-    else:   # shouldn't happen!
-        return v * 10 ** -p                            # pragma: no cover
+    else:  # shouldn't happen!
+        return v * 10 ** -p  # pragma: no cover
 
 
 def _approx_rational(num: int, den: int, min_prec: int = 0) \
