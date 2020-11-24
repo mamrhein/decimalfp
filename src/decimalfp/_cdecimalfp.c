@@ -1823,24 +1823,17 @@ CLEAN_UP:
 
 static PyGetSetDef Decimal_properties[] = {
     {"precision", (getter)Decimal_precision_get, 0,
-     "Return precision of `self`.", 0},
+     Decimal_precision_doc, 0},
     {"magnitude", (getter)Decimal_magnitude_get, 0,
-     "Return magnitude of `self` in terms of power to 10.\n\n"
-     "I.e. the largest integer exp so that 10 ** exp <= self.\n\n", 0},
+     Decimal_magnitude_doc, 0},
     {"numerator", (getter)Decimal_numerator_get, 0,
-     "Return the normalized numerator of `self`.\n\n"
-     "I. e. the numerator from the pair of integers with the smallest\n"
-     "positive denominator, whose ratio is equal to `self`.\n\n", 0},
+     Decimal_numerator_doc, 0},
     {"denominator", (getter)Decimal_denominator_get, 0,
-     "Return the normalized denominator of 'self'.\n\n"
-     "I. e. the smallest positive denominator from the pairs of integers,"
-     "\nwhose ratio is equal to `self`.\n\n", 0},
+     Decimal_denominator_doc, 0},
     {"real", (getter)Decimal_real_get, 0,
-     "Return real part of `self`.\n\n"
-     "Returns `self` (Real numbers are their real component).\n\n", 0},
+     Decimal_real_doc, 0},
     {"imag", (getter)Decimal_imag_get, 0,
-     "Return imaginary part of `self`.\n\n"
-     "Returns 0 (Real numbers have no imaginary component).\n\n", 0},
+     Decimal_imag_doc, 0},
     {"__module__", (getter)Decimal_imag_get, 0,
      "Hack to avoid deprecation warning. Will be overwritten.\n\n", 0},
     {0, 0, 0, 0, 0}};
@@ -1859,7 +1852,7 @@ static PyMethodDef Decimal_methods[] = {
      (PyCFunction)(void *)(PyCFunctionWithKeywords)DecimalType_from_real,
      METH_CLASS | METH_VARARGS | METH_KEYWORDS, // NOLINT(hicpp-signed-bitwise)
      DecimalType_from_real_doc},
-    // other methods
+    // instance methods
     {"adjusted",
      (PyCFunction)(void *)(PyCFunctionWithKeywords)Decimal_adjusted,
      METH_VARARGS | METH_KEYWORDS, // NOLINT(hicpp-signed-bitwise)
@@ -1925,7 +1918,7 @@ static PyMethodDef Decimal_methods[] = {
 };
 
 static PyType_Slot decimal_type_slots[] = {
-    //{Py_tp_doc, DecimalType_doc},
+    {Py_tp_doc, DecimalType_doc},
     {Py_tp_new, DecimalType_new},
     {Py_tp_dealloc, Decimal_dealloc},
     {Py_tp_free, PyObject_Del},
