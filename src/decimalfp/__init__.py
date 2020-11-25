@@ -15,8 +15,7 @@
 
 
 # noinspection PyUnresolvedReferences
-"""Decimal fixed-point arithmetic.
-
+"""
 The package `decimalfp` provides a :class:`Decimal` number type which can
 represent decimal numbers of (nearly) arbitrary magnitude and very large
 precision, i.e. with a very large number of fractional digits.

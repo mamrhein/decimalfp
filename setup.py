@@ -41,7 +41,7 @@ setup(
     author="Michael Amrhein",
     author_email="michael@adrhinum.de",
     url="https://github.com/mamrhein/decimalfp",
-    description="Decimal fixed-point arithmetic",
+    description="Decimal numbers with fixed-point arithmetic",
     long_description=long_description,
     long_description_content_type="text/markdown",
     package_dir={'': 'src'},

@@ -1,6 +1,6 @@
-**************************************************************
-Decimal numbers of arbitrary magnitude and arbitrary precision
-**************************************************************
+*******************************************
+Decimal numbers with fixed-point arithmetic
+*******************************************
 
 .. automodule:: decimalfp
 
@@ -17,26 +17,25 @@ Class `Decimal`
         __mul__, __rmul__, __pow__,
         __div__, __rdiv__, __truediv__, __rtruediv__,
         __trunc__, __floor__, __ceil__, __round__,
-        __repr__, __str__, __format__
+        __repr__, __str__, __bytes__, __format__
 
 Rounding modes
 --------------
 
-`Decimal` supports all rounding modes defined by the standard library module
-`decimal`: ROUND_DOWN, ROUND_UP, ROUND_HALF_DOWN, ROUND_HALF_UP,
-ROUND_HALF_EVEN, ROUND_CEILING, ROUND_FLOOR and ROUND_05UP. Unless explicitely
-given, it uses the rounding mode set in the current context set in that module.
+`Decimal` supports rounding modes equivalent to those defined by the standard
+library module `decimal`: ROUND_DOWN, ROUND_UP, ROUND_HALF_DOWN,
+ROUND_HALF_UP, ROUND_HALF_EVEN, ROUND_CEILING, ROUND_FLOOR and ROUND_05UP.
 
-The rounding modes defined in `decimal` are wrapped into the Enum
-:class:`ROUNDING`.
+The rounding modes are wrapped into the Enum :class:`ROUNDING`.
 
 .. autoclass:: ROUNDING
     :members: ROUND_05UP, ROUND_CEILING, ROUND_DOWN, ROUND_FLOOR,
         ROUND_HALF_DOWN, ROUND_HALF_EVEN, ROUND_HALF_UP, ROUND_UP
 
-As shortcut to get or set the rounding mode, the package `decimalfp` provides
-the following two functions:
+Unless a rounding mode is explicitely given, the rounding mode set as current
+default is used. To get or set the default rounding mode, the package
+`decimalfp` provides the following two functions:
 
-.. autofunction:: get_rounding
+.. autofunction:: get_dflt_rounding_mode
 
-.. autofunction:: set_rounding
+.. autofunction:: set_dflt_rounding_mode
