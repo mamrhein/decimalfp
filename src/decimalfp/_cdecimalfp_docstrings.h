@@ -179,7 +179,7 @@ PyDoc_STRVAR(
     "Return a tuple (sign, coeff, exp) equivalent to `self`.\n\n"
     "self == sign * coeff * 10 ** exp.\n\n"
     "sign in (-1, 0, 1), for self < 0, = 0, > 0.\n"
-    "coeff = 0 only if self = 0, without trailing zeros otherwise.\n\n"
+    "coeff = 0 only if self = 0.\n\n"
 );
 
 PyDoc_STRVAR(

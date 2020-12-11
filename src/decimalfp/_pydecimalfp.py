@@ -513,7 +513,7 @@ class Decimal:
         self == sign * coeff * 10 ** exp.
 
         sign in (-1, 0, 1), for self < 0, = 0, > 0.
-        coeff = 0 only if self = 0, without trailing zeros otherwise.
+        coeff = 0 only if self = 0.
 
         """
         v = self._value
