@@ -142,7 +142,7 @@ def test_quantize_dflt_round(impl, value, quant):
 @pytest.mark.parametrize("value",
                          ("17.849",
                           ".".join(("1" * 2259, "4" * 33)),
-                          "0.0025",
+                          "0.0000000025",
                           "12345678901234567e12"),
                          ids=("compact", "large", "fraction", "int"))
 def test_quantize_round(impl, rnd, value, quant):
