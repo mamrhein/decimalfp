@@ -2105,8 +2105,11 @@ fpdec_div_abs_dyn_by_dyn(fpdec_t *z, const fpdec_t *x, const fpdec_t *y,
         // calculate digit shifts to accomplish wanted precision
         int quot_exp = FPDEC_DYN_EXP(x) - FPDEC_DYN_EXP(y);
         int res_exp = -prec_limit / DEC_DIGITS_PER_DIGIT - 1;
+        int d_shift = prec_limit % DEC_DIGITS_PER_DIGIT;
         fpdec_n_digits_t x_n_shift, y_n_shift;
         fpdec_n_digits_t x_n_digits_after_shift, y_n_digits_after_shift;
+        bool carry;
+        error_t rc;
 
         if (res_exp < quot_exp) {
             x_n_shift = (fpdec_n_digits_t)(quot_exp - res_exp);
@@ -2120,20 +2123,38 @@ fpdec_div_abs_dyn_by_dyn(fpdec_t *z, const fpdec_t *x, const fpdec_t *y,
             y_n_shift = (fpdec_n_digits_t)(res_exp - quot_exp);
             y_n_digits_after_shift = FPDEC_DYN_N_DIGITS(y) + y_n_shift;
         }
-        // check if result will have significant digits
+        // check if result will have significant digits (before rounding!)
         if (x_n_digits_after_shift >= y_n_digits_after_shift) {
             fpdec_digit_array_t *q_digits =
                 digits_div_limit_prec(x->digit_array, x_n_shift,
                                       y->digit_array, y_n_shift);
             if (q_digits == NULL)
                 MEMERROR;
-            int d_shift = prec_limit % DEC_DIGITS_PER_DIGIT;
-            digits_round(q_digits, FPDEC_SIGN(z),
-                         DEC_DIGITS_PER_DIGIT - d_shift,
-                         rounding);
+            carry = digits_round(q_digits, FPDEC_SIGN(z),
+                                 DEC_DIGITS_PER_DIGIT - d_shift,
+                                 rounding);
+            if (carry) {
+                // total carry-over
+                res_exp += q_digits->n_signif;
+                q_digits->digits[0] = 1UL;
+                q_digits->n_signif = 1;
+            }
             FPDEC_DYN_EXP(z) = res_exp;
             z->digit_array = q_digits;
             z->dyn_alloc = true;
+        }
+        else {
+            // result < 10 ^ -prec_limit (before rounding)
+            // and may be rounded to 10 ^ -prec_limit
+            fpdec_digit_t digit = u64_10_pow_n(d_shift);
+            digit *= round_qr(FPDEC_SIGN(z), 0, 0, true, digit, rounding);
+            if (digit != 0) {
+                FPDEC_DYN_EXP(z) = -prec_limit / DEC_DIGITS_PER_DIGIT;
+                rc = digits_from_digits(&(z->digit_array), &digit, 1);
+                if (rc != FPDEC_OK)
+                    return rc;
+                z->dyn_alloc = true;
+            }
         }
     }
     return FPDEC_OK;
