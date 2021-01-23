@@ -101,18 +101,18 @@ def test_adjust_limits_exceeded(impl, prec):
         dec.adjusted(prec)
 
 
-@pytest.mark.parametrize("quant", (Fraction(1, 40),
+@pytest.mark.parametrize("quant", (Fraction(1, 7),
                                    StdLibDecimal("-0.3"),
                                    0.4,
                                    3,
                                    1),
-                         ids=("Fraction 1/40",
+                         ids=("Fraction 1/7",
                               "StdLibDecimal -0.3",
                               "0.4",
                               "3",
                               "1"))
 @pytest.mark.parametrize("value",
-                         ("17.849",
+                         ("17",
                           ".".join(("1" * 2259, "4" * 33)),
                           "0.0025",
                           "12345678901234567e12"),
@@ -120,14 +120,10 @@ def test_adjust_limits_exceeded(impl, prec):
 def test_quantize_dflt_round(impl, value, quant):
     dec = impl.Decimal(value)
     adj = dec.quantize(quant)
-    # compute equivalent StdLibDecimal
-    if isinstance(quant, Fraction):
-        q = StdLibDecimal(quant.numerator) / StdLibDecimal(quant.denominator)
-    else:
-        q = StdLibDecimal(quant)
-    eq_dec = (StdLibDecimal(value) / q).quantize(1) * q
-    assert adj.as_fraction() == Fraction(eq_dec)
-
+    # compute equivalent Fraction
+    quot = Fraction(quant)
+    equiv = round(Fraction(value) / quot) * quot
+    assert adj == equiv
 
 @pytest.mark.parametrize("quant", (Fraction(1, 40),
                                    StdLibDecimal("-0.3"),
