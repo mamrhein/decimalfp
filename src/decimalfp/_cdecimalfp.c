@@ -1595,17 +1595,18 @@ Decimal_quantize(DecimalObject *self, PyObject *args, PyObject *kwds) {
         return NULL;
 
     BINOP_ALLOC_RESULT(Py_TYPE(self));
+    PyObject *frac_quant = NULL;
     PyObject *t = NULL;
     PyObject *num = NULL;
     PyObject *den = NULL;
     fpdec_t *fpz = &dec->fpdec;
     error_t rc;
     fpdec_t tmp_q = FPDEC_ZERO;
-    fpdec_t *fpq;
+    fpdec_t *fp_quant;
     DEF_N_CONV_RND_MODE(rounding);
 
-    fpq = fpdec_from_number(&tmp_q, quant);
-    if (fpq == NULL) {
+    fp_quant = fpdec_from_number(&tmp_q, quant);
+    if (fp_quant == NULL) {
         if (PyErr_Occurred()) {
             PyErr_Format(PyExc_ValueError, "Can't quantize to '%R'.",
                          quant);
@@ -1620,27 +1621,26 @@ Decimal_quantize(DecimalObject *self, PyObject *args, PyObject *kwds) {
             goto ERROR;
         }
     }
-    rc = fpdec_quantized(fpz, &self->fpdec, fpq, rnd);
+    rc = fpdec_quantized(fpz, &self->fpdec, fp_quant, rnd);
     if (rc == FPDEC_OK)
         goto CLEAN_UP;
 
 FALLBACK:
     fpdec_reset_to_zero(&dec->fpdec, 0);
     res = NULL;
-    ASSIGN_AND_CHECK_NULL(t, PyObject_CallFunctionObjArgs(Fraction, quant,
-                                                          NULL));
-    Py_DECREF(quant);
-    quant = t;
-    ASSIGN_AND_CHECK_NULL(num, PyObject_GetAttrString(quant, "numerator"));
-    ASSIGN_AND_CHECK_NULL(den, PyObject_GetAttrString(quant, "denominator"));
-    t = NULL;
+    ASSIGN_AND_CHECK_NULL(frac_quant,
+                          PyObject_CallFunctionObjArgs(Fraction, quant, NULL));
+    ASSIGN_AND_CHECK_NULL(num, PyObject_GetAttrString(frac_quant,
+                                                      "numerator"));
+    ASSIGN_AND_CHECK_NULL(den, PyObject_GetAttrString(frac_quant,
+                                                      "denominator"));
     ASSIGN_AND_CHECK_NULL(t, Decimal_mul((PyObject *)self, den));
     tmp_q = FPDEC_ZERO;
     rc = fpdec_from_pylong(&tmp_q, num);
     CHECK_FPDEC_ERROR(rc);
     rc = fpdec_div(&dec->fpdec, &((DecimalObject *)t)->fpdec, &tmp_q, 0, rnd);
     CHECK_FPDEC_ERROR(rc);
-    ASSIGN_AND_CHECK_NULL(res, Decimal_mul((PyObject *)dec, quant));
+    ASSIGN_AND_CHECK_NULL(res, Decimal_mul((PyObject *)dec, frac_quant));
     Py_CLEAR(dec);
     goto CLEAN_UP;
 
@@ -1651,6 +1651,7 @@ ERROR:
 
 CLEAN_UP:
     fpdec_reset_to_zero(&tmp_q, 0);
+    Py_XDECREF(frac_quant);
     Py_XDECREF(t);
     Py_XDECREF(num);
     Py_XDECREF(den);

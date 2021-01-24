@@ -13,8 +13,6 @@
 
 
 """Test driver for package 'decimalfp' (adjustments)."""
-
-
 from decimal import Decimal as StdLibDecimal
 from decimal import getcontext
 from fractions import Fraction
@@ -106,13 +104,13 @@ def test_adjust_limits_exceeded(impl, prec):
                                    0.4,
                                    3,
                                    1),
-                         ids=("Fraction 1/7",
+                         ids=("1/7",
                               "StdLibDecimal -0.3",
                               "0.4",
                               "3",
                               "1"))
 @pytest.mark.parametrize("value",
-                         ("17",
+                         ("17.849",
                           ".".join(("1" * 2259, "4" * 33)),
                           "0.0025",
                           "12345678901234567e12"),
@@ -130,7 +128,7 @@ def test_quantize_dflt_round(impl, value, quant):
                                    0.4,
                                    3,
                                    1),
-                         ids=("Fraction 1/40",
+                         ids=("1/40",
                               "StdLibDecimal -0.3",
                               "0.4",
                               "3",
@@ -140,7 +138,10 @@ def test_quantize_dflt_round(impl, value, quant):
                           ".".join(("1" * 2259, "4" * 33)),
                           "0.0000000025",
                           "12345678901234567e12"),
-                         ids=("compact", "large", "fraction", "int"))
+                         ids=("compact",
+                              "large",
+                              "fraction",
+                              "int"))
 def test_quantize_round(impl, rnd, value, quant):
     dec = impl.Decimal(value)
     adj = dec.quantize(quant, rounding=rnd)
@@ -150,7 +151,10 @@ def test_quantize_round(impl, rnd, value, quant):
     else:
         q = StdLibDecimal(quant)
     eq_dec = (StdLibDecimal(value) / q).quantize(1, rnd.name) * q
-    assert adj.as_fraction() == Fraction(eq_dec)
+    if isinstance(adj, Fraction):
+        assert adj == Fraction(eq_dec)
+    else:
+        assert adj.as_fraction() == Fraction(eq_dec)
 
 
 @pytest.mark.parametrize("quant", (Fraction(1, 3),
