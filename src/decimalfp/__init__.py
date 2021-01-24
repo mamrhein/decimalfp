@@ -222,7 +222,7 @@ also support all rounding modes mentioned above.
     Decimal('12')
 """
 
-__version__ = 0, 11, 1
+__version__ = 0, 11, 2
 
 # Under PyPy the C implementation is slower than the Python
 # implementation, so we force to import the latter.
