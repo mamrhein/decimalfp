@@ -1477,8 +1477,15 @@ def set_dflt_rounding_mode(rounding: ROUNDING):
     _dflt_rounding_mode = rounding
 
 
+# Some Decimal constants
+ZERO = Decimal(0)
+ONE = Decimal(1)
+
+
 __all__ = [
     'Decimal',
+    'ZERO',
+    'ONE',
     'ROUNDING',
     'get_dflt_rounding_mode',
     'set_dflt_rounding_mode',

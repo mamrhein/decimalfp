@@ -153,6 +153,9 @@ static PyObject *PyUInt64Max = NULL;
 static PyObject *Py2pow64 = NULL;
 static PyObject *MAX_DEC_PRECISION = NULL;
 
+static PyObject *ZERO = NULL;
+static PyObject *ONE = NULL;
+
 // *** Helper prototypes ***
 
 static inline PyObject *
@@ -2524,6 +2527,12 @@ cdecimalfp_exec(PyObject *module) {
                                                               "register", "O",
                                                               DecimalType));
 
+    /* Add some Decimal constants */
+    ZERO = DecimalType_from_pylong(DecimalType, PyZERO, -1);
+    PYMOD_ADD_OBJ(module, "ZERO", ZERO);
+    ONE = DecimalType_from_pylong(DecimalType, PyONE, -1);
+    PYMOD_ADD_OBJ(module, "ONE", ONE);
+
     return 0;
 
 ERROR:
@@ -2546,6 +2555,8 @@ ERROR:
     Py_CLEAR(PyUInt64Max);
     Py_CLEAR(Py2pow64);
     Py_CLEAR(MAX_DEC_PRECISION);
+    Py_CLEAR(ZERO);
+    Py_CLEAR(ONE);
     return -1;
 }
 

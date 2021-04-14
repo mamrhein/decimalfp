@@ -2,15 +2,14 @@
 """Setup package 'decimalfp'."""
 
 import os
-from setuptools import setup, Extension
 import sysconfig
 
+from setuptools import Extension, setup
 
 LIBFPDEC_PATH = 'src/decimalfp/libfpdec'
 LIBFPDEC_SRC_FILES = sorted(f"{LIBFPDEC_PATH}/{fn}"
                             for fn in os.listdir(path=LIBFPDEC_PATH)
                             if fn.endswith(('.c',)))
-
 
 DEBUG = int(os.getenv("DEBUG", 0))
 extra_compile_args = sysconfig.get_config_var('CFLAGS').split()
@@ -28,16 +27,15 @@ ext_modules = [
         extra_compile_args=extra_compile_args,
         # extra_link_args="",
         language='c',
-    ),
-]
-
+        ),
+    ]
 
 with open('README.md') as file:
     long_description = file.read()
 
 setup(
     name="decimalfp",
-    version="0.11.2",
+    version="0.11.3",
     author="Michael Amrhein",
     author_email="michael@adrhinum.de",
     url="https://github.com/mamrhein/decimalfp",
@@ -67,6 +65,6 @@ setup(
         "Topic :: Software Development",
         "Topic :: Software Development :: Libraries",
         "Topic :: Software Development :: Libraries :: Python Modules"
-    ],
+        ],
     zip_safe=False,
-)
+    )

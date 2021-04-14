@@ -222,39 +222,43 @@ also support all rounding modes mentioned above.
     Decimal('12')
 """
 
-__version__ = 0, 11, 2
+__version__ = 0, 11, 3
 
 # Under PyPy the C implementation is slower than the Python
 # implementation, so we force to import the latter.
 # In addition, the import of the Python implementation can be forced by
 # setting the environment variable DECIMALFP_FORCE_PYTHON_IMPL
 import platform  # noqa: I100, I202
+
 _impl = platform.python_implementation()
 del platform
 
 import os  # noqa: I100, I202
+
 _force_python_impl = os.getenv('DECIMALFP_FORCE_PYTHON_IMPL')
 del os
 
 if _impl == 'PyPy' or _force_python_impl:
     from ._pydecimalfp import (
         Decimal, get_dflt_rounding_mode, ROUNDING, set_dflt_rounding_mode,
-    )
+        )
 else:  # pragma: no cover
     try:
         # C implementation available?
         from ._cdecimalfp import (
             Decimal, get_dflt_rounding_mode, ROUNDING, set_dflt_rounding_mode,
-        )
+            ONE, ZERO, )
     except ImportError:
         from ._pydecimalfp import (
             Decimal, get_dflt_rounding_mode, ROUNDING, set_dflt_rounding_mode,
-        )
+            ONE, ZERO, )
 
 # define public namespace
 __all__ = [
     'Decimal',
+    'ZERO',
+    'ONE',
     'ROUNDING',
     'get_dflt_rounding_mode',
     'set_dflt_rounding_mode',
-]
+    ]
