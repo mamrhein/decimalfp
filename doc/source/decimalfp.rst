@@ -7,7 +7,9 @@ Decimal numbers with fixed-point arithmetic
 Class `Decimal`
 ---------------
 
-.. autoclass:: decimalfp.Decimal
+DecValueT = Union[SupportsInt, SupportsFloat, SupportsAsIntegerRatio, str]
+
+.. autoclass:: Decimal
     :members: from_float, from_decimal, from_real,
         precision, magnitude, numerator, denominator, real, imag,
         adjusted, quantize, as_fraction, as_integer_ratio, as_tuple, __hash__,
@@ -15,8 +17,8 @@ Class `Decimal`
         __abs__, __neg__, __pos__,
         __add__, __radd__, __sub__, __rsub__,
         __mul__, __rmul__, __pow__,
-        __div__, __rdiv__, __truediv__, __rtruediv__,
-        __trunc__, __floor__, __ceil__, __round__,
+        __truediv__, __rtruediv__,
+        __int__, __trunc__, __floor__, __ceil__, __round__,
         __repr__, __str__, __bytes__, __format__
 
 Rounding modes
