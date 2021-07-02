@@ -35,7 +35,6 @@ with open('README.md') as file:
 
 setup(
     name="decimalfp",
-    version="0.11.4",
     author="Michael Amrhein",
     author_email="michael@adrhinum.de",
     url="https://github.com/mamrhein/decimalfp",
@@ -45,7 +44,7 @@ setup(
     package_dir={'': 'src'},
     packages=['decimalfp'],
     ext_modules=ext_modules,
-    python_requires=">=3.6",
+    python_requires=">=3.7",
     license='BSD',
     keywords='fixed-point decimal number datatype',
     platforms='all',
@@ -56,10 +55,10 @@ setup(
         "Operating System :: OS Independent",
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: Implementation :: CPython",
         "Programming Language :: Python :: Implementation :: PyPy",
         "Topic :: Software Development",
