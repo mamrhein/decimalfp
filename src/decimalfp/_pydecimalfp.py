@@ -1187,7 +1187,8 @@ class Decimal(Rational):
             raise TypeError("3rd argument not allowed unless all arguments "
                             "are integers")
         # SupportsInt is not runtime_checkable in Python 3.7, so check directly
-        if hasattr(other, "__int__") or hasattr(other, "__trunc__"):
+        if (hasattr(other.__class__, "__int__") or
+                hasattr(other.__class__, "__trunc__")):
             try:
                 exp = int(other)  # type: ignore
             except (ValueError, OverflowError):
@@ -1210,7 +1211,7 @@ class Decimal(Rational):
                                     prec)
         # SupportsFloat is not runtime_checkable in Python 3.7, so check
         # directly
-        if hasattr(other, "__float__"):
+        if hasattr(other.__class__, "__float__"):
             # fractional exponent => fallback to float
             return float(self) ** float(other)  # type: ignore
         return NotImplemented
