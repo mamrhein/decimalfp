@@ -17,22 +17,30 @@
 
 """Decimal fixed-point arithmetic."""
 
-__name__ = 'decimalfp'  # for pickling
+from __future__ import annotations
 
-# standard lib imports
-
+import locale
+import operator
+import sys
+from abc import abstractmethod
 from decimal import Decimal as _StdLibDecimal
 from fractions import Fraction
 from functools import reduce
-import locale
 from math import ceil, floor, gcd, log10
 from numbers import Complex, Integral, Rational, Real
-import operator
-from typing import Any, Callable, Generator, Optional, Sequence, Tuple, Union
+from typing import (
+    Any, Callable, Generator, Optional, Sequence, SupportsFloat,
+    SupportsInt, Tuple, Union, overload,
+    )
 
-# local imports
+if sys.version_info >= (3, 8):
+    from typing import Protocol, runtime_checkable
+else:
+    from typing_extensions import Protocol, runtime_checkable
 
 from .rounding import ROUNDING
+
+__name__ = 'decimalfp'  # for pickling
 
 MAX_DEC_PRECISION = 65535
 
@@ -75,17 +83,31 @@ _parse_format_spec = re.compile(_pattern, re.VERBOSE).match
 del re, _pattern
 
 
-class Decimal:
+@runtime_checkable
+class SupportsAsIntegerRatio(Protocol):
+    """Number which is convertable to a ratio of integers."""
+
+    @abstractmethod
+    def as_integer_ratio(self) -> Tuple[int, int]:
+        """Return integer ratio equal to `self`."""
+
+
+SupportsIntOrFloat = Union[SupportsInt, SupportsFloat]
+DecValueT = Union[SupportsAsIntegerRatio, SupportsInt, SupportsFloat, str,
+                  None]
+Integer = Union[int, Integral]
+
+
+class Decimal(Rational):
     # noinspection PyUnresolvedReferences
     """Decimal number with a given number of fractional digits.
 
     Args:
-        value (see below): numerical value (default: None)
-        precision (numbers.Integral): number of fractional digits (default:
-            None)
+        value: numerical value (default: None)
+        precision: number of fractional digits (default: None)
 
     If `value` is given, it must either be a string, an instance of
-    `numbers.Integral`, `number.Rational` (for example `fractions.Fraction`),
+    `int`, `number.Rational` (for example `fractions.Fraction`),
     `decimal.Decimal`, a finite instance of `numbers.Real` (for example
     `float`) or be convertable to a `float` or an `int`.
 
@@ -104,7 +126,7 @@ class Decimal:
     calculated from the given value, if no precision is given.
 
     Raises:
-        TypeError: `precision` is given, but not of type `Integral`.
+        TypeError: `precision` is given, but not of type `int`.
         TypeError: `value` is not an instance of the types listed above and
             not convertable to `float` or `int`.
         ValueError: `precision` is given, but not >= 0.
@@ -121,39 +143,46 @@ class Decimal:
                  '_hash', '_numerator', '_denominator'
                  )
 
-    def __new__(cls, value = None, precision = None) -> "Decimal":
+    _value: int
+    _precision: int
+    _hash: int
+    _numerator: int
+    _denominator: int
+
+    def __new__(cls, value: DecValueT = None,
+                precision: Optional[Integer] = None) -> Decimal:
         """Create and return new `Decimal` instance."""
-        self = object.__new__(cls)
+        self: Decimal = object.__new__(cls)
 
         if precision is None:
             if value is None:
                 self._value = 0
                 self._precision = 0
                 return self
+            prec = 0
         else:
             if not isinstance(precision, Integral):
                 raise TypeError(
                     "Precision must be of type 'numbers.Integral'.")
-            else:
-                precision = int(precision)
-            if precision < 0:
+            prec = int(precision)
+            if prec < 0:
                 raise ValueError("Precision must be >= 0.")
-            if precision > MAX_DEC_PRECISION:
+            if prec > MAX_DEC_PRECISION:
                 raise ValueError("Precision limit exceeded.")
             if value is None:
                 self._value = 0
-                self._precision = precision
+                self._precision = prec
                 return self
 
         # Decimal
         if isinstance(value, Decimal):
             v, p = value._value, value._precision
-            if precision is None or precision == p:
+            if precision is None or prec == p:
                 self._value = v
                 self._precision = p
             else:
-                self._value = _vp_adjust_to_prec(v, p, precision)
-                self._precision = precision
+                self._value = _vp_adjust_to_prec(v, p, prec)
+                self._precision = prec
             return self
 
         # String
@@ -181,11 +210,11 @@ class Decimal:
                 n_frac = len(s_frac)
                 sign_n_digits += s_frac
             if precision is None:
-                precision = max(0, n_frac - exp)
-                if precision > MAX_DEC_PRECISION:
+                prec = max(0, n_frac - exp)
+                if prec > MAX_DEC_PRECISION:
                     raise ValueError("Precision limit exceeded.")
-            self._precision = precision
-            shift10 = precision - n_frac + exp
+            self._precision = prec
+            shift10 = prec - n_frac + exp
             if shift10 == 0:
                 self._value = int(sign_n_digits)
             elif shift10 > 0:
@@ -195,15 +224,14 @@ class Decimal:
                                                 10 ** -shift10)
             return self
 
-        # Integral
+        # Integer
         if isinstance(value, Integral):
+            self._precision = prec
             value = int(value)
-            if precision is None:
-                self._precision = 0
+            if prec == 0:
                 self._value = value
             else:
-                self._precision = precision
-                self._value = value * 10 ** precision
+                self._value = value * 10 ** prec
             return self
 
         # Decimal (from standard library)
@@ -214,21 +242,20 @@ class Decimal:
                 if precision is None:
                     if exp > 0:
                         self._value = coeff * 10 ** exp
-                        self._precision = 0
                     else:
                         self._value = coeff
-                        self._precision = abs(exp)
-                        if self._precision > MAX_DEC_PRECISION:
+                        prec = abs(exp)
+                        if prec > MAX_DEC_PRECISION:
                             raise ValueError("Precision limit exceeded.")
                 else:
-                    self._precision = precision
-                    shift10 = exp + precision
+                    shift10 = exp + prec
                     if shift10 == 0:
                         self._value = coeff
                     elif shift10 > 0:
                         self._value = coeff * 10 ** shift10
                     else:
                         self._value = _floordiv_rounded(coeff, 10 ** -shift10)
+                self._precision = prec
                 return self
             else:
                 raise ValueError("Can't convert %s to Decimal." % repr(value))
@@ -237,11 +264,11 @@ class Decimal:
         if isinstance(value, Real):
             try:
                 # noinspection PyUnresolvedReferences
-                num, den = value.numerator, value.denominator
+                num, den = value.numerator, value.denominator  # type: ignore
             except AttributeError:
                 try:
                     # noinspection PyUnresolvedReferences
-                    num, den = value.as_integer_ratio()
+                    num, den = value.as_integer_ratio()  # type: ignore
                 except (ValueError, OverflowError, AttributeError):
                     raise ValueError("Can't convert %s to Decimal."
                                      % repr(value))
@@ -255,18 +282,18 @@ class Decimal:
                 self._value = v
                 self._precision = p
             else:
-                self._value = _floordiv_rounded(num * 10 ** precision, den)
-                self._precision = precision
+                self._value = _floordiv_rounded(num * 10 ** prec, den)
+                self._precision = prec
             return self
 
         # Others
         # If there's a float or int equivalent to value, use it
         ev = None
         try:
-            ev = float(value)
+            ev = float(value)  # type: ignore
         except (TypeError, ValueError):
             try:
-                ev = int(value)
+                ev = int(value)  # type: ignore
             except (TypeError, ValueError):
                 pass
         if ev == value:  # do we really have the same value?
@@ -277,11 +304,11 @@ class Decimal:
 
     # to be compatible to fractions.Fraction
     @classmethod
-    def from_float(cls, f: Union[float, Integral]) -> "Decimal":
+    def from_float(cls, f: Union[float, int]) -> Decimal:
         """Convert a finite float (or int) to a :class:`Decimal`.
 
         Args:
-            f (float or int): number to be converted to a `Decimal`
+            f: number to be converted to a `Decimal`
 
         Returns:
             :class:`Decimal` instance derived from `f`
@@ -294,23 +321,19 @@ class Decimal:
         Beware that Decimal.from_float(0.3) != Decimal('0.3').
 
         """
-        if not isinstance(f, (float, Integral)):
+        if not isinstance(f, (float, int)):
             raise TypeError("%s is not a float." % repr(f))
         # noinspection PyArgumentList
         return cls(f)
 
     # to be compatible to fractions.Fraction
     @classmethod
-    def from_decimal(cls, d: Union["Decimal", Integral, _StdLibDecimal]) \
-            -> "Decimal":
+    def from_decimal(cls, d: Union[Decimal, int, _StdLibDecimal]) \
+            -> Decimal:
         """Convert a finite decimal number to a :class:`Decimal`.
 
         Args:
-            d (see below): decimal number to be converted to a
-                :class:`Decimal`
-
-        `d` can be of type :class:`Decimal`, `numbers.Integral` or
-        `decimal.Decimal`.
+            d: decimal number to be converted to a :class:`Decimal`
 
         Returns:
             :class:`Decimal` instance derived from `d`
@@ -320,18 +343,18 @@ class Decimal:
             ValueError: `d` can not be converted to a :class:`Decimal`.
 
         """
-        if not isinstance(d, (Decimal, Integral, _StdLibDecimal)):
+        if not isinstance(d, (Decimal, int, _StdLibDecimal)):
             raise TypeError("%s is not a Decimal." % repr(d))
         # noinspection PyArgumentList
         return cls(d)
 
     @classmethod
-    def from_real(cls, r: Real, exact: bool = True) -> "Decimal":
+    def from_real(cls, r: Real, exact: bool = True) -> Decimal:
         """Convert a finite Real number to a :class:`Decimal`.
 
         Args:
-            r (`numbers.Real`): number to be converted to a :class:`Decimal`
-            exact (`bool`): `True` if `r` shall exactly be represented by
+            r: number to be converted to a :class:`Decimal`
+            exact: `True` if `r` shall exactly be represented by
                 the resulting :class:`Decimal`
 
         Returns:
@@ -407,7 +430,7 @@ class Decimal:
             return self._denominator
 
     @property
-    def real(self) -> "Decimal":
+    def real(self) -> Decimal:
         """Return real part of `self`.
 
         Returns `self` (Real numbers are their real component).
@@ -425,13 +448,12 @@ class Decimal:
         return 0
 
     def adjusted(self, precision: Optional[int] = None,
-                 rounding: Optional[ROUNDING] = None) -> "Decimal":
+                 rounding: Optional[ROUNDING] = None) -> Decimal:
         """Return adjusted copy of `self`.
 
         Args:
-            precision (numbers.Integral): number of fractional digits
-                (default: None)
-            rounding (ROUNDING): rounding mode (default: None)
+            precision: number of fractional digits (default: None)
+            rounding: rounding mode (default: None)
 
         Returns:
             :class:`Decimal` instance derived from `self`, adjusted
@@ -448,12 +470,12 @@ class Decimal:
 
         """
         if precision is None:
-            adj = object.__new__(Decimal)
+            adj: Decimal = object.__new__(Decimal)
             adj._value, adj._precision = _vp_normalize(self._value,
                                                        self._precision)
         else:
-            if not isinstance(precision, Integral):
-                raise TypeError("Precision must be of type 'Integral'.")
+            if not isinstance(precision, int):
+                raise TypeError("Precision must be of type 'int'.")
             to_prec = int(precision)
             if abs(to_prec) > MAX_DEC_PRECISION:
                 raise ValueError("Precision limit exceeded.")
@@ -465,15 +487,13 @@ class Decimal:
             adj._precision = max(0, to_prec)
         return adj
 
-    def quantize(self, quant: Any, rounding: Optional[ROUNDING] = None) \
-            -> Union["Decimal", Fraction]:
+    def quantize(self, quant: SupportsAsIntegerRatio,
+                 rounding: Optional[ROUNDING] = None) -> Rational:
         """Return integer multiple of `quant` closest to `self`.
 
         Args:
-            quant (Number): quantum to get a multiple from; must be a
-                `Rational` or a number which is convertable to a `Rational`
-                (i. e. must support 'as_integer_ratio')
-            rounding (ROUNDING): rounding mode (default: None)
+            quant: quantum to get a multiple from
+            rounding: rounding mode (default: None)
 
         If no `rounding` mode is given, the current default rounding mode is
         used.
@@ -491,7 +511,7 @@ class Decimal:
 
         """
         try:
-            num, den = quant.numerator, quant.denominator
+            num, den = quant.numerator, quant.denominator  # type: ignore
         except AttributeError:
             try:
                 num, den = quant.as_integer_ratio()
@@ -555,11 +575,11 @@ class Decimal:
         g = gcd(n, d)
         return n // g, d // g
 
-    def __copy__(self) -> "Decimal":
+    def __copy__(self) -> Decimal:
         """Return self (Decimal instances are immutable)."""
         return self
 
-    def __deepcopy__(self, memo) -> "Decimal":
+    def __deepcopy__(self, memo: Any) -> Decimal:
         """Return self (Decimal instances are immutable)."""
         return self.__copy__()
 
@@ -614,7 +634,7 @@ class Decimal:
         """Return `self` converted to a string according to `fmt_spec`.
 
         Args:
-            fmt_spec (str): a standard format specifier for a number
+            fmt_spec: a standard format specifier for a number
 
         Returns:
             str: `self` converted to a string according to `fmt_spec`
@@ -647,7 +667,7 @@ class Decimal:
             n_to_fill -= 1
         raw_digits = format(v, '>0%i' % (fmt_precision + 1))
         if fmt_precision:
-            decimal_point = fmt_decimal_point
+            decimal_point: str = fmt_decimal_point
             raw_digits, frac_part = (raw_digits[:-fmt_precision],
                                      raw_digits[-fmt_precision:])
             n_to_fill -= fmt_precision + 1
@@ -670,14 +690,14 @@ class Decimal:
 
     __getstate__ = __bytes__
 
-    def __setstate__(self, state: bytes):
+    def __setstate__(self, state: bytes) -> None:
         """Set state of `self` from `state`."""
         lit = state.decode('ascii')
         int_lit, _, frac_lit = lit.partition('.')
         self._precision = len(frac_lit)
         self._value = int(int_lit + frac_lit)
 
-    def _compare(self, other: Any, cmp: Callable) -> bool:
+    def _compare(self, other: Any, cmp: Callable[[Any, Any], bool]) -> bool:
         """Compare `self` and `other` using operator `cmp`."""
         sv = self._value
         sp = self._precision
@@ -693,7 +713,7 @@ class Decimal:
                 ov *= 10 ** (sp - op)
             return cmp(sv, ov)
 
-        elif isinstance(other, Integral):
+        elif isinstance(other, int):
             ov = int(other) * 10 ** sp
             return cmp(sv, ov)
 
@@ -705,7 +725,7 @@ class Decimal:
 
         # float, Real, standard lib Decimal
         try:
-            num, den = other.as_integer_ratio()  # type: ignore
+            num, den = other.as_integer_ratio()
         except AttributeError:
             # fall through
             pass
@@ -774,27 +794,39 @@ class Decimal:
     # convert to float (may loose precision!)
     def __float__(self) -> float:
         """float(self)"""  # noqa: D400
-        return self._value / 10 ** self._precision
+        return self._value / 10 ** self._precision  # type: ignore
 
-    def __pos__(self) -> "Decimal":
+    def __pos__(self) -> Decimal:
         """+self"""  # noqa: D400
         return self
 
-    def __neg__(self) -> "Decimal":
+    def __neg__(self) -> Decimal:
         """-self"""  # noqa: D400
-        result = object.__new__(Decimal)
+        result: Decimal = object.__new__(Decimal)
         result._value = -self._value
         result._precision = self._precision
         return result
 
-    def __abs__(self) -> "Decimal":
+    def __abs__(self) -> Decimal:
         """abs(self)"""  # noqa: D400
-        result = object.__new__(Decimal)
+        result: Decimal = object.__new__(Decimal)
         result._value = abs(self._value)
         result._precision = self._precision
         return result
 
-    def __add__(self, other: Any) -> Union["Decimal", Fraction]:
+    @overload
+    def __add__(self, other: int) -> Decimal:
+        ...
+
+    @overload
+    def __add__(self, other: Decimal) -> Decimal:
+        ...
+
+    @overload
+    def __add__(self, other: SupportsAsIntegerRatio) -> Rational:
+        ...
+
+    def __add__(self, other: SupportsAsIntegerRatio) -> Rational:
         """self + other"""  # noqa: D400, D403
         if isinstance(other, Decimal):
             p = self._precision - other._precision
@@ -808,18 +840,17 @@ class Decimal:
                 result = Decimal(other)
                 result._value += self._value * 10 ** -p
             return result
-        elif isinstance(other, Integral):
+        elif isinstance(other, int):
             p = self._precision
             result = Decimal(self)
             result._value += int(other) * 10 ** p
             return result
         elif isinstance(other, Rational):
             onum, oden = (other.numerator, other.denominator)
-        elif isinstance(other, Real):
+        elif isinstance(other, SupportsAsIntegerRatio):
             try:
-                # noinspection PyUnresolvedReferences
                 onum, oden = other.as_integer_ratio()
-            except (ValueError, OverflowError, AttributeError):
+            except (ValueError, OverflowError):
                 raise ValueError("Unsupported operand: %s" % repr(other))
         elif isinstance(other, _StdLibDecimal):
             return self + Decimal(other)
@@ -833,10 +864,31 @@ class Decimal:
         # return num / den as Decimal or as Fraction
         return _div(num, den, min_prec)
 
-    # other + self
-    __radd__ = __add__
+    @overload
+    def __radd__(self, other: int) -> Decimal:
+        ...
 
-    def __sub__(self, other: Any) -> Union["Decimal", Fraction]:
+    @overload
+    def __radd__(self, other: SupportsAsIntegerRatio) -> Rational:
+        ...
+
+    def __radd__(self, other: SupportsAsIntegerRatio) -> Rational:
+        """other + self"""  # noqa: D400, D403
+        return self + other
+
+    @overload
+    def __sub__(self, other: int) -> Decimal:
+        ...
+
+    @overload
+    def __sub__(self, other: Decimal) -> Decimal:
+        ...
+
+    @overload
+    def __sub__(self, other: SupportsAsIntegerRatio) -> Rational:
+        ...
+
+    def __sub__(self, other: SupportsAsIntegerRatio) -> Rational:
         """self - other"""  # noqa: D400, D403
         if isinstance(other, Decimal):
             p = self._precision - other._precision
@@ -850,18 +902,17 @@ class Decimal:
                 result = Decimal(other)
                 result._value = self._value * 10 ** -p - other._value
             return result
-        elif isinstance(other, Integral):
+        elif isinstance(other, int):
             p = self._precision
             result = Decimal(self)
             result._value -= int(other) * 10 ** p
             return result
         elif isinstance(other, Rational):
             onum, oden = (other.numerator, other.denominator)
-        elif isinstance(other, Real):
+        elif isinstance(other, SupportsAsIntegerRatio):
             try:
-                # noinspection PyUnresolvedReferences
                 onum, oden = other.as_integer_ratio()
-            except (ValueError, OverflowError, AttributeError):
+            except (ValueError, OverflowError):
                 raise ValueError("Unsupported operand: %s" % repr(other))
         elif isinstance(other, _StdLibDecimal):
             return self - Decimal(other)
@@ -875,11 +926,31 @@ class Decimal:
         # return num / den as Decimal or as Fraction
         return _div(num, den, min_prec)
 
-    def __rsub__(self, other: Any) -> Union["Decimal", Fraction]:
+    @overload
+    def __rsub__(self, other: int) -> Decimal:
+        ...
+
+    @overload
+    def __rsub__(self, other: SupportsAsIntegerRatio) -> Rational:
+        ...
+
+    def __rsub__(self, other: SupportsAsIntegerRatio) -> Rational:
         """other - self"""  # noqa: D400, D403
         return -self + other
 
-    def __mul__(self, other: Any) -> Union["Decimal", Fraction]:
+    @overload
+    def __mul__(self, other: int) -> Decimal:
+        ...
+
+    @overload
+    def __mul__(self, other: Decimal) -> Decimal:
+        ...
+
+    @overload
+    def __mul__(self, other: SupportsAsIntegerRatio) -> Rational:
+        ...
+
+    def __mul__(self, other: SupportsAsIntegerRatio) -> Rational:
         """self * other"""  # noqa: D400, D403
         if isinstance(other, Decimal):
             result = Decimal(self)
@@ -888,17 +959,16 @@ class Decimal:
             if result._precision > MAX_DEC_PRECISION:
                 return Fraction(result._value, 10 ** result._precision)
             return result
-        elif isinstance(other, Integral):
+        elif isinstance(other, int):
             result = Decimal(self)
             result._value *= other
             return result
         elif isinstance(other, Rational):
             onum, oden = (other.numerator, other.denominator)
-        elif isinstance(other, Real):
+        elif isinstance(other, SupportsAsIntegerRatio):
             try:
-                # noinspection PyUnresolvedReferences
                 onum, oden = other.as_integer_ratio()
-            except (ValueError, OverflowError, AttributeError):
+            except (ValueError, OverflowError):
                 raise ValueError("Unsupported operand: %s" % repr(other))
         elif isinstance(other, _StdLibDecimal):
             return self * Decimal(other)
@@ -911,10 +981,19 @@ class Decimal:
         # return num / den as Decimal or as Fraction
         return _div(num, den, min_prec)
 
-    # other * self
-    __rmul__ = __mul__
+    @overload
+    def __rmul__(self, other: int) -> Decimal:
+        ...
 
-    def __div__(self, other: Any) -> Union["Decimal", Fraction]:
+    @overload
+    def __rmul__(self, other: SupportsAsIntegerRatio) -> Rational:
+        ...
+
+    def __rmul__(self, other: SupportsAsIntegerRatio) -> Rational:
+        """other * self"""
+        return self * other
+
+    def __truediv__(self, other: SupportsAsIntegerRatio) -> Rational:
         """self / other"""  # noqa: D400, D403
         if isinstance(other, Decimal):
             if other._value == 0:
@@ -933,13 +1012,12 @@ class Decimal:
                 den = other._value
             # return num / den as Decimal or as Fraction
             return _div(num, den, min_prec)
-        elif isinstance(other, Rational):  # includes Integral
+        elif isinstance(other, Rational):  # includes int
             onum, oden = (other.numerator, other.denominator)
-        elif isinstance(other, Real):
+        elif isinstance(other, SupportsAsIntegerRatio):
             try:
-                # noinspection PyUnresolvedReferences
                 onum, oden = other.as_integer_ratio()
-            except (ValueError, OverflowError, AttributeError):
+            except (ValueError, OverflowError):
                 raise ValueError("Unsupported operand: %s" % repr(other))
         elif isinstance(other, _StdLibDecimal):
             return self / Decimal(other)
@@ -954,15 +1032,14 @@ class Decimal:
         # return num / den as Decimal or as Fraction
         return _div(num, den, min_prec)
 
-    def __rdiv__(self, other: Any) -> Union["Decimal", Fraction]:
+    def __rtruediv__(self, other: SupportsAsIntegerRatio) -> Rational:
         """other / self"""  # noqa: D400, D403
         if isinstance(other, Rational):
             onum, oden = (other.numerator, other.denominator)
-        elif isinstance(other, Real):
+        elif isinstance(other, SupportsAsIntegerRatio):
             try:
-                # noinspection PyUnresolvedReferences
                 onum, oden = other.as_integer_ratio()
-            except (ValueError, OverflowError, AttributeError):
+            except (ValueError, OverflowError):
                 raise ValueError("Unsupported operand: %s" % repr(other))
         elif isinstance(other, _StdLibDecimal):
             return Decimal(other) / self
@@ -977,12 +1054,8 @@ class Decimal:
         # return num / den as Decimal or as Fraction
         return _div(num, den, min_prec)
 
-    # Decimal division is true division
-    __truediv__ = __div__
-    __rtruediv__ = __rdiv__
-
-    def __divmod__(self, other: Any) \
-            -> Tuple[int, Union["Decimal", Fraction]]:
+    def __divmod__(self, other: SupportsAsIntegerRatio) \
+            -> Tuple[int, Rational]:
         """self // other, self % other"""  # noqa: D400, D403
         # noinspection DuplicatedCode
         if isinstance(other, Decimal):
@@ -998,7 +1071,7 @@ class Decimal:
             q = sv // ov
             r._value = sv - q * ov
             return q, r
-        elif isinstance(other, Integral):
+        elif isinstance(other, int):
             sp = self._precision
             r = Decimal(precision=sp)
             sv = self._value
@@ -1007,15 +1080,15 @@ class Decimal:
             r._value = sv - q * ov
             return q, r
         elif isinstance(other, _StdLibDecimal):
-            return divmod(self, Decimal(other))
+            return self.__divmod__(Decimal(other))
         else:
             return self // other, self % other
 
-    def __rdivmod__(self, other: Any) \
-            -> Tuple[int, Union["Decimal", Fraction]]:
+    def __rdivmod__(self, other: SupportsAsIntegerRatio) \
+            -> Tuple[int, Rational]:
         """other // self, other % self"""  # noqa: D400, D403
         # noinspection DuplicatedCode
-        if isinstance(other, Integral):
+        if isinstance(other, int):
             sp = self._precision
             r = Decimal(precision=sp)
             sv = self._value
@@ -1024,22 +1097,22 @@ class Decimal:
             r._value = ov - q * sv
             return q, r
         elif isinstance(other, _StdLibDecimal):
-            return divmod(Decimal(other), self)
+            return Decimal(other).__divmod__(self)
         else:
             return other // self, other % self
 
-    def __floordiv__(self, other: Any) -> int:
+    def __floordiv__(self, other: SupportsAsIntegerRatio) -> int:
         """self // other"""  # noqa: D400, D403
         if isinstance(other, Decimal):
             sp, op = self._precision, other._precision
             if sp >= op:
                 sv = self._value
-                ov = other._value * 10 ** (sp - op)
+                ov: int = other._value * 10 ** (sp - op)
             else:
                 sv = self._value * 10 ** (op - sp)
                 ov = other._value
             return sv // ov
-        elif isinstance(other, Integral):
+        elif isinstance(other, int):
             sv = self._value
             ov = other * 10 ** self._precision
             return sv // ov
@@ -1048,18 +1121,18 @@ class Decimal:
         else:
             return floor(self / other)
 
-    def __rfloordiv__(self, other: Any) -> int:
+    def __rfloordiv__(self, other: SupportsAsIntegerRatio) -> int:
         """other // self"""  # noqa: D400, D403
-        if isinstance(other, Integral):
+        if isinstance(other, int):
             sv = self._value
-            ov = other * 10 ** self._precision
+            ov: int = other * 10 ** self._precision
             return ov // sv
         elif isinstance(other, _StdLibDecimal):
             return Decimal(other) // self
         else:
             return floor(other / self)
 
-    def __mod__(self, other: Any) -> Union["Decimal", Fraction]:
+    def __mod__(self, other: SupportsAsIntegerRatio) -> Rational:
         """self % other"""  # noqa: D400, D403
         # noinspection DuplicatedCode
         if isinstance(other, Decimal):
@@ -1074,7 +1147,7 @@ class Decimal:
                 ov = other._value
             r._value = sv - (sv // ov) * ov
             return r
-        elif isinstance(other, Integral):
+        elif isinstance(other, int):
             sp = self._precision
             r = Decimal(precision=sp)
             sv = self._value
@@ -1084,11 +1157,11 @@ class Decimal:
         elif isinstance(other, _StdLibDecimal):
             return self % Decimal(other)
         else:
-            return self - other * Decimal(self // other)
+            return self - other * Decimal(self // other)  # type: ignore
 
-    def __rmod__(self, other: Any) -> Union["Decimal", Fraction]:
+    def __rmod__(self, other: SupportsAsIntegerRatio) -> Rational:
         """other % self"""  # noqa: D400, D403
-        if isinstance(other, Integral):
+        if isinstance(other, int):
             sp = self._precision
             r = Decimal(precision=sp)
             sv = self._value
@@ -1100,8 +1173,7 @@ class Decimal:
         else:
             return other - self * Decimal(other // self)
 
-    def __pow__(self, other: Any, mod: Any = None) \
-            -> Union["Decimal", float, complex]:
+    def __pow__(self, other: SupportsIntOrFloat, mod: Any = None) -> Complex:
         """self ** other
 
         If other is an integer (or a Rational with denominator = 1), the
@@ -1114,32 +1186,36 @@ class Decimal:
         if mod is not None:
             raise TypeError("3rd argument not allowed unless all arguments "
                             "are integers")
-        if isinstance(other, (Real, _StdLibDecimal)):
+        # SupportsInt is not runtime_checkable in Python 3.7, so check directly
+        if hasattr(other, "__int__") or hasattr(other, "__trunc__"):
             try:
-                exp = int(other)
+                exp = int(other)  # type: ignore
             except (ValueError, OverflowError):
                 raise ValueError("Unsupported operand: %s" % repr(other)) \
                     from None
             else:
-                if exp != other:
-                    # fractional exponent => fallback to float
-                    return float(self) ** float(other)
-                if exp >= 0:
-                    result = Decimal()
-                    result._value = self._value ** exp
-                    result._precision = self._precision * exp
-                    if result._precision > MAX_DEC_PRECISION:
-                        raise ValueError("Precision limit exceeded.")
-                    return result
-                else:
-                    # 1 / x ** -y
-                    exp = -exp
-                    prec = self._precision
-                    return _div(10 ** (prec * exp), self._value ** exp, prec)
+                if exp == other:
+                    if exp >= 0:
+                        result = Decimal()
+                        result._value = self._value ** exp
+                        result._precision = self._precision * exp
+                        if result._precision > MAX_DEC_PRECISION:
+                            raise ValueError("Precision limit exceeded.")
+                        return result
+                    else:
+                        # 1 / x ** -y
+                        exp = -exp
+                        prec = self._precision
+                        return _div(10 ** (prec * exp), self._value ** exp,
+                                    prec)
+        # SupportsFloat is not runtime_checkable in Python 3.7, so check
+        # directly
+        if hasattr(other, "__float__"):
+            # fractional exponent => fallback to float
+            return float(self) ** float(other)  # type: ignore
         return NotImplemented
 
-    def __rpow__(self, other: Any, mod: Any = None) \
-            -> Union["Decimal", float, complex]:
+    def __rpow__(self, other: Any, mod: Any = None) -> Complex:
         """other ** self
 
         `mod` must always be None (otherwise a `TypeError` is raised).
@@ -1148,21 +1224,33 @@ class Decimal:
             raise TypeError("3rd argument not allowed unless all arguments "
                             "are integers")
         if self.denominator == 1:
-            return other ** self.numerator
-        return other ** float(self)
+            return other ** self.numerator  # type: ignore
+        return other ** float(self)  # type: ignore
 
     def __floor__(self) -> int:
         """math.floor(self)"""  # noqa: D400
+        n: int
+        d: int
         n, d = self._value, 10 ** self._precision
         return n // d
 
     def __ceil__(self) -> int:
         """math.ceil(self)"""  # noqa: D400
+        n: int
+        d: int
         n, d = self._value, 10 ** self._precision
         return -(-n // d)
 
-    def __round__(self, precision: Optional[int] = None) \
-            -> Union[int, "Decimal"]:
+    @overload
+    def __round__(self, ndigits: None = ...) -> int:
+        ...
+
+    @overload
+    def __round__(self, ndigits: int) -> Decimal:
+        ...
+
+    def __round__(self, ndigits: Optional[int] = None) \
+            -> Union[int, Decimal]:
         """round(self [, n_digits])
 
         Round `self` to a given precision in decimal digits (default 0).
@@ -1171,19 +1259,14 @@ class Decimal:
         This method is called by the built-in `round` function. It returns an
         `int` when called with one argument, otherwise a :class:`Decimal`.
         """
-        if precision is None:
+        if ndigits is None:
             # return integer
             return int(self.adjusted(0))
         # otherwise return Decimal
-        return self.adjusted(precision)
+        return self.adjusted(ndigits)
 
-
-# register Decimal as Rational
-# noinspection PyUnresolvedReferences
-Rational.register(Decimal)
 
 # helper functions for formatting:
-
 
 _dflt_format_params = {
     'fill': ' ',
@@ -1196,12 +1279,10 @@ _dflt_format_params = {
     'decimal_point': '.',
     'precision': None,
     'type': 'f'
-}
+    }
 
 
-def _get_format_params(format_spec: str) \
-        -> Tuple[str, str, str, int, str, Sequence[int], str, Optional[int],
-                 str]:
+def _get_format_params(format_spec: str) -> Tuple[Any, ...]:
     m = _parse_format_spec(format_spec)
     if m is None:
         raise ValueError("Invalid format specifier: " + format_spec)
@@ -1214,14 +1295,15 @@ def _get_format_params(format_spec: str) \
         fmt_fill = '0'
         fmt_align = "="
     else:
-        fmt_fill = _dflt_format_params['fill']
-        fmt_align = m.group('align') or _dflt_format_params['align']
+        fmt_fill = _dflt_format_params['fill']  # type: ignore
+        fmt_align = \
+            m.group('align') or _dflt_format_params['align']  # type: ignore
     fmt_sign = m.group('sign') or _dflt_format_params['sign']
     minimumwidth = m.group('minimumwidth')
     if minimumwidth:
         fmt_min_width = int(minimumwidth)
     else:
-        fmt_min_width = _dflt_format_params['minimumwidth']
+        fmt_min_width = _dflt_format_params['minimumwidth']  # type: ignore
     fmt_type = m.group('type') or _dflt_format_params['type']
     if fmt_type == 'n':
         lconv = locale.localeconv()
@@ -1231,12 +1313,14 @@ def _get_format_params(format_spec: str) \
         fmt_decimal_point = lconv['decimal_point']
     else:
         fmt_thousands_sep = (m.group('thousands_sep') or
-                             _dflt_format_params['thousands_sep'])
-        fmt_grouping = _dflt_format_params['grouping']
-        fmt_decimal_point = _dflt_format_params['decimal_point']
+                             _dflt_format_params[
+                                 'thousands_sep'])  # type: ignore
+        fmt_grouping = _dflt_format_params['grouping']  # type: ignore
+        fmt_decimal_point = _dflt_format_params[
+            'decimal_point']  # type: ignore
     precision = m.group('precision')
     if precision:
-        fmt_precision = int(precision)
+        fmt_precision: Optional[int] = int(precision)
     else:
         fmt_precision = None
     return (fmt_fill, fmt_align, fmt_sign, fmt_min_width, fmt_thousands_sep,
@@ -1296,7 +1380,8 @@ def _vp_adjust_to_prec(v: int, p: int, to_prec: int,
     dp = to_prec - p
     if dp >= 0:
         # increase precision -> increase internal value
-        return v * 10 ** dp
+        sh: int = 10 ** dp
+        return v * sh
     # decrease precision -> decrease internal value -> rounding
     elif to_prec >= 0:
         # resulting precision >= 0 -> just return adjusted internal value
@@ -1306,7 +1391,8 @@ def _vp_adjust_to_prec(v: int, p: int, to_prec: int,
         # 1) round internal value to requested precision
         # 2) adjust internal value to precison 0 (because internal precision
         # must be >= 0)
-        return _floordiv_rounded(v, 10 ** -dp, rounding) * 10 ** -to_prec
+        sh = 10 ** -to_prec
+        return _floordiv_rounded(v, 10 ** -dp, rounding) * sh
 
 
 def _vp_normalize(v: int, p: int) -> Tuple[int, int]:
@@ -1407,12 +1493,14 @@ def _vp_to_int(v: int, p: int) -> int:
     if v == 0:
         return v
     if p > 0:
+        sh: int = 10 ** p
         if v > 0:
-            return v // 10 ** p
+            return v // sh
         else:
-            return -(-v // 10 ** p)
+            return -(-v // sh)
     else:  # shouldn't happen!
-        return v * 10 ** -p  # pragma: no cover
+        sh = 10 ** -p
+        return v * sh  # pragma: no cover
 
 
 def _approx_rational(num: int, den: int, min_prec: int = 0) \
@@ -1462,7 +1550,7 @@ def get_dflt_rounding_mode() -> ROUNDING:
     return _dflt_rounding_mode
 
 
-def set_dflt_rounding_mode(rounding: ROUNDING):
+def set_dflt_rounding_mode(rounding: ROUNDING) -> None:
     """Set default rounding mode.
 
     Args:
@@ -1481,7 +1569,6 @@ def set_dflt_rounding_mode(rounding: ROUNDING):
 ZERO = Decimal(0)
 ONE = Decimal(1)
 
-
 __all__ = [
     'Decimal',
     'ZERO',
@@ -1489,4 +1576,4 @@ __all__ = [
     'ROUNDING',
     'get_dflt_rounding_mode',
     'set_dflt_rounding_mode',
-]
+    ]

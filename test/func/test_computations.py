@@ -45,7 +45,7 @@ class FakeReal:
 
     def __int__(self):
         """math.trunc(self)"""                                  # noqa: D400
-        raise ValueError
+        return int(self.f)
 
 
 numbers.Real.register(FakeReal)
@@ -296,9 +296,9 @@ def test_pow_incompat_param(impl):
 
 
 @pytest.mark.parametrize("other",
-                         (FakeReal("0.5"), float('Inf'), StdLibDecimal('Inf'),
+                         (float('Inf'), StdLibDecimal('Inf'),
                           float('Nan'), StdLibDecimal('Nan')),
-                         ids=("FakeReal", "'inf' (float)", "'inf' (Decimal)",
+                         ids=("'inf' (float)", "'inf' (Decimal)",
                               "'nan' (float)", "'nan' (Decimal)")
                          )
 @pytest.mark.parametrize("op",
@@ -313,8 +313,9 @@ def test_bin_ops_incompat_number(impl, op, other):
 
 
 @pytest.mark.parametrize("other",
-                         ("0.5", min, int, 5 + 3j),
-                         ids=("str", "function", "class", "complex")
+                         (FakeReal("0.5"), "0.5", min, int, 5 + 3j),
+                         ids=("FakeReal", "str", "function", "class",
+                              "complex")
                          )
 @pytest.mark.parametrize("op",
                          [op for op in BIN_OPS],
@@ -328,9 +329,9 @@ def test_bin_ops_incompat_operand_type(impl, op, other):
 
 
 @pytest.mark.parametrize("other",
-                         (FakeReal("0.5"), float('Inf'), StdLibDecimal('Inf'),
+                         (float('Inf'), StdLibDecimal('Inf'),
                           float('Nan'), StdLibDecimal('Nan')),
-                         ids=("FakeReal", "'inf' (float)", "'inf' (Decimal)",
+                         ids=("'inf' (float)", "'inf' (Decimal)",
                               "'nan' (float)", "'nan' (Decimal)")
                          )
 def test_pow_incompat_number(impl, other):
@@ -340,8 +341,9 @@ def test_pow_incompat_number(impl, other):
 
 
 @pytest.mark.parametrize("other",
-                         ("0.5", min, int, 5 + 3j),
-                         ids=("str", "function", "class", "complex")
+                         (FakeReal("0.5"), "0.5", min, int, 5 + 3j),
+                         ids=("FakeReal", "str", "function", "class",
+                              "complex")
                          )
 def test_pow_incompat_operand_type(impl, other):
     dec = impl.Decimal()
