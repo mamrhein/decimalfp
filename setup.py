@@ -43,6 +43,7 @@ setup(
     long_description_content_type="text/markdown",
     package_dir={'': 'src'},
     packages=['decimalfp'],
+    package_data={'decimalfp': ['py.typed', '_cdecimalfp.pyi']},
     ext_modules=ext_modules,
     python_requires=">=3.7",
     license='BSD',
