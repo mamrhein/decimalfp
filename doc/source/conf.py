@@ -27,7 +27,7 @@ if TYPE_CHECKING:
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 # sys.path.insert(0, os.path.abspath('.'))
-sys.path.insert(0, os.path.abspath('..'))
+sys.path.insert(0, os.path.abspath('../../src'))
 
 # Force Python implementation of decimalfp to be imported
 os.environ["DECIMALFP_FORCE_PYTHON_IMPL"] = "True"
@@ -60,8 +60,8 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'decimalfp'
-copyright = u'2014 ff., Michael Amrhein'
+project = 'decimalfp'
+copyright = '2014 ff., Michael Amrhein'
 author = 'Michael Amrhein'
 
 # The version info for the project you're documenting, acts as replacement for
