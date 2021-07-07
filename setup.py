@@ -12,8 +12,11 @@ LIBFPDEC_SRC_FILES = sorted(f"{LIBFPDEC_PATH}/{fn}"
                             if fn.endswith(('.c',)))
 
 DEBUG = int(os.getenv("DEBUG", 0))
-extra_compile_args = sysconfig.get_config_var('CFLAGS').split()
-extra_compile_args += ["-Wall", "-Wextra"]
+cflags = sysconfig.get_config_var('CFLAGS')
+if cflags:
+    extra_compile_args = cflags.split() + ["-Wall", "-Wextra"]
+else:
+    extra_compile_args = ["-Wall", "-Wextra"]
 if DEBUG:
     extra_compile_args += ["-g3", "-O0", f"-DDEBUG={DEBUG}", "-UNDEBUG"]
 else:
