@@ -1,5 +1,7 @@
 Version     Changes
 ------------------------------------------------------------------------------
+0.12.1      Fixed defect in setup.py (issue #7).
+
 0.12.0      Reworked type handling; added type hints and stub file.
 
 0.11.4      Fixed missing import (for PyPy).
