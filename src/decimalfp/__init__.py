@@ -228,45 +228,58 @@ __version__ = 0, 12, 2
 # implementation, so we force to import the latter.
 # In addition, the import of the Python implementation can be forced by
 # setting the environment variable DECIMALFP_FORCE_PYTHON_IMPL
-import platform  # noqa: I100, I202
+import platform
 
 _impl = platform.python_implementation()
 del platform
 
-import os  # noqa: I100, I202
+import os  # noqa: E402
 
-_force_python_impl = os.getenv('DECIMALFP_FORCE_PYTHON_IMPL')
+_force_python_impl = os.getenv("DECIMALFP_FORCE_PYTHON_IMPL")
 del os
 
-from fractions import Fraction
+from fractions import Fraction  # noqa: E402
+
 # patch Fraction, so that issubclass(Fraction, SupportsAsIntergerRatio) is True
-if not hasattr(Fraction, 'as_integer_ratio'):
+if not hasattr(Fraction, "as_integer_ratio"):
     Fraction.as_integer_ratio = lambda f: (f.numerator, f.denominator)
 
-if _impl == 'PyPy' or _force_python_impl:
+if _impl == "PyPy" or _force_python_impl:
     from ._pydecimalfp import (
-        Decimal, get_dflt_rounding_mode, ROUNDING, set_dflt_rounding_mode,
-        ONE, ZERO,
-        )
+        ONE,
+        ROUNDING,
+        ZERO,
+        Decimal,
+        get_dflt_rounding_mode,
+        set_dflt_rounding_mode,
+    )
 else:  # pragma: no cover
     try:
         # C implementation available?
         from ._cdecimalfp import (
-            Decimal, get_dflt_rounding_mode, ROUNDING, set_dflt_rounding_mode,
-            ONE, ZERO,
-            )
+            ONE,
+            ROUNDING,
+            ZERO,
+            Decimal,
+            get_dflt_rounding_mode,
+            set_dflt_rounding_mode,
+        )
     except ImportError:
         from ._pydecimalfp import (
-            Decimal, get_dflt_rounding_mode, ROUNDING, set_dflt_rounding_mode,
-            ONE, ZERO,
-            )
+            ONE,
+            ROUNDING,
+            ZERO,
+            Decimal,
+            get_dflt_rounding_mode,
+            set_dflt_rounding_mode,
+        )
 
 # define public namespace
 __all__ = [
-    'Decimal',
-    'ZERO',
-    'ONE',
-    'ROUNDING',
-    'get_dflt_rounding_mode',
-    'set_dflt_rounding_mode',
-    ]
+    "Decimal",
+    "ZERO",
+    "ONE",
+    "ROUNDING",
+    "get_dflt_rounding_mode",
+    "set_dflt_rounding_mode",
+]
