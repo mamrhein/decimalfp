@@ -29,6 +29,9 @@ import pytest
 from decimalfp._pydecimalfp import MAX_DEC_PRECISION
 
 
+sys.set_int_max_str_digits(MAX_DEC_PRECISION)
+
+
 @pytest.fixture(scope="module")
 def dflt_rounding(impl):
     rnd = impl.get_dflt_rounding_mode()
