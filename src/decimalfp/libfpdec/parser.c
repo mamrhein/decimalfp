@@ -48,7 +48,7 @@ parse_ascii_dec_literal(dec_repr_t *result, const char *literal) {
     ptrdiff_t len_frac_part = 0;
     int64_t t;
 
-    while isspace(*curr_char) {
+    while (isspace(*curr_char)) {
         curr_char++;
     }
     if (*curr_char == 0) return FPDEC_INVALID_DECIMAL_LITERAL;
@@ -104,7 +104,7 @@ parse_ascii_dec_literal(dec_repr_t *result, const char *literal) {
                 if (!isdigit(*curr_char))
                     return FPDEC_INVALID_DECIMAL_LITERAL;
         }
-        while isdigit(*curr_char) {
+        while (isdigit(*curr_char)) {
             t = exp;
             exp = exp * 10 + (*curr_char - '0');
             if (exp < t)    // overflow occured!
@@ -113,7 +113,7 @@ parse_ascii_dec_literal(dec_repr_t *result, const char *literal) {
         }
         result->exp = sign * exp;
     }
-    while isspace(*curr_char) {
+    while (isspace(*curr_char)) {
         curr_char++;
     }
     if (*curr_char != 0)

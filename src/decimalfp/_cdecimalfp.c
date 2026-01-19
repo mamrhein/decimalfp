@@ -169,7 +169,7 @@ PyLong_from_digits(const fpdec_digit_t *digits,
 static PyObject *
 PyLong_from_fpdec(const fpdec_t *fpdec);
 
-static long
+static int64_t
 fpdec_dec_coeff_exp(PyObject **coeff, const fpdec_t *fpdec);
 
 static void
@@ -1082,7 +1082,7 @@ fpdec_from_number(fpdec_t *tmp, PyObject *obj) {
         if (rc == FPDEC_OK)
             fpdec = tmp;
     }
-    else if (PyObject_HasAttrString(Py_TYPE(obj), "as_integer_ratio")) {
+    else if (PyObject_HasAttrString((PyObject *)Py_TYPE(obj), "as_integer_ratio")) {
         ASSIGN_AND_CHECK_NULL(ratio,
                               PyObject_CallMethod(obj, "as_integer_ratio",
                                                   NULL));

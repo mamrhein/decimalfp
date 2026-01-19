@@ -15,7 +15,7 @@ $Revision$
 #ifndef FPDEC_MEM_H
 #define FPDEC_MEM_H
 
-#include <malloc.h>
+#include <stdlib.h>
 #include "compiler_macros.h"
 
 typedef void * (*mem_alloc_func)(size_t num, size_t size);

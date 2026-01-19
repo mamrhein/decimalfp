@@ -1,0 +1,6 @@
+-I
+.venv/include
+-W
+all
+-W
+extra

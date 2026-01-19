@@ -70,7 +70,7 @@ shint_from_dec_coeff(uint64_t *lo, uint32_t *hi, const dec_digit_t *coeff,
         if (*lo < *coeff)
             t++;
         if (U64_HI(t))
-            goto OVERFLOW;
+            goto LIMIT_EXCEEDED;
         *hi = t;
     }
     if (n_add_zeros > 0) {
@@ -82,7 +82,7 @@ shint_from_dec_coeff(uint64_t *lo, uint32_t *hi, const dec_digit_t *coeff,
             n_shift = MIN(n_left_to_shift, UINT64_10_POW_N_CUTOFF);
             u128_imul_10_pow_n(&sh, n_shift);
             if (UINT128_CHECK_MAX(&sh) || U64_HI(U128_HI(sh)))
-                goto OVERFLOW;
+                goto LIMIT_EXCEEDED;
             n_left_to_shift -= n_shift;
         }
         *hi = (uint32_t)U128_HI(sh);
@@ -90,7 +90,7 @@ shint_from_dec_coeff(uint64_t *lo, uint32_t *hi, const dec_digit_t *coeff,
     }
     return FPDEC_OK;
 
-OVERFLOW:
+LIMIT_EXCEEDED:
     *hi = 0;
     *lo = 0;
     return FPDEC_N_DIGITS_LIMIT_EXCEEDED;

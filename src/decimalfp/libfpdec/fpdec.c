@@ -116,11 +116,11 @@ fpdec_dump(const fpdec_t *fpdec) {
         printf("n digits: %u\n", FPDEC_DYN_N_DIGITS(fpdec));
         printf("digits: ");
         for (uint32_t i = 0; i < FPDEC_DYN_N_DIGITS(fpdec); ++i) {
-            printf("%lu, ", FPDEC_DYN_DIGITS(fpdec)[i]);
+            printf("%lu, ", (unsigned long)FPDEC_DYN_DIGITS(fpdec)[i]);
         }
     }
     else {
-        printf("digits: %lu %u\n", fpdec->lo, fpdec->hi);
+        printf("digits: %lu %u\n", (unsigned long)fpdec->lo, fpdec->hi);
     }
     printf("\n\n");
 }
