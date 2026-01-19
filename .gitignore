@@ -96,3 +96,6 @@ src/*/*.html
 
 # wily config
 wily.cfg
+
+# uv
+uv.lock
