@@ -2,6 +2,7 @@
 """Setup package 'decimalfp'."""
 
 import os
+import subprocess
 import sysconfig
 
 from setuptools import Extension, setup
@@ -9,9 +10,12 @@ from setuptools import Extension, setup
 
 def have_gcc() -> bool:
     """Return true if gcc is available, false otherwise."""
-    with os.popen("gcc --version") as pipe:
-        rsp = pipe.read()
-    return rsp != ""
+    try:
+        subprocess.run(["gcc", "--version"])
+    except OSError:
+        return False
+    else:
+        return True
 
 
 if have_gcc():
@@ -48,17 +52,8 @@ else:
     ext_modules = []
     package_data = {}
 
-with open("README.md") as file:
-    long_description = file.read()
-
 setup(
     name="decimalfp",
-    author="Michael Amrhein",
-    author_email="michael@adrhinum.de",
-    url="https://github.com/mamrhein/decimalfp",
-    description="Decimal numbers with fixed-point arithmetic",
-    long_description=long_description,
-    long_description_content_type="text/markdown",
     package_dir={"": "src"},
     packages=["decimalfp"],
     package_data=package_data,

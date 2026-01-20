@@ -1,3 +1,15 @@
+[project]
+name = "decimalfp"
+requires-python = ">= 3.9"
+authors = [
+    { name = "Michael Amrhein", email="michael@adrhinum.de" },
+]
+urls.Homepage = "https://github.com/mamrhein/decimalfp"
+description = "Decimal numbers with fixed-point arithmetic"
+readme.content-type = "text/markdown"
+readme.file = "README.md"
+dynamic = ["version"]
+
 [build-system]
 requires = [
     "setuptools>=42",
@@ -8,3 +20,12 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools_scm]
 write_to = "src/decimalfp/version.py"
+
+[dependency-groups]
+dev = [
+    "pytest",
+    "setuptools>=42",
+    "Sphinx>=4.0",
+    "sphinx_py3doc_enhanced_theme>=2.4",
+    "tox>=4.30",
+]
