@@ -58,7 +58,7 @@ setup(
     packages=["decimalfp"],
     package_data=package_data,
     ext_modules=ext_modules,
-    python_requires=">=3.9",
+    python_requires=">=3.11",
     license="BSD-2-Clause",
     keywords="fixed-point decimal number datatype",
     platforms="all",

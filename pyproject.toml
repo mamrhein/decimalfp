@@ -1,6 +1,6 @@
 [project]
 name = "decimalfp"
-requires-python = ">= 3.9"
+requires-python = ">= 3.11"
 authors = [
     { name = "Michael Amrhein", email="michael@adrhinum.de" },
 ]
