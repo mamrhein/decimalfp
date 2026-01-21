@@ -220,9 +220,12 @@ also support all rounding modes mentioned above.
     Decimal('12.6')
     >>> d.quantize(4)
     Decimal('12')
+    0.13.0      Set minimal Python version to 3.11.
+                Allow compilation by clang.
+
 """
 
-__version__ = 0, 12, 2
+__version__ = 0, 13, 0
 
 # Under PyPy the C implementation is slower than the Python
 # implementation, so we force to import the latter.

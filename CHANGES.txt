@@ -1,5 +1,9 @@
 Version     Changes
 ------------------------------------------------------------------------------
+0.13.0      Set minimal Python version to 3.11.
+            Enabled compilation of C modules using clang.
+            Fixed issue #9.
+
 0.12.2      Build extension module only if the GNU C Compiler is available
             and make a "source-only" install if that is not the case.
 
