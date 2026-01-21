@@ -19,7 +19,8 @@ $Revision$
 #include "basemath.h"
 #include "compiler_macros.h"
 #include "digit_array.h"
-#include "digit_array_struct.h"
+#include "helper_macros.h"
+#include "mem.h"
 #include "rounding_helper.h"
 
 

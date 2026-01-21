@@ -25,9 +25,9 @@ extern "C" {
 #include <stdint.h>
 
 #ifdef __SIZEOF_INT128__
-#include "uint128_type_native.h"
+#include "uint128_type_native.h" // IWYU pragma: export
 #else
-#include "uint128_type.h"
+#include "uint128_type.h" // IWYU pragma: export
 #endif // __int128
 
 
@@ -44,23 +44,14 @@ typedef int error_t;
 // sign indicator: =0 -> zero, <0 -> negative, >0 -> positive
 typedef int8_t fpdec_sign_t;
 
+// exponent (base 2**64)
+typedef int32_t fpdec_exp_t;
+
 // number of decimal fractional digits
 typedef uint16_t fpdec_dec_prec_t;
 
 // single decimal digit
 typedef unsigned char dec_digit_t;
-
-// single digit (base 2 ** 64 or 10 ** 19)
-typedef uint64_t fpdec_digit_t;
-
-// digit counter
-typedef uint32_t fpdec_n_digits_t;
-
-typedef int32_t fpdec_exp_t;
-
-typedef struct fpdec_digit_array fpdec_digit_array_t;
-
-typedef struct fpdec_struct fpdec_t;
 
 /*****************************************************************************
 *  Macros

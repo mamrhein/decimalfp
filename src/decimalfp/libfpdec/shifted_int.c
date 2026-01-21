@@ -16,7 +16,7 @@ $Revision$
 #include <assert.h>
 
 #include "shifted_int.h"
-#include "fpdec.h"
+#include "rounding_helper.h"
 
 /*****************************************************************************
 *  Macros

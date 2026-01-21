@@ -19,11 +19,11 @@ $Revision$
 #include <stdint.h>
 
 #include "common.h"
-#include "uint64_math.h"
+#include "uint64_math.h" // IWYU pragma: export
 #ifdef __SIZEOF_INT128__
-#include "uint128_math_native.h"
+#include "uint128_math_native.h" // IWYU pragma: export
 #else
-#include "uint128_math.h"
+#include "uint128_math.h" // IWYU pragma: export
 #endif // __int128
 
 

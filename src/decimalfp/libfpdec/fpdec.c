@@ -15,6 +15,8 @@ $Revision$
 */
 
 #include <assert.h>
+#include <math.h> // IWYU pragma: keep
+#include <stddef.h>
 #include <stdio.h>
 #include <string.h>
 #include <wchar.h>
@@ -23,8 +25,8 @@ $Revision$
 #include "fpdec.h"
 #include "fpdec_struct.h"
 #include "digit_array.h"
-#include "digit_array_struct.h"
 #include "format_spec.h"
+#include "mem.h"
 #include "parser.h"
 #include "shifted_int.h"
 #include "rounding_helper.h"

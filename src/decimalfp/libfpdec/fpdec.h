@@ -21,8 +21,9 @@ $Revision$
 extern "C" {
 #endif // __cplusplus
 
+#include <stddef.h>
 #include "common.h"
-#include "mem.h"
+#include "fpdec_struct.h"
 #include "rounding.h"
 
 

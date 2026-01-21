@@ -22,6 +22,7 @@ extern "C" {
 
 #include "compiler_macros.h"
 #include "common.h"
+#include "digit_array.h"
 #include "rounding.h"
 #include "basemath.h"
 

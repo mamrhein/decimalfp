@@ -17,12 +17,10 @@ $Revision$
 #ifndef FPDEC_SHIFTED_INT_H
 #define FPDEC_SHIFTED_INT_H
 
-#include <math.h>
 #include <stddef.h>
 
 #include "basemath.h"
-#include "helper_macros.h"
-#include "rounding_helper.h"
+#include "rounding.h"
 
 /*****************************************************************************
 *  Macros

@@ -16,6 +16,7 @@ $Revision$
 #ifndef FPDEC_STRUCT_H
 #define FPDEC_STRUCT_H
 
+#include "digit_array.h"
 #ifdef __cplusplus
 extern "C" {
 #endif // __cplusplus
@@ -42,6 +43,8 @@ struct fpdec_struct {
         fpdec_digit_array_t *digit_array;   //          pointer to digit array
     };
 };
+
+typedef struct fpdec_struct fpdec_t;
 
 /*****************************************************************************
 *  Macros

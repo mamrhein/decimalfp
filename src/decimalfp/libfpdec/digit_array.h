@@ -17,9 +17,8 @@ $Revision$
 #ifndef FPDEC_DIGIT_ARRAY_H
 #define FPDEC_DIGIT_ARRAY_H
 
+#include <stdlib.h>
 #include "common.h"
-#include "helper_macros.h"
-#include "mem.h"
 #include "rounding.h"
 
 
@@ -28,6 +27,24 @@ $Revision$
 *****************************************************************************/
 
 #define MAX_DIGIT 9999999999999999999UL     // RADIX - 1
+
+/*****************************************************************************
+*  Types
+*****************************************************************************/
+
+// single digit (base 2 ** 64 or 10 ** 19)
+typedef uint64_t fpdec_digit_t;
+
+// digit counter
+typedef uint32_t fpdec_n_digits_t;
+
+struct fpdec_digit_array {
+    fpdec_n_digits_t n_alloc;
+    fpdec_n_digits_t n_signif;
+    fpdec_digit_t digits[1];
+};
+
+typedef struct fpdec_digit_array fpdec_digit_array_t;
 
 /*****************************************************************************
 *  Functions

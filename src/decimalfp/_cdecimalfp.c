@@ -20,9 +20,14 @@ $Revision$
 #include "_cdecimalfp_docstrings.h"
 #include "libfpdec/fpdec.h"
 #include "libfpdec/fpdec_struct.h"
-#include "libfpdec/digit_array_struct.h"
-#include "libfpdec/basemath.h"
 #include "libfpdec/compiler_macros.h"
+#include "libfpdec/mem.h"
+#include "libfpdec/uint64_math.h"
+#ifdef __SIZEOF_INT128__
+#include "libfpdec/uint128_math_native.h"
+#else
+#include "libfpdec/uint128_math.h"
+#endif // __int128
 
 // Macro defs to be compatible with Python 3.6 (incl PyPy3):
 
@@ -1921,7 +1926,7 @@ static PyMethodDef Decimal_methods[] = {
 };
 
 static PyType_Slot decimal_type_slots[] = {
-    {Py_tp_doc, DecimalType_doc},
+    {Py_tp_doc, (void *) DecimalType_doc},
     {Py_tp_new, DecimalType_new},
     {Py_tp_dealloc, Decimal_dealloc},
     {Py_tp_free, PyObject_Del},
